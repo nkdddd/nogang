@@ -90,12 +90,12 @@
         </div>
     </div>
 
-    <!-- Firebase SDK 및 전체 로직 -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    <!-- 🟢 모듈(import) 에러를 원천 차단하는 클래식 방식 스크립트로 변경 -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
+    <script>
         // ⭐ 중요: 아래 firebaseConfig는 선생님의 Firebase 정보로 교체하셔야 정상적으로 클라우드에 연동됩니다. ⭐
         const firebaseConfig = {
             apiKey: "AIzaSyBC5ffBjfAuLmq_Dg-J9XFOp6y7lzdhHYI",
@@ -107,9 +107,10 @@
             measurementId: "G-RFDMSR7G82"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // 파이어베이스 초기화 (클래식/Compat 방식)
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
         // --- 데이터베이스 ---
         const VOWEL_DB = {
@@ -165,7 +166,7 @@
                 }));
                 return;
             }
-            setDoc(doc(db, "users", window.currentUser.uid), {
+            db.collection("users").doc(window.currentUser.uid).set({
                 coins: window.state.coins, inventory: window.state.inventory, farmPets: window.state.farmPets
             }).catch(e => console.error("데이터 저장 실패:", e));
         };
@@ -195,7 +196,7 @@
 
         // 파이어베이스 인증 리스너
         try {
-            onAuthStateChanged(auth, async (user) => {
+            auth.onAuthStateChanged(async (user) => {
                 if (window.isGuestMode) return; 
                 clearTimeout(fallbackTimer); 
                 
@@ -203,9 +204,9 @@
                 if (user) {
                     window.currentUser = user;
                     try {
-                        const docRef = doc(db, "users", user.uid);
-                        const docSnap = await getDoc(docRef);
-                        if (docSnap.exists()) {
+                        const docRef = db.collection("users").doc(user.uid);
+                        const docSnap = await docRef.get();
+                        if (docSnap.exists) {
                             const data = docSnap.data();
                             window.state.coins = data.coins !== undefined ? data.coins : 200;
                             window.state.inventory = data.inventory || [];
@@ -243,9 +244,9 @@
             window.showToast("서버와 통신 중...");
             try {
                 if (isLogin) {
-                    await signInWithEmailAndPassword(auth, email, password);
+                    await auth.signInWithEmailAndPassword(email, password);
                 } else {
-                    await createUserWithEmailAndPassword(auth, email, password);
+                    await auth.createUserWithEmailAndPassword(email, password);
                     window.showToast('가입 환영! 시작합니다. 🪙');
                 }
             } catch (error) {
@@ -256,7 +257,7 @@
         };
 
         window.logout = async function() {
-            await signOut(auth);
+            await auth.signOut();
             window.showToast('로그아웃 되었습니다.');
         };
 
