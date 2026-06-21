@@ -99,6 +99,7 @@
         </div>
     </div>
 
+    <!-- Firebase 통신을 위한 모듈 스크립트 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -119,7 +120,8 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        //        const VOWEL_DB = {
+        // 오류가 났던 주석 부분 복구 완료
+        const VOWEL_DB = {
             'a': { sound: '애', fam: [{n:'-at', w:['cat','hat','bat','mat']}, {n:'-an', w:['can','fan','man','pan']}, {n:'-ap', w:['cap','map','tap']}], magic: ['cake','game','name','lake'], var: [{rule:'ar (아)', w:['car','park','star']}] },
             'e': { sound: '에', fam: [{n:'-en', w:['pen','hen','ten']}, {n:'-et', w:['net','wet','pet']}, {n:'-ell', w:['bell','well','fell']}], magic: ['here'], var: [{rule:'단어 끝 e (이)', w:['he','me','we']}, {rule:'ee/ea (이~)', w:['see','sea','leaf']}] },
             'i': { sound: '이', fam: [{n:'-it', w:['sit','hit','bit']}, {n:'-in', w:['win','pin','bin']}, {n:'-ig', w:['pig','big','dig']}], magic: ['kite','bike','five','nine'], var: [{rule:'ir (어)', w:['bird','girl','shirt']}] },
@@ -164,7 +166,8 @@
             return { w, kr, emoji, ans, parts: w.split(''), opts: opts.sort(() => 0.5 - Math.random()) };
         });
 
-        //        window.isAuthReady = false;
+        // 전역 상태 초기화
+        window.isAuthReady = false;
         window.currentUser = null;
         window.state = {
             tab: 'learning', subTab: 'vowel', coins: 200, inventory: [], farmPets: [], altarSelection: [],
@@ -185,7 +188,8 @@
             }
         };
 
-        //        onAuthStateChanged(auth, async (user) => {
+        // 인증 상태 추적 (이 부분이 주석 처리되어 멈췄었습니다)
+        onAuthStateChanged(auth, async (user) => {
             window.isAuthReady = true;
             if (user) {
                 window.currentUser = user;
@@ -213,7 +217,8 @@
             }
         });
 
-        //        window.handleAuth = async function(isLogin) {
+        // 회원가입 및 로그인 처리
+        window.handleAuth = async function(isLogin) {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
@@ -274,7 +279,8 @@
             return '<span class="bg-gray-200 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">NORMAL (일반)</span>';
         }
 
-        //        window.render = function() {
+        // 전체 화면 렌더링 함수
+        window.render = function() {
             const app = document.getElementById('app');
             if(!app) return;
             
@@ -284,7 +290,7 @@
             // 로그인이 안 되어 있다면 로그인 화면만 표시
             if (!window.currentUser) {
                 app.innerHTML = `
-                    <div class="flex-1 flex flex-col items-center justify-center p-8 w-full bg-gradient-to-b from-blue-50 to-blue-100">
+                    <div class="flex-1 flex flex-col items-center justify-center p-8 w-full bg-gradient-to-b from-blue-50 to-blue-100 h-full">
                         ${window.state.toastMsg ? `<div class="absolute top-10 bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-xl animate-pop">${window.state.toastMsg}</div>` : ''}
                         
                         <div class="text-6xl mb-6 animate-bounce">👻</div>
@@ -395,7 +401,7 @@
             `;
         }
 
-        //        window.renderLearning = function() {
+        window.renderLearning = function() {
             const isVowel = window.state.subTab === 'vowel';
             return `
                 <div class="p-4 max-w-md mx-auto w-full">
@@ -542,7 +548,7 @@
             `;
         }
 
-        //        window.getNewQuiz = function() {
+        window.getNewQuiz = function() {
             const randomWord = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
             window.state.currentQuiz = { ...randomWord, options: [...randomWord.opts] };
         }
@@ -634,7 +640,7 @@
             `;
         }
 
-        //        window.openPack = async function() {
+        window.openPack = async function() {
             if(window.state.coins < 50) return window.showToast("코인이 부족해요! (50 필요)");
             if(window.state.packOpening) return;
 
@@ -700,7 +706,7 @@
             `;
         }
 
-        //        window.selectForAltar = function(id) {
+        window.selectForAltar = function(id) {
             if(window.state.altarSelection.includes(id)) {
                 window.state.altarSelection = window.state.altarSelection.filter(x => x !== id);
             } else {
@@ -842,6 +848,7 @@
                 </div>
             `;
         }
+
     </script>
 </body>
 </html>
