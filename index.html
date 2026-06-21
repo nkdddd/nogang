@@ -168,13 +168,28 @@
         });
 
         async function saveToDB() {
-            if (!currentUser) return;
+            if (!currentUser) return false;
             try {
                 await setDoc(doc(db, "users", currentUser.uid), {
                     coins: state.coins, inventory: state.inventory, farmPets: state.farmPets
                 });
-            } catch (e) { console.error("저장 에러:", e); }
+                return true;
+            } catch (e) { 
+                console.error("저장 에러:", e); 
+                return false;
+            }
         }
+
+        // --- 서버 저장 테스트 함수 ---
+        window.testFirebase = async function() {
+            showToast("서버와 동기화 중...");
+            const success = await saveToDB();
+            if(success) {
+                setTimeout(() => showToast("✅ 서버 저장 완벽 성공!"), 1000);
+            } else {
+                setTimeout(() => showToast("❌ 서버 저장 실패 (규칙 확인 필요)"), 1000);
+            }
+        };
 
         window.handleAuth = async function(isLogin) {
             const email = document.getElementById('email').value;
@@ -303,13 +318,17 @@
             app.innerHTML = `
                 <header class="pt-safe bg-white border-b shrink-0 z-50 shadow-sm relative">
                     <div class="h-14 flex items-center justify-between px-5">
-                        <button onclick="logout()" class="flex items-center gap-2 font-bold text-gray-800 hover:opacity-70 active:scale-95 transition-all bg-gray-50 px-2 py-1 rounded-lg">
+                        <div class="flex items-center gap-2 font-bold text-gray-800">
                             <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-lg">👦</div>
                             <div class="flex flex-col items-start">
                                 <span class="text-xs text-blue-500">${userNickname}</span>
-                                <span class="text-[9px] text-gray-400">로그아웃</span>
+                                <div class="flex gap-1 mt-0.5">
+                                    <button onclick="logout()" class="text-[9px] text-gray-400 border border-gray-200 px-1.5 py-0.5 rounded hover:bg-gray-100 active:scale-95 transition-transform">로그아웃</button>
+                                    <!-- 🟢 서버 데이터 동기화 테스트 버튼 추가 🟢 -->
+                                    <button onclick="testFirebase()" class="text-[9px] text-green-600 bg-green-50 border border-green-200 px-1.5 py-0.5 rounded hover:bg-green-100 active:scale-95 transition-transform"><i class="fa-solid fa-cloud-arrow-up"></i> 저장 테스트</button>
+                                </div>
                             </div>
-                        </button>
+                        </div>
                         <div class="bg-yellow-50 px-4 py-1.5 rounded-full border border-yellow-200 font-black text-yellow-600 shadow-inner flex items-center gap-1">
                             <i class="fa-solid fa-coins"></i> ${state.coins}
                         </div>
@@ -324,8 +343,10 @@
                 </main>
 
                 <!-- 🟢 구글 애드센스 하단 배너 영역 🟢 -->
-                <div class="w-full bg-slate-50 border-t border-gray-200 flex justify-center items-center shrink-0 min-h-[60px] z-40 overflow-hidden">
-                    <ins class="adsbygoogle w-full"
+                <!-- 빈 공간일 때 당황하지 않게 옅은 글씨로 안내문구 추가 -->
+                <div class="w-full bg-slate-100 border-t border-gray-300 flex justify-center items-center shrink-0 min-h-[60px] z-40 relative overflow-hidden">
+                    <span class="absolute text-gray-400 text-[10px] font-bold tracking-widest text-center">AD SPACE<br>(광고 심사 중이거나 로딩 전입니다)</span>
+                    <ins class="adsbygoogle w-full relative z-10"
                          style="display:block; height:60px;"
                          data-ad-client="ca-pub-6453117184750039"
                          data-ad-slot="5112847569"
@@ -346,13 +367,10 @@
             `;
 
             // 🟢 화면 렌더링 직후 광고 실행 로직 🟢
-            // 탭을 이동하여 화면이 다시 그려질 때마다 빈 컨테이너에 광고를 채워 넣습니다.
             setTimeout(() => {
                 try {
                     (window.adsbygoogle = window.adsbygoogle || []).push({});
-                } catch (e) {
-                    // 구글 애드센스 오류 무시용 (개발 중 에러 방지)
-                }
+                } catch (e) {}
             }, 100);
         }
 
