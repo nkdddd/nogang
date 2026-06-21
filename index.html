@@ -3,13 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- 아이폰(iOS) 전체화면 앱 설치를 위한 전용 메타 태그 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="파닉스 몬스터">
+    
     <title>Phonics Monster App</title>
     
-    <!-- 🟢 구글 애드센스 기본 스크립트 (Head 영역) 🟢 -->
+    <!-- 🟢 구글 애드센스 기본 스크립트 🟢 -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6453117184750039" crossorigin="anonymous"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap');
         
@@ -36,24 +43,28 @@
             80% { transform: translateX(10px) rotate(2deg); }
         }
         .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
         @keyframes pop {
             0% { transform: scale(0.8); opacity: 0; }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); opacity: 1; }
         }
         .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
         @keyframes fly-to-blank {
             0% { transform: scale(1) translateY(0); opacity: 1; }
             50% { transform: scale(1.5) translateY(-50px); opacity: 0.8; }
             100% { transform: scale(0.5) translate(0, -150px); opacity: 0; }
         }
         .animate-fly { animation: fly-to-blank 0.6s ease-in-out forwards; }
+
         @keyframes flash-red {
             0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
             20% { box-shadow: inset 0 0 0 30px rgba(239, 68, 68, 0.6); }
             100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
         }
         .animate-flash { animation: flash-red 0.5s ease-out; }
+
         @keyframes pack-tremble {
             0%, 100% { transform: rotate(0deg) scale(1); filter: brightness(1); }
             25% { transform: rotate(-5deg) scale(1.05); filter: brightness(1.2); }
@@ -79,13 +90,13 @@
         </div>
     </div>
 
-    <!-- Firebase SDK 및 로직 -->
+    <!-- Firebase SDK 및 전체 로직 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // 선생님 Firebase 설정
+        // ⭐ 중요: 아래 firebaseConfig는 선생님의 Firebase 정보로 교체하셔야 정상적으로 클라우드에 연동됩니다. ⭐
         const firebaseConfig = {
             apiKey: "AIzaSyBC5ffBjfAuLmq_Dg-J9XFOp6y7lzdhHYI",
             authDomain: "phonicsmonster-2d495.firebaseapp.com",
@@ -100,7 +111,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- 앱 데이터베이스 ---
+        // --- 데이터베이스 ---
         const VOWEL_DB = {
             'a': { sound: '애', fam: [{n:'-at', w:['cat','hat','bat','mat']}, {n:'-an', w:['can','fan','man','pan']}, {n:'-ap', w:['cap','map','tap']}], magic: ['cake','game','name','lake'], var: [{rule:'ar (아)', w:['car','park','star']}] },
             'e': { sound: '에', fam: [{n:'-en', w:['pen','hen','ten']}, {n:'-et', w:['net','wet','pet']}, {n:'-ell', w:['bell','well','fell']}], magic: ['here'], var: [{rule:'단어 끝 e (이)', w:['he','me','we']}, {rule:'ee/ea (이~)', w:['see','sea','leaf']}] },
@@ -108,6 +119,7 @@
             'o': { sound: '아', fam: [{n:'-ot', w:['hot','pot','dot']}, {n:'-op', w:['mop','top','hop']}, {n:'-og', w:['dog','log','fog']}], magic: ['hope','nose','rose','bone'], var: [{rule:'or (오)', w:['corn','horn','fork']}] },
             'u': { sound: '어', fam: [{n:'-ug', w:['bug','rug','mug']}, {n:'-ub', w:['tub','rub','cub']}, {n:'-ut', w:['nut','cut','hut']}], magic: ['cute','tube','cube','mule'], var: [{rule:'ur (어)', w:['nurse','purple','turtle']}] }
         };
+
         const CONSONANT_DB = {
             locations: [
                 { id: 'lips', title: '💋 입술 소리', tags: '(p, b, m, w)', items: [{id: 'p', kr: '프', w: 'pig'}, {id: 'b', kr: '브', w: 'bear'}, {id: 'm', kr: '음', w: 'mouse'}, {id: 'w', kr: '우/워', w: 'water'}]},
@@ -124,6 +136,7 @@
                 { p1: {id: 'f', kr: '바람만(프)', sound: '프', w: 'fish'}, p2: {id: 'v', kr: '목 떨림!(브)', sound: '브', w: 'van'} }
             ]
         };
+
         const RAW_WORDS = "cat:고양이:🐱:a,dog:개:🐶:o,pig:돼지:🐷:i,sun:태양:☀️:u,bed:침대:🛏️:e,bat:박쥐:🦇:a,hat:모자:🧢:a,map:지도:🗺️:a,cap:모자:🧢:a,fan:선풍기:🌬️:a,man:남자:👨:a,pan:팬:🍳:a,net:그물:🥅:e,red:빨강:🔴:e,leg:다리:🦵:e,pen:펜:🖊️:e,hen:암탉:🐔:e,sit:앉다:🪑:i,hit:치다:🏏:i,lip:입술:👄:i,six:육:6️⃣:i,box:상자:📦:o,fox:여우:🦊:o,top:팽이:🌀:o,hop:뛰다:🦘:o,mop:걸레:🧹:o,bug:벌레:🐛:u,rug:깔개:🔲:u,mug:머그컵:☕:u,nut:견과:🥜:u,cup:컵:🥤:u,bus:버스:🚌:u,tub:욕조:🛁:u,mud:진흙:🟤:u,web:거미줄:🕸️:e,wet:젖은:💧:e,vet:수의사:👩‍⚕️:e,zip:지퍼:🤐:i,win:이기다:🏆:i,fin:지느러미:🦈:i,bin:쓰레기통:🗑️:i,pin:핀:📍:i,mix:섞다:🥣:i,sad:슬픈:😢:a,mad:화난:😡:a,bad:나쁜:😈:a,bag:가방:👜:a,tag:태그:🏷️:a,wag:흔들다:🐕:a,jam:잼:🍓:a,ham:햄:🍖:a,ram:숫양:🐏:a,can:캔:🥫:a,van:승합차:🚐:a,run:달리다:🏃:u,fun:재미:🎉:u,gum:껌:🍬:u,hot:뜨거운:🔥:o,pot:냄비:🥘:o,dot:점:⏺️:o,log:통나무:🪵:o,jog:조깅:🏃‍♂️:o,cop:경찰:👮:o,pop:터지다:💥:o,sob:흐느끼다:😭:o,rob:도둑질:🦹:o,nod:끄덕이다:😌:o,rod:막대:🦯:o";
         const CONS_WORDS = "bear:곰:🐻:b,tiger:호랑이:🐯:t,lion:사자:🦁:l,zebra:얼룩말:🦓:z,fish:물고기:🐟:f,mouse:생쥐:🐭:m,nest:둥지:🪹:n,rabbit:토끼:🐰:r,house:집:🏠:h,juice:주스:🧃:j,kite:연:🪁:k,grapes:포도:🍇:g,queen:여왕:👑:q,water:물:💧:w";
 
@@ -134,31 +147,30 @@
             return { w, kr, emoji, ans, parts: w.split(''), opts: opts.sort(() => 0.5 - Math.random()) };
         });
 
-        // 🟢 전역 상태 변수 완벽 정의 (Scope 에러 방지) 🟢
+        // --- 전역 변수 설정 (Scope 오류 방지) ---
         window.isAuthReady = false;
         window.currentUser = null;
-        window.isGuestMode = false; 
+        window.isGuestMode = false;
         window.state = {
             tab: 'learning', subTab: 'vowel', coins: 200, inventory: [], farmPets: [], altarSelection: [],
             toastMsg: null, currentQuiz: null, isAnswering: false, packOpening: false, revealedCard: null, animatingCorrect: null
         };
-        const state = window.state; // 로컬에서도 손쉽게 쓸 수 있게 연결
 
         // --- 백그라운드 서버 자동 저장 ---
-        function saveData() {
+        window.saveData = function() {
             if (!window.currentUser || window.isGuestMode) {
-                // 오프라인(게스트)일 때는 브라우저에 저장
+                // 서버 연결 실패 또는 게스트 모드일 때는 브라우저 내부에 안전하게 임시 저장합니다.
                 localStorage.setItem('phonicsAppState', JSON.stringify({
-                    coins: state.coins, inventory: state.inventory, farmPets: state.farmPets
+                    coins: window.state.coins, inventory: window.state.inventory, farmPets: window.state.farmPets
                 }));
                 return;
             }
             setDoc(doc(db, "users", window.currentUser.uid), {
-                coins: state.coins, inventory: state.inventory, farmPets: state.farmPets
+                coins: window.state.coins, inventory: window.state.inventory, farmPets: window.state.farmPets
             }).catch(e => console.error("데이터 저장 실패:", e));
-        }
+        };
 
-        // 🚀 타임아웃 3초 안전장치: 서버 무한 대기 방지
+        // 🚀 타임아웃 3초 안전장치: 서버가 무한 로딩에 빠지면 즉시 게스트 모드로 강제 접속!
         const fallbackTimer = setTimeout(() => {
             if (!window.isAuthReady) {
                 console.warn("Firebase 서버 응답 지연 - 게스트 모드 자동 실행");
@@ -166,21 +178,22 @@
                 window.isGuestMode = true;
                 window.currentUser = { uid: "guest", email: "Guest@offline" }; 
                 
+                // 오프라인에 저장해두었던 기록 불러오기
                 const savedData = localStorage.getItem('phonicsAppState');
                 if (savedData) {
                     try {
                         const data = JSON.parse(savedData);
-                        state.coins = data.coins !== undefined ? data.coins : 200;
-                        state.inventory = data.inventory || [];
-                        state.farmPets = data.farmPets || [];
+                        window.state.coins = data.coins !== undefined ? data.coins : 200;
+                        window.state.inventory = data.inventory || [];
+                        window.state.farmPets = data.farmPets || [];
                     } catch(e) {}
                 }
-                showToast("네트워크 지연: 오프라인(게스트) 모드로 실행했습니다.");
-                changeTab('learning'); 
+                window.showToast("네트워크 지연: 오프라인(게스트) 모드로 실행했습니다.");
+                window.changeTab('learning'); 
             }
         }, 3000); 
 
-        // Firebase 접속 처리
+        // 파이어베이스 인증 리스너
         try {
             onAuthStateChanged(auth, async (user) => {
                 if (window.isGuestMode) return; 
@@ -194,122 +207,118 @@
                         const docSnap = await getDoc(docRef);
                         if (docSnap.exists()) {
                             const data = docSnap.data();
-                            state.coins = data.coins !== undefined ? data.coins : 200;
-                            state.inventory = data.inventory || [];
-                            state.farmPets = data.farmPets || [];
+                            window.state.coins = data.coins !== undefined ? data.coins : 200;
+                            window.state.inventory = data.inventory || [];
+                            window.state.farmPets = data.farmPets || [];
                         } else {
-                            state.coins = 200;
-                            state.inventory = [];
-                            state.farmPets = [];
-                            saveData();
+                            window.state.coins = 200;
+                            window.state.inventory = [];
+                            window.state.farmPets = [];
+                            window.saveData();
                         }
-                        changeTab('learning');
+                        window.changeTab('learning');
                     } catch(error) {
                         console.error("DB 접속 에러:", error);
-                        showToast(`DB 접속 에러: 오프라인 모드로 실행합니다.`);
+                        window.showToast(`DB 접속 에러: 오프라인 모드로 실행합니다.`);
                         window.isGuestMode = true;
                         window.currentUser = { uid: "guest", email: "Guest@offline" };
-                        changeTab('learning');
+                        window.changeTab('learning');
                     }
                 } else {
                     window.currentUser = null;
-                    render();
+                    window.render();
                 }
             });
         } catch(error) {
             console.error("인증 초기화 에러:", error);
         }
 
-        // --- 필수 로직 함수들 정의 ---
-        async function handleAuth(isLogin) {
+        // --- 필수 로직 함수들 ---
+        window.handleAuth = async function(isLogin) {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            if(!email || !password) return showToast('이메일과 비밀번호를 모두 입력해주세요.');
-            if(password.length < 6) return showToast('비밀번호는 6자리 이상이어야 합니다.');
+            if(!email || !password) return window.showToast('이메일과 비밀번호를 모두 입력해주세요.');
+            if(password.length < 6) return window.showToast('비밀번호는 6자리 이상이어야 합니다.');
             
-            showToast("서버와 통신 중...");
+            window.showToast("서버와 통신 중...");
             try {
                 if (isLogin) {
                     await signInWithEmailAndPassword(auth, email, password);
                 } else {
                     await createUserWithEmailAndPassword(auth, email, password);
-                    showToast('가입 환영! 시작합니다. 🪙');
+                    window.showToast('가입 환영! 시작합니다. 🪙');
                 }
             } catch (error) {
-                if (error.code === 'auth/email-already-in-use') showToast('이미 가입된 이메일입니다.');
-                else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') showToast('이메일이나 비밀번호가 틀렸습니다.');
-                else showToast('오류 발생: ' + error.message);
+                if (error.code === 'auth/email-already-in-use') window.showToast('이미 가입된 이메일입니다.');
+                else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') window.showToast('이메일이나 비밀번호가 틀렸습니다.');
+                else window.showToast('오류 발생: 다시 시도해주세요.');
             }
-        }
+        };
 
-        async function logout() {
+        window.logout = async function() {
             await signOut(auth);
-            showToast('로그아웃 되었습니다.');
-        }
+            window.showToast('로그아웃 되었습니다.');
+        };
 
-        function speak(text, lang = 'en-US') {
+        window.speak = function(text, lang = 'en-US') {
             if (!window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang; utterance.rate = 0.9;
             window.speechSynthesis.speak(utterance);
-        }
+        };
 
-        function showToast(msg) {
-            state.toastMsg = msg; render();
-            setTimeout(() => { state.toastMsg = null; render(); }, 2000);
-        }
+        window.showToast = function(msg) {
+            window.state.toastMsg = msg; window.render();
+            setTimeout(() => { window.state.toastMsg = null; window.render(); }, 2000);
+        };
 
-        function changeTab(tab) {
-            state.tab = tab;
-            if(tab === 'training' && !state.currentQuiz) getNewQuiz();
-            if(tab !== 'altar') state.altarSelection = [];
-            render();
-        }
+        window.changeTab = function(tab) {
+            window.state.tab = tab;
+            if(tab === 'training' && !window.state.currentQuiz) window.getNewQuiz();
+            if(tab !== 'altar') window.state.altarSelection = [];
+            window.render();
+        };
 
-        function setSubTab(subTab) {
-            state.subTab = subTab; render();
-        }
-
-        function getCardGradeStyle(grade) {
+        window.getCardGradeStyle = function(grade) {
             if (grade === 'SUPER') return 'grade-super';
             if (grade === 'RARE') return 'grade-rare';
             return 'grade-normal';
-        }
+        };
         
-        function getCardGradeText(grade) {
+        window.getCardGradeText = function(grade) {
             if (grade === 'SUPER') return '<span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-black shadow-sm">👑 SUPER (S급)</span>';
             if (grade === 'RARE') return '<span class="bg-gradient-to-r from-slate-300 to-slate-400 text-slate-700 px-3 py-1 rounded-full text-xs font-black shadow-sm">✨ RARE (A급)</span>';
             return '<span class="bg-gray-200 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">NORMAL (일반)</span>';
-        }
+        };
 
-        function getNewQuiz() {
+        window.getNewQuiz = function() {
             const randomWord = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
-            state.currentQuiz = { ...randomWord, options: [...randomWord.opts] };
-        }
+            window.state.currentQuiz = { ...randomWord, options: [...randomWord.opts] };
+        };
 
-        function checkAnswer(selected) {
-            if(state.isAnswering) return;
-            state.isAnswering = true;
-            const isCorrect = selected === state.currentQuiz.ans;
+        window.checkAnswer = function(selected) {
+            if(window.state.isAnswering) return;
+            window.state.isAnswering = true;
+            const isCorrect = selected === window.state.currentQuiz.ans;
             const mainContent = document.getElementById('main-content'); 
 
             if(isCorrect) {
-                state.coins += 20;
-                saveData(); 
-                speak(state.currentQuiz.w);
-                state.animatingCorrect = selected;
-                render();
+                window.state.coins += 20;
+                window.saveData(); 
+                window.speak(window.state.currentQuiz.w);
+                window.state.animatingCorrect = selected;
+                window.render();
                 setTimeout(() => {
-                    showToast("🎉 정답! +20 코인");
-                    state.animatingCorrect = null;
-                    state.isAnswering = false;
-                    getNewQuiz();
-                    render();
+                    window.showToast("🎉 정답! +20 코인");
+                    window.state.animatingCorrect = null;
+                    window.state.isAnswering = false;
+                    window.getNewQuiz();
+                    window.render();
                 }, 700);
             } else {
-                state.coins = Math.max(0, state.coins - 10);
-                saveData(); 
+                window.state.coins = Math.max(0, window.state.coins - 10);
+                window.saveData(); 
                 let soundKr = selected;
                 if (VOWEL_DB[selected]) soundKr = VOWEL_DB[selected].sound;
                 else {
@@ -318,29 +327,29 @@
                     const found = allCons.find(c => c.id === selected);
                     if(found) soundKr = found.kr;
                 }
-                speak(soundKr, 'ko-KR');
+                window.speak(soundKr, 'ko-KR');
 
                 if(mainContent) mainContent.classList.add('animate-shake', 'animate-flash');
                 const btn = document.getElementById(`opt-${selected}`);
                 if(btn) btn.classList.replace('bg-blue-500', 'bg-red-500');
-                showToast("앗! -10 코인");
+                window.showToast("앗! -10 코인");
 
                 setTimeout(() => {
                     if(mainContent) mainContent.classList.remove('animate-shake', 'animate-flash');
                     if(btn) btn.classList.replace('bg-red-500', 'bg-blue-500');
-                    state.isAnswering = false;
-                    render();
+                    window.state.isAnswering = false;
+                    window.render();
                 }, 500);
             }
-        }
+        };
 
-        function openPack() {
-            if(state.coins < 50) return showToast("코인이 부족해요! (50 필요)");
-            if(state.packOpening) return;
-            state.coins -= 50;
-            saveData(); 
-            state.packOpening = true;
-            render();
+        window.openPack = function() {
+            if(window.state.coins < 50) return window.showToast("코인이 부족해요! (50 필요)");
+            if(window.state.packOpening) return;
+            window.state.coins -= 50;
+            window.saveData(); 
+            window.state.packOpening = true;
+            window.render();
 
             setTimeout(() => {
                 const rand = Math.random();
@@ -348,95 +357,290 @@
                 if (rand < 0.05) grade = 'SUPER';
                 else if (rand < 0.25) grade = 'RARE';
                 const randomWord = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
-                state.revealedCard = { id: Date.now().toString(), ...randomWord, grade: grade };
-                render();
-                speak(randomWord.w);
+                window.state.revealedCard = { id: Date.now().toString(), ...randomWord, grade: grade };
+                window.render();
+                window.speak(randomWord.w);
             }, 1000);
-        }
+        };
 
-        function keepCard() {
-            state.inventory.push(state.revealedCard);
-            if(state.farmPets.length < 15) {
-                state.farmPets.push({...state.revealedCard, x: Math.random()*80, y: Math.random()*80});
+        window.keepCard = function() {
+            window.state.inventory.push(window.state.revealedCard);
+            if(window.state.farmPets.length < 15) {
+                window.state.farmPets.push({...window.state.revealedCard, x: Math.random()*80, y: Math.random()*80});
             }
-            state.packOpening = false;
-            state.revealedCard = null;
-            saveData(); 
-            showToast("도감에 보관했어요! 🎒");
-            render();
-        }
+            window.state.packOpening = false;
+            window.state.revealedCard = null;
+            window.saveData(); 
+            window.showToast("도감에 보관했어요! 🎒");
+            window.render();
+        };
 
-        function discardCard() {
-            state.coins += 10;
-            state.packOpening = false;
-            state.revealedCard = null;
-            saveData(); 
-            showToast("카드를 버리고 10 코인을 얻었어요! 🪙");
-            render();
-        }
+        window.discardCard = function() {
+            window.state.coins += 10;
+            window.state.packOpening = false;
+            window.state.revealedCard = null;
+            window.saveData(); 
+            window.showToast("카드를 버리고 10 코인을 얻었어요! 🪙");
+            window.render();
+        };
 
-        function selectForAltar(id) {
-            if(state.altarSelection.includes(id)) {
-                state.altarSelection = state.altarSelection.filter(x => x !== id);
+        window.selectForAltar = function(id) {
+            if(window.state.altarSelection.includes(id)) {
+                window.state.altarSelection = window.state.altarSelection.filter(x => x !== id);
             } else {
-                if(state.altarSelection.length >= 2) return showToast("2개까지만 선택 가능해요!");
-                const card = state.inventory.find(c => c.id === id);
-                if(state.altarSelection.length === 1) {
-                    const firstCard = state.inventory.find(c => c.id === state.altarSelection[0]);
-                    if(firstCard.w !== card.w) return showToast("같은 단어 카드만 합성할 수 있어요!");
+                if(window.state.altarSelection.length >= 2) return window.showToast("2개까지만 선택 가능해요!");
+                const card = window.state.inventory.find(c => c.id === id);
+                if(window.state.altarSelection.length === 1) {
+                    const firstCard = window.state.inventory.find(c => c.id === window.state.altarSelection[0]);
+                    if(firstCard.w !== card.w) return window.showToast("같은 단어 카드만 합성할 수 있어요!");
                 }
-                state.altarSelection.push(id);
+                window.state.altarSelection.push(id);
             }
-            render();
-        }
+            window.render();
+        };
 
-        function tryEvolve() {
-            if(state.altarSelection.length !== 2) return;
-            const cardId = state.altarSelection[0];
-            const baseCard = state.inventory.find(c => c.id === cardId);
+        window.tryEvolve = function() {
+            if(window.state.altarSelection.length !== 2) return;
+            const cardId = window.state.altarSelection[0];
+            const baseCard = window.state.inventory.find(c => c.id === cardId);
             
-            state.inventory = state.inventory.filter(c => !state.altarSelection.includes(c.id));
-            state.altarSelection = [];
+            window.state.inventory = window.state.inventory.filter(c => !window.state.altarSelection.includes(c.id));
+            window.state.altarSelection = [];
             
             if(Math.random() < 0.5) { 
                 const newCard = { ...baseCard, id: Date.now().toString(), grade: 'SUPER' };
-                state.inventory.push(newCard);
-                showToast("✨ 합성 대성공! SUPER 카드를 얻었습니다!");
+                window.state.inventory.push(newCard);
+                window.showToast("✨ 합성 대성공! SUPER 카드를 얻었습니다!");
             } else {
                 const failReturnCard = { ...baseCard, id: Date.now().toString() };
-                state.inventory.push(failReturnCard);
-                showToast("💥 합성 실패... 카드 1장을 잃었습니다.");
+                window.state.inventory.push(failReturnCard);
+                window.showToast("💥 합성 실패... 카드 1장을 잃었습니다.");
             }
-            saveData(); 
-            render();
-        }
+            window.saveData(); 
+            window.render();
+        };
 
-        // --- 컴포넌트 렌더링 함수들 ---
-        function renderShop() {
+        // 🟢 각 카테고리 본문 하단에 넣을 광고 컴포넌트 🟢
+        window.renderAdBanner = function() {
             return `
-                <div class="p-6 flex flex-col items-center justify-center h-full">
-                    <div class="text-6xl mb-6 drop-shadow-lg">🏪</div>
-                    <h2 class="text-2xl font-black text-slate-800 mb-2">단어 몬스터 상점</h2>
-                    <p class="text-slate-500 font-bold mb-10 text-center">코인을 모아 카드를 뽑고<br>나만의 농장을 채우세요!</p>
-                    <button onclick="window.openPack()" class="bg-gradient-to-b from-yellow-300 to-yellow-500 p-6 rounded-3xl shadow-[0_8px_0_#b45309] active:translate-y-2 active:shadow-none transition-all w-full max-w-xs group">
-                        <div class="text-5xl mb-2 group-active:scale-95 transition-transform">🎁</div>
-                        <div class="text-white font-black text-xl drop-shadow-md">일반 팩 뜯기</div>
-                        <div class="mt-2 bg-yellow-600/30 text-yellow-900 font-bold py-1 px-4 rounded-full inline-block text-sm shadow-inner">50 코인</div>
-                    </button>
-                    <div class="mt-8 text-xs font-bold text-gray-400 bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-1 w-full max-w-xs">
-                        <div class="text-center mb-1 text-gray-500">🏆 뽑기 확률표</div>
-                        <div class="flex justify-between"><span>👑 SUPER (S급)</span> <span class="text-yellow-500">5%</span></div>
-                        <div class="flex justify-between"><span>✨ RARE (A급)</span> <span class="text-slate-500">20%</span></div>
-                        <div class="flex justify-between"><span>⬜ NORMAL (일반)</span> <span class="text-gray-400">75%</span></div>
+                <div class="w-full bg-slate-100 border-t border-gray-200 mt-6 py-4 flex justify-center items-center relative overflow-hidden rounded-xl shadow-inner">
+                    <span class="absolute text-gray-400 text-[10px] font-bold tracking-widest text-center">AD SPACE</span>
+                    <ins class="adsbygoogle w-full relative z-10"
+                         style="display:block; min-height:90px;"
+                         data-ad-client="ca-pub-6453117184750039"
+                         data-ad-slot="5112847569"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                </div>
+            `;
+        };
+
+        // --- 컴포넌트 화면 구성 ---
+        window.renderLearning = function() {
+            const isVowel = window.state.subTab === 'vowel';
+            return `
+                <div class="p-4 max-w-md mx-auto w-full flex flex-col min-h-full">
+                    <div class="flex bg-gray-200 rounded-full p-1 mb-6 shadow-inner">
+                        <button onclick="window.state.subTab='vowel'; window.render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">A E I O U (모음)</button>
+                        <button onclick="window.state.subTab='consonant'; window.render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${!isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">나머지 21개 (자음)</button>
+                    </div>
+                    <div class="flex-1">
+                        ${isVowel ? window.renderVowels() : window.renderConsonants()}
+                    </div>
+                    ${window.renderAdBanner()}
+                </div>
+            `;
+        };
+
+        window.renderVowels = function() {
+            return `
+                <div class="flex justify-between gap-2 mb-6">
+                    ${Object.entries(VOWEL_DB).map(([v, data]) => `
+                        <button onclick="window.speak('${v}'); window.showToast('${v} - ${data.sound}')" class="flex-1 aspect-[3/4] bg-white rounded-2xl shadow-sm border-b-4 border-blue-100 flex flex-col items-center justify-center active:translate-y-1 active:border-b-0 transition-all">
+                            <span class="text-3xl font-black text-blue-500 uppercase">${v}</span>
+                            <span class="text-sm font-bold text-gray-400 mt-1">${data.sound}</span>
+                        </button>
+                    `).join('')}
+                </div>
+                <details class="mb-4 bg-indigo-50 rounded-2xl border border-indigo-100 overflow-hidden group">
+                    <summary class="p-4 font-bold text-indigo-800 flex justify-between items-center cursor-pointer">
+                        <span>👥 단어 가족 모여라!</span>
+                        <i class="fa-solid fa-chevron-down text-indigo-300 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="p-4 pt-0 flex flex-col gap-3">
+                        ${['a','e','i','o','u'].map(v => VOWEL_DB[v].fam.map(f => `
+                            <div class="bg-indigo-100/50 p-3 rounded-xl">
+                                <div class="text-xs font-bold text-indigo-600 mb-2">🏠 ${f.n} 가족</div>
+                                <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+                                    ${f.w.map(word => `
+                                        <button onclick="window.speak('${word}')" class="bg-white px-3 py-1.5 rounded-lg shadow-sm font-bold text-slate-700 shrink-0 text-sm border border-indigo-50 flex items-center gap-1 active:scale-95 transition-transform">
+                                            ${word.replace(f.n.replace('-',''), `<span class="text-indigo-500">${f.n.replace('-','')}</span>`)}
+                                            <i class="fa-solid fa-volume-high text-[10px] text-indigo-400"></i>
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')).join('')}
+                    </div>
+                </details>
+                <details class="mb-4 bg-purple-50 rounded-2xl border border-purple-100 overflow-hidden group">
+                    <summary class="p-4 font-bold text-purple-800 flex justify-between items-center cursor-pointer">
+                        <span>⚡ 매직 E가 붙으면? (긴 소리)</span>
+                        <i class="fa-solid fa-chevron-down text-purple-300 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="p-4 pt-0 grid grid-cols-2 gap-2">
+                        ${['a','e','i','o','u'].flatMap(v => VOWEL_DB[v].magic).map(word => `
+                            <button onclick="window.speak('${word}')" class="bg-white p-3 rounded-xl shadow-sm font-bold text-slate-700 text-center border border-purple-50 flex items-center justify-center gap-1 active:scale-95 transition-transform">
+                                ${word.slice(0,-1)}<span class="text-purple-500">e</span>
+                                <i class="fa-solid fa-volume-high text-[10px] text-purple-400"></i>
+                            </button>
+                        `).join('')}
+                    </div>
+                </details>
+                <details class="mb-4 bg-orange-50 rounded-2xl border border-orange-100 overflow-hidden group">
+                    <summary class="p-4 font-bold text-orange-800 flex justify-between items-center cursor-pointer">
+                        <span>💡 자리에 따라 소리가 달라져요</span>
+                        <i class="fa-solid fa-chevron-down text-orange-300 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="p-4 pt-0 flex flex-col gap-2">
+                        ${['a','e','i','o','u'].flatMap(v => VOWEL_DB[v].var || []).map(vr => `
+                            <div class="bg-white p-3 rounded-xl shadow-sm border border-orange-50">
+                                <div class="text-xs font-bold text-orange-600 mb-2">${vr.rule}</div>
+                                <div class="flex gap-2">
+                                    ${vr.w.map(word => `
+                                        <button onclick="window.speak('${word}')" class="bg-orange-100 px-3 py-1 rounded-lg text-orange-800 font-bold text-sm shrink-0 flex items-center gap-1 active:scale-95 transition-transform">
+                                            ${word} <i class="fa-solid fa-volume-high text-[10px] text-orange-500"></i>
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </details>
+            `;
+        };
+
+        window.renderConsonants = function() {
+            return `
+                <div class="flex flex-col gap-4">
+                    ${CONSONANT_DB.locations.map(loc => `
+                        <details class="bg-emerald-50 rounded-2xl border border-emerald-100 overflow-hidden group">
+                            <summary class="p-4 font-bold text-emerald-800 flex justify-between items-center cursor-pointer">
+                                <div class="flex items-center gap-2">
+                                    <span>${loc.title}</span>
+                                    <span class="text-xs bg-emerald-200/50 text-emerald-700 px-2 py-0.5 rounded-full">${loc.tags}</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-down text-emerald-300 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="p-4 pt-0 grid grid-cols-2 gap-3">
+                                ${loc.items.map(item => `
+                                    <div class="bg-white p-2 rounded-xl shadow-sm border border-emerald-100 flex flex-col items-center">
+                                        <button onclick="window.speak('${item.kr}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-emerald-50 rounded-lg transition-colors">
+                                            <span class="text-3xl font-black text-slate-700">${item.id}</span>
+                                            <span class="text-[10px] text-emerald-600 font-bold mt-1">${item.kr}</span>
+                                        </button>
+                                        <button onclick="window.speak('${item.w}')" class="mt-1 w-full bg-slate-50 border border-slate-100 py-1.5 rounded-lg text-xs font-bold text-slate-600 active:bg-slate-200 transition-colors flex items-center justify-center gap-1 shadow-inner">
+                                            ${item.w} <i class="fa-solid fa-volume-high text-[10px] text-emerald-400"></i>
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </details>
+                    `).join('')}
+                    <div class="bg-red-50 rounded-2xl p-4 border border-red-100 mt-2">
+                        <h3 class="font-bold text-red-800 mb-3"><i class="fa-solid fa-ear-listen mr-1"></i> 헷갈리는 소리 짝 (VS)</h3>
+                        <div class="flex flex-col gap-3">
+                            ${CONSONANT_DB.vs.map(pair => `
+                                <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-red-100">
+                                    <div class="flex-1 flex flex-col items-center p-1">
+                                        <button onclick="window.speak('${pair.p1.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
+                                            <span class="text-3xl font-black text-slate-700">${pair.p1.id}</span>
+                                            <span class="text-[10px] text-slate-400 mt-1">${pair.p1.kr}</span>
+                                        </button>
+                                        <button onclick="window.speak('${pair.p1.w}')" class="mt-1 w-full bg-blue-50 py-1.5 rounded-lg text-[11px] font-bold text-blue-600 active:bg-blue-100 flex items-center justify-center gap-1 shadow-sm transition-colors">
+                                            ${pair.p1.w} <i class="fa-solid fa-volume-high text-[10px]"></i>
+                                        </button>
+                                    </div>
+                                    <div class="text-xs font-black text-red-300 px-1">VS</div>
+                                    <div class="flex-1 flex flex-col items-center p-1">
+                                        <button onclick="window.speak('${pair.p2.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
+                                            <span class="text-3xl font-black text-red-600">${pair.p2.id}</span>
+                                            <span class="text-[10px] text-red-400 mt-1">${pair.p2.kr}</span>
+                                        </button>
+                                        <button onclick="window.speak('${pair.p2.w}')" class="mt-1 w-full bg-red-50 py-1.5 rounded-lg text-[11px] font-bold text-red-600 active:bg-red-100 flex items-center justify-center gap-1 shadow-sm transition-colors">
+                                            ${pair.p2.w} <i class="fa-solid fa-volume-high text-[10px]"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             `;
-        }
+        };
 
-        function renderAltar() {
-            const normalCards = state.inventory.filter(c => c.grade === 'NORMAL');
-            const selectedCards = state.altarSelection.map(id => state.inventory.find(c => c.id === id));
-            
+        window.renderTraining = function() {
+            if(!window.state.currentQuiz) window.getNewQuiz();
+            const q = window.state.currentQuiz;
+            const displayHtml = q.parts.map(p => {
+                if(p === q.ans) {
+                    if (window.state.animatingCorrect) return `<span class="text-blue-500 animate-pop inline-block">${p}</span>`;
+                    return `<span class="text-blue-200 border-b-4 border-blue-200 px-2 inline-block w-8 text-center pb-1">?</span>`;
+                }
+                return `<span class="text-slate-700 inline-block px-1">${p}</span>`;
+            }).join('');
+
+            return `
+                <div class="flex flex-col h-full p-6 w-full">
+                    <div class="flex-1 flex flex-col items-center justify-center">
+                        <h2 class="text-2xl font-black text-slate-800 mb-8 tracking-tight">빈칸을 채워봐!</h2>
+                        <div class="bg-white rounded-[2rem] p-8 shadow-xl w-full max-w-sm flex flex-col items-center border-2 border-slate-100 relative z-10">
+                            <div class="text-7xl mb-4 drop-shadow-sm">${q.emoji}</div>
+                            <div class="bg-slate-100 text-slate-500 font-bold px-4 py-1.5 rounded-full mb-8">${q.kr}</div>
+                            <div class="text-5xl font-black tracking-widest uppercase flex items-center h-16">${displayHtml}</div>
+                        </div>
+                        <div class="flex flex-wrap justify-center gap-3 mt-10 w-full relative z-20">
+                            ${q.options.map(opt => `
+                                <button id="opt-${opt}" onclick="window.checkAnswer('${opt}')" 
+                                    class="w-14 h-14 bg-blue-500 text-white rounded-2xl text-2xl font-black shadow-[0_5px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all uppercase relative overflow-hidden">
+                                    <span class="${window.state.animatingCorrect === opt ? 'opacity-0' : 'opacity-100'}">${opt}</span>
+                                    ${window.state.animatingCorrect === opt ? `<span class="absolute inset-0 flex items-center justify-center animate-fly text-3xl font-black text-yellow-300 z-50">${opt}</span>` : ''}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ${window.renderAdBanner()}
+                </div>
+            `;
+        };
+
+        window.renderShop = function() {
+            return `
+                <div class="p-6 flex flex-col items-center h-full">
+                    <div class="flex-1 flex flex-col items-center justify-center">
+                        <div class="text-6xl mb-6 drop-shadow-lg">🏪</div>
+                        <h2 class="text-2xl font-black text-slate-800 mb-2">단어 몬스터 상점</h2>
+                        <p class="text-slate-500 font-bold mb-10 text-center">코인을 모아 카드를 뽑고<br>나만의 농장을 채우세요!</p>
+                        <button onclick="window.openPack()" class="bg-gradient-to-b from-yellow-300 to-yellow-500 p-6 rounded-3xl shadow-[0_8px_0_#b45309] active:translate-y-2 active:shadow-none transition-all w-full max-w-xs group">
+                            <div class="text-5xl mb-2 group-active:scale-95 transition-transform">🎁</div>
+                            <div class="text-white font-black text-xl drop-shadow-md">일반 팩 뜯기</div>
+                            <div class="mt-2 bg-yellow-600/30 text-yellow-900 font-bold py-1 px-4 rounded-full inline-block text-sm shadow-inner">50 코인</div>
+                        </button>
+                        <div class="mt-8 text-xs font-bold text-gray-400 bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-1 w-full max-w-xs">
+                            <div class="text-center mb-1 text-gray-500">🏆 뽑기 확률표</div>
+                            <div class="flex justify-between"><span>👑 SUPER (S급)</span> <span class="text-yellow-500">5%</span></div>
+                            <div class="flex justify-between"><span>✨ RARE (A급)</span> <span class="text-slate-500">20%</span></div>
+                            <div class="flex justify-between"><span>⬜ NORMAL (일반)</span> <span class="text-gray-400">75%</span></div>
+                        </div>
+                    </div>
+                    ${window.renderAdBanner()}
+                </div>
+            `;
+        };
+
+        window.renderAltar = function() {
+            const normalCards = window.state.inventory.filter(c => c.grade === 'NORMAL');
+            const selectedCards = window.state.altarSelection.map(id => window.state.inventory.find(c => c.id === id));
             return `
                 <div class="p-6 flex flex-col h-full">
                     <div class="text-center mb-6">
@@ -451,16 +655,16 @@
                             </div>
                         `).join('')}
                     </div>
-                    ${state.altarSelection.length === 2 ? `
-                        <button onclick="window.tryEvolve()" class="w-full bg-yellow-400 text-yellow-900 font-black text-xl py-4 rounded-2xl mb-8 shadow-[0_5px_0_#ca8a04] active:translate-y-1 active:shadow-none animate-bounce">
+                    ${window.state.altarSelection.length === 2 ? `
+                        <button onclick="window.tryEvolve()" class="w-full bg-yellow-400 text-yellow-900 font-black text-xl py-4 rounded-2xl mb-4 shadow-[0_5px_0_#ca8a04] active:translate-y-1 active:shadow-none animate-bounce">
                             합성 시작하기!
                         </button>
                     ` : ''}
-                    <div class="flex-1 bg-white rounded-t-3xl p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border-t border-gray-100 overflow-y-auto">
+                    <div class="flex-1 bg-white rounded-3xl p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border border-gray-100 overflow-y-auto min-h-[150px]">
                         <h3 class="font-bold text-gray-700 mb-3 text-sm">합성 가능한 일반 카드</h3>
                         <div class="grid grid-cols-4 gap-2">
                             ${normalCards.map(item => {
-                                const isSel = state.altarSelection.includes(item.id);
+                                const isSel = window.state.altarSelection.includes(item.id);
                                 return `
                                 <button onclick="window.selectForAltar('${item.id}')" class="relative bg-slate-50 border-2 rounded-xl p-2 flex flex-col items-center transition-all ${isSel ? 'border-blue-500 bg-blue-50' : 'border-slate-200'}">
                                     <div class="text-2xl">${item.emoji}</div>
@@ -471,89 +675,92 @@
                             }).join('')}
                         </div>
                     </div>
+                    ${window.renderAdBanner()}
                 </div>
             `;
-        }
+        };
 
-        function renderDex() {
-            if(state.inventory.length === 0) {
-                return `
-                    <div class="flex flex-col items-center justify-center h-full text-slate-400 font-bold gap-4">
+        window.renderDex = function() {
+            let innerHtml = '';
+            if(window.state.inventory.length === 0) {
+                innerHtml = `
+                    <div class="flex-1 flex flex-col items-center justify-center text-slate-400 font-bold gap-4">
                         <i class="fa-solid fa-book-open text-5xl"></i>
                         <p>수집한 카드가 없어요.</p>
                     </div>
                 `;
-            }
-            return `
-                <div class="p-4">
-                    <h2 class="text-xl font-black text-slate-800 mb-4 px-2">나의 도감 <span class="text-blue-500">${state.inventory.length}</span></h2>
-                    <div class="grid grid-cols-3 gap-3">
-                        ${state.inventory.slice().reverse().map(item => `
-                            <div class="${getCardGradeStyle(item.grade)} rounded-2xl p-3 flex flex-col items-center relative overflow-hidden active:scale-95 transition-transform" onclick="window.speak('${item.w}')">
-                                ${item.grade === 'SUPER' ? '<div class="absolute top-0 right-0 bg-yellow-400 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg">S급</div>' : ''}
-                                ${item.grade === 'RARE' ? '<div class="absolute top-0 right-0 bg-slate-400 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg">A급</div>' : ''}
-                                <div class="text-3xl mb-1 mt-2 z-10">${item.emoji}</div>
-                                <div class="text-xs font-black text-slate-800 truncate w-full text-center z-10">${item.w}</div>
-                            </div>
-                        `).join('')}
+            } else {
+                innerHtml = `
+                    <div class="flex-1 overflow-y-auto">
+                        <h2 class="text-xl font-black text-slate-800 mb-4 px-2">나의 도감 <span class="text-blue-500">${window.state.inventory.length}</span></h2>
+                        <div class="grid grid-cols-3 gap-3">
+                            ${window.state.inventory.slice().reverse().map(item => `
+                                <div class="${window.getCardGradeStyle(item.grade)} rounded-2xl p-3 flex flex-col items-center relative overflow-hidden active:scale-95 transition-transform" onclick="window.speak('${item.w}')">
+                                    ${item.grade === 'SUPER' ? '<div class="absolute top-0 right-0 bg-yellow-400 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg">S급</div>' : ''}
+                                    ${item.grade === 'RARE' ? '<div class="absolute top-0 right-0 bg-slate-400 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg">A급</div>' : ''}
+                                    <div class="text-3xl mb-1 mt-2 z-10">${item.emoji}</div>
+                                    <div class="text-xs font-black text-slate-800 truncate w-full text-center z-10">${item.w}</div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
+                `;
+            }
+
+            return `
+                <div class="p-4 flex flex-col h-full w-full">
+                    ${innerHtml}
+                    ${window.renderAdBanner()}
                 </div>
             `;
-        }
+        };
 
-        function renderFarm() {
-            if(state.farmPets.length === 0) {
-                return `
-                    <div class="flex flex-col items-center justify-center h-full text-green-700 font-bold gap-4 p-6 text-center bg-green-50/50">
+        window.renderFarm = function() {
+            let innerHtml = '';
+            if(window.state.farmPets.length === 0) {
+                innerHtml = `
+                    <div class="flex-1 flex flex-col items-center justify-center text-green-700 font-bold gap-4 text-center">
                         <i class="fa-solid fa-seedling text-5xl text-green-400"></i>
                         <p>농장이 비어있어요!</p>
                     </div>
                 `;
-            }
-            return `
-                <div class="relative w-full h-full bg-gradient-to-b from-blue-200 via-green-200 to-green-300 overflow-hidden">
-                    <div class="absolute top-4 left-4 text-white font-black drop-shadow-md z-10">
-                        🌳 내 농장 (${state.farmPets.length}마리)
-                    </div>
-                    ${state.farmPets.map((pet, i) => `
-                        <div class="absolute cursor-pointer hover:scale-110 transition-transform flex flex-col items-center drop-shadow-xl z-20"
-                             style="left: ${pet.x}%; top: ${pet.y}%; animation: shake ${3 + (i%2)}s infinite alternate ease-in-out;"
-                             onclick="window.speak('${pet.w}')">
-                            <div class="text-4xl bg-white/80 rounded-full w-12 h-12 flex items-center justify-center shadow-inner border-2 border-white/50 backdrop-blur-sm relative">
-                                ${pet.grade === 'SUPER' ? '<div class="absolute -top-2 text-xs">👑</div>' : ''}
-                                ${pet.grade === 'RARE' ? '<div class="absolute -top-2 text-xs">✨</div>' : ''}
-                                ${pet.emoji}
-                            </div>
-                            <div class="bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 backdrop-blur-sm">
-                                ${pet.w}
-                            </div>
+            } else {
+                innerHtml = `
+                    <div class="flex-1 relative w-full rounded-2xl overflow-hidden shadow-inner border-2 border-green-300">
+                        <div class="absolute inset-0 bg-gradient-to-b from-blue-200 via-green-200 to-green-300"></div>
+                        <div class="absolute top-4 left-4 text-white font-black drop-shadow-md z-10">
+                            🌳 내 농장 (${window.state.farmPets.length}마리)
                         </div>
-                    `).join('')}
-                    <div class="absolute bottom-10 left-10 text-6xl opacity-50 z-0">🌲</div>
-                    <div class="absolute bottom-20 right-10 text-5xl opacity-50 z-0">🌳</div>
+                        ${window.state.farmPets.map((pet, i) => `
+                            <div class="absolute cursor-pointer hover:scale-110 transition-transform flex flex-col items-center drop-shadow-xl z-20"
+                                 style="left: ${pet.x}%; top: ${pet.y}%; animation: shake ${3 + (i%2)}s infinite alternate ease-in-out;"
+                                 onclick="window.speak('${pet.w}')">
+                                <div class="text-4xl bg-white/80 rounded-full w-12 h-12 flex items-center justify-center shadow-inner border-2 border-white/50 backdrop-blur-sm relative">
+                                    ${pet.grade === 'SUPER' ? '<div class="absolute -top-2 text-xs">👑</div>' : ''}
+                                    ${pet.grade === 'RARE' ? '<div class="absolute -top-2 text-xs">✨</div>' : ''}
+                                    ${pet.emoji}
+                                </div>
+                                <div class="bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 backdrop-blur-sm">
+                                    ${pet.w}
+                                </div>
+                            </div>
+                        `).join('')}
+                        <div class="absolute bottom-10 left-10 text-6xl opacity-50 z-0">🌲</div>
+                        <div class="absolute bottom-20 right-10 text-5xl opacity-50 z-0">🌳</div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="p-4 flex flex-col h-full w-full bg-green-50/50">
+                    ${innerHtml}
+                    ${window.renderAdBanner()}
                 </div>
             `;
-        }
+        };
 
-        // --- 전역 함수 연결 (인라인 HTML에서 호출 가능하도록) ---
-        window.render = render;
-        window.getNewQuiz = getNewQuiz;
-        window.checkAnswer = checkAnswer;
-        window.openPack = openPack;
-        window.keepCard = keepCard;
-        window.discardCard = discardCard;
-        window.selectForAltar = selectForAltar;
-        window.tryEvolve = tryEvolve;
-        window.handleAuth = handleAuth;
-        window.logout = logout;
-        window.speak = speak;
-        window.showToast = showToast;
-        window.changeTab = changeTab;
-        window.setSubTab = setSubTab;
-        window.saveData = saveData;
-        
-        // --- 메인 렌더링 엔진 ---
-        function render() {
+        // --- 메인 렌더러 ---
+        window.render = function() {
             const app = document.getElementById('app');
             if (!window.isAuthReady) return;
 
@@ -561,7 +768,7 @@
             if (!window.currentUser) {
                 app.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-8 w-full bg-gradient-to-b from-blue-50 to-blue-100 h-full">
-                        ${state.toastMsg ? `<div class="absolute top-10 bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-xl animate-pop text-center z-[100] max-w-[90%]">${state.toastMsg}</div>` : ''}
+                        ${window.state.toastMsg ? `<div class="absolute top-10 bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-xl animate-pop text-center z-[100] max-w-[90%]">${window.state.toastMsg}</div>` : ''}
                         <div class="text-6xl mb-6 animate-bounce">👻</div>
                         <h1 class="text-4xl font-black text-blue-800 mb-2 tracking-tight text-center">Phonics<br>Monster</h1>
                         <p class="text-gray-500 font-bold mb-8 text-center text-sm">진행 상황이 클라우드에 자동 저장됩니다.</p>
@@ -576,23 +783,23 @@
                 return;
             }
 
-            // 2. 로그인 성공 시 앱 화면 렌더링
-            const toastHtml = state.toastMsg ? `
+            // 2. 앱 본문 렌더링
+            const toastHtml = window.state.toastMsg ? `
                 <div class="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-2xl animate-pop whitespace-nowrap">
-                    ${state.toastMsg}
+                    ${window.state.toastMsg}
                 </div>
             ` : '';
 
-            const packOverlayHtml = state.packOpening ? `
+            const packOverlayHtml = window.state.packOpening ? `
                 <div class="absolute inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-sm">
-                    ${state.revealedCard ? `
-                        <div class="${getCardGradeStyle(state.revealedCard.grade)} rounded-3xl p-8 w-full max-w-[280px] animate-pop flex flex-col items-center text-center relative overflow-hidden">
-                            ${state.revealedCard.grade !== 'NORMAL' ? '<div class="absolute inset-0 bg-[url(\'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=\')] opacity-50 mix-blend-overlay"></div>' : ''}
+                    ${window.state.revealedCard ? `
+                        <div class="${window.getCardGradeStyle(window.state.revealedCard.grade)} rounded-3xl p-8 w-full max-w-[280px] animate-pop flex flex-col items-center text-center relative overflow-hidden">
+                            ${window.state.revealedCard.grade !== 'NORMAL' ? '<div class="absolute inset-0 bg-[url(\'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=\')] opacity-50 mix-blend-overlay"></div>' : ''}
                             <div class="relative z-10 w-full flex flex-col items-center">
-                                <div class="mb-6">${getCardGradeText(state.revealedCard.grade)}</div>
-                                <div class="text-8xl mb-4 drop-shadow-md">${state.revealedCard.emoji}</div>
-                                <div class="text-gray-500 font-black mb-1 bg-white/50 px-3 py-1 rounded-full text-sm">${state.revealedCard.kr}</div>
-                                <div class="text-4xl font-black mb-8 text-gray-800 tracking-wider">${state.revealedCard.w}</div>
+                                <div class="mb-6">${window.getCardGradeText(window.state.revealedCard.grade)}</div>
+                                <div class="text-8xl mb-4 drop-shadow-md">${window.state.revealedCard.emoji}</div>
+                                <div class="text-gray-500 font-black mb-1 bg-white/50 px-3 py-1 rounded-full text-sm">${window.state.revealedCard.kr}</div>
+                                <div class="text-4xl font-black mb-8 text-gray-800 tracking-wider">${window.state.revealedCard.w}</div>
                                 <div class="w-full flex gap-2 flex-col">
                                     <button onclick="window.keepCard()" class="w-full py-3.5 bg-blue-500 text-white rounded-xl font-black text-lg shadow-[0_4px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all">
                                         <i class="fa-solid fa-box-open mr-1"></i> 도감에 넣기
@@ -611,12 +818,12 @@
             ` : '';
 
             let contentHtml = '';
-            if(state.tab === 'learning') contentHtml = renderLearning();
-            if(state.tab === 'training') contentHtml = renderTraining();
-            if(state.tab === 'shop') contentHtml = renderShop();
-            if(state.tab === 'altar') contentHtml = renderAltar();
-            if(state.tab === 'dex') contentHtml = renderDex();
-            if(state.tab === 'farm') contentHtml = renderFarm();
+            if(window.state.tab === 'learning') contentHtml = window.renderLearning();
+            if(window.state.tab === 'training') contentHtml = window.renderTraining();
+            if(window.state.tab === 'shop') contentHtml = window.renderShop();
+            if(window.state.tab === 'altar') contentHtml = window.renderAltar();
+            if(window.state.tab === 'dex') contentHtml = window.renderDex();
+            if(window.state.tab === 'farm') contentHtml = window.renderFarm();
 
             const userEmailPrefix = window.currentUser.email.split('@')[0];
 
@@ -631,7 +838,7 @@
                             </div>
                         </button>
                         <div class="bg-yellow-50 px-4 py-1.5 rounded-full border border-yellow-200 font-black text-yellow-600 shadow-inner flex items-center gap-1">
-                            <i class="fa-solid fa-coins"></i> ${state.coins}
+                            <i class="fa-solid fa-coins"></i> ${window.state.coins}
                         </div>
                     </div>
                 </header>
@@ -639,48 +846,36 @@
                 ${toastHtml}
                 ${packOverlayHtml}
 
-                <main class="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50 w-full pb-2 hide-scrollbar" id="main-content">
+                <main class="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50 w-full hide-scrollbar" id="main-content">
                     ${contentHtml}
                 </main>
 
-                <!-- 🟢 구글 애드센스 하단 배너 영역 🟢 -->
-                <div class="w-full bg-slate-100 border-t border-gray-300 flex justify-center items-center shrink-0 min-h-[60px] z-40 relative overflow-hidden">
-                    <span class="absolute text-gray-400 text-[10px] font-bold tracking-widest text-center">AD SPACE<br>(광고 심사 중이거나 로딩 전입니다)</span>
-                    <ins class="adsbygoogle w-full relative z-10"
-                         style="display:block; height:60px;"
-                         data-ad-client="ca-pub-6453117184750039"
-                         data-ad-slot="5112847569"
-                         data-ad-format="horizontal"
-                         data-full-width-responsive="true"></ins>
-                </div>
-
                 <nav class="pb-safe bg-white border-t shrink-0 z-50 relative">
                     <div class="h-16 flex items-center justify-between px-1">
-                        ${navButton('learning', 'fa-book-open', '학습장')}
-                        ${navButton('training', 'fa-dumbbell', '훈련소')}
-                        ${navButton('shop', 'fa-store', '상점')}
-                        ${navButton('altar', 'fa-bolt', '제단')}
-                        ${navButton('dex', 'fa-address-book', '도감')}
-                        ${navButton('farm', 'fa-tree', '농장')}
+                        ${window.navButton('learning', 'fa-book-open', '학습장')}
+                        ${window.navButton('training', 'fa-dumbbell', '훈련소')}
+                        ${window.navButton('shop', 'fa-store', '상점')}
+                        ${window.navButton('altar', 'fa-bolt', '제단')}
+                        ${window.navButton('dex', 'fa-address-book', '도감')}
+                        ${window.navButton('farm', 'fa-tree', '농장')}
                     </div>
                 </nav>
             `;
 
-            // 🟢 광고가 충돌 없이 갱신되도록 처리하는 로직 🟢
+            // 🟢 광고가 충돌 없이 안전하게 불려오도록 처리 (화면 렌더링 이후)
             setTimeout(() => {
                 try {
-                    const adContainer = document.querySelector('.adsbygoogle');
-                    // 아직 광고가 채워지지 않은 요소에만 실행 요청
-                    if (adContainer && !adContainer.hasAttribute('data-adsbygoogle-status')) {
+                    const ads = document.querySelectorAll('.adsbygoogle:not([data-adsbygoogle-status])');
+                    ads.forEach(ad => {
                         (window.adsbygoogle = window.adsbygoogle || []).push({});
-                    }
+                    });
                 } catch (e) {
-                    console.warn("AdSense push failed:", e);
+                    console.warn("구글 애드센스 로드 실패:", e);
                 }
-            }, 100);
-        }
+            }, 300);
+        };
 
-        // 초기 시작
+        // 앱 구동
         document.addEventListener('DOMContentLoaded', window.render);
         if (document.readyState === 'complete' || document.readyState === 'interactive') window.render();
     </script>
