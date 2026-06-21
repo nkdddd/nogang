@@ -10,8 +10,10 @@
     <meta name="apple-mobile-web-app-title" content="파닉스 몬스터">
     
     <title>Phonics Monster App</title>
+    <!-- 오류를 유발하던 Babel과 React를 제거하고, 가장 안정적인 Tailwind와 FontAwesome만 남겼습니다. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap');
         
@@ -73,6 +75,7 @@
         details > summary::-webkit-details-marker { display: none; }
         details[open] summary ~ * { animation: pop 0.3s ease-in-out; }
 
+        /* 카드 등급별 스타일 */
         .grade-super {
             background: linear-gradient(135deg, #fffbeb, #fef3c7, #fde68a);
             border: 4px solid #fbbf24;
@@ -91,11 +94,15 @@
     </style>
 </head>
 <body>
+    <!-- 앱 컨테이너 -->
     <div id="app" class="relative w-full max-w-md h-full bg-slate-50 flex flex-col shadow-2xl overflow-hidden">
-        <!-- JS 렌더링 -->
+        <!-- 자바스크립트 렌더링 영역 -->
     </div>
 
     <script>
+        // ==========================================
+        // 1. 단어 데이터베이스
+        // ==========================================
         const VOWEL_DB = {
             'a': { sound: '애', fam: [{n:'-at', w:['cat','hat','bat','mat']}, {n:'-an', w:['can','fan','man','pan']}, {n:'-ap', w:['cap','map','tap']}], magic: ['cake','game','name','lake'], var: [{rule:'ar (아)', w:['car','park','star']}] },
             'e': { sound: '에', fam: [{n:'-en', w:['pen','hen','ten']}, {n:'-et', w:['net','wet','pet']}, {n:'-ell', w:['bell','well','fell']}], magic: ['here'], var: [{rule:'단어 끝 e (이)', w:['he','me','we']}, {rule:'ee/ea (이~)', w:['see','sea','leaf']}] },
@@ -141,21 +148,41 @@
             return { w, kr, emoji, ans, parts: w.split(''), opts: opts.sort(() => 0.5 - Math.random()) };
         });
 
-        let state = {
-            tab: 'learning',
+        // ==========================================
+        // 2. 상태 관리 및 자동 저장 (LocalStorage)
+        // ==========================================
+        const savedData = localStorage.getItem('phonicsAppState');
+        let state = savedData ? JSON.parse(savedData) : {
+            tab: 'training',
             subTab: 'vowel',
             coins: 200,
             inventory: [],
             farmPets: [],
-            altarSelection: [],
-            toastMsg: null,
-            currentQuiz: null,
-            isAnswering: false,
-            packOpening: false,
-            revealedCard: null,
-            animatingCorrect: null
+            altarSelection: []
         };
 
+        // 앱이 꺼져도 저장할 필요 없는 휘발성 상태들
+        state.toastMsg = null;
+        state.currentQuiz = null;
+        state.isAnswering = false;
+        state.packOpening = false;
+        state.revealedCard = null;
+        state.animatingCorrect = null;
+
+        function saveData() {
+            localStorage.setItem('phonicsAppState', JSON.stringify({
+                tab: state.tab,
+                subTab: state.subTab,
+                coins: state.coins,
+                inventory: state.inventory,
+                farmPets: state.farmPets,
+                altarSelection: state.altarSelection
+            }));
+        }
+
+        // ==========================================
+        // 3. 유틸리티 함수
+        // ==========================================
         function speak(text, lang = 'en-US') {
             if (!window.speechSynthesis) return;
             window.speechSynthesis.cancel();
@@ -175,6 +202,7 @@
             state.tab = tab;
             if(tab === 'training' && !state.currentQuiz) getNewQuiz();
             if(tab !== 'altar') state.altarSelection = [];
+            saveData();
             render();
         }
 
@@ -190,6 +218,9 @@
             return '<span class="bg-gray-200 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">NORMAL (일반)</span>';
         }
 
+        // ==========================================
+        // 4. 화면 렌더링 (UI 구성)
+        // ==========================================
         function render() {
             const app = document.getElementById('app');
             if(!app) return;
@@ -204,7 +235,7 @@
                 <div class="absolute inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-sm">
                     ${state.revealedCard ? `
                         <div class="${getCardGradeStyle(state.revealedCard.grade)} rounded-3xl p-8 w-full max-w-[280px] animate-pop flex flex-col items-center text-center relative overflow-hidden">
-                            ${state.revealedCard.grade !== 'NORMAL' ? '<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')] opacity-50 mix-blend-overlay"></div>' : ''}
+                            ${state.revealedCard.grade !== 'NORMAL' ? '<div class="absolute inset-0 bg-[url(\'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=\')] opacity-50 mix-blend-overlay"></div>' : ''}
                             <div class="relative z-10 w-full flex flex-col items-center">
                                 <div class="mb-6">${getCardGradeText(state.revealedCard.grade)}</div>
                                 <div class="text-8xl mb-4 drop-shadow-md">${state.revealedCard.emoji}</div>
@@ -280,13 +311,14 @@
             `;
         }
 
+        // --- 학습장 화면 ---
         function renderLearning() {
             const isVowel = state.subTab === 'vowel';
             return `
                 <div class="p-4 max-w-md mx-auto w-full">
                     <div class="flex bg-gray-200 rounded-full p-1 mb-6 shadow-inner">
-                        <button onclick="state.subTab='vowel'; render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">A E I O U (모음)</button>
-                        <button onclick="state.subTab='consonant'; render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${!isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">나머지 21개 (자음)</button>
+                        <button onclick="state.subTab='vowel'; saveData(); render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">A E I O U (모음)</button>
+                        <button onclick="state.subTab='consonant'; saveData(); render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${!isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">나머지 21개 (자음)</button>
                     </div>
                     ${isVowel ? renderVowels() : renderConsonants()}
                 </div>
@@ -429,7 +461,7 @@
             `;
         }
 
-        // --- 훈련소 ---
+        // --- 훈련소 화면 ---
         function getNewQuiz() {
             const randomWord = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
             state.currentQuiz = { ...randomWord, options: [...randomWord.opts] };
@@ -444,6 +476,7 @@
 
             if(isCorrect) {
                 state.coins += 20;
+                saveData(); // 정답 맞추고 자동 저장
                 speak(state.currentQuiz.w);
                 state.animatingCorrect = selected;
                 render();
@@ -458,6 +491,7 @@
 
             } else {
                 state.coins = Math.max(0, state.coins - 10);
+                saveData(); // 틀렸을 때도 자동 저장
                 
                 let soundKr = selected;
                 if (VOWEL_DB[selected]) soundKr = VOWEL_DB[selected].sound;
@@ -518,13 +552,14 @@
             `;
         }
 
-        // --- 상점 ---
+        // --- 상점 화면 ---
         window.openPack = function() {
             if(state.coins < 50) return showToast("코인이 부족해요! (50 필요)");
             if(state.packOpening) return;
 
             state.coins -= 50;
             state.packOpening = true;
+            saveData(); // 코인 깎이고 자동 저장
             render();
 
             setTimeout(() => {
@@ -547,6 +582,7 @@
             }
             state.packOpening = false;
             state.revealedCard = null;
+            saveData(); // 카드 획득 후 자동 저장
             showToast("도감에 보관했어요! 🎒");
             render();
         };
@@ -555,6 +591,7 @@
             state.coins += 10;
             state.packOpening = false;
             state.revealedCard = null;
+            saveData(); // 카드 버리고 10코인 얻고 자동 저장
             showToast("카드를 버리고 10 코인을 얻었어요! 🪙");
             render();
         };
@@ -582,7 +619,7 @@
             `;
         }
 
-        // --- 제단 ---
+        // --- 제단 화면 ---
         window.selectForAltar = function(id) {
             if(state.altarSelection.includes(id)) {
                 state.altarSelection = state.altarSelection.filter(x => x !== id);
@@ -595,6 +632,7 @@
                 }
                 state.altarSelection.push(id);
             }
+            saveData(); // 선택 변경 시 저장
             render();
         }
 
@@ -615,6 +653,7 @@
                 state.inventory.push(failReturnCard);
                 showToast("💥 합성 실패... 카드 1장을 잃었습니다.");
             }
+            saveData(); // 합성 후 저장
             render();
         }
 
@@ -663,7 +702,7 @@
             `;
         }
 
-        // --- 도감 ---
+        // --- 도감 화면 ---
         function renderDex() {
             if(state.inventory.length === 0) {
                 return `
@@ -691,7 +730,7 @@
             `;
         }
 
-        // --- 농장 ---
+        // --- 농장 화면 ---
         function renderFarm() {
             if(state.farmPets.length === 0) {
                 return `
@@ -727,6 +766,9 @@
             `;
         }
 
+        // ==========================================
+        // 5. 앱 구동 시작
+        // ==========================================
         document.addEventListener('DOMContentLoaded', render);
         if (document.readyState === 'complete' || document.readyState === 'interactive') render();
     </script>
