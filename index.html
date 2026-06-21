@@ -3,17 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <!-- 아이폰(iOS) 전체화면 앱 설치를 위한 전용 메타 태그 -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="파닉스 몬스터">
-    
     <title>Phonics Monster App</title>
-    <!-- 오류를 유발하던 Babel과 React를 제거하고, 가장 안정적인 Tailwind와 FontAwesome만 남겼습니다. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap');
         
@@ -29,7 +21,6 @@
 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
         .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
         .pb-safe { padding-bottom: max(env(safe-area-inset-bottom, 16px), 8px); }
 
@@ -41,28 +32,24 @@
             80% { transform: translateX(10px) rotate(2deg); }
         }
         .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-
         @keyframes pop {
             0% { transform: scale(0.8); opacity: 0; }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); opacity: 1; }
         }
         .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-
         @keyframes fly-to-blank {
             0% { transform: scale(1) translateY(0); opacity: 1; }
             50% { transform: scale(1.5) translateY(-50px); opacity: 0.8; }
             100% { transform: scale(0.5) translate(0, -150px); opacity: 0; }
         }
         .animate-fly { animation: fly-to-blank 0.6s ease-in-out forwards; }
-
         @keyframes flash-red {
             0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
             20% { box-shadow: inset 0 0 0 30px rgba(239, 68, 68, 0.6); }
             100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
         }
         .animate-flash { animation: flash-red 0.5s ease-out; }
-
         @keyframes pack-tremble {
             0%, 100% { transform: rotate(0deg) scale(1); filter: brightness(1); }
             25% { transform: rotate(-5deg) scale(1.05); filter: brightness(1.2); }
@@ -75,34 +62,42 @@
         details > summary::-webkit-details-marker { display: none; }
         details[open] summary ~ * { animation: pop 0.3s ease-in-out; }
 
-        /* 카드 등급별 스타일 */
-        .grade-super {
-            background: linear-gradient(135deg, #fffbeb, #fef3c7, #fde68a);
-            border: 4px solid #fbbf24;
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-        }
-        .grade-rare {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9, #e2e8f0);
-            border: 4px solid #cbd5e1;
-            box-shadow: 0 0 15px rgba(203, 213, 225, 0.5);
-        }
-        .grade-normal {
-            background: #ffffff;
-            border: 4px solid #f1f5f9;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
+        .grade-super { background: linear-gradient(135deg, #fffbeb, #fef3c7, #fde68a); border: 4px solid #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+        .grade-rare { background: linear-gradient(135deg, #f8fafc, #f1f5f9, #e2e8f0); border: 4px solid #cbd5e1; box-shadow: 0 0 15px rgba(203, 213, 225, 0.5); }
+        .grade-normal { background: #ffffff; border: 4px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body>
-    <!-- 앱 컨테이너 -->
     <div id="app" class="relative w-full max-w-md h-full bg-slate-50 flex flex-col shadow-2xl overflow-hidden">
-        <!-- 자바스크립트 렌더링 영역 -->
+        <!-- 앱 로딩 중 화면 -->
+        <div class="flex-1 flex flex-col items-center justify-center bg-blue-500 text-white font-black text-2xl h-full">
+            <i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i>
+            서버와 연결 중...
+        </div>
     </div>
 
-    <script>
-        // ==========================================
-        // 1. 단어 데이터베이스
-        // ==========================================
+    <!-- Firebase SDK (ES Module 방식) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // 오류가 발생했던 괄호 부분을 깔끔하게 수정했습니다!
+        const firebaseConfig = {
+            apiKey: "AIzaSyBC5ffBjfAuLmq_Dg-J9XFOp6y7lzdhHYI",
+            authDomain: "phonicsmonster-2d495.firebaseapp.com",
+            projectId: "phonicsmonster-2d495",
+            storageBucket: "phonicsmonster-2d495.firebasestorage.app",
+            messagingSenderId: "961679319312",
+            appId: "1:961679319312:web:8eb58f35e963585bab8595",
+            measurementId: "G-RFDMSR7G82"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- 앱 데이터베이스 (단어/UI 데이터) ---
         const VOWEL_DB = {
             'a': { sound: '애', fam: [{n:'-at', w:['cat','hat','bat','mat']}, {n:'-an', w:['can','fan','man','pan']}, {n:'-ap', w:['cap','map','tap']}], magic: ['cake','game','name','lake'], var: [{rule:'ar (아)', w:['car','park','star']}] },
             'e': { sound: '에', fam: [{n:'-en', w:['pen','hen','ten']}, {n:'-et', w:['net','wet','pet']}, {n:'-ell', w:['bell','well','fell']}], magic: ['here'], var: [{rule:'단어 끝 e (이)', w:['he','me','we']}, {rule:'ee/ea (이~)', w:['see','sea','leaf']}] },
@@ -110,24 +105,13 @@
             'o': { sound: '아', fam: [{n:'-ot', w:['hot','pot','dot']}, {n:'-op', w:['mop','top','hop']}, {n:'-og', w:['dog','log','fog']}], magic: ['hope','nose','rose','bone'], var: [{rule:'or (오)', w:['corn','horn','fork']}] },
             'u': { sound: '어', fam: [{n:'-ug', w:['bug','rug','mug']}, {n:'-ub', w:['tub','rub','cub']}, {n:'-ut', w:['nut','cut','hut']}], magic: ['cute','tube','cube','mule'], var: [{rule:'ur (어)', w:['nurse','purple','turtle']}] }
         };
-
         const CONSONANT_DB = {
             locations: [
-                { id: 'lips', title: '💋 입술 소리', tags: '(p, b, m, w)', items: [
-                    {id: 'p', kr: '프', w: 'pig'}, {id: 'b', kr: '브', w: 'bear'}, {id: 'm', kr: '음', w: 'mouse'}, {id: 'w', kr: '우/워', w: 'water'}
-                ]},
-                { id: 'teeth', title: '🦷 혀끝 소리', tags: '(t, d, n, l)', items: [
-                    {id: 't', kr: '트', w: 'tiger'}, {id: 'd', kr: '드', w: 'dog'}, {id: 'n', kr: '은', w: 'nest'}, {id: 'l', kr: '을', w: 'lion'}
-                ]},
-                { id: 'throat', title: '🗣️ 목 안쪽 소리', tags: '(k, g, c, q)', items: [
-                    {id: 'k', kr: '크', w: 'kite'}, {id: 'g', kr: '그', w: 'grapes'}, {id: 'c', kr: '크', w: 'cat'}, {id: 'q', kr: '쿠', w: 'queen'}
-                ]},
-                { id: 'wind', title: '🌬️ 이·바람 소리', tags: '(s, z, f, v)', items: [
-                    {id: 's', kr: '스', w: 'sun'}, {id: 'z', kr: '즈', w: 'zebra'}, {id: 'f', kr: '프', w: 'fish'}, {id: 'v', kr: '브', w: 'van'}
-                ]},
-                { id: 'etc', title: '기타 소리', tags: '(h, j, r, y, x)', items: [
-                    {id: 'h', kr: '흐', w: 'house'}, {id: 'j', kr: '즈', w: 'juice'}, {id: 'r', kr: '르', w: 'rabbit'}, {id: 'y', kr: '여', w: 'yo-yo'}, {id: 'x', kr: '크스', w: 'xylophone'}
-                ]}
+                { id: 'lips', title: '💋 입술 소리', tags: '(p, b, m, w)', items: [{id: 'p', kr: '프', w: 'pig'}, {id: 'b', kr: '브', w: 'bear'}, {id: 'm', kr: '음', w: 'mouse'}, {id: 'w', kr: '우/워', w: 'water'}]},
+                { id: 'teeth', title: '🦷 혀끝 소리', tags: '(t, d, n, l)', items: [{id: 't', kr: '트', w: 'tiger'}, {id: 'd', kr: '드', w: 'dog'}, {id: 'n', kr: '은', w: 'nest'}, {id: 'l', kr: '을', w: 'lion'}]},
+                { id: 'throat', title: '🗣️ 목 안쪽 소리', tags: '(k, g, c, q)', items: [{id: 'k', kr: '크', w: 'kite'}, {id: 'g', kr: '그', w: 'grapes'}, {id: 'c', kr: '크', w: 'cat'}, {id: 'q', kr: '쿠', w: 'queen'}]},
+                { id: 'wind', title: '🌬️ 이·바람 소리', tags: '(s, z, f, v)', items: [{id: 's', kr: '스', w: 'sun'}, {id: 'z', kr: '즈', w: 'zebra'}, {id: 'f', kr: '프', w: 'fish'}, {id: 'v', kr: '브', w: 'van'}]},
+                { id: 'etc', title: '기타 소리', tags: '(h, j, r, y, x)', items: [{id: 'h', kr: '흐', w: 'house'}, {id: 'j', kr: '즈', w: 'juice'}, {id: 'r', kr: '르', w: 'rabbit'}, {id: 'y', kr: '여', w: 'yo-yo'}, {id: 'x', kr: '크스', w: 'xylophone'}]}
             ],
             vs: [
                 { p1: {id: 'p', kr: '바람만(프)', sound: '프', w: 'pig'}, p2: {id: 'b', kr: '목 떨림!(브)', sound: '브', w: 'bear'} },
@@ -137,7 +121,6 @@
                 { p1: {id: 'f', kr: '바람만(프)', sound: '프', w: 'fish'}, p2: {id: 'v', kr: '목 떨림!(브)', sound: '브', w: 'van'} }
             ]
         };
-
         const RAW_WORDS = "cat:고양이:🐱:a,dog:개:🐶:o,pig:돼지:🐷:i,sun:태양:☀️:u,bed:침대:🛏️:e,bat:박쥐:🦇:a,hat:모자:🧢:a,map:지도:🗺️:a,cap:모자:🧢:a,fan:선풍기:🌬️:a,man:남자:👨:a,pan:팬:🍳:a,net:그물:🥅:e,red:빨강:🔴:e,leg:다리:🦵:e,pen:펜:🖊️:e,hen:암탉:🐔:e,sit:앉다:🪑:i,hit:치다:🏏:i,lip:입술:👄:i,six:육:6️⃣:i,box:상자:📦:o,fox:여우:🦊:o,top:팽이:🌀:o,hop:뛰다:🦘:o,mop:걸레:🧹:o,bug:벌레:🐛:u,rug:깔개:🔲:u,mug:머그컵:☕:u,nut:견과:🥜:u,cup:컵:🥤:u,bus:버스:🚌:u,tub:욕조:🛁:u,mud:진흙:🟤:u,web:거미줄:🕸️:e,wet:젖은:💧:e,vet:수의사:👩‍⚕️:e,zip:지퍼:🤐:i,win:이기다:🏆:i,fin:지느러미:🦈:i,bin:쓰레기통:🗑️:i,pin:핀:📍:i,mix:섞다:🥣:i,sad:슬픈:😢:a,mad:화난:😡:a,bad:나쁜:😈:a,bag:가방:👜:a,tag:태그:🏷️:a,wag:흔들다:🐕:a,jam:잼:🍓:a,ham:햄:🍖:a,ram:숫양:🐏:a,can:캔:🥫:a,van:승합차:🚐:a,run:달리다:🏃:u,fun:재미:🎉:u,gum:껌:🍬:u,hot:뜨거운:🔥:o,pot:냄비:🥘:o,dot:점:⏺️:o,log:통나무:🪵:o,jog:조깅:🏃‍♂️:o,cop:경찰:👮:o,pop:터지다:💥:o,sob:흐느끼다:😭:o,rob:도둑질:🦹:o,nod:끄덕이다:😌:o,rod:막대:🦯:o";
         const CONS_WORDS = "bear:곰:🐻:b,tiger:호랑이:🐯:t,lion:사자:🦁:l,zebra:얼룩말:🦓:z,fish:물고기:🐟:f,mouse:생쥐:🐭:m,nest:둥지:🪹:n,rabbit:토끼:🐰:r,house:집:🏠:h,juice:주스:🧃:j,kite:연:🪁:k,grapes:포도:🍇:g,queen:여왕:👑:q,water:물:💧:w";
 
@@ -148,42 +131,86 @@
             return { w, kr, emoji, ans, parts: w.split(''), opts: opts.sort(() => 0.5 - Math.random()) };
         });
 
-        // ==========================================
-        // 2. 상태 관리 및 자동 저장 (LocalStorage)
-        // ==========================================
-        const savedData = localStorage.getItem('phonicsAppState');
-        let state = savedData ? JSON.parse(savedData) : {
-            tab: 'training',
-            subTab: 'vowel',
-            coins: 200,
-            inventory: [],
-            farmPets: [],
-            altarSelection: []
+        // --- 전역 상태 및 현재 로그인 유저 ---
+        let currentUser = null;
+        let isAuthReady = false; // 파이어베이스 로딩 완료 체크
+        let state = {
+            tab: 'learning', subTab: 'vowel', coins: 200, inventory: [], farmPets: [], altarSelection: [],
+            toastMsg: null, currentQuiz: null, isAnswering: false, packOpening: false, revealedCard: null, animatingCorrect: null
         };
 
-        // 앱이 꺼져도 저장할 필요 없는 휘발성 상태들
-        state.toastMsg = null;
-        state.currentQuiz = null;
-        state.isAnswering = false;
-        state.packOpening = false;
-        state.revealedCard = null;
-        state.animatingCorrect = null;
+        // --- Firebase 유저 상태 감지 ---
+        onAuthStateChanged(auth, async (user) => {
+            isAuthReady = true;
+            if (user) {
+                currentUser = user;
+                // 유저가 로그인하면 DB에서 데이터 불러오기
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    state.coins = data.coins !== undefined ? data.coins : 200;
+                    state.inventory = data.inventory || [];
+                    state.farmPets = data.farmPets || [];
+                } else {
+                    // 신규 유저일 경우 초기 데이터 설정
+                    state.coins = 200;
+                    state.inventory = [];
+                    state.farmPets = [];
+                    saveToDB();
+                }
+                changeTab('learning'); // 로그인 후 기본 화면
+            } else {
+                currentUser = null;
+                render(); // 로그인 화면 렌더링
+            }
+        });
 
-        function saveData() {
-            localStorage.setItem('phonicsAppState', JSON.stringify({
-                tab: state.tab,
-                subTab: state.subTab,
-                coins: state.coins,
-                inventory: state.inventory,
-                farmPets: state.farmPets,
-                altarSelection: state.altarSelection
-            }));
+        // --- Firebase 데이터 저장 함수 ---
+        async function saveToDB() {
+            if (!currentUser) return;
+            try {
+                await setDoc(doc(db, "users", currentUser.uid), {
+                    coins: state.coins,
+                    inventory: state.inventory,
+                    farmPets: state.farmPets
+                });
+            } catch (e) {
+                console.error("저장 에러:", e);
+            }
         }
 
-        // ==========================================
-        // 3. 유틸리티 함수
-        // ==========================================
-        function speak(text, lang = 'en-US') {
+        // --- 인증 함수들 ---
+        window.handleAuth = async function(isLogin) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if(!email || !password) return alert('이메일과 비밀번호를 모두 입력해주세요.');
+            if(password.length < 6) return alert('비밀번호는 6자리 이상이어야 합니다.');
+
+            try {
+                if (isLogin) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    alert('회원가입이 완료되었습니다! 시작합니다.');
+                }
+            } catch (error) {
+                if (error.code === 'auth/email-already-in-use') alert('이미 가입된 이메일입니다. 로그인을 눌러주세요.');
+                else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') alert('이메일이나 비밀번호가 틀렸습니다.');
+                else alert('오류가 발생했습니다: ' + error.message);
+            }
+        };
+
+        window.logout = async function() {
+            if(confirm("로그아웃 하시겠습니까?")) {
+                await signOut(auth);
+            }
+        };
+
+        // --- 기존 유틸 함수들을 Window 객체에 할당 (HTML에서 onclick으로 쓰기 위함) ---
+        window.speak = function(text, lang = 'en-US') {
             if (!window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
@@ -192,17 +219,21 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        function showToast(msg) {
+        window.showToast = function(msg) {
             state.toastMsg = msg;
             render();
             setTimeout(() => { state.toastMsg = null; render(); }, 2000);
         }
 
-        function changeTab(tab) {
+        window.changeTab = function(tab) {
             state.tab = tab;
             if(tab === 'training' && !state.currentQuiz) getNewQuiz();
             if(tab !== 'altar') state.altarSelection = [];
-            saveData();
+            render();
+        }
+
+        window.setSubTab = function(subTab) {
+            state.subTab = subTab;
             render();
         }
 
@@ -218,13 +249,33 @@
             return '<span class="bg-gray-200 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">NORMAL (일반)</span>';
         }
 
-        // ==========================================
-        // 4. 화면 렌더링 (UI 구성)
-        // ==========================================
-        function render() {
+        window.render = function() {
             const app = document.getElementById('app');
-            if(!app) return;
             
+            // 파이어베이스 로딩 전
+            if (!isAuthReady) return;
+
+            // 로그인 안 된 상태면 로그인 화면 렌더링
+            if (!currentUser) {
+                app.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-8 w-full bg-gradient-to-b from-blue-50 to-blue-100">
+                        <div class="text-6xl mb-6 animate-bounce">👻</div>
+                        <h1 class="text-4xl font-black text-blue-800 mb-2 tracking-tight">Phonics Monster</h1>
+                        <p class="text-gray-500 font-bold mb-8 text-center">나만의 파닉스 몬스터를<br>수집하고 진화시키세요!</p>
+                        
+                        <div class="w-full bg-white p-6 rounded-3xl shadow-xl flex flex-col gap-4">
+                            <input type="email" id="email" placeholder="이메일 주소" class="w-full bg-gray-100 px-4 py-3 rounded-xl font-bold text-gray-800 outline-none focus:ring-2 focus:ring-blue-400">
+                            <input type="password" id="password" placeholder="비밀번호 (6자리 이상)" class="w-full bg-gray-100 px-4 py-3 rounded-xl font-bold text-gray-800 outline-none focus:ring-2 focus:ring-blue-400 mb-2">
+                            
+                            <button onclick="handleAuth(true)" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-[0_4px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all">로그인</button>
+                            <button onclick="handleAuth(false)" class="w-full bg-white text-blue-600 border-2 border-blue-200 font-black py-4 rounded-xl active:bg-blue-50 transition-all mt-2">10초만에 회원가입</button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // --- 로그인 이후 정상 앱 렌더링 ---
             const toastHtml = state.toastMsg ? `
                 <div class="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-2xl animate-pop whitespace-nowrap">
                     ${state.toastMsg}
@@ -246,7 +297,7 @@
                                         <i class="fa-solid fa-box-open mr-1"></i> 도감에 넣기
                                     </button>
                                     <button onclick="discardCard()" class="w-full py-3 bg-red-50 text-red-500 border border-red-200 rounded-xl font-bold text-sm active:bg-red-100 transition-colors">
-                                        <i class="fa-solid fa-trash-can mr-1"></i> 버리기 (+10 코인)
+                                        <i class="fa-solid fa-trash-can mr-1"></i> 버리기 (+10)
                                     </button>
                                 </div>
                             </div>
@@ -266,13 +317,19 @@
             if(state.tab === 'dex') contentHtml = renderDex();
             if(state.tab === 'farm') contentHtml = renderFarm();
 
+            // 유저 이메일 앞부분 추출 (트레이너 이름용)
+            const userNickname = currentUser.email.split('@')[0];
+
             app.innerHTML = `
                 <header class="pt-safe bg-white border-b shrink-0 z-50 shadow-sm relative">
                     <div class="h-14 flex items-center justify-between px-5">
-                        <div class="flex items-center gap-2 font-bold text-gray-800">
+                        <button onclick="logout()" class="flex items-center gap-2 font-bold text-gray-800 hover:opacity-70 active:scale-95 transition-all bg-gray-50 px-2 py-1 rounded-lg">
                             <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-lg">👦</div>
-                            트레이너
-                        </div>
+                            <div class="flex flex-col items-start">
+                                <span class="text-xs text-blue-500">${userNickname}</span>
+                                <span class="text-[9px] text-gray-400">로그아웃</span>
+                            </div>
+                        </button>
                         <div class="bg-yellow-50 px-4 py-1.5 rounded-full border border-yellow-200 font-black text-yellow-600 shadow-inner flex items-center gap-1">
                             <i class="fa-solid fa-coins"></i> ${state.coins}
                         </div>
@@ -311,14 +368,13 @@
             `;
         }
 
-        // --- 학습장 화면 ---
         function renderLearning() {
             const isVowel = state.subTab === 'vowel';
             return `
                 <div class="p-4 max-w-md mx-auto w-full">
                     <div class="flex bg-gray-200 rounded-full p-1 mb-6 shadow-inner">
-                        <button onclick="state.subTab='vowel'; saveData(); render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">A E I O U (모음)</button>
-                        <button onclick="state.subTab='consonant'; saveData(); render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${!isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">나머지 21개 (자음)</button>
+                        <button onclick="setSubTab('vowel')" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">A E I O U (모음)</button>
+                        <button onclick="setSubTab('consonant')" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${!isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">나머지 21개 (자음)</button>
                     </div>
                     ${isVowel ? renderVowels() : renderConsonants()}
                 </div>
@@ -408,7 +464,6 @@
                                 </div>
                                 <i class="fa-solid fa-chevron-down text-emerald-300 group-open:rotate-180 transition-transform"></i>
                             </summary>
-                            
                             <div class="p-4 pt-0 grid grid-cols-2 gap-3">
                                 ${loc.items.map(item => `
                                     <div class="bg-white p-2 rounded-xl shadow-sm border border-emerald-100 flex flex-col items-center">
@@ -430,7 +485,6 @@
                         <div class="flex flex-col gap-3">
                             ${CONSONANT_DB.vs.map(pair => `
                                 <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-red-100">
-                                    
                                     <div class="flex-1 flex flex-col items-center p-1">
                                         <button onclick="speak('${pair.p1.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
                                             <span class="text-3xl font-black text-slate-700">${pair.p1.id}</span>
@@ -440,9 +494,7 @@
                                             ${pair.p1.w} <i class="fa-solid fa-volume-high text-[10px]"></i>
                                         </button>
                                     </div>
-
                                     <div class="text-xs font-black text-red-300 px-1">VS</div>
-
                                     <div class="flex-1 flex flex-col items-center p-1">
                                         <button onclick="speak('${pair.p2.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
                                             <span class="text-3xl font-black text-red-600">${pair.p2.id}</span>
@@ -452,7 +504,6 @@
                                             ${pair.p2.w} <i class="fa-solid fa-volume-high text-[10px]"></i>
                                         </button>
                                     </div>
-
                                 </div>
                             `).join('')}
                         </div>
@@ -461,7 +512,6 @@
             `;
         }
 
-        // --- 훈련소 화면 ---
         function getNewQuiz() {
             const randomWord = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
             state.currentQuiz = { ...randomWord, options: [...randomWord.opts] };
@@ -476,7 +526,8 @@
 
             if(isCorrect) {
                 state.coins += 20;
-                saveData(); // 정답 맞추고 자동 저장
+                saveToDB(); 
+                
                 speak(state.currentQuiz.w);
                 state.animatingCorrect = selected;
                 render();
@@ -491,7 +542,7 @@
 
             } else {
                 state.coins = Math.max(0, state.coins - 10);
-                saveData(); // 틀렸을 때도 자동 저장
+                saveToDB(); 
                 
                 let soundKr = selected;
                 if (VOWEL_DB[selected]) soundKr = VOWEL_DB[selected].sound;
@@ -532,13 +583,11 @@
             return `
                 <div class="flex flex-col items-center justify-center h-full p-6 w-full">
                     <h2 class="text-2xl font-black text-slate-800 mb-8 tracking-tight">빈칸을 채워봐!</h2>
-                    
                     <div class="bg-white rounded-[2rem] p-8 shadow-xl w-full max-w-sm flex flex-col items-center border-2 border-slate-100 relative z-10">
                         <div class="text-7xl mb-4 drop-shadow-sm">${q.emoji}</div>
                         <div class="bg-slate-100 text-slate-500 font-bold px-4 py-1.5 rounded-full mb-8">${q.kr}</div>
                         <div class="text-5xl font-black tracking-widest uppercase flex items-center h-16">${displayHtml}</div>
                     </div>
-
                     <div class="flex flex-wrap justify-center gap-3 mt-10 w-full relative z-20">
                         ${q.options.map(opt => `
                             <button id="opt-${opt}" onclick="checkAnswer('${opt}')" 
@@ -552,14 +601,14 @@
             `;
         }
 
-        // --- 상점 화면 ---
         window.openPack = function() {
             if(state.coins < 50) return showToast("코인이 부족해요! (50 필요)");
             if(state.packOpening) return;
 
             state.coins -= 50;
+            saveToDB(); 
+
             state.packOpening = true;
-            saveData(); // 코인 깎이고 자동 저장
             render();
 
             setTimeout(() => {
@@ -582,7 +631,9 @@
             }
             state.packOpening = false;
             state.revealedCard = null;
-            saveData(); // 카드 획득 후 자동 저장
+            
+            saveToDB(); 
+            
             showToast("도감에 보관했어요! 🎒");
             render();
         };
@@ -591,7 +642,9 @@
             state.coins += 10;
             state.packOpening = false;
             state.revealedCard = null;
-            saveData(); // 카드 버리고 10코인 얻고 자동 저장
+            
+            saveToDB(); 
+            
             showToast("카드를 버리고 10 코인을 얻었어요! 🪙");
             render();
         };
@@ -602,13 +655,11 @@
                     <div class="text-6xl mb-6 drop-shadow-lg">🏪</div>
                     <h2 class="text-2xl font-black text-slate-800 mb-2">단어 몬스터 상점</h2>
                     <p class="text-slate-500 font-bold mb-10 text-center">코인을 모아 카드를 뽑고<br>나만의 농장을 채우세요!</p>
-                    
                     <button onclick="openPack()" class="bg-gradient-to-b from-yellow-300 to-yellow-500 p-6 rounded-3xl shadow-[0_8px_0_#b45309] active:translate-y-2 active:shadow-none transition-all w-full max-w-xs group">
                         <div class="text-5xl mb-2 group-active:scale-95 transition-transform">🎁</div>
                         <div class="text-white font-black text-xl drop-shadow-md">일반 팩 뜯기</div>
                         <div class="mt-2 bg-yellow-600/30 text-yellow-900 font-bold py-1 px-4 rounded-full inline-block text-sm shadow-inner">50 코인</div>
                     </button>
-                    
                     <div class="mt-8 text-xs font-bold text-gray-400 bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-1 w-full max-w-xs">
                         <div class="text-center mb-1 text-gray-500">🏆 뽑기 확률표</div>
                         <div class="flex justify-between"><span>👑 SUPER (S급)</span> <span class="text-yellow-500">5%</span></div>
@@ -619,7 +670,6 @@
             `;
         }
 
-        // --- 제단 화면 ---
         window.selectForAltar = function(id) {
             if(state.altarSelection.includes(id)) {
                 state.altarSelection = state.altarSelection.filter(x => x !== id);
@@ -632,7 +682,6 @@
                 }
                 state.altarSelection.push(id);
             }
-            saveData(); // 선택 변경 시 저장
             render();
         }
 
@@ -653,7 +702,8 @@
                 state.inventory.push(failReturnCard);
                 showToast("💥 합성 실패... 카드 1장을 잃었습니다.");
             }
-            saveData(); // 합성 후 저장
+            
+            saveToDB(); 
             render();
         }
 
@@ -668,7 +718,6 @@
                         <h2 class="text-2xl font-black text-slate-800">진화의 제단</h2>
                         <p class="text-xs text-slate-500 font-bold mt-1">같은 NORMAL 카드 2장을 섞어보세요!<br>(성공률 50%)</p>
                     </div>
-
                     <div class="flex justify-center gap-4 mb-8">
                         ${[0, 1].map(i => `
                             <div class="w-24 h-32 rounded-2xl border-4 border-dashed flex items-center justify-center bg-white shadow-inner ${selectedCards[i] ? 'border-yellow-400 bg-yellow-50' : 'border-gray-300'}">
@@ -676,13 +725,11 @@
                             </div>
                         `).join('')}
                     </div>
-                    
                     ${state.altarSelection.length === 2 ? `
                         <button onclick="tryEvolve()" class="w-full bg-yellow-400 text-yellow-900 font-black text-xl py-4 rounded-2xl mb-8 shadow-[0_5px_0_#ca8a04] active:translate-y-1 active:shadow-none animate-bounce">
                             합성 시작하기!
                         </button>
                     ` : ''}
-
                     <div class="flex-1 bg-white rounded-t-3xl p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border-t border-gray-100 overflow-y-auto">
                         <h3 class="font-bold text-gray-700 mb-3 text-sm">합성 가능한 일반 카드</h3>
                         <div class="grid grid-cols-4 gap-2">
@@ -702,7 +749,6 @@
             `;
         }
 
-        // --- 도감 화면 ---
         function renderDex() {
             if(state.inventory.length === 0) {
                 return `
@@ -712,7 +758,6 @@
                     </div>
                 `;
             }
-
             return `
                 <div class="p-4">
                     <h2 class="text-xl font-black text-slate-800 mb-4 px-2">나의 도감 <span class="text-blue-500">${state.inventory.length}</span></h2>
@@ -730,7 +775,6 @@
             `;
         }
 
-        // --- 농장 화면 ---
         function renderFarm() {
             if(state.farmPets.length === 0) {
                 return `
@@ -740,7 +784,6 @@
                     </div>
                 `;
             }
-
             return `
                 <div class="relative w-full h-full bg-gradient-to-b from-blue-200 via-green-200 to-green-300 overflow-hidden">
                     <div class="absolute top-4 left-4 text-white font-black drop-shadow-md z-10">
@@ -765,12 +808,6 @@
                 </div>
             `;
         }
-
-        // ==========================================
-        // 5. 앱 구동 시작
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', render);
-        if (document.readyState === 'complete' || document.readyState === 'interactive') render();
     </script>
 </body>
 </html>
