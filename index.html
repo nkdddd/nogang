@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- 아이폰(iOS) 전체화면 앱 설치를 위한 전용 메타 태그 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="파닉스 몬스터">
@@ -92,20 +91,18 @@
 </head>
 <body>
     <div id="app" class="relative w-full max-w-md h-full bg-slate-50 flex flex-col shadow-2xl overflow-hidden">
-        <!-- 초기 로딩 화면 -->
         <div class="flex-1 flex flex-col items-center justify-center bg-blue-500 text-white font-black text-2xl h-full">
             <i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i>
             서버와 연결 중...
         </div>
     </div>
 
-    <!-- Firebase 통신을 위한 모듈 스크립트 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // 선생님의 Firebase 설정
+        // ⭐ 중요: 아래 firebaseConfig는 선생님의 Firebase 프로젝트 정보로 반드시 교체하셔야 합니다! ⭐
         const firebaseConfig = {
             apiKey: "AIzaSyBC5ffBjfAuLmq_Dg-J9XFOp6y7lzdhHYI",
             authDomain: "phonicsmonster-2d495.firebaseapp.com",
@@ -120,7 +117,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 오류가 났던 주석 부분 복구 완료
         const VOWEL_DB = {
             'a': { sound: '애', fam: [{n:'-at', w:['cat','hat','bat','mat']}, {n:'-an', w:['can','fan','man','pan']}, {n:'-ap', w:['cap','map','tap']}], magic: ['cake','game','name','lake'], var: [{rule:'ar (아)', w:['car','park','star']}] },
             'e': { sound: '에', fam: [{n:'-en', w:['pen','hen','ten']}, {n:'-et', w:['net','wet','pet']}, {n:'-ell', w:['bell','well','fell']}], magic: ['here'], var: [{rule:'단어 끝 e (이)', w:['he','me','we']}, {rule:'ee/ea (이~)', w:['see','sea','leaf']}] },
@@ -166,7 +162,6 @@
             return { w, kr, emoji, ans, parts: w.split(''), opts: opts.sort(() => 0.5 - Math.random()) };
         });
 
-        // 전역 상태 초기화
         window.isAuthReady = false;
         window.currentUser = null;
         window.state = {
@@ -174,50 +169,53 @@
             toastMsg: null, currentQuiz: null, isAnswering: false, packOpening: false, revealedCard: null, animatingCorrect: null
         };
 
-        // --- Firebase 실시간 DB 저장 함수 ---
-        window.saveData = async function() {
+        // UI 멈춤 현상(freeze)을 막기 위해 async/await 제거 후 백그라운드 저장으로 변경
+        window.saveData = function() {
             if (!window.currentUser) return;
-            try {
-                await setDoc(doc(db, "users", window.currentUser.uid), {
-                    coins: window.state.coins,
-                    inventory: window.state.inventory,
-                    farmPets: window.state.farmPets
-                });
-            } catch (e) {
+            setDoc(doc(db, "users", window.currentUser.uid), {
+                coins: window.state.coins,
+                inventory: window.state.inventory,
+                farmPets: window.state.farmPets
+            }).catch(e => {
                 console.error("데이터 저장 실패:", e);
-            }
+                // 백그라운드 에러는 UI 흐름을 끊지 않도록 콘솔에만 남깁니다.
+            });
         };
 
-        // 인증 상태 추적 (이 부분이 주석 처리되어 멈췄었습니다)
         onAuthStateChanged(auth, async (user) => {
             window.isAuthReady = true;
             if (user) {
                 window.currentUser = user;
-                
-                // 유저 로그인 시 Firestore에서 데이터 불러오기
-                const docRef = doc(db, "users", user.uid);
-                const docSnap = await getDoc(docRef);
-                
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    window.state.coins = data.coins !== undefined ? data.coins : 200;
-                    window.state.inventory = data.inventory || [];
-                    window.state.farmPets = data.farmPets || [];
-                } else {
-                    // 신규 유저 초기값 설정
+                try {
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        window.state.coins = data.coins !== undefined ? data.coins : 200;
+                        window.state.inventory = data.inventory || [];
+                        window.state.farmPets = data.farmPets || [];
+                    } else {
+                        window.state.coins = 200;
+                        window.state.inventory = [];
+                        window.state.farmPets = [];
+                        window.saveData(); // 백그라운드 저장
+                    }
+                    window.changeTab('learning');
+                } catch(error) {
+                    console.error("DB 접속 에러:", error);
+                    // 파이어베이스 DB 설정이 안 되어 있어도 앱이 열리도록 강제 구동!
+                    window.showToast(`DB 접속 지연: 오프라인 모드로 실행합니다.`);
                     window.state.coins = 200;
                     window.state.inventory = [];
                     window.state.farmPets = [];
-                    await window.saveData();
+                    window.changeTab('learning');
                 }
-                window.changeTab('learning');
             } else {
                 window.currentUser = null;
-                window.render(); // 로그인 화면 띄우기
+                window.render();
             }
         });
 
-        // 회원가입 및 로그인 처리
         window.handleAuth = async function(isLogin) {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -234,9 +232,12 @@
                     window.showToast('가입 환영! 200 코인 지급완료 🪙');
                 }
             } catch (error) {
+                console.error(error);
                 if (error.code === 'auth/email-already-in-use') window.showToast('이미 가입된 이메일입니다.');
                 else if (error.code === 'auth/invalid-credential') window.showToast('이메일이나 비밀번호가 틀렸습니다.');
-                else window.showToast('오류 발생: 다시 시도해주세요.');
+                else if (error.code === 'auth/configuration-not-found') window.showToast('Firebase에서 이메일 로그인을 켜주세요.');
+                else if (error.code === 'auth/unauthorized-domain') window.showToast('승인되지 않은 도메인입니다. 깃허브 주소를 추가하세요.');
+                else window.showToast(`오류: ${error.message}`); 
             }
         };
 
@@ -257,7 +258,7 @@
         window.showToast = function(msg) {
             window.state.toastMsg = msg;
             window.render();
-            setTimeout(() => { window.state.toastMsg = null; window.render(); }, 2000);
+            setTimeout(() => { window.state.toastMsg = null; window.render(); }, 3000);
         }
 
         window.changeTab = function(tab) {
@@ -279,19 +280,16 @@
             return '<span class="bg-gray-200 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">NORMAL (일반)</span>';
         }
 
-        // 전체 화면 렌더링 함수
         window.render = function() {
             const app = document.getElementById('app');
             if(!app) return;
             
-            // 아직 파이어베이스 상태 확인이 안 끝났다면 대기
             if (!window.isAuthReady) return;
 
-            // 로그인이 안 되어 있다면 로그인 화면만 표시
             if (!window.currentUser) {
                 app.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-8 w-full bg-gradient-to-b from-blue-50 to-blue-100 h-full">
-                        ${window.state.toastMsg ? `<div class="absolute top-10 bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-xl animate-pop">${window.state.toastMsg}</div>` : ''}
+                        ${window.state.toastMsg ? `<div class="absolute top-10 bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-xl animate-pop text-center z-[100] max-w-[90%]">${window.state.toastMsg}</div>` : ''}
                         
                         <div class="text-6xl mb-6 animate-bounce">👻</div>
                         <h1 class="text-4xl font-black text-blue-800 mb-2 tracking-tight text-center">Phonics<br>Monster</h1>
@@ -301,15 +299,14 @@
                             <input type="email" id="email" placeholder="이메일 주소" class="w-full bg-gray-100 px-4 py-3 rounded-xl font-bold text-gray-800 outline-none focus:ring-2 focus:ring-blue-400">
                             <input type="password" id="password" placeholder="비밀번호 (6자 이상)" class="w-full bg-gray-100 px-4 py-3 rounded-xl font-bold text-gray-800 outline-none focus:ring-2 focus:ring-blue-400 mb-2">
                             
-                            <button onclick="handleAuth(true)" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-[0_4px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all">로그인</button>
-                            <button onclick="handleAuth(false)" class="w-full bg-white text-blue-600 border-2 border-blue-200 font-black py-4 rounded-xl active:bg-blue-50 transition-all mt-2">새 계정 만들기</button>
+                            <button onclick="window.handleAuth(true)" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-[0_4px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all">로그인</button>
+                            <button onclick="window.handleAuth(false)" class="w-full bg-white text-blue-600 border-2 border-blue-200 font-black py-4 rounded-xl active:bg-blue-50 transition-all mt-2">새 계정 만들기</button>
                         </div>
                     </div>
                 `;
                 return;
             }
 
-            // --- 로그인 성공 시 앱 화면 ---
             const toastHtml = window.state.toastMsg ? `
                 <div class="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-2xl animate-pop whitespace-nowrap">
                     ${window.state.toastMsg}
@@ -327,10 +324,10 @@
                                 <div class="text-gray-500 font-black mb-1 bg-white/50 px-3 py-1 rounded-full text-sm">${window.state.revealedCard.kr}</div>
                                 <div class="text-4xl font-black mb-8 text-gray-800 tracking-wider">${window.state.revealedCard.w}</div>
                                 <div class="w-full flex gap-2 flex-col">
-                                    <button onclick="keepCard()" class="w-full py-3.5 bg-blue-500 text-white rounded-xl font-black text-lg shadow-[0_4px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all">
+                                    <button onclick="window.keepCard()" class="w-full py-3.5 bg-blue-500 text-white rounded-xl font-black text-lg shadow-[0_4px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all">
                                         <i class="fa-solid fa-box-open mr-1"></i> 도감에 넣기
                                     </button>
-                                    <button onclick="discardCard()" class="w-full py-3 bg-red-50 text-red-500 border border-red-200 rounded-xl font-bold text-sm active:bg-red-100 transition-colors">
+                                    <button onclick="window.discardCard()" class="w-full py-3 bg-red-50 text-red-500 border border-red-200 rounded-xl font-bold text-sm active:bg-red-100 transition-colors">
                                         <i class="fa-solid fa-trash-can mr-1"></i> 버리기 (+10 코인)
                                     </button>
                                 </div>
@@ -356,7 +353,7 @@
             app.innerHTML = `
                 <header class="pt-safe bg-white border-b shrink-0 z-50 shadow-sm relative">
                     <div class="h-14 flex items-center justify-between px-5">
-                        <button onclick="logout()" class="flex items-center gap-2 font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded-lg active:scale-95 transition-transform border border-gray-100">
+                        <button onclick="window.logout()" class="flex items-center gap-2 font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded-lg active:scale-95 transition-transform border border-gray-100">
                             <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-lg">👦</div>
                             <div class="flex flex-col items-start">
                                 <span class="text-xs text-blue-600">${userEmailPrefix}</span>
@@ -392,7 +389,7 @@
         window.navButton = function(tabId, icon, label) {
             const isActive = window.state.tab === tabId;
             return `
-                <button onclick="changeTab('${tabId}')" class="flex-1 flex flex-col items-center justify-center gap-1 py-1 transition-all ${isActive ? 'text-blue-600 scale-110' : 'text-gray-400'}">
+                <button onclick="window.changeTab('${tabId}')" class="flex-1 flex flex-col items-center justify-center gap-1 py-1 transition-all ${isActive ? 'text-blue-600 scale-110' : 'text-gray-400'}">
                     <div class="${isActive ? 'bg-blue-100' : ''} w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-colors">
                         <i class="fa-solid ${icon}"></i>
                     </div>
@@ -406,8 +403,8 @@
             return `
                 <div class="p-4 max-w-md mx-auto w-full">
                     <div class="flex bg-gray-200 rounded-full p-1 mb-6 shadow-inner">
-                        <button onclick="state.subTab='vowel'; render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">A E I O U (모음)</button>
-                        <button onclick="state.subTab='consonant'; render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${!isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">나머지 21개 (자음)</button>
+                        <button onclick="window.state.subTab='vowel'; window.render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">A E I O U (모음)</button>
+                        <button onclick="window.state.subTab='consonant'; window.render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${!isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">나머지 21개 (자음)</button>
                     </div>
                     ${isVowel ? window.renderVowels() : window.renderConsonants()}
                 </div>
@@ -418,7 +415,7 @@
             return `
                 <div class="flex justify-between gap-2 mb-6">
                     ${Object.entries(VOWEL_DB).map(([v, data]) => `
-                        <button onclick="speak('${v}'); showToast('${v} - ${data.sound}')" class="flex-1 aspect-[3/4] bg-white rounded-2xl shadow-sm border-b-4 border-blue-100 flex flex-col items-center justify-center active:translate-y-1 active:border-b-0 transition-all">
+                        <button onclick="window.speak('${v}'); window.showToast('${v} - ${data.sound}')" class="flex-1 aspect-[3/4] bg-white rounded-2xl shadow-sm border-b-4 border-blue-100 flex flex-col items-center justify-center active:translate-y-1 active:border-b-0 transition-all">
                             <span class="text-3xl font-black text-blue-500 uppercase">${v}</span>
                             <span class="text-sm font-bold text-gray-400 mt-1">${data.sound}</span>
                         </button>
@@ -436,7 +433,7 @@
                                 <div class="text-xs font-bold text-indigo-600 mb-2">🏠 ${f.n} 가족</div>
                                 <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
                                     ${f.w.map(word => `
-                                        <button onclick="speak('${word}')" class="bg-white px-3 py-1.5 rounded-lg shadow-sm font-bold text-slate-700 shrink-0 text-sm border border-indigo-50 flex items-center gap-1 active:scale-95 transition-transform">
+                                        <button onclick="window.speak('${word}')" class="bg-white px-3 py-1.5 rounded-lg shadow-sm font-bold text-slate-700 shrink-0 text-sm border border-indigo-50 flex items-center gap-1 active:scale-95 transition-transform">
                                             ${word.replace(f.n.replace('-',''), `<span class="text-indigo-500">${f.n.replace('-','')}</span>`)}
                                             <i class="fa-solid fa-volume-high text-[10px] text-indigo-400"></i>
                                         </button>
@@ -454,7 +451,7 @@
                     </summary>
                     <div class="p-4 pt-0 grid grid-cols-2 gap-2">
                         ${['a','e','i','o','u'].flatMap(v => VOWEL_DB[v].magic).map(word => `
-                            <button onclick="speak('${word}')" class="bg-white p-3 rounded-xl shadow-sm font-bold text-slate-700 text-center border border-purple-50 flex items-center justify-center gap-1 active:scale-95 transition-transform">
+                            <button onclick="window.speak('${word}')" class="bg-white p-3 rounded-xl shadow-sm font-bold text-slate-700 text-center border border-purple-50 flex items-center justify-center gap-1 active:scale-95 transition-transform">
                                 ${word.slice(0,-1)}<span class="text-purple-500">e</span>
                                 <i class="fa-solid fa-volume-high text-[10px] text-purple-400"></i>
                             </button>
@@ -473,7 +470,7 @@
                                 <div class="text-xs font-bold text-orange-600 mb-2">${vr.rule}</div>
                                 <div class="flex gap-2">
                                     ${vr.w.map(word => `
-                                        <button onclick="speak('${word}')" class="bg-orange-100 px-3 py-1 rounded-lg text-orange-800 font-bold text-sm shrink-0 flex items-center gap-1 active:scale-95 transition-transform">
+                                        <button onclick="window.speak('${word}')" class="bg-orange-100 px-3 py-1 rounded-lg text-orange-800 font-bold text-sm shrink-0 flex items-center gap-1 active:scale-95 transition-transform">
                                             ${word} <i class="fa-solid fa-volume-high text-[10px] text-orange-500"></i>
                                         </button>
                                     `).join('')}
@@ -501,11 +498,11 @@
                             <div class="p-4 pt-0 grid grid-cols-2 gap-3">
                                 ${loc.items.map(item => `
                                     <div class="bg-white p-2 rounded-xl shadow-sm border border-emerald-100 flex flex-col items-center">
-                                        <button onclick="speak('${item.kr}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-emerald-50 rounded-lg transition-colors">
+                                        <button onclick="window.speak('${item.kr}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-emerald-50 rounded-lg transition-colors">
                                             <span class="text-3xl font-black text-slate-700">${item.id}</span>
                                             <span class="text-[10px] text-emerald-600 font-bold mt-1">${item.kr}</span>
                                         </button>
-                                        <button onclick="speak('${item.w}')" class="mt-1 w-full bg-slate-50 border border-slate-100 py-1.5 rounded-lg text-xs font-bold text-slate-600 active:bg-slate-200 transition-colors flex items-center justify-center gap-1 shadow-inner">
+                                        <button onclick="window.speak('${item.w}')" class="mt-1 w-full bg-slate-50 border border-slate-100 py-1.5 rounded-lg text-xs font-bold text-slate-600 active:bg-slate-200 transition-colors flex items-center justify-center gap-1 shadow-inner">
                                             ${item.w} <i class="fa-solid fa-volume-high text-[10px] text-emerald-400"></i>
                                         </button>
                                     </div>
@@ -520,11 +517,11 @@
                             ${CONSONANT_DB.vs.map(pair => `
                                 <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-red-100">
                                     <div class="flex-1 flex flex-col items-center p-1">
-                                        <button onclick="speak('${pair.p1.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
+                                        <button onclick="window.speak('${pair.p1.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
                                             <span class="text-3xl font-black text-slate-700">${pair.p1.id}</span>
                                             <span class="text-[10px] text-slate-400 mt-1">${pair.p1.kr}</span>
                                         </button>
-                                        <button onclick="speak('${pair.p1.w}')" class="mt-1 w-full bg-blue-50 py-1.5 rounded-lg text-[11px] font-bold text-blue-600 active:bg-blue-100 flex items-center justify-center gap-1 shadow-sm transition-colors">
+                                        <button onclick="window.speak('${pair.p1.w}')" class="mt-1 w-full bg-blue-50 py-1.5 rounded-lg text-[11px] font-bold text-blue-600 active:bg-blue-100 flex items-center justify-center gap-1 shadow-sm transition-colors">
                                             ${pair.p1.w} <i class="fa-solid fa-volume-high text-[10px]"></i>
                                         </button>
                                     </div>
@@ -532,11 +529,11 @@
                                     <div class="text-xs font-black text-red-300 px-1">VS</div>
 
                                     <div class="flex-1 flex flex-col items-center p-1">
-                                        <button onclick="speak('${pair.p2.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
+                                        <button onclick="window.speak('${pair.p2.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
                                             <span class="text-3xl font-black text-red-600">${pair.p2.id}</span>
                                             <span class="text-[10px] text-red-400 mt-1">${pair.p2.kr}</span>
                                         </button>
-                                        <button onclick="speak('${pair.p2.w}')" class="mt-1 w-full bg-red-50 py-1.5 rounded-lg text-[11px] font-bold text-red-600 active:bg-red-100 flex items-center justify-center gap-1 shadow-sm transition-colors">
+                                        <button onclick="window.speak('${pair.p2.w}')" class="mt-1 w-full bg-red-50 py-1.5 rounded-lg text-[11px] font-bold text-red-600 active:bg-red-100 flex items-center justify-center gap-1 shadow-sm transition-colors">
                                             ${pair.p2.w} <i class="fa-solid fa-volume-high text-[10px]"></i>
                                         </button>
                                     </div>
@@ -553,7 +550,7 @@
             window.state.currentQuiz = { ...randomWord, options: [...randomWord.opts] };
         }
 
-        window.checkAnswer = async function(selected) {
+        window.checkAnswer = function(selected) {
             if(window.state.isAnswering) return;
             window.state.isAnswering = true;
 
@@ -562,7 +559,7 @@
 
             if(isCorrect) {
                 window.state.coins += 20;
-                await window.saveData(); // 서버에 코인 저장
+                window.saveData(); // 백그라운드 자동 저장
                 
                 window.speak(window.state.currentQuiz.w);
                 window.state.animatingCorrect = selected;
@@ -578,7 +575,7 @@
 
             } else {
                 window.state.coins = Math.max(0, window.state.coins - 10);
-                await window.saveData(); // 서버에 코인 차감 저장
+                window.saveData(); // 백그라운드 자동 저장
                 
                 let soundKr = selected;
                 if (VOWEL_DB[selected]) soundKr = VOWEL_DB[selected].sound;
@@ -629,7 +626,7 @@
 
                     <div class="flex flex-wrap justify-center gap-3 mt-10 w-full relative z-20">
                         ${q.options.map(opt => `
-                            <button id="opt-${opt}" onclick="checkAnswer('${opt}')" 
+                            <button id="opt-${opt}" onclick="window.checkAnswer('${opt}')" 
                                 class="w-14 h-14 bg-blue-500 text-white rounded-2xl text-2xl font-black shadow-[0_5px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all uppercase relative overflow-hidden">
                                 <span class="${window.state.animatingCorrect === opt ? 'opacity-0' : 'opacity-100'}">${opt}</span>
                                 ${window.state.animatingCorrect === opt ? `<span class="absolute inset-0 flex items-center justify-center animate-fly text-3xl font-black text-yellow-300 z-50">${opt}</span>` : ''}
@@ -640,13 +637,13 @@
             `;
         }
 
-        window.openPack = async function() {
+        window.openPack = function() {
             if(window.state.coins < 50) return window.showToast("코인이 부족해요! (50 필요)");
             if(window.state.packOpening) return;
 
             window.state.coins -= 50;
             window.state.packOpening = true;
-            await window.saveData(); // 코인 소모 서버 저장
+            window.saveData(); // 백그라운드 자동 저장
             window.render();
 
             setTimeout(() => {
@@ -662,23 +659,23 @@
             }, 1000);
         };
 
-        window.keepCard = async function() {
+        window.keepCard = function() {
             window.state.inventory.push(window.state.revealedCard);
             if(window.state.farmPets.length < 15) {
                 window.state.farmPets.push({...window.state.revealedCard, x: Math.random()*80, y: Math.random()*80});
             }
             window.state.packOpening = false;
             window.state.revealedCard = null;
-            await window.saveData(); // 카드 보관 서버 저장
+            window.saveData(); // 백그라운드 자동 저장
             window.showToast("도감에 보관했어요! 🎒");
             window.render();
         };
 
-        window.discardCard = async function() {
+        window.discardCard = function() {
             window.state.coins += 10;
             window.state.packOpening = false;
             window.state.revealedCard = null;
-            await window.saveData(); // 코인 환불 서버 저장
+            window.saveData(); // 백그라운드 자동 저장
             window.showToast("카드를 버리고 10 코인을 얻었어요! 🪙");
             window.render();
         };
@@ -690,7 +687,7 @@
                     <h2 class="text-2xl font-black text-slate-800 mb-2">단어 몬스터 상점</h2>
                     <p class="text-slate-500 font-bold mb-10 text-center">코인을 모아 카드를 뽑고<br>나만의 농장을 채우세요!</p>
                     
-                    <button onclick="openPack()" class="bg-gradient-to-b from-yellow-300 to-yellow-500 p-6 rounded-3xl shadow-[0_8px_0_#b45309] active:translate-y-2 active:shadow-none transition-all w-full max-w-xs group">
+                    <button onclick="window.openPack()" class="bg-gradient-to-b from-yellow-300 to-yellow-500 p-6 rounded-3xl shadow-[0_8px_0_#b45309] active:translate-y-2 active:shadow-none transition-all w-full max-w-xs group">
                         <div class="text-5xl mb-2 group-active:scale-95 transition-transform">🎁</div>
                         <div class="text-white font-black text-xl drop-shadow-md">일반 팩 뜯기</div>
                         <div class="mt-2 bg-yellow-600/30 text-yellow-900 font-bold py-1 px-4 rounded-full inline-block text-sm shadow-inner">50 코인</div>
@@ -721,7 +718,7 @@
             window.render();
         }
 
-        window.tryEvolve = async function() {
+        window.tryEvolve = function() {
             if(window.state.altarSelection.length !== 2) return;
             const cardId = window.state.altarSelection[0];
             const baseCard = window.state.inventory.find(c => c.id === cardId);
@@ -738,7 +735,7 @@
                 window.state.inventory.push(failReturnCard);
                 window.showToast("💥 합성 실패... 카드 1장을 잃었습니다.");
             }
-            await window.saveData(); // 진화 결과 서버 저장
+            window.saveData(); // 백그라운드 자동 저장
             window.render();
         }
 
@@ -763,7 +760,7 @@
                     </div>
                     
                     ${window.state.altarSelection.length === 2 ? `
-                        <button onclick="tryEvolve()" class="w-full bg-yellow-400 text-yellow-900 font-black text-xl py-4 rounded-2xl mb-8 shadow-[0_5px_0_#ca8a04] active:translate-y-1 active:shadow-none animate-bounce">
+                        <button onclick="window.tryEvolve()" class="w-full bg-yellow-400 text-yellow-900 font-black text-xl py-4 rounded-2xl mb-8 shadow-[0_5px_0_#ca8a04] active:translate-y-1 active:shadow-none animate-bounce">
                             합성 시작하기!
                         </button>
                     ` : ''}
@@ -774,7 +771,7 @@
                             ${normalCards.map(item => {
                                 const isSel = window.state.altarSelection.includes(item.id);
                                 return `
-                                <button onclick="selectForAltar('${item.id}')" class="relative bg-slate-50 border-2 rounded-xl p-2 flex flex-col items-center transition-all ${isSel ? 'border-blue-500 bg-blue-50' : 'border-slate-200'}">
+                                <button onclick="window.selectForAltar('${item.id}')" class="relative bg-slate-50 border-2 rounded-xl p-2 flex flex-col items-center transition-all ${isSel ? 'border-blue-500 bg-blue-50' : 'border-slate-200'}">
                                     <div class="text-2xl">${item.emoji}</div>
                                     <div class="text-[9px] font-black mt-1 truncate w-full text-center text-slate-700">${item.w}</div>
                                     ${isSel ? '<div class="absolute -top-2 -right-2 bg-blue-500 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold">✓</div>' : ''}
@@ -802,7 +799,7 @@
                     <h2 class="text-xl font-black text-slate-800 mb-4 px-2">나의 도감 <span class="text-blue-500">${window.state.inventory.length}</span></h2>
                     <div class="grid grid-cols-3 gap-3">
                         ${window.state.inventory.slice().reverse().map(item => `
-                            <div class="${getCardGradeStyle(item.grade)} rounded-2xl p-3 flex flex-col items-center relative overflow-hidden active:scale-95 transition-transform" onclick="speak('${item.w}')">
+                            <div class="${getCardGradeStyle(item.grade)} rounded-2xl p-3 flex flex-col items-center relative overflow-hidden active:scale-95 transition-transform" onclick="window.speak('${item.w}')">
                                 ${item.grade === 'SUPER' ? '<div class="absolute top-0 right-0 bg-yellow-400 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg">S급</div>' : ''}
                                 ${item.grade === 'RARE' ? '<div class="absolute top-0 right-0 bg-slate-400 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg">A급</div>' : ''}
                                 <div class="text-3xl mb-1 mt-2 z-10">${item.emoji}</div>
@@ -832,7 +829,7 @@
                     ${window.state.farmPets.map((pet, i) => `
                         <div class="absolute cursor-pointer hover:scale-110 transition-transform flex flex-col items-center drop-shadow-xl z-20"
                              style="left: ${pet.x}%; top: ${pet.y}%; animation: shake ${3 + (i%2)}s infinite alternate ease-in-out;"
-                             onclick="speak('${pet.w}')">
+                             onclick="window.speak('${pet.w}')">
                             <div class="text-4xl bg-white/80 rounded-full w-12 h-12 flex items-center justify-center shadow-inner border-2 border-white/50 backdrop-blur-sm relative">
                                 ${pet.grade === 'SUPER' ? '<div class="absolute -top-2 text-xs">👑</div>' : ''}
                                 ${pet.grade === 'RARE' ? '<div class="absolute -top-2 text-xs">✨</div>' : ''}
@@ -849,6 +846,8 @@
             `;
         }
 
+        document.addEventListener('DOMContentLoaded', window.render);
+        if (document.readyState === 'complete' || document.readyState === 'interactive') window.render();
     </script>
 </body>
 </html>
