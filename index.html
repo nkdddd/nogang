@@ -37,41 +37,37 @@
         .animate-flash { animation: flash-red 0.5s ease-out; }
         @keyframes pack-tremble { 0%, 100% { transform: rotate(0deg) scale(1); filter: brightness(1); } 25% { transform: rotate(-5deg) scale(1.05); filter: brightness(1.2); } 50% { transform: rotate(5deg) scale(1.05); } 75% { transform: rotate(-5deg) scale(1.05); } }
         .animate-pack-open { animation: pack-tremble 0.3s infinite ease-in-out; }
+        @keyframes mythic-glow { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+        @keyframes pump { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .animate-pump { animation: pump 0.2s ease-out; }
         details > summary { list-style: none; outline: none; }
         details > summary::-webkit-details-marker { display: none; }
         details[open] summary ~ * { animation: pop 0.3s ease-in-out; }
-        .grade-super { background: linear-gradient(135deg, #fffbeb, #fef3c7, #fde68a); border: 4px solid #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
-        .grade-rare { background: linear-gradient(135deg, #f8fafc, #f1f5f9, #e2e8f0); border: 4px solid #cbd5e1; box-shadow: 0 0 15px rgba(203, 213, 225, 0.5); }
+        
+        /* 🟢 카드 등급 CSS 🟢 */
+        .grade-mythic { background: linear-gradient(135deg, #e0e7ff, #f3e8ff, #fae8ff); border: 4px solid #a855f7; box-shadow: 0 0 25px rgba(168, 85, 247, 0.8); animation: mythic-glow 3s infinite linear; }
+        .grade-legend { background: linear-gradient(135deg, #fee2e2, #fecaca, #fca5a5); border: 4px solid #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+        .grade-super { background: linear-gradient(135deg, #fffbeb, #fef3c7, #fde68a); border: 4px solid #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); }
+        .grade-rare { background: linear-gradient(135deg, #f8fafc, #f1f5f9, #e2e8f0); border: 4px solid #cbd5e1; box-shadow: 0 0 10px rgba(203, 213, 225, 0.5); }
         .grade-normal { background: #ffffff; border: 4px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body>
-    <!-- 전체 앱 컨테이너 -->
     <div id="main-wrapper" class="relative w-full max-w-md h-full bg-slate-50 flex flex-col shadow-2xl overflow-hidden mx-auto">
-        
-        <!-- 🟢 1. 동적으로 변하는 앱 본문 영역 -->
         <div id="app" class="flex-1 w-full flex flex-col overflow-hidden relative">
             <div class="flex-1 flex flex-col items-center justify-center bg-blue-500 text-white font-black text-2xl h-full">
-                <i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i>
-                서버 확인 중...
+                <i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i> 서버 확인 중...
             </div>
         </div>
-
-        <!-- 🟢 2. 영구 고정되는 최하단 광고 영역 -->
         <div id="global-ad" class="w-full bg-slate-100 border-t border-gray-300 flex justify-center items-center shrink-0 h-[65px] pb-safe relative z-[999] overflow-hidden">
             <span class="absolute text-gray-400 text-[10px] font-bold tracking-widest text-center z-0">AD SPACE</span>
-            <ins class="adsbygoogle w-full h-full relative z-10"
-                 style="display:block;"
-                 data-ad-client="ca-pub-6453117184750039"
-                 data-ad-slot="5112847569"
-                 data-ad-format="horizontal"
-                 data-full-width-responsive="true"></ins>
+            <ins class="adsbygoogle w-full h-full relative z-10" style="display:block;" data-ad-client="ca-pub-6453117184750039" data-ad-slot="5112847569" data-ad-format="horizontal" data-full-width-responsive="true"></ins>
         </div>
     </div>
 
     <script>
         // =========================================================================
-        // 1. 단어, 알파벳, 포켓몬스터(100종) 데이터베이스
+        // 1. 단어, 알파벳, 포켓몬스터(1,025종 분류) 데이터베이스
         // =========================================================================
         const ALPHABET_DB = [
             {u:'A', l:'a', n:'에이', s:'애'}, {u:'B', l:'b', n:'비', s:'브'}, {u:'C', l:'c', n:'씨', s:'크'},
@@ -85,60 +81,29 @@
             {u:'Y', l:'y', n:'와이', s:'여'}, {u:'Z', l:'z', n:'지', s:'즈'}
         ];
 
-        // 🟢 슈퍼 S급 100마리 포켓몬 도감
-        const POKEMON_DB = [
-            { id: 1, w: 'Bulbasaur', kr: '이상해씨' }, { id: 4, w: 'Charmander', kr: '파이리' },
-            { id: 7, w: 'Squirtle', kr: '꼬부기' }, { id: 10, w: 'Caterpie', kr: '캐터피' },
-            { id: 12, w: 'Butterfree', kr: '버터플' }, { id: 13, w: 'Weedle', kr: '뿔충이' },
-            { id: 16, w: 'Pidgey', kr: '구구' }, { id: 19, w: 'Rattata', kr: '꼬렛' },
-            { id: 23, w: 'Ekans', kr: '아보' }, { id: 25, w: 'Pikachu', kr: '피카츄' },
-            { id: 26, w: 'Raichu', kr: '라이츄' }, { id: 27, w: 'Sandshrew', kr: '모래두지' },
-            { id: 35, w: 'Clefairy', kr: '삐삐' }, { id: 37, w: 'Vulpix', kr: '식스테일' },
-            { id: 39, w: 'Jigglypuff', kr: '푸린' }, { id: 41, w: 'Zubat', kr: '주뱃' },
-            { id: 43, w: 'Oddish', kr: '뚜벅쵸' }, { id: 46, w: 'Paras', kr: '파라스' },
-            { id: 50, w: 'Diglett', kr: '디그다' }, { id: 52, w: 'Meowth', kr: '나옹' },
-            { id: 54, w: 'Psyduck', kr: '고라파덕' }, { id: 56, w: 'Mankey', kr: '망키' },
-            { id: 58, w: 'Growlithe', kr: '가디' }, { id: 60, w: 'Poliwag', kr: '발챙이' },
-            { id: 63, w: 'Abra', kr: '캐이시' }, { id: 66, w: 'Machop', kr: '알통몬' },
-            { id: 69, w: 'Bellsprout', kr: '모다피' }, { id: 72, w: 'Tentacool', kr: '왕눈해' },
-            { id: 74, w: 'Geodude', kr: '꼬마돌' }, { id: 77, w: 'Ponyta', kr: '포니타' },
-            { id: 79, w: 'Slowpoke', kr: '야돈' }, { id: 81, w: 'Magnemite', kr: '코일' },
-            { id: 83, w: 'Farfetch\'d', kr: '파오리' }, { id: 84, w: 'Doduo', kr: '두두' },
-            { id: 86, w: 'Seel', kr: '쥬쥬' }, { id: 88, w: 'Grimer', kr: '질퍽이' },
-            { id: 90, w: 'Shellder', kr: '셀러' }, { id: 92, w: 'Gastly', kr: '고오스' },
-            { id: 94, w: 'Gengar', kr: '팬텀' }, { id: 95, w: 'Onix', kr: '롱스톤' },
-            { id: 96, w: 'Drowzee', kr: '슬리프' }, { id: 98, w: 'Krabby', kr: '크랩' },
-            { id: 100, w: 'Voltorb', kr: '찌리리공' }, { id: 104, w: 'Cubone', kr: '탕구리' },
-            { id: 108, w: 'Lickitung', kr: '내루미' }, { id: 109, w: 'Koffing', kr: '또가스' },
-            { id: 111, w: 'Rhyhorn', kr: '뿔카노' }, { id: 113, w: 'Chansey', kr: '럭키' },
-            { id: 114, w: 'Tangela', kr: '덩쿠리' }, { id: 116, w: 'Horsea', kr: '쏘드라' },
-            { id: 118, w: 'Goldeen', kr: '콘치' }, { id: 120, w: 'Staryu', kr: '별가사리' },
-            { id: 129, w: 'Magikarp', kr: '잉어킹' }, { id: 130, w: 'Gyarados', kr: '갸라도스' },
-            { id: 131, w: 'Lapras', kr: '라프라스' }, { id: 132, w: 'Ditto', kr: '메타몽' },
-            { id: 133, w: 'Eevee', kr: '이브이' }, { id: 134, w: 'Vaporeon', kr: '샤미드' },
-            { id: 135, w: 'Jolteon', kr: '쥬피썬더' }, { id: 136, w: 'Flareon', kr: '부스터' },
-            { id: 137, w: 'Porygon', kr: '폴리곤' }, { id: 143, w: 'Snorlax', kr: '잠만보' },
-            { id: 144, w: 'Articuno', kr: '프리져' }, { id: 145, w: 'Zapdos', kr: '썬더' },
-            { id: 146, w: 'Moltres', kr: '파이어' }, { id: 147, w: 'Dratini', kr: '미뇽' },
-            { id: 149, w: 'Dragonite', kr: '망나뇽' }, { id: 150, w: 'Mewtwo', kr: '뮤츠' },
-            { id: 151, w: 'Mew', kr: '뮤' }, { id: 152, w: 'Chikorita', kr: '치코리타' },
-            { id: 155, w: 'Cyndaquil', kr: '브케인' }, { id: 158, w: 'Totodile', kr: '리아코' },
-            { id: 172, w: 'Pichu', kr: '피츄' }, { id: 175, w: 'Togepi', kr: '토게피' },
-            { id: 176, w: 'Togetic', kr: '토게틱' }, { id: 179, w: 'Mareep', kr: '메리프' },
-            { id: 183, w: 'Marill', kr: '마릴' }, { id: 190, w: 'Aipom', kr: '에이팜' },
-            { id: 196, w: 'Espeon', kr: '에브이' }, { id: 197, w: 'Umbreon', kr: '블래키' },
-            { id: 202, w: 'Wobbuffet', kr: '마자용' }, { id: 212, w: 'Scizor', kr: '핫삼' },
-            { id: 214, w: 'Heracross', kr: '헤라크로스' }, { id: 248, w: 'Tyranitar', kr: '마기라스' },
-            { id: 249, w: 'Lugia', kr: '루기아' }, { id: 250, w: 'Ho-Oh', kr: '칠색조' },
-            { id: 251, w: 'Celebi', kr: '세레비' }, { id: 252, w: 'Treecko', kr: '나무지기' },
-            { id: 255, w: 'Torchic', kr: '아차모' }, { id: 258, w: 'Mudkip', kr: '물짱이' },
-            { id: 280, w: 'Ralts', kr: '랄토스' }, { id: 282, w: 'Gardevoir', kr: '가디안' },
-            { id: 380, w: 'Latias', kr: '라티아스' }, { id: 381, w: 'Latios', kr: '라티오스' },
-            { id: 384, w: 'Rayquaza', kr: '레쿠쟈' }, { id: 393, w: 'Piplup', kr: '팽도리' },
-            { id: 447, w: 'Riolu', kr: '리오르' }, { id: 448, w: 'Lucario', kr: '루카리오' },
-            { id: 470, w: 'Leafeon', kr: '리피아' }, { id: 471, w: 'Glaceon', kr: '글레이시아' },
-            { id: 700, w: 'Sylveon', kr: '님피아' }
-        ];
+        const LEGEND_IDS = [144,145,146,150, 243,244,245,249,250, 377,378,379,380,381,382,383,384, 480,481,482,483,484,485,486,487,488, 638,639,640,641,642,643,644,645,646, 716,717,718, 772,773, 785,786,787,788, 789,790,791,792, 800, 888,889,890,891,892, 894,895,896,897,898, 1001,1002,1003,1004];
+        const MYTHIC_IDS = [151, 251, 385,386, 489,490,491,492,493, 494, 647,648,649, 719,720,721, 801,802, 807, 808, 809, 893, 1025];
+        const EXCLUDED_IDS = new Set([...LEGEND_IDS, ...MYTHIC_IDS]);
+        const NORMAL_POKE_IDS = [];
+        for(let i=1; i<=1025; i++) { if(!EXCLUDED_IDS.has(i)) NORMAL_POKE_IDS.push(i); }
+
+        async function fetchPokemon(id) {
+            try {
+                const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
+                if (!res.ok) throw new Error('API Fail');
+                const data = await res.json();
+                const krNameObj = data.names.find(n => n.language.name === 'ko');
+                const enNameObj = data.names.find(n => n.language.name === 'en');
+                return {
+                    w: enNameObj ? enNameObj.name : data.name, 
+                    kr: krNameObj ? krNameObj.name : data.name, 
+                    emoji: '✨', 
+                    imgUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
+                };
+            } catch(e) {
+                return { w: 'Pokemon', kr: '비밀의 포켓몬', emoji: '✨', imgUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png` };
+            }
+        }
 
         const VOWEL_DB = {
             'a': { sound: '애', fam: [{n:'-at', w:['cat','hat','bat','mat']}, {n:'-an', w:['can','fan','man','pan']}, {n:'-ap', w:['cap','map','tap']}], magic: ['cake','game','name','lake'], var: [{rule:'ar (아)', w:['car','park','star']}] },
@@ -181,7 +146,9 @@
             trainingMode: 'alphabet', trainingSubMode: 'match',
             coins: 200, inventory: [], farmPets: [], altarSelection: [],
             toastMsg: null, currentQuiz: null, isAnswering: false, packOpening: false, revealedCard: null, animatingCorrect: null,
-            altarResult: null, isFailing: false // 제단 합성 결과용 
+            altarResult: null, isFailing: false, isProcessing: false,
+            // 🟢 광클 훈련용 상태 추가 🟢
+            isClickingMode: false, clickCount: 0, clickTimeLeft: 10, clickTimer: null
         };
 
         window.saveData = function() {
@@ -197,17 +164,50 @@
         };
 
         // =========================================================================
-        // 3. 네비게이션 및 훈련소 출제 엔진
+        // 3. TTS 음성 엔진
+        // =========================================================================
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.getVoices();
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = window.speechSynthesis.getVoices;
+            }
+        }
+
+        window.speak = function(text, lang = 'en-US') {
+            if (!window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            
+            let speakText = text;
+            if (lang === 'en-US' && speakText.length === 1 && /[a-zA-Z]/.test(speakText)) {
+                speakText = speakText.toLowerCase() + ".";
+            }
+            const utterance = new SpeechSynthesisUtterance(speakText);
+            utterance.lang = lang; utterance.rate = 0.85;
+
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                let targetVoice = voices.find(v => v.lang === lang || v.lang === lang.replace('-', '_'));
+                if (!targetVoice) targetVoice = voices.find(v => v.lang.startsWith(lang.substring(0, 2)));
+                if (targetVoice) utterance.voice = targetVoice;
+            }
+            window.speechSynthesis.speak(utterance);
+        };
+
+        window.showToast = function(msg) {
+            window.state.toastMsg = msg; window.render();
+            setTimeout(() => { window.state.toastMsg = null; window.render(); }, 2000);
+        };
+
+        // =========================================================================
+        // 4. 훈련소 출제 로직
         // =========================================================================
         window.setLearningSubTab = function(sub) { window.state.subTab = sub; window.render(); };
-
         window.setTrainingMode = function(mode) {
             window.state.trainingMode = mode;
             if (mode === 'alphabet' && !window.state.trainingSubMode) window.state.trainingSubMode = 'match';
             window.state.isAnswering = false; window.state.animatingCorrect = null;
             window.getNewQuiz(); window.render();
         };
-
         window.setTrainingSubMode = function(subMode) {
             window.state.trainingSubMode = subMode;
             window.state.isAnswering = false; window.state.animatingCorrect = null;
@@ -235,16 +235,14 @@
                 } else if (qType === 'name') {
                     ans = target.u;
                     window.state.currentQuiz = {
-                        isAlphabet: true, qType: 'name',
-                        display: `🔈 ${target.n}`, sub: '이름을 가진 알파벳은?',
+                        isAlphabet: true, qType: 'name', display: `🔈 ${target.n}`, sub: '이름을 가진 알파벳은?',
                         ans: ans, speakText: target.l, speakLang: 'en-US'
                     };
                     options = ALPHABET_DB.map(x => x.u);
                 } else if (qType === 'sound') {
                     ans = target.l;
                     window.state.currentQuiz = {
-                        isAlphabet: true, qType: 'sound',
-                        display: `🔈 ${target.s}`, sub: '소리를 내는 알파벳은?',
+                        isAlphabet: true, qType: 'sound', display: `🔈 ${target.s}`, sub: '소리를 내는 알파벳은?',
                         ans: ans, speakText: target.s, speakLang: 'ko-KR'
                     };
                     options = ALPHABET_DB.map(x => x.l);
@@ -253,7 +251,6 @@
                 options = options.filter(x => x !== ans).sort(() => 0.5 - Math.random()).slice(0, 4);
                 options.push(ans);
                 window.state.currentQuiz.options = options.sort(() => 0.5 - Math.random());
-                
             } 
             else {
                 let wordObj, targetAns, blankIdx, opts = [];
@@ -319,19 +316,8 @@
         };
 
         // =========================================================================
-        // 4. 시스템 함수 & S급 포켓몬 뽑기/합성/판매 시스템 
+        // 5. 뽑기, 판매, 메가 진화(제단 + 광클 이벤트) 시스템
         // =========================================================================
-        window.handleAuth = async function(isLogin) { window.showToast("오프라인 모드입니다."); };
-        window.logout = async function() { window.currentUser = null; window.isGuestMode = false; window.render(); };
-        window.speak = function(text, lang = 'en-US') {
-            if (!window.speechSynthesis) return; window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text); utterance.lang = lang; utterance.rate = 0.9;
-            window.speechSynthesis.speak(utterance);
-        };
-        window.showToast = function(msg) {
-            window.state.toastMsg = msg; window.render();
-            setTimeout(() => { window.state.toastMsg = null; window.render(); }, 2000);
-        };
         window.changeTab = function(tab) {
             window.state.tab = tab;
             if(tab === 'training' && !window.state.currentQuiz) window.getNewQuiz();
@@ -339,30 +325,46 @@
             window.render();
         };
 
-        window.getCardGradeStyle = function(grade) { return grade === 'SUPER' ? 'grade-super' : grade === 'RARE' ? 'grade-rare' : 'grade-normal'; };
+        window.getCardGradeStyle = function(grade) { 
+            if(grade === 'MYTHIC') return 'grade-mythic';
+            if(grade === 'LEGEND') return 'grade-legend';
+            if(grade === 'SUPER') return 'grade-super'; 
+            if(grade === 'RARE') return 'grade-rare'; 
+            return 'grade-normal'; 
+        };
         window.getCardGradeText = function(grade) {
-            if (grade === 'SUPER') return '<span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-black shadow-sm">👑 SUPER (S급 포켓몬)</span>';
-            if (grade === 'RARE') return '<span class="bg-gradient-to-r from-slate-300 to-slate-400 text-slate-700 px-3 py-1 rounded-full text-xs font-black shadow-sm">✨ RARE (A급)</span>';
+            if (grade === 'MYTHIC') return '<span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-black shadow-lg">🌌 SSS급 환상</span>';
+            if (grade === 'LEGEND') return '<span class="bg-gradient-to-r from-red-500 to-rose-400 text-white px-3 py-1 rounded-full text-xs font-black shadow-md">💎 SS급 전설</span>';
+            if (grade === 'SUPER') return '<span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-black shadow-sm">👑 S급 일반포켓몬</span>';
+            if (grade === 'RARE') return '<span class="bg-gradient-to-r from-slate-300 to-slate-400 text-slate-700 px-3 py-1 rounded-full text-xs font-black shadow-sm">✨ A급 단어</span>';
             return '<span class="bg-gray-200 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">NORMAL (일반)</span>';
         };
 
-        window.openPack = function() {
+        window.openPack = async function() {
             if(window.state.coins < 50) return window.showToast("코인이 부족해요! (50 필요)");
-            if(window.state.packOpening) return;
-            window.state.coins -= 50; window.saveData(); window.state.packOpening = true; window.render();
+            if(window.state.packOpening || window.state.isProcessing) return;
             
-            setTimeout(() => {
-                const rand = Math.random(); let grade = 'NORMAL'; let drawnCard = {};
-                if (rand < 0.05) { 
-                    grade = 'SUPER'; const poke = POKEMON_DB[Math.floor(Math.random() * POKEMON_DB.length)];
-                    drawnCard = { w: poke.w, kr: poke.kr, emoji: '✨', imgUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${poke.id}.png` };
-                } else if (rand < 0.25) { 
-                    grade = 'RARE'; drawnCard = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
-                } else { drawnCard = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)]; }
+            window.state.isProcessing = true;
+            window.state.coins -= 50; window.saveData(); 
+            window.state.packOpening = true; window.render();
+            
+            const rand = Math.random(); let grade = 'NORMAL'; let drawnCard = {};
+            
+            if (rand < 0.03) grade = 'SUPER'; 
+            else if (rand < 0.20) grade = 'RARE';
 
+            if (grade === 'SUPER') {
+                const randomId = NORMAL_POKE_IDS[Math.floor(Math.random() * NORMAL_POKE_IDS.length)];
+                drawnCard = await fetchPokemon(randomId);
+            } else {
+                drawnCard = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
+            }
+
+            setTimeout(() => {
                 window.state.revealedCard = { id: Date.now().toString(), ...drawnCard, grade: grade };
+                window.state.isProcessing = false;
                 window.render(); window.speak(drawnCard.w);
-            }, 1000);
+            }, 800);
         };
         window.keepCard = function() {
             window.state.inventory.push(window.state.revealedCard);
@@ -374,50 +376,108 @@
             window.saveData(); window.showToast("카드를 버리고 10 코인을 얻었어요! 🪙"); window.render();
         };
 
-        // 🟢 신규: 도감에서 카드 판매
         window.sellCard = function(id) {
             const card = window.state.inventory.find(c => c.id === id);
             if (!card) return;
-            if (confirm(`'${card.w}' 카드를 25코인에 판매하시겠습니까?`)) {
+            const prices = { 'NORMAL': 10, 'RARE': 25, 'SUPER': 100, 'LEGEND': 500, 'MYTHIC': 2000 };
+            const price = prices[card.grade] || 10;
+
+            if (confirm(`'${card.kr}' 카드를 ${price}코인에 판매하시겠습니까?`)) {
                 window.state.inventory = window.state.inventory.filter(c => c.id !== id);
-                // 농장에서도 제거
                 window.state.farmPets = window.state.farmPets.filter(p => p.id !== id);
-                window.state.coins += 25;
+                window.state.coins += price;
                 window.saveData();
-                window.showToast(`카드를 판매하고 25코인을 얻었습니다! 🪙`);
+                window.showToast(`카드를 판매하고 ${price}코인을 얻었습니다! 🪙`);
                 window.render();
             }
         };
 
-        // 🟢 제단 기능 🟢
         window.selectForAltar = function(id) {
             if(window.state.altarSelection.includes(id)) { window.state.altarSelection = window.state.altarSelection.filter(x => x !== id); } 
             else {
                 if(window.state.altarSelection.length >= 2) return window.showToast("2개까지만 선택 가능해요!");
+                const card = window.state.inventory.find(c => c.id === id);
+                if(window.state.altarSelection.length === 1) {
+                    const firstCard = window.state.inventory.find(c => c.id === window.state.altarSelection[0]);
+                    if(firstCard.grade !== card.grade) return window.showToast("같은 등급의 카드만 합성할 수 있어요!");
+                }
                 window.state.altarSelection.push(id);
             }
             window.render();
         };
         
-        window.tryEvolve = function() {
-            if(window.state.altarSelection.length !== 2) return;
+        // 🟢 3초 광클(터치) 이벤트 시작 함수 🟢
+        window.startClickEvent = function() {
+            if(window.state.altarSelection.length !== 2 || window.state.isProcessing) return;
+            
+            // 광클 모드 시작! (3초, 12번 터치 목표)
+            window.state.isClickingMode = true;
+            window.state.clickCount = 0;
+            window.state.clickTimeLeft = 3; 
+            window.render();
+
+            window.state.clickTimer = setInterval(() => {
+                window.state.clickTimeLeft -= 1;
+                
+                if(window.state.clickTimeLeft <= 0) {
+                    clearInterval(window.state.clickTimer);
+                    window.state.isClickingMode = false;
+                    window.tryEvolve(); // 3초 끝나면 바로 진화 확률 계산 시작
+                } else {
+                    window.render();
+                }
+            }, 1000);
+        };
+
+        // 🟢 터치 횟수 증가 함수 🟢
+        window.doClick = function() {
+            if(!window.state.isClickingMode) return;
+            window.state.clickCount += 1;
+            
+            // 펌핑 애니메이션 효과
+            const btn = document.getElementById('click-btn');
+            if(btn) {
+                btn.classList.remove('animate-pump');
+                void btn.offsetWidth; // 리플로우 강제 트리거
+                btn.classList.add('animate-pump');
+            }
+            window.render();
+        };
+
+        window.tryEvolve = async function() {
+            window.state.isProcessing = true;
+
+            const cardId = window.state.altarSelection[0];
+            const baseCard = window.state.inventory.find(c => c.id === cardId);
+            const grade = baseCard.grade;
+
+            // 제물 소멸
             window.state.inventory = window.state.inventory.filter(c => !window.state.altarSelection.includes(c.id));
             window.state.altarSelection = [];
+            window.render(); 
             
-            // 🟢 제단 합성 대성공/실패 연출 분기 🟢
-            if(Math.random() < 0.5) { 
-                // 성공 시 상자깡 화면을 재사용하여 화려하게 등장
-                const poke = POKEMON_DB[Math.floor(Math.random() * POKEMON_DB.length)];
-                const newCard = { 
-                    id: Date.now().toString(), grade: 'SUPER', w: poke.w, kr: poke.kr, emoji: '✨',
-                    imgUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${poke.id}.png`
-                };
+            // 🚨 진화 성공률
+            let baseRate = 0.25; 
+            let nextGrade = 'SUPER';
+            let pokeIdList = NORMAL_POKE_IDS;
+
+            if (grade === 'SUPER') { baseRate = 0.20; nextGrade = 'LEGEND'; pokeIdList = LEGEND_IDS; }
+            if (grade === 'LEGEND') { baseRate = 0.15; nextGrade = 'MYTHIC'; pokeIdList = MYTHIC_IDS; }
+
+            // 🟢 광클 부스트 적용 (12번 이상 시 2배)
+            const isBoosted = window.state.clickCount >= 12;
+            const finalRate = isBoosted ? baseRate * 2 : baseRate;
+
+            if(Math.random() < finalRate) { 
+                const randomId = pokeIdList[Math.floor(Math.random() * pokeIdList.length)];
+                const poke = await fetchPokemon(randomId);
+                const newCard = { id: Date.now().toString(), grade: nextGrade, ...poke };
+                
                 window.state.revealedCard = newCard;
-                window.state.packOpening = true; // 상자깡 모드 강제 발동
-                window.showToast("✨ 합성 대성공! S급 포켓몬 카드를 얻었습니다!");
+                window.state.packOpening = true; 
+                window.showToast(`✨ 합성 대성공! ${isBoosted ? '(광클 2배 버프 적용!)' : ''}`);
                 window.speak(poke.w);
             } else {
-                // 실패 시 꽝 화면 연출
                 window.state.isFailing = true;
                 window.render();
                 setTimeout(() => {
@@ -426,11 +486,13 @@
                     window.render();
                 }, 1500);
             }
-            window.saveData(); 
+            window.state.isProcessing = false;
+            window.state.clickCount = 0; // 초기화
+            window.saveData(); window.render();
         };
 
         // =========================================================================
-        // 5. UI 렌더링 화면들 
+        // 6. UI 렌더링 화면들 
         // =========================================================================
         
         window.renderLearning = function() {
@@ -687,16 +749,19 @@
                         <div class="text-6xl mb-6 drop-shadow-lg">🏪</div>
                         <h2 class="text-2xl font-black text-slate-800 mb-2">단어 몬스터 상점</h2>
                         <p class="text-slate-500 font-bold mb-10 text-center">코인을 모아 카드를 뽑고<br>나만의 농장을 채우세요!</p>
-                        <button onclick="window.openPack()" class="bg-gradient-to-b from-yellow-300 to-yellow-500 p-6 rounded-3xl shadow-[0_8px_0_#b45309] active:translate-y-2 active:shadow-none transition-all w-full max-w-xs group">
+                        
+                        <button onclick="window.openPack()" class="bg-gradient-to-b from-yellow-300 to-yellow-500 p-6 rounded-3xl shadow-[0_8px_0_#b45309] active:translate-y-2 active:shadow-none transition-all w-full max-w-xs group relative overflow-hidden">
+                            ${window.state.isProcessing ? '<div class="absolute inset-0 bg-black/20 flex items-center justify-center"><i class="fa-solid fa-spinner fa-spin text-white text-3xl"></i></div>' : ''}
                             <div class="text-5xl mb-2 group-active:scale-95 transition-transform">🎁</div>
                             <div class="text-white font-black text-xl drop-shadow-md">카드 팩 뜯기</div>
                             <div class="mt-2 bg-yellow-600/30 text-yellow-900 font-bold py-1 px-4 rounded-full inline-block text-sm shadow-inner">50 코인</div>
                         </button>
+
                         <div class="mt-8 text-xs font-bold text-gray-400 bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-1 w-full max-w-xs">
-                            <div class="text-center mb-1 text-gray-500">🏆 뽑기 확률표</div>
-                            <div class="flex justify-between"><span class="font-black text-yellow-600">👑 SUPER (S급 포켓몬)</span> <span class="text-yellow-500">5%</span></div>
-                            <div class="flex justify-between"><span>✨ RARE (A급 단어)</span> <span class="text-slate-500">20%</span></div>
-                            <div class="flex justify-between"><span>⬜ NORMAL (일반 단어)</span> <span class="text-gray-400">75%</span></div>
+                            <div class="text-center mb-1 text-gray-500">🏆 상점 뽑기 확률</div>
+                            <div class="flex justify-between"><span class="font-black text-yellow-600">👑 S급 포켓몬</span> <span class="text-yellow-500">3%</span></div>
+                            <div class="flex justify-between"><span>✨ A급 단어</span> <span class="text-slate-500">17%</span></div>
+                            <div class="flex justify-between"><span>⬜ 일반 단어</span> <span class="text-gray-400">80%</span></div>
                         </div>
                     </div>
                 </div>
@@ -704,27 +769,57 @@
         };
 
         window.renderAltar = function() {
-            // 🟢 제단 꽝 애니메이션 모드 🟢
-            if (window.state.isFailing) {
+            // 🟢 3초 광클(터치) 이벤트 화면 🟢
+            if (window.state.isClickingMode) {
+                const fillPercent = Math.min((window.state.clickCount / 12) * 100, 100);
                 return `
-                    <div class="absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center p-6 backdrop-blur-md animate-shake">
-                        <div class="text-[120px] mb-4">💥</div>
-                        <h2 class="text-4xl font-black text-red-500 mb-4 animate-flash">합성 실패!</h2>
-                        <p class="text-white font-bold text-lg text-center">아앗... 제물의 카드가<br>모두 재가 되어 사라졌습니다...</p>
+                    <div class="absolute inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-md" onclick="window.doClick()">
+                        <div class="text-[80px] mb-2 animate-bounce">🌀</div>
+                        <div class="text-white text-2xl font-black mb-4 text-center leading-tight">합성 에너지를 모아라!<br><span class="text-yellow-400 text-sm animate-pulse">3초 안에 12번 미친듯이 터치!!</span></div>
+                        <div class="text-6xl font-black text-yellow-400 mb-8 font-mono">${window.state.clickTimeLeft}초</div>
+                        
+                        <div id="click-btn" class="w-48 h-48 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full flex flex-col items-center justify-center shadow-[0_0_50px_rgba(168,85,247,0.6)] cursor-pointer select-none border-4 border-white">
+                            <div class="text-6xl mb-2">👇</div>
+                            <div class="text-white font-black text-4xl drop-shadow-md">${window.state.clickCount}</div>
+                        </div>
+
+                        <div class="w-full max-w-xs bg-gray-800 rounded-full h-6 mt-10 p-1 border-2 border-gray-700">
+                            <div class="bg-gradient-to-r from-blue-400 to-purple-500 h-full rounded-full transition-all duration-100" style="width: ${fillPercent}%"></div>
+                        </div>
+                        <div class="text-blue-300 text-xs font-bold mt-2">목표: 12번 (현재 ${window.state.clickCount}번)</div>
                     </div>
                 `;
             }
 
-            const rareCards = window.state.inventory.filter(c => c.grade === 'RARE'); 
+            if (window.state.isFailing) {
+                return `
+                    <div class="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-md animate-shake">
+                        <div class="text-[120px] mb-4">💥</div>
+                        <h2 class="text-4xl font-black text-red-500 mb-4 animate-flash">진화 실패!</h2>
+                        <p class="text-white font-bold text-lg text-center leading-relaxed">아앗... 제물의 카드가<br>모두 재가 되어 사라졌습니다...</p>
+                    </div>
+                `;
+            }
+
+            const validCards = window.state.inventory.filter(c => ['RARE', 'SUPER', 'LEGEND'].includes(c.grade)); 
             const selectedCards = window.state.altarSelection.map(id => window.state.inventory.find(c => c.id === id));
+            
+            let altarStatusMsg = "A급(RARE) 이상 카드 아무거나 2장을 올려보세요!<br><span class='text-blue-500'>(등급에 따라 전설, 환상의 포켓몬 등장! 실패 시 소멸 💥)</span>";
+            if (selectedCards.length > 0) {
+                const grade = selectedCards[0].grade;
+                if(grade === 'RARE') altarStatusMsg = "기본 성공률: 25% <b class='text-yellow-600'>(광클 성공 시 50%)</b>";
+                if(grade === 'SUPER') altarStatusMsg = "기본 성공률: 20% <b class='text-red-500'>(광클 성공 시 40%)</b>";
+                if(grade === 'LEGEND') altarStatusMsg = "기본 성공률: 15% <b class='text-purple-500'>(광클 성공 시 30%)</b>";
+            }
+
             return `
                 <div class="p-6 flex flex-col h-full w-full relative">
                     <div class="text-center mb-6">
                         <div class="text-5xl mb-2 animate-pulse">⚡</div>
                         <h2 class="text-2xl font-black text-slate-800">진화의 제단</h2>
-                        <p class="text-xs text-slate-500 font-bold mt-1">A급(RARE) 카드 아무거나 2장을 섞어보세요!<br><span class="text-blue-500">(성공 시 S급 포켓몬 획득! 실패 시 모두 소멸 💥)</span></p>
+                        <p class="text-[11px] text-slate-500 font-bold mt-2 leading-tight">${altarStatusMsg}</p>
                     </div>
-                    <div class="flex justify-center gap-4 mb-8">
+                    <div class="flex justify-center gap-4 mb-6">
                         ${[0, 1].map(i => `
                             <div class="w-24 h-32 rounded-2xl border-4 border-dashed flex items-center justify-center bg-white shadow-inner overflow-hidden ${selectedCards[i] ? 'border-yellow-400 bg-yellow-50' : 'border-gray-300'}">
                                 ${selectedCards[i] ? (selectedCards[i].imgUrl ? `<img src="${selectedCards[i].imgUrl}" class="w-16 h-16 object-contain" />` : `<div class="text-4xl">${selectedCards[i].emoji}</div>`) : `<span class="text-gray-300 font-bold">카드 ${i+1}</span>`}
@@ -732,21 +827,24 @@
                         `).join('')}
                     </div>
                     ${window.state.altarSelection.length === 2 ? `
-                        <button onclick="window.tryEvolve()" class="w-full bg-yellow-400 text-yellow-900 font-black text-xl py-4 rounded-2xl mb-4 shadow-[0_5px_0_#ca8a04] active:translate-y-1 active:shadow-none animate-bounce">
+                        <button onclick="window.startClickEvent()" class="relative overflow-hidden w-full bg-yellow-400 text-yellow-900 font-black text-xl py-4 rounded-2xl mb-4 shadow-[0_5px_0_#ca8a04] active:translate-y-1 active:shadow-none animate-bounce">
                             포켓몬으로 합성 시작!
                         </button>
                     ` : ''}
                     <div class="flex-1 bg-white rounded-3xl p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border border-gray-100 overflow-y-auto min-h-[150px] w-full">
-                        <h3 class="font-bold text-gray-700 mb-3 text-sm">합성 가능한 A급(RARE) 카드</h3>
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm">합성 가능한 카드 (A급 이상)</h3>
                         <div class="grid grid-cols-4 gap-2">
-                            ${rareCards.map(item => {
+                            ${validCards.map(item => {
                                 const isSel = window.state.altarSelection.includes(item.id);
+                                let ringColor = item.grade === 'LEGEND' ? 'border-red-400 bg-red-50' : (item.grade === 'SUPER' ? 'border-yellow-400 bg-yellow-50' : 'border-slate-300 bg-slate-50');
+                                if (isSel) ringColor = 'border-blue-500 bg-blue-100 ring-2 ring-blue-300';
+                                
                                 return `
-                                <button onclick="window.selectForAltar('${item.id}')" class="relative bg-slate-50 border-2 rounded-xl p-2 flex flex-col items-center transition-all overflow-hidden ${isSel ? 'border-blue-500 bg-blue-50' : 'border-slate-200'}">
+                                <button onclick="window.selectForAltar('${item.id}')" class="relative ${ringColor} border-2 rounded-xl p-2 flex flex-col items-center transition-all overflow-hidden">
                                     <div class="h-8 flex items-center justify-center">
-                                        ${item.imgUrl ? `<img src="${item.imgUrl}" class="w-8 h-8 object-contain" />` : `<div class="text-2xl">${item.emoji}</div>`}
+                                        ${item.imgUrl ? `<img src="${item.imgUrl}" class="w-8 h-8 object-contain drop-shadow-sm" />` : `<div class="text-2xl">${item.emoji}</div>`}
                                     </div>
-                                    <div class="text-[9px] font-black mt-1 w-full text-center text-slate-700 truncate">${item.w}</div>
+                                    <div class="text-[9px] font-black mt-1 w-full text-center text-slate-700 truncate capitalize">${item.w}</div>
                                     ${isSel ? '<div class="absolute -top-2 -right-2 bg-blue-500 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold">✓</div>' : ''}
                                 </button>
                                 `;
@@ -760,14 +858,8 @@
         window.renderDex = function() {
             let innerHtml = '';
             if(window.state.inventory.length === 0) {
-                innerHtml = `
-                    <div class="flex-1 flex flex-col items-center justify-center text-slate-400 font-bold gap-4">
-                        <i class="fa-solid fa-book-open text-5xl"></i>
-                        <p>수집한 카드가 없어요.</p>
-                    </div>
-                `;
+                innerHtml = `<div class="flex-1 flex flex-col items-center justify-center text-slate-400 font-bold gap-4"><i class="fa-solid fa-book-open text-5xl"></i><p>수집한 카드가 없어요.</p></div>`;
             } else {
-                // 🟢 신규: 도감 카드 터치 시 판매/듣기 팝업 기능 추가 🟢
                 innerHtml = `
                     <div class="flex-1 overflow-y-auto w-full pb-4">
                         <h2 class="text-xl font-black text-slate-800 mb-4 px-2">나의 도감 <span class="text-blue-500">${window.state.inventory.length}</span></h2>
@@ -776,8 +868,8 @@
                             ${window.state.inventory.slice().reverse().map(item => `
                                 <div class="${window.getCardGradeStyle(item.grade)} rounded-2xl p-3 flex flex-col items-center justify-center relative overflow-hidden active:scale-95 transition-transform cursor-pointer" 
                                      onclick="window.sellCard('${item.id}')">
-                                    ${item.grade === 'SUPER' ? '<div class="absolute top-0 right-0 bg-yellow-400 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg z-20">S급</div>' : ''}
-                                    ${item.grade === 'RARE' ? '<div class="absolute top-0 right-0 bg-slate-400 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg z-20">A급</div>' : ''}
+                                    ${window.getCardGradeText(item.grade).replace(' px-3 py-1 rounded-full text-xs', ' absolute top-0 right-0 text-[8px] px-2 py-0.5 rounded-bl-lg z-20').replace(' shadow-sm', '').replace(' shadow-md', '').replace(' shadow-lg', '')}
+                                    
                                     ${item.imgUrl ? `<img src="${item.imgUrl}" class="w-12 h-12 object-contain mb-1 mt-2 z-10 drop-shadow-md" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"/> <div class="text-3xl mb-1 mt-2 z-10 hidden">${item.emoji}</div>` : `<div class="text-3xl mb-1 mt-2 z-10">${item.emoji}</div>`}
                                     <div class="text-xs font-black text-slate-800 w-full text-center z-10 truncate capitalize">${item.w}</div>
                                 </div>
@@ -786,41 +878,26 @@
                     </div>
                 `;
             }
-            return `
-                <div class="p-4 flex flex-col h-full w-full">
-                    ${innerHtml}
-                </div>
-            `;
+            return `<div class="p-4 flex flex-col h-full w-full">${innerHtml}</div>`;
         };
 
         window.renderFarm = function() {
             let innerHtml = '';
             if(window.state.farmPets.length === 0) {
-                innerHtml = `
-                    <div class="flex-1 flex flex-col items-center justify-center text-green-700 font-bold gap-4 text-center">
-                        <i class="fa-solid fa-seedling text-5xl text-green-400"></i>
-                        <p>농장이 비어있어요!</p>
-                    </div>
-                `;
+                innerHtml = `<div class="flex-1 flex flex-col items-center justify-center text-green-700 font-bold gap-4 text-center"><i class="fa-solid fa-seedling text-5xl text-green-400"></i><p>농장이 비어있어요!</p></div>`;
             } else {
                 innerHtml = `
                     <div class="flex-1 relative w-full rounded-2xl overflow-hidden shadow-inner border-2 border-green-300">
                         <div class="absolute inset-0 bg-gradient-to-b from-blue-200 via-green-200 to-green-300"></div>
-                        <div class="absolute top-4 left-4 text-white font-black drop-shadow-md z-10">
-                            🌳 내 농장 (${window.state.farmPets.length}마리)
-                        </div>
+                        <div class="absolute top-4 left-4 text-white font-black drop-shadow-md z-10">🌳 내 농장 (${window.state.farmPets.length}마리)</div>
                         ${window.state.farmPets.map((pet, i) => `
                             <div class="absolute cursor-pointer hover:scale-110 transition-transform flex flex-col items-center drop-shadow-xl z-20"
                                  style="left: ${pet.x}%; top: ${pet.y}%; animation: shake ${3 + (i%2)}s infinite alternate ease-in-out;"
                                  onclick="window.speak('${pet.w}')">
                                 <div class="text-4xl bg-white/80 rounded-full w-12 h-12 flex items-center justify-center shadow-inner border-2 border-white/50 backdrop-blur-sm relative overflow-hidden">
-                                    ${pet.grade === 'SUPER' ? '<div class="absolute -top-2 text-xs z-20">👑</div>' : ''}
-                                    ${pet.grade === 'RARE' ? '<div class="absolute -top-2 text-xs z-20">✨</div>' : ''}
-                                    ${pet.imgUrl ? `<img src="${pet.imgUrl}" class="w-10 h-10 object-contain z-10" />` : pet.emoji}
+                                    ${pet.imgUrl ? `<img src="${pet.imgUrl}" class="w-10 h-10 object-contain z-10 drop-shadow-sm" />` : pet.emoji}
                                 </div>
-                                <div class="bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 backdrop-blur-sm capitalize">
-                                    ${pet.w}
-                                </div>
+                                <div class="bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 backdrop-blur-sm capitalize">${pet.w}</div>
                             </div>
                         `).join('')}
                         <div class="absolute bottom-10 left-10 text-6xl opacity-50 z-0">🌲</div>
@@ -828,22 +905,16 @@
                     </div>
                 `;
             }
-
-            return `
-                <div class="p-4 flex flex-col h-full w-full bg-green-50/50">
-                    ${innerHtml}
-                </div>
-            `;
+            return `<div class="p-4 flex flex-col h-full w-full bg-green-50/50">${innerHtml}</div>`;
         };
 
         // =========================================================================
-        // 6. 메인 렌더링 
+        // 7. 앱 뼈대 구성 및 초기화
         // =========================================================================
         window.render = function() {
             const app = document.getElementById('app');
             if (!window.isAuthReady) return;
 
-            // 1. 로그인 전 화면
             if (!window.currentUser && !window.isGuestMode) {
                 app.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-8 w-full bg-gradient-to-b from-blue-50 to-blue-100 h-full overflow-y-auto">
@@ -862,12 +933,8 @@
                 return;
             }
 
-            // 2. 앱 본문 렌더링
-            const toastHtml = window.state.toastMsg ? `
-                <div class="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-2xl animate-pop whitespace-nowrap">${window.state.toastMsg}</div>
-            ` : '';
+            const toastHtml = window.state.toastMsg ? `<div class="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-2xl animate-pop whitespace-nowrap">${window.state.toastMsg}</div>` : '';
 
-            // 🟢 상자깡 연출 (포켓몬 합성 성공 시에도 재사용) 🟢
             const packOverlayHtml = window.state.packOpening ? `
                 <div class="absolute inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-sm">
                     ${window.state.revealedCard ? `
@@ -875,12 +942,10 @@
                             ${window.state.revealedCard.grade !== 'NORMAL' ? '<div class="absolute inset-0 bg-[url(\'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=\')] opacity-50 mix-blend-overlay"></div>' : ''}
                             <div class="relative z-10 w-full flex flex-col items-center">
                                 <div class="mb-6">${window.getCardGradeText(window.state.revealedCard.grade)}</div>
-                                
                                 ${window.state.revealedCard.imgUrl 
                                     ? `<img src="${window.state.revealedCard.imgUrl}" class="w-32 h-32 object-contain drop-shadow-xl animate-bounce mb-4" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"/> <div class="text-8xl mb-4 drop-shadow-md hidden">${window.state.revealedCard.emoji}</div>`
                                     : `<div class="text-8xl mb-4 drop-shadow-md">${window.state.revealedCard.emoji}</div>`
                                 }
-                                
                                 <div class="text-gray-500 font-black mb-1 bg-white/50 px-3 py-1 rounded-full text-sm">${window.state.revealedCard.kr}</div>
                                 <div class="text-4xl font-black mb-8 text-gray-800 tracking-wider capitalize">${window.state.revealedCard.w}</div>
                                 <div class="w-full flex gap-2 flex-col">
@@ -919,14 +984,11 @@
                         </div>
                     </div>
                 </header>
-
                 ${toastHtml}
                 ${packOverlayHtml}
-
                 <main class="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50 w-full hide-scrollbar flex flex-col" id="main-content">
                     ${contentHtml}
                 </main>
-
                 <nav class="pb-safe bg-white border-t shrink-0 z-50 relative">
                     <div class="h-16 flex items-center justify-between px-1">
                         <button onclick="window.changeTab('learning')" class="flex-1 flex flex-col items-center justify-center gap-1 py-1 transition-all ${window.state.tab === 'learning' ? 'text-blue-600 scale-110' : 'text-gray-400'}"><div class="${window.state.tab === 'learning' ? 'bg-blue-100' : ''} w-9 h-9 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-book-open"></i></div><span class="text-[9px] font-bold">학습장</span></button>
@@ -940,9 +1002,6 @@
             `;
         };
 
-        // =========================================================================
-        // 7. 광고 로드 및 파이어베이스 초기화
-        // =========================================================================
         window.addEventListener('load', () => {
             try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
         });
@@ -951,7 +1010,6 @@
             if (window.isGuestMode) return;
             window.isAuthReady = true; window.isGuestMode = true;
             window.currentUser = { uid: "guest", email: "Guest@offline" };
-            
             const savedData = localStorage.getItem('phonicsAppState');
             if (savedData) {
                 try {
@@ -1035,7 +1093,6 @@
                         }
                         window.changeTab('learning');
                     } catch(error) {
-                        console.error("DB 거부 에러:", error);
                         window.showToast("⚠️ Firebase 정보가 다르거나 규칙이 닫혀있습니다.");
                         window.startGuestMode("Firestore 권한 오류");
                     }
@@ -1046,7 +1103,6 @@
             });
 
         } catch(error) {
-            console.error("Firebase 로딩 실패:", error);
             clearTimeout(fallbackTimer);
             window.showToast("보안 환경 감지: 앱을 바로 엽니다!");
             window.startGuestMode("스크립트 차단");
