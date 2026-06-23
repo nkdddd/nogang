@@ -70,8 +70,6 @@
         // =========================================================================
         // 1. 단어 및 알파벳 데이터베이스
         // =========================================================================
-        
-        // 🟢 신규: 알파벳 기초 학습용 데이터베이스
         const ALPHABET_DB = [
             {u:'A', l:'a', n:'에이', s:'애'}, {u:'B', l:'b', n:'비', s:'브'}, {u:'C', l:'c', n:'씨', s:'크'},
             {u:'D', l:'d', n:'디', s:'드'}, {u:'E', l:'e', n:'이', s:'에'}, {u:'F', l:'f', n:'에프', s:'프'},
@@ -121,7 +119,8 @@
         window.currentUser = null;
         window.isGuestMode = false;
         window.state = {
-            tab: 'learning', subTab: 'vowel', trainingMode: 'alphabet', // 기본 훈련모드를 알파벳으로!
+            tab: 'learning', subTab: 'alphabet', // 학습장 기본값도 알파벳으로!
+            trainingMode: 'alphabet', trainingSubMode: 'match', // 훈련소 서브모드 추가
             coins: 200, inventory: [], farmPets: [], altarSelection: [],
             toastMsg: null, currentQuiz: null, isAnswering: false, packOpening: false, revealedCard: null, animatingCorrect: null
         };
@@ -139,10 +138,26 @@
         };
 
         // =========================================================================
-        // 3. 훈련소 퀴즈 출제 엔진 (알파벳, 모음, 종합)
+        // 3. 네비게이션 및 훈련소 출제 엔진
         // =========================================================================
+        window.setLearningSubTab = function(sub) {
+            window.state.subTab = sub;
+            window.render();
+        };
+
         window.setTrainingMode = function(mode) {
             window.state.trainingMode = mode;
+            if (mode === 'alphabet' && !window.state.trainingSubMode) {
+                window.state.trainingSubMode = 'match';
+            }
+            window.state.isAnswering = false;
+            window.state.animatingCorrect = null;
+            window.getNewQuiz();
+            window.render();
+        };
+
+        window.setTrainingSubMode = function(subMode) {
+            window.state.trainingSubMode = subMode;
             window.state.isAnswering = false;
             window.state.animatingCorrect = null;
             window.getNewQuiz();
@@ -152,10 +167,9 @@
         window.getNewQuiz = function() {
             const mode = window.state.trainingMode || 'alphabet';
             
-            // 🟢 ABC 기초 모드
+            // 🟢 ABC 기초 모드 (세분화 됨)
             if (mode === 'alphabet') {
-                const types = ['match', 'name', 'sound'];
-                const qType = types[Math.floor(Math.random() * types.length)];
+                const qType = window.state.trainingSubMode || 'match';
                 const target = ALPHABET_DB[Math.floor(Math.random() * ALPHABET_DB.length)];
                 let options = [], ans = '';
 
@@ -170,7 +184,7 @@
                     };
                     options = ALPHABET_DB.map(x => isUpperToLower ? x.l : x.u);
                 } else if (qType === 'name') {
-                    ans = target.u; // 이름듣고 대문자 찾기
+                    ans = target.u;
                     window.state.currentQuiz = {
                         isAlphabet: true, qType: 'name',
                         display: `🔈 ${target.n}`, sub: '이름을 가진 알파벳은?',
@@ -178,11 +192,11 @@
                     };
                     options = ALPHABET_DB.map(x => x.u);
                 } else if (qType === 'sound') {
-                    ans = target.l; // 소리듣고 소문자 찾기
+                    ans = target.l;
                     window.state.currentQuiz = {
                         isAlphabet: true, qType: 'sound',
                         display: `🔈 ${target.s}`, sub: '소리를 내는 알파벳은?',
-                        ans: ans, speakText: target.s, speakLang: 'ko-KR'
+                        ans: ans, speakText: target.s, speakLang: 'ko-KR' // 발음은 한글 표기 소리로
                     };
                     options = ALPHABET_DB.map(x => x.l);
                 }
@@ -192,7 +206,7 @@
                 window.state.currentQuiz.options = options.sort(() => 0.5 - Math.random());
                 
             } 
-            // 🟢 모음 단독 훈련 및 종합(자음+모음) 훈련 모드
+            // 🟢 단어 기반 훈련 모드
             else {
                 let wordObj, targetAns, blankIdx, opts = [];
                 
@@ -269,9 +283,9 @@
         };
 
         // =========================================================================
-        // 4. 기타 필수 함수들 (상점, 제단 등 이전과 동일)
+        // 4. 기타 시스템 함수 (상점, 제단, Auth 등)
         // =========================================================================
-        window.handleAuth = async function(isLogin) { /* 파이어베이스 블록에서 덮어씀 */ window.showToast("오프라인 모드입니다."); };
+        window.handleAuth = async function(isLogin) { window.showToast("오프라인 모드입니다."); };
         window.logout = async function() { window.currentUser = null; window.isGuestMode = false; window.render(); };
 
         window.speak = function(text, lang = 'en-US') {
@@ -362,17 +376,38 @@
         };
 
         window.renderLearning = function() {
-            const isVowel = window.state.subTab === 'vowel';
+            const sub = window.state.subTab;
             return `
                 <div class="p-4 max-w-md mx-auto w-full flex flex-col min-h-full">
-                    <div class="flex bg-gray-200 rounded-full p-1 mb-6 shadow-inner">
-                        <button onclick="window.state.subTab='vowel'; window.render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">A E I O U (모음)</button>
-                        <button onclick="window.state.subTab='consonant'; window.render()" class="flex-1 py-2.5 rounded-full font-bold text-sm transition-all ${!isVowel ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">나머지 21개 (자음)</button>
+                    
+                    <!-- 🟢 알파벳, 모음, 자음 3단 분리 탭 🟢 -->
+                    <div class="flex bg-gray-200 rounded-full p-1 mb-6 shadow-inner text-[10px]">
+                        <button onclick="window.setLearningSubTab('alphabet')" class="flex-1 py-2.5 rounded-full font-bold transition-all ${sub === 'alphabet' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">ABC 알파벳</button>
+                        <button onclick="window.setLearningSubTab('vowel')" class="flex-1 py-2.5 rounded-full font-bold transition-all ${sub === 'vowel' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">A E I O U 모음</button>
+                        <button onclick="window.setLearningSubTab('consonant')" class="flex-1 py-2.5 rounded-full font-bold transition-all ${sub === 'consonant' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">나머지 자음</button>
                     </div>
+
                     <div class="flex-1">
-                        ${isVowel ? window.renderVowels() : window.renderConsonants()}
+                        ${sub === 'alphabet' ? window.renderAlphabetLearning() : sub === 'vowel' ? window.renderVowels() : window.renderConsonants()}
                     </div>
                     ${window.renderAdBanner()}
+                </div>
+            `;
+        };
+
+        // 🟢 신설: 알파벳 전용 학습장
+        window.renderAlphabetLearning = function() {
+            return `
+                <div class="grid grid-cols-2 gap-3 pb-4">
+                    ${ALPHABET_DB.map(a => `
+                        <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
+                            <div class="text-3xl font-black text-slate-800 mb-2">${a.u} <span class="text-2xl text-slate-500">${a.l}</span></div>
+                            <div class="flex w-full gap-1">
+                                <button onclick="window.speak('${a.u}', 'en-US')" class="flex-1 bg-blue-50 text-blue-600 rounded-lg py-1.5 text-[10px] font-bold active:bg-blue-100 transition-colors">이름(${a.n})</button>
+                                <button onclick="window.speak('${a.s}', 'ko-KR')" class="flex-1 bg-red-50 text-red-600 rounded-lg py-1.5 text-[10px] font-bold active:bg-red-100 transition-colors">소리(${a.s})</button>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
         };
@@ -513,42 +548,48 @@
             `;
         };
 
-        // 🟢 훈련소 메인 화면 (힌트 및 알파벳 퀴즈 통합)
         window.renderTraining = function() {
             if(!window.state.currentQuiz) window.getNewQuiz();
             const mode = window.state.trainingMode;
             const q = window.state.currentQuiz;
             
-            let quizAreaHtml = '';
+            // 🟢 ABC 기초 세부 훈련 탭 🟢
+            let abcSubMenuHtml = '';
+            if (mode === 'alphabet') {
+                const sub = window.state.trainingSubMode;
+                abcSubMenuHtml = `
+                    <div class="flex bg-blue-100/50 rounded-full p-1 mt-3 shadow-inner w-full max-w-[250px] mx-auto border border-blue-100">
+                        <button onclick="window.setTrainingSubMode('match')" class="flex-1 py-1.5 rounded-full font-bold text-[10px] transition-all ${sub === 'match' ? 'bg-blue-500 text-white shadow' : 'text-blue-600'}">대소문자</button>
+                        <button onclick="window.setTrainingSubMode('name')" class="flex-1 py-1.5 rounded-full font-bold text-[10px] transition-all ${sub === 'name' ? 'bg-blue-500 text-white shadow' : 'text-blue-600'}">이름</button>
+                        <button onclick="window.setTrainingSubMode('sound')" class="flex-1 py-1.5 rounded-full font-bold text-[10px] transition-all ${sub === 'sound' ? 'bg-blue-500 text-white shadow' : 'text-blue-600'}">발음</button>
+                    </div>
+                `;
+            }
 
+            let quizAreaHtml = '';
             if (q.isAlphabet) {
-                // ABC 기초 모드 UI
                 quizAreaHtml = `
-                    <div class="bg-white rounded-[2rem] p-8 shadow-xl w-full max-w-sm flex flex-col items-center border-2 border-slate-100 relative z-10">
-                        <div class="text-[9px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full mb-4">${q.sub}</div>
+                    <div class="bg-white rounded-[2rem] p-8 shadow-xl w-full max-w-sm flex flex-col items-center border-2 border-slate-100 relative z-10 mt-6">
+                        <div class="text-[10px] font-black text-blue-500 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full mb-4">${q.sub}</div>
                         <div class="text-8xl mb-2 drop-shadow-md font-black text-indigo-600 cursor-pointer active:scale-95 transition-transform group relative" 
                              onclick="window.speak('${q.speakText}', '${q.speakLang}')">
                             ${q.display}
-                            ${(q.qType === 'name' || q.qType === 'sound') ? '<div class="absolute -top-2 -right-6 bg-yellow-300 text-yellow-800 text-[10px] px-2 py-1 rounded-full animate-bounce shadow-md">소리 듣기!</div>' : ''}
+                            ${(q.qType === 'name' || q.qType === 'sound') ? '<div class="absolute -top-2 -right-8 bg-yellow-300 text-yellow-800 text-[10px] px-2 py-1 font-bold rounded-full animate-bounce shadow-md whitespace-nowrap">눌러서 듣기!</div>' : ''}
                         </div>
                     </div>
                 `;
             } else {
-                // 기존 단어 모음/종합 모드 UI (그림 힌트 포함)
                 const displayHtml = q.parts.map((p, idx) => {
                     if(idx === q.blankIndex) return window.state.animatingCorrect ? `<span class="text-blue-500 animate-pop inline-block">${p}</span>` : `<span class="text-blue-200 border-b-4 border-blue-200 px-2 inline-block w-8 text-center pb-1">?</span>`;
                     return `<span class="text-slate-700 inline-block px-1">${p}</span>`;
                 }).join('');
 
                 quizAreaHtml = `
-                    <div class="bg-white rounded-[2rem] p-8 shadow-xl w-full max-w-sm flex flex-col items-center border-2 border-slate-100 relative z-10">
-                        
-                        <!-- 🟢 몬스터 그림 클릭 시 원어민 발음 힌트 기능 🟢 -->
+                    <div class="bg-white rounded-[2rem] p-8 shadow-xl w-full max-w-sm flex flex-col items-center border-2 border-slate-100 relative z-10 mt-6">
                         <div class="text-7xl mb-4 drop-shadow-sm cursor-pointer active:scale-95 transition-transform group relative" onclick="window.speak('${q.w}')">
                             ${q.emoji}
-                            <div class="absolute -top-2 -right-8 bg-yellow-300 text-yellow-800 text-[10px] font-black px-2 py-1 rounded-full animate-bounce shadow-md">힌트 듣기!</div>
+                            <div class="absolute -top-2 -right-8 bg-yellow-300 text-yellow-800 text-[10px] font-black px-2 py-1 rounded-full animate-bounce shadow-md whitespace-nowrap">힌트 듣기!</div>
                         </div>
-
                         <div class="bg-slate-100 text-slate-500 font-bold px-4 py-1.5 rounded-full mb-8">${q.kr}</div>
                         <div class="text-5xl font-black tracking-widest uppercase flex items-center h-16">${displayHtml}</div>
                     </div>
@@ -559,11 +600,14 @@
                 <div class="flex flex-col h-full w-full">
                     <div class="flex-1 flex flex-col items-center justify-center p-6">
                         
-                        <!-- 🟢 훈련 모드 3단계 선택 토글 🟢 -->
-                        <div class="flex bg-gray-200 rounded-full p-1 mb-8 shadow-inner w-full max-w-sm mx-auto">
-                            <button onclick="window.setTrainingMode('alphabet')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'alphabet' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">ABC 기초</button>
-                            <button onclick="window.setTrainingMode('vowel')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'vowel' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">모음 훈련</button>
-                            <button onclick="window.setTrainingMode('all')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'all' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">종합 훈련</button>
+                        <!-- 🟢 훈련 모드 3단계 토글 🟢 -->
+                        <div class="flex flex-col w-full">
+                            <div class="flex bg-gray-200 rounded-full p-1 shadow-inner w-full max-w-sm mx-auto">
+                                <button onclick="window.setTrainingMode('alphabet')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'alphabet' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">ABC 기초</button>
+                                <button onclick="window.setTrainingMode('vowel')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'vowel' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">모음 훈련</button>
+                                <button onclick="window.setTrainingMode('all')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'all' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">종합 훈련</button>
+                            </div>
+                            ${abcSubMenuHtml}
                         </div>
 
                         ${quizAreaHtml}
@@ -734,6 +778,7 @@
             const app = document.getElementById('app');
             if (!window.isAuthReady) return;
 
+            // 1. 로그인 전 화면
             if (!window.currentUser && !window.isGuestMode) {
                 app.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-8 w-full bg-gradient-to-b from-blue-50 to-blue-100 h-full overflow-y-auto">
@@ -752,6 +797,7 @@
                 return;
             }
 
+            // 2. 앱 본문 렌더링
             const toastHtml = window.state.toastMsg ? `
                 <div class="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-2xl animate-pop whitespace-nowrap">${window.state.toastMsg}</div>
             ` : '';
