@@ -39,7 +39,7 @@
         .animate-pack-open { animation: pack-tremble 0.3s infinite ease-in-out; }
         @keyframes mythic-glow { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
         @keyframes pump { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-        .animate-pump { animation: pump 0.2s ease-out; }
+        .animate-pump { animation: pump 0.1s ease-out; }
         details > summary { list-style: none; outline: none; }
         details > summary::-webkit-details-marker { display: none; }
         details[open] summary ~ * { animation: pop 0.3s ease-in-out; }
@@ -146,9 +146,9 @@
             trainingMode: 'alphabet', trainingSubMode: 'match',
             coins: 200, inventory: [], farmPets: [], altarSelection: [],
             toastMsg: null, currentQuiz: null, isAnswering: false, packOpening: false, revealedCard: null, animatingCorrect: null,
-            altarResult: null, isFailing: false, isProcessing: false,
+            altarResult: null, isFailing: false, isFailingProtected: false, isProcessing: false,
             // 🟢 광클 훈련용 상태 추가 🟢
-            isClickingMode: false, clickCount: 0, clickTimeLeft: 10, clickTimer: null
+            isClickingMode: false, clickCount: 0, clickTimeLeft: 3, clickTimer: null
         };
 
         window.saveData = function() {
@@ -316,7 +316,7 @@
         };
 
         // =========================================================================
-        // 5. 뽑기, 판매, 메가 진화(제단 + 광클 이벤트) 시스템
+        // 5. 뽑기, 판매, 메가 진화(제단 + 광클 카드 파괴방지 이벤트) 시스템
         // =========================================================================
         window.changeTab = function(tab) {
             window.state.tab = tab;
@@ -366,11 +366,13 @@
                 window.render(); window.speak(drawnCard.w);
             }, 800);
         };
+        
         window.keepCard = function() {
             window.state.inventory.push(window.state.revealedCard);
             if(window.state.farmPets.length < 15) { window.state.farmPets.push({...window.state.revealedCard, x: Math.random()*80, y: Math.random()*80}); }
             window.state.packOpening = false; window.state.revealedCard = null; window.saveData(); window.showToast("도감에 보관했어요! 🎒"); window.render();
         };
+        
         window.discardCard = function() {
             window.state.coins += 10; window.state.packOpening = false; window.state.revealedCard = null;
             window.saveData(); window.showToast("카드를 버리고 10 코인을 얻었어요! 🪙"); window.render();
@@ -410,7 +412,6 @@
         window.startClickEvent = function() {
             if(window.state.altarSelection.length !== 2 || window.state.isProcessing) return;
             
-            // 광클 모드 시작! (3초, 12번 터치 목표)
             window.state.isClickingMode = true;
             window.state.clickCount = 0;
             window.state.clickTimeLeft = 3; 
@@ -429,12 +430,11 @@
             }, 1000);
         };
 
-        // 🟢 터치 횟수 증가 함수 🟢
+        // 🟢 터치 횟수 증가 및 실시간 성공률 상승 함수 🟢
         window.doClick = function() {
             if(!window.state.isClickingMode) return;
             window.state.clickCount += 1;
             
-            // 펌핑 애니메이션 효과
             const btn = document.getElementById('click-btn');
             if(btn) {
                 btn.classList.remove('animate-pump');
@@ -444,6 +444,7 @@
             window.render();
         };
 
+        // 🟢 진화 성공 계산 로직 🟢
         window.tryEvolve = async function() {
             window.state.isProcessing = true;
 
@@ -451,50 +452,71 @@
             const baseCard = window.state.inventory.find(c => c.id === cardId);
             const grade = baseCard.grade;
 
-            // 제물 소멸
-            window.state.inventory = window.state.inventory.filter(c => !window.state.altarSelection.includes(c.id));
-            window.state.altarSelection = [];
-            window.render(); 
-            
-            // 🚨 진화 성공률
-            let baseRate = 0.25; 
+            // 🚨 기본 진화 성공률
+            let baseRate = 0.60; 
             let nextGrade = 'SUPER';
             let pokeIdList = NORMAL_POKE_IDS;
 
-            if (grade === 'SUPER') { baseRate = 0.20; nextGrade = 'LEGEND'; pokeIdList = LEGEND_IDS; }
-            if (grade === 'LEGEND') { baseRate = 0.15; nextGrade = 'MYTHIC'; pokeIdList = MYTHIC_IDS; }
+            if (grade === 'SUPER') { baseRate = 0.30; nextGrade = 'LEGEND'; pokeIdList = LEGEND_IDS; }
+            if (grade === 'LEGEND') { baseRate = 0.20; nextGrade = 'MYTHIC'; pokeIdList = MYTHIC_IDS; }
 
-            // 🟢 광클 부스트 적용 (12번 이상 시 2배)
-            const isBoosted = window.state.clickCount >= 12;
-            const finalRate = isBoosted ? baseRate * 2 : baseRate;
+            // 🟢 광클 부스트: 1클릭 당 +1.5% 상승, 11번 터치 시 카드 파괴 방지!
+            const targetClicks = 11;
+            const isProtected = window.state.clickCount >= targetClicks;
+            const addedRate = window.state.clickCount * 0.015;
+            const finalRate = Math.min(baseRate + addedRate, 1.0);
 
             if(Math.random() < finalRate) { 
+                // 진화 대성공! (기존 카드 소멸 및 새 카드 지급)
+                window.state.inventory = window.state.inventory.filter(c => !window.state.altarSelection.includes(c.id));
+                window.state.altarSelection = [];
+                
                 const randomId = pokeIdList[Math.floor(Math.random() * pokeIdList.length)];
                 const poke = await fetchPokemon(randomId);
                 const newCard = { id: Date.now().toString(), grade: nextGrade, ...poke };
                 
                 window.state.revealedCard = newCard;
                 window.state.packOpening = true; 
-                window.showToast(`✨ 합성 대성공! ${isBoosted ? '(광클 2배 버프 적용!)' : ''}`);
+                window.showToast(`✨ 합성 대성공! (확률 ${Math.floor(finalRate*100)}% 적용)`);
                 window.speak(poke.w);
+                
+                window.state.isProcessing = false;
+                window.state.clickCount = 0; 
+                window.saveData(); window.render();
             } else {
-                window.state.isFailing = true;
-                window.render();
-                setTimeout(() => {
-                    window.state.isFailing = false;
-                    window.showToast("💥 합성 실패... 제물의 카드가 모두 사라졌습니다.");
+                // 진화 실패
+                if (isProtected) {
+                    // 🛡️ 카드 파괴 방지 발동! (카드는 사라지지 않습니다)
+                    window.state.altarSelection = []; 
+                    window.state.isFailingProtected = true;
                     window.render();
-                }, 1500);
+                    setTimeout(() => {
+                        window.state.isFailingProtected = false;
+                        window.showToast("휴~ 🛡️ 엄청난 터치 덕분에 카드를 지켜냈어요!");
+                        window.state.isProcessing = false;
+                        window.state.clickCount = 0;
+                        window.saveData(); window.render();
+                    }, 2500);
+                } else {
+                    // 💥 카드 완전히 파괴됨
+                    window.state.inventory = window.state.inventory.filter(c => !window.state.altarSelection.includes(c.id));
+                    window.state.altarSelection = [];
+                    window.state.isFailing = true;
+                    window.render();
+                    setTimeout(() => {
+                        window.state.isFailing = false;
+                        window.showToast("💥 합성 실패... 카드가 모두 사라졌습니다.");
+                        window.state.isProcessing = false;
+                        window.state.clickCount = 0;
+                        window.saveData(); window.render();
+                    }, 2000);
+                }
             }
-            window.state.isProcessing = false;
-            window.state.clickCount = 0; // 초기화
-            window.saveData(); window.render();
         };
 
         // =========================================================================
-        // 6. UI 렌더링 화면들 
+        // 6. UI 렌더링 화면들
         // =========================================================================
-        
         window.renderLearning = function() {
             const sub = window.state.subTab;
             return `
@@ -769,28 +791,57 @@
         };
 
         window.renderAltar = function() {
-            // 🟢 3초 광클(터치) 이벤트 화면 🟢
+            // 🟢 1. 진행 중인 광클 미니게임 화면 🟢
             if (window.state.isClickingMode) {
-                const fillPercent = Math.min((window.state.clickCount / 12) * 100, 100);
+                const cardId = window.state.altarSelection[0];
+                const baseCard = window.state.inventory.find(c => c.id === cardId);
+                const grade = baseCard.grade;
+                let baseRate = 0.60;
+                if (grade === 'SUPER') baseRate = 0.30;
+                if (grade === 'LEGEND') baseRate = 0.20;
+
+                // 실시간 확률 계산
+                let currentRate = Math.min(baseRate + (window.state.clickCount * 0.015), 1.0);
+                const percentRate = Math.floor(currentRate * 100);
+
+                const targetClicks = 11;
+                const remaining = Math.max(targetClicks - window.state.clickCount, 0);
+                const isProtected = remaining === 0;
+
                 return `
                     <div class="absolute inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-md" onclick="window.doClick()">
-                        <div class="text-[80px] mb-2 animate-bounce">🌀</div>
-                        <div class="text-white text-2xl font-black mb-4 text-center leading-tight">합성 에너지를 모아라!<br><span class="text-yellow-400 text-sm animate-pulse">3초 안에 12번 미친듯이 터치!!</span></div>
-                        <div class="text-6xl font-black text-yellow-400 mb-8 font-mono">${window.state.clickTimeLeft}초</div>
+                        <div class="text-[60px] mb-2 animate-bounce">⚡️</div>
+                        <div class="text-white text-xl font-black mb-2 text-center leading-tight">합성 에너지를 모아라!</div>
+                        <div class="text-6xl font-black text-yellow-400 mb-4 font-mono">${window.state.clickTimeLeft}초</div>
                         
-                        <div id="click-btn" class="w-48 h-48 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full flex flex-col items-center justify-center shadow-[0_0_50px_rgba(168,85,247,0.6)] cursor-pointer select-none border-4 border-white">
-                            <div class="text-6xl mb-2">👇</div>
-                            <div class="text-white font-black text-4xl drop-shadow-md">${window.state.clickCount}</div>
+                        <div class="bg-gray-800 text-white px-4 py-2 rounded-xl mb-6 text-center border-2 ${isProtected ? 'border-green-400' : 'border-red-400'} shadow-lg w-full max-w-[250px]">
+                            <div class="text-yellow-300 font-black text-lg mb-1">현재 성공률: <span class="text-2xl">${percentRate}%</span></div>
+                            ${isProtected 
+                                ? `<div class="text-green-400 font-black text-sm animate-pulse">🛡️ 카드 파괴 방지 100% 활성화!</div>`
+                                : `<div class="text-red-400 font-bold text-xs">카드 보호까지 남은 터치: <span class="text-xl">${remaining}</span>번!</div>`
+                            }
                         </div>
 
-                        <div class="w-full max-w-xs bg-gray-800 rounded-full h-6 mt-10 p-1 border-2 border-gray-700">
-                            <div class="bg-gradient-to-r from-blue-400 to-purple-500 h-full rounded-full transition-all duration-100" style="width: ${fillPercent}%"></div>
+                        <div id="click-btn" class="w-40 h-40 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full flex flex-col items-center justify-center shadow-[0_0_50px_rgba(168,85,247,0.6)] cursor-pointer select-none border-4 border-white">
+                            <div class="text-4xl mb-1">👇</div>
+                            <div class="text-white font-black text-4xl drop-shadow-md">${window.state.clickCount}</div>
                         </div>
-                        <div class="text-blue-300 text-xs font-bold mt-2">목표: 12번 (현재 ${window.state.clickCount}번)</div>
                     </div>
                 `;
             }
 
+            // 🟢 2. 실패 - 카드 파괴 방어 성공 애니메이션 🟢
+            if (window.state.isFailingProtected) {
+                return `
+                    <div class="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-md">
+                        <div class="text-[120px] mb-4 animate-bounce">🛡️</div>
+                        <h2 class="text-4xl font-black text-blue-400 mb-4 animate-pulse">합성 실패... 지만!</h2>
+                        <p class="text-white font-bold text-lg text-center leading-relaxed">엄청난 터치 에너지 덕분에<br>카드가 파괴되지 않았습니다! 🎉</p>
+                    </div>
+                `;
+            }
+
+            // 🟢 3. 실패 - 카드 파괴 애니메이션 🟢
             if (window.state.isFailing) {
                 return `
                     <div class="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-md animate-shake">
@@ -801,15 +852,16 @@
                 `;
             }
 
+            // 🟢 4. 기본 제단 화면 🟢
             const validCards = window.state.inventory.filter(c => ['RARE', 'SUPER', 'LEGEND'].includes(c.grade)); 
             const selectedCards = window.state.altarSelection.map(id => window.state.inventory.find(c => c.id === id));
             
-            let altarStatusMsg = "A급(RARE) 이상 카드 아무거나 2장을 올려보세요!<br><span class='text-blue-500'>(등급에 따라 전설, 환상의 포켓몬 등장! 실패 시 소멸 💥)</span>";
+            let altarStatusMsg = "A급 이상 카드 2장을 골라주세요!<br><span class='text-blue-500'>(등급에 따라 전설, 환상 등장! 실패 시 소멸 💥)</span>";
             if (selectedCards.length > 0) {
                 const grade = selectedCards[0].grade;
-                if(grade === 'RARE') altarStatusMsg = "기본 성공률: 25% <b class='text-yellow-600'>(광클 성공 시 50%)</b>";
-                if(grade === 'SUPER') altarStatusMsg = "기본 성공률: 20% <b class='text-red-500'>(광클 성공 시 40%)</b>";
-                if(grade === 'LEGEND') altarStatusMsg = "기본 성공률: 15% <b class='text-purple-500'>(광클 성공 시 30%)</b>";
+                if(grade === 'RARE') altarStatusMsg = "기본 성공률: 60% <b class='text-yellow-600'>(광클 시 증가 & 11번 터치 시 파괴 방지!)</b>";
+                if(grade === 'SUPER') altarStatusMsg = "기본 성공률: 30% <b class='text-red-500'>(광클 시 증가 & 11번 터치 시 파괴 방지!)</b>";
+                if(grade === 'LEGEND') altarStatusMsg = "기본 성공률: 20% <b class='text-purple-500'>(광클 시 증가 & 11번 터치 시 파괴 방지!)</b>";
             }
 
             return `
@@ -828,7 +880,8 @@
                     </div>
                     ${window.state.altarSelection.length === 2 ? `
                         <button onclick="window.startClickEvent()" class="relative overflow-hidden w-full bg-yellow-400 text-yellow-900 font-black text-xl py-4 rounded-2xl mb-4 shadow-[0_5px_0_#ca8a04] active:translate-y-1 active:shadow-none animate-bounce">
-                            포켓몬으로 합성 시작!
+                            ${window.state.isProcessing ? '<div class="absolute inset-0 bg-black/20 flex items-center justify-center"><i class="fa-solid fa-spinner fa-spin text-white"></i></div>' : ''}
+                            포켓몬 진화 시작!
                         </button>
                     ` : ''}
                     <div class="flex-1 bg-white rounded-3xl p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border border-gray-100 overflow-y-auto min-h-[150px] w-full">
@@ -1093,6 +1146,7 @@
                         }
                         window.changeTab('learning');
                     } catch(error) {
+                        console.error("DB 거부 에러:", error);
                         window.showToast("⚠️ Firebase 정보가 다르거나 규칙이 닫혀있습니다.");
                         window.startGuestMode("Firestore 권한 오류");
                     }
@@ -1103,6 +1157,7 @@
             });
 
         } catch(error) {
+            console.error("Firebase 로딩 실패:", error);
             clearTimeout(fallbackTimer);
             window.showToast("보안 환경 감지: 앱을 바로 엽니다!");
             window.startGuestMode("스크립트 차단");
