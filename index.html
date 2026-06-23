@@ -101,9 +101,7 @@
         const CONS_WORDS = "bear:곰:🐻:b,tiger:호랑이:🐯:t,lion:사자:🦁:l,zebra:얼룩말:🦓:z,fish:물고기:🐟:f,mouse:생쥐:🐭:m,nest:둥지:🪹:n,rabbit:토끼:🐰:r,house:집:🏠:h,juice:주스:🧃:j,kite:연:🪁:k,grapes:포도:🍇:g,queen:여왕:👑:q,water:물:💧:w";
         const WORDS_DB = [...RAW_WORDS.split(','), ...CONS_WORDS.split(',')].map(item => {
             const [w, kr, emoji, ans] = item.split(':');
-            const opts = ['a','e','i','o','u'].includes(ans) ? ['a','e','i','o','u'] : [ans, 'p','b','t','d','k','g','s','m'].sort(() => 0.5 - Math.random()).slice(0,5);
-            if(!opts.includes(ans)) opts[0] = ans;
-            return { w, kr, emoji, ans, parts: w.split(''), opts: opts.sort(() => 0.5 - Math.random()) };
+            return { w, kr, emoji, ans, parts: w.split('') };
         });
 
         // =========================================================================
@@ -113,7 +111,7 @@
         window.currentUser = null;
         window.isGuestMode = false;
         window.state = {
-            tab: 'learning', subTab: 'vowel', coins: 200, inventory: [], farmPets: [], altarSelection: [],
+            tab: 'learning', subTab: 'vowel', trainingMode: 'vowel', coins: 200, inventory: [], farmPets: [], altarSelection: [],
             toastMsg: null, currentQuiz: null, isAnswering: false, packOpening: false, revealedCard: null, animatingCorrect: null
         };
 
@@ -143,6 +141,14 @@
             window.render();
         };
 
+        window.setTrainingMode = function(mode) {
+            window.state.trainingMode = mode;
+            window.state.isAnswering = false;
+            window.state.animatingCorrect = null;
+            window.getNewQuiz();
+            window.render();
+        };
+
         // --- 기능 로직 ---
         window.getCardGradeStyle = function(grade) { return grade === 'SUPER' ? 'grade-super' : grade === 'RARE' ? 'grade-rare' : 'grade-normal'; };
         window.getCardGradeText = function(grade) {
@@ -151,9 +157,37 @@
             return '<span class="bg-gray-200 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">NORMAL (일반)</span>';
         };
 
+        // 🟢 훈련소 새 퀴즈 출제 로직 (모음 vs 종합)
         window.getNewQuiz = function() {
-            const randomWord = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
-            window.state.currentQuiz = { ...randomWord, options: [...randomWord.opts] };
+            const mode = window.state.trainingMode || 'vowel';
+            let wordObj, targetAns, blankIdx, opts = [];
+
+            if (mode === 'vowel') {
+                // 모음 모드: 정답이 모음인 단어만 가져옴
+                const vowelWords = WORDS_DB.filter(w => ['a','e','i','o','u'].includes(w.ans) && w.parts.includes(w.ans));
+                wordObj = vowelWords[Math.floor(Math.random() * vowelWords.length)];
+                targetAns = wordObj.ans;
+                blankIdx = wordObj.parts.indexOf(targetAns);
+                opts = ['a', 'e', 'i', 'o', 'u']; // 선택지는 항상 aeiou
+            } else {
+                // 종합 훈련 모드: 아무 단어나 가져와서 랜덤으로 빈칸 뚫기 (자음 or 모음)
+                wordObj = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
+                blankIdx = Math.floor(Math.random() * wordObj.parts.length);
+                targetAns = wordObj.parts[blankIdx];
+                
+                opts = [targetAns];
+                const isVowel = ['a','e','i','o','u'].includes(targetAns);
+                // 모음이 뚫렸으면 모음끼리, 자음이 뚫렸으면 자음끼리 보기 생성
+                const pool = isVowel ? ['a','e','i','o','u'] : ['b','c','d','f','g','h','j','k','l','m','n','p','r','s','t','v','w','x','y','z'];
+                
+                while(opts.length < 5) {
+                    const rnd = pool[Math.floor(Math.random() * pool.length)];
+                    if(!opts.includes(rnd)) opts.push(rnd);
+                }
+                opts.sort(() => 0.5 - Math.random());
+            }
+
+            window.state.currentQuiz = { ...wordObj, ans: targetAns, blankIndex: blankIdx, options: opts };
         };
 
         window.checkAnswer = function(selected) {
@@ -276,6 +310,24 @@
                         </button>
                     `).join('')}
                 </div>
+
+                <!-- 🟢 CVC 단어 섞어 읽기 연습 (교재 복원 기능) 🟢 -->
+                <details class="mb-4 bg-sky-50 rounded-2xl border border-sky-100 overflow-hidden group">
+                    <summary class="p-4 font-bold text-sky-800 flex justify-between items-center cursor-pointer">
+                        <span>📚 CVC 단어 섞어 읽기 연습</span>
+                        <i class="fa-solid fa-chevron-down text-sky-300 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="p-4 pt-0 grid grid-cols-5 gap-2 text-center">
+                        ${['cat','pet','pig','dog','cup', 'map','hen','sit','hot','run', 'bag','net','lip','box','gum', 'fan','red','win','mop','bus'].map(w => `
+                            <button onclick="window.speak('${w}')" class="bg-white py-2 rounded-lg shadow-sm text-xs font-black text-slate-700 active:scale-95 transition-transform border border-sky-100 flex items-center justify-center">
+                                ${w}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <p class="text-center text-[10px] text-sky-600 mt-2 font-bold px-4 pb-4">가운데 모음 소리에 집중하며 차례대로 읽어봐요!</p>
+                </details>
+
+                <!-- 단어 가족 -->
                 <details class="mb-4 bg-indigo-50 rounded-2xl border border-indigo-100 overflow-hidden group">
                     <summary class="p-4 font-bold text-indigo-800 flex justify-between items-center cursor-pointer">
                         <span>👥 단어 가족 모여라!</span>
@@ -294,6 +346,40 @@
                                 </div>
                             </div>
                         `).join('')).join('')}
+                    </div>
+                </details>
+                <details class="mb-4 bg-purple-50 rounded-2xl border border-purple-100 overflow-hidden group">
+                    <summary class="p-4 font-bold text-purple-800 flex justify-between items-center cursor-pointer">
+                        <span>⚡ 매직 E가 붙으면? (긴 소리)</span>
+                        <i class="fa-solid fa-chevron-down text-purple-300 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="p-4 pt-0 grid grid-cols-2 gap-2">
+                        ${['a','e','i','o','u'].flatMap(v => VOWEL_DB[v].magic).map(word => `
+                            <button onclick="window.speak('${word}')" class="bg-white p-3 rounded-xl shadow-sm font-bold text-slate-700 text-center border border-purple-50 flex items-center justify-center gap-1 active:scale-95 transition-transform">
+                                ${word.slice(0,-1)}<span class="text-purple-500">e</span>
+                                <i class="fa-solid fa-volume-high text-[10px] text-purple-400"></i>
+                            </button>
+                        `).join('')}
+                    </div>
+                </details>
+                <details class="mb-4 bg-orange-50 rounded-2xl border border-orange-100 overflow-hidden group">
+                    <summary class="p-4 font-bold text-orange-800 flex justify-between items-center cursor-pointer">
+                        <span>💡 자리에 따라 소리가 달라져요</span>
+                        <i class="fa-solid fa-chevron-down text-orange-300 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="p-4 pt-0 flex flex-col gap-2">
+                        ${['a','e','i','o','u'].flatMap(v => VOWEL_DB[v].var || []).map(vr => `
+                            <div class="bg-white p-3 rounded-xl shadow-sm border border-orange-50">
+                                <div class="text-xs font-bold text-orange-600 mb-2">${vr.rule}</div>
+                                <div class="flex gap-2">
+                                    ${vr.w.map(word => `
+                                        <button onclick="window.speak('${word}')" class="bg-orange-100 px-3 py-1 rounded-lg text-orange-800 font-bold text-sm shrink-0 flex items-center gap-1 active:scale-95 transition-transform">
+                                            ${word} <i class="fa-solid fa-volume-high text-[10px] text-orange-500"></i>
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
                 </details>
             `;
@@ -321,21 +407,81 @@
                             </div>
                         </details>
                     `).join('')}
+                    <div class="bg-red-50 rounded-2xl p-4 border border-red-100 mt-2">
+                        <h3 class="font-bold text-red-800 mb-3"><i class="fa-solid fa-ear-listen mr-1"></i> 헷갈리는 소리 짝 (VS)</h3>
+                        <div class="flex flex-col gap-3">
+                            ${CONSONANT_DB.vs.map(pair => `
+                                <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-red-100">
+                                    <div class="flex-1 flex flex-col items-center p-1">
+                                        <button onclick="window.speak('${pair.p1.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
+                                            <span class="text-3xl font-black text-slate-700">${pair.p1.id}</span>
+                                            <span class="text-[10px] text-slate-400 mt-1">${pair.p1.kr}</span>
+                                        </button>
+                                        <button onclick="window.speak('${pair.p1.w}')" class="mt-1 w-full bg-blue-50 py-1.5 rounded-lg text-[11px] font-bold text-blue-600 active:bg-blue-100 flex items-center justify-center gap-1 shadow-sm transition-colors">
+                                            ${pair.p1.w} <i class="fa-solid fa-volume-high text-[10px]"></i>
+                                        </button>
+                                    </div>
+                                    <div class="text-xs font-black text-red-300 px-1">VS</div>
+                                    <div class="flex-1 flex flex-col items-center p-1">
+                                        <button onclick="window.speak('${pair.p2.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
+                                            <span class="text-3xl font-black text-red-600">${pair.p2.id}</span>
+                                            <span class="text-[10px] text-red-400 mt-1">${pair.p2.kr}</span>
+                                        </button>
+                                        <button onclick="window.speak('${pair.p2.w}')" class="mt-1 w-full bg-red-50 py-1.5 rounded-lg text-[11px] font-bold text-red-600 active:bg-red-100 flex items-center justify-center gap-1 shadow-sm transition-colors">
+                                            ${pair.p2.w} <i class="fa-solid fa-volume-high text-[10px]"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- 🟢 W와 Y의 두 얼굴 (교재 복원 기능) 🟢 -->
+                    <details class="bg-indigo-50 rounded-2xl border border-indigo-100 overflow-hidden group mt-2">
+                        <summary class="p-4 font-bold text-indigo-800 flex justify-between items-center cursor-pointer">
+                            <span>🎭 W와 Y의 두 얼굴</span>
+                            <i class="fa-solid fa-chevron-down text-indigo-300 group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <div class="p-4 pt-0 text-sm text-indigo-900 space-y-3">
+                            <div class="bg-white p-3 rounded-xl shadow-sm border border-indigo-100">
+                                <div class="font-black text-indigo-600 mb-1 text-center">W의 두 얼굴</div>
+                                <ul class="list-disc pl-5 space-y-1 text-[11px] font-bold text-gray-600">
+                                    <li><span class="text-blue-500">단어 맨 앞 (자음):</span> "우/워" (win, wet)</li>
+                                    <li><span class="text-red-500">모음 뒤 (모음팀):</span> "우/오" (cow, saw, new)</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl shadow-sm border border-indigo-100">
+                                <div class="font-black text-indigo-600 mb-1 text-center">Y의 두 얼굴</div>
+                                <ul class="list-disc pl-5 space-y-1 text-[11px] font-bold text-gray-600">
+                                    <li><span class="text-blue-500">단어 맨 앞 (자음):</span> "여" (yes, yellow)</li>
+                                    <li><span class="text-red-500">단어 끝 (모음):</span> "이/아이" (happy, fly, sky)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </details>
                 </div>
             `;
         };
 
         window.renderTraining = function() {
             if(!window.state.currentQuiz) window.getNewQuiz();
+            const mode = window.state.trainingMode;
             const q = window.state.currentQuiz;
-            const displayHtml = q.parts.map(p => {
-                if(p === q.ans) return window.state.animatingCorrect ? `<span class="text-blue-500 animate-pop inline-block">${p}</span>` : `<span class="text-blue-200 border-b-4 border-blue-200 px-2 inline-block w-8 text-center pb-1">?</span>`;
+            const displayHtml = q.parts.map((p, idx) => {
+                if(idx === q.blankIndex) return window.state.animatingCorrect ? `<span class="text-blue-500 animate-pop inline-block">${p}</span>` : `<span class="text-blue-200 border-b-4 border-blue-200 px-2 inline-block w-8 text-center pb-1">?</span>`;
                 return `<span class="text-slate-700 inline-block px-1">${p}</span>`;
             }).join('');
 
             return `
                 <div class="flex flex-col items-center justify-center h-full p-6 w-full">
-                    <h2 class="text-2xl font-black text-slate-800 mb-8">빈칸을 채워봐!</h2>
+                    
+                    <!-- 🟢 훈련 모드 선택 토글 🟢 -->
+                    <div class="flex bg-gray-200 rounded-full p-1 mb-8 shadow-inner w-full max-w-xs mx-auto">
+                        <button onclick="window.setTrainingMode('vowel')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'vowel' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">모음 훈련</button>
+                        <button onclick="window.setTrainingMode('all')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'all' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">종합 훈련 (모음+자음)</button>
+                    </div>
+
+                    <h2 class="text-2xl font-black text-slate-800 mb-6">빈칸을 채워봐!</h2>
                     <div class="bg-white rounded-[2rem] p-8 shadow-xl w-full max-w-sm flex flex-col items-center border-2 border-slate-100">
                         <div class="text-7xl mb-4 drop-shadow-sm">${q.emoji}</div>
                         <div class="bg-slate-100 text-slate-500 font-bold px-4 py-1.5 rounded-full mb-8">${q.kr}</div>
