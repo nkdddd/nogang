@@ -1,1177 +1,1309 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="파닉스 몬스터">
-    
-    <!-- 🟢 구글 애드센스 소유권 확인 태그 (추가된 부분) 🟢 -->
-   
-    <meta name="description" content="파닉스 몬스터: 아이들을 위한 즐거운 파닉스 학습 앱. 단어 몬스터를 수집하며 자연스럽게 영어를 읽고 배울 수 있습니다.">
-    <title>Phonics Monster App - 파닉스 몬스터 학습 앱</title>
-    
-    <!-- 🟢 구글 애드센스 🟢 -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6453117184750039" crossorigin="anonymous"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>책임수사관 8회 — 암기 마스터</title>
+<style>
+  :root{
+    --ink:#0E1F33; --navy:#16304F; --canvas:#EAEDF1; --card:#FFFFFF;
+    --gold:#A9762A; --gold-soft:#F1E6CF; --red:#B0392E; --red-soft:#F7E3DF;
+    --green:#15795A; --green-soft:#DBEFE7; --muted:#5C6B7A; --line:#DCE2E8;
+    --text:#16212E;
+    --sans:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'D2Coding',monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--canvas);color:var(--text);
+    -webkit-font-smoothing:antialiased;line-height:1.55;font-size:15px}
+  .wrap{max-width:860px;margin:0 auto;padding:0 14px 80px}
 
-    <!-- 🟢 Firebase 클래식 스크립트 🟢 -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+  /* Header */
+  header{position:sticky;top:0;z-index:50;background:var(--ink);
+    box-shadow:0 2px 10px rgba(0,0,0,.18)}
+  .hd{max-width:860px;margin:0 auto;padding:14px 16px 0}
+  .hd h1{margin:0;color:#fff;font-size:18px;font-weight:800;letter-spacing:-.3px}
+  .hd .sub{color:#9DB2CC;font-size:12px;margin:3px 0 12px;font-family:var(--mono)}
+  .hd .sub b{color:var(--gold)}
+  nav{display:flex;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  nav::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;background:transparent;border:none;color:#9DB2CC;
+    padding:10px 13px;font-family:var(--sans);font-size:13px;font-weight:700;
+    cursor:pointer;border-top-left-radius:7px;border-top-right-radius:7px;
+    white-space:nowrap;transition:background .15s,color .15s}
+  .tab:hover{color:#cdd9e8}
+  .tab.on{background:var(--canvas);color:var(--ink)}
+  .tab:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap');
-        body { font-family: 'Nunito', 'Noto Sans KR', sans-serif; height: 100dvh; background-color: #000; margin: 0; display: flex; justify-content: center; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
-        .pb-safe { padding-bottom: max(env(safe-area-inset-bottom, 16px), 8px); }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-10px) rotate(-2deg); } 40% { transform: translateX(10px) rotate(2deg); } 60% { transform: translateX(-10px) rotate(-2deg); } 80% { transform: translateX(10px) rotate(2deg); } }
-        .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes fly-to-blank { 0% { transform: scale(1) translateY(0); opacity: 1; } 50% { transform: scale(1.5) translateY(-50px); opacity: 0.8; } 100% { transform: scale(0.5) translate(0, -150px); opacity: 0; } }
-        .animate-fly { animation: fly-to-blank 0.6s ease-in-out forwards; }
-        @keyframes flash-red { 0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); } 20% { box-shadow: inset 0 0 0 30px rgba(239, 68, 68, 0.6); } 100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); } }
-        .animate-flash { animation: flash-red 0.5s ease-out; }
-        @keyframes pack-tremble { 0%, 100% { transform: rotate(0deg) scale(1); filter: brightness(1); } 25% { transform: rotate(-5deg) scale(1.05); filter: brightness(1.2); } 50% { transform: rotate(5deg) scale(1.05); } 75% { transform: rotate(-5deg) scale(1.05); } }
-        .animate-pack-open { animation: pack-tremble 0.3s infinite ease-in-out; }
-        @keyframes mythic-glow { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
-        @keyframes pump { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-        .animate-pump { animation: pump 0.1s ease-out; }
-        details > summary { list-style: none; outline: none; }
-        details > summary::-webkit-details-marker { display: none; }
-        details[open] summary ~ * { animation: pop 0.3s ease-in-out; }
-        
-        /* 🟢 카드 등급 CSS 🟢 */
-        .grade-mythic { background: linear-gradient(135deg, #e0e7ff, #f3e8ff, #fae8ff); border: 4px solid #a855f7; box-shadow: 0 0 25px rgba(168, 85, 247, 0.8); animation: mythic-glow 3s infinite linear; }
-        .grade-legend { background: linear-gradient(135deg, #fee2e2, #fecaca, #fca5a5); border: 4px solid #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
-        .grade-super { background: linear-gradient(135deg, #fffbeb, #fef3c7, #fde68a); border: 4px solid #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); }
-        .grade-rare { background: linear-gradient(135deg, #f8fafc, #f1f5f9, #e2e8f0); border: 4px solid #cbd5e1; box-shadow: 0 0 10px rgba(203, 213, 225, 0.5); }
-        .grade-normal { background: #ffffff; border: 4px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-    </style>
+  /* Panels */
+  .panel{display:none;padding-top:18px}
+  .panel.on{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.panel.on{animation:none}}
+
+  .lead{color:var(--muted);font-size:13px;margin:0 0 16px}
+  h2.sec{font-size:15px;margin:22px 0 10px;color:var(--navy);font-weight:800;
+    display:flex;align-items:center;gap:8px}
+  h2.sec .n{font-family:var(--mono);font-size:11px;color:#fff;background:var(--navy);
+    padding:2px 7px;border-radius:4px;font-weight:700}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:11px;
+    padding:14px 15px;margin:0 0 11px}
+  .card h3{margin:0 0 7px;font-size:14px;font-weight:800;color:var(--text)}
+  .card p{margin:5px 0;font-size:13.5px}
+  .card ul{margin:5px 0;padding-left:18px}
+  .card li{margin:4px 0;font-size:13.5px}
+
+  /* statute chip */
+  .st{font-family:var(--mono);font-size:12px;background:#EDF1F5;border:1px solid var(--line);
+    color:var(--navy);padding:1px 6px;border-radius:5px;font-weight:600;white-space:nowrap}
+  b.k{color:var(--gold);font-weight:800}
+  .rd{color:var(--red);font-weight:700}
+  .gn{color:var(--green);font-weight:700}
+
+  /* frequency bars */
+  .freq{display:flex;align-items:center;gap:10px;margin:7px 0}
+  .freq .lab{flex:0 0 142px;font-size:13px;font-weight:700}
+  .freq .bar{flex:1;height:22px;background:#E2E7EC;border-radius:5px;overflow:hidden;position:relative}
+  .freq .fill{height:100%;background:linear-gradient(90deg,var(--navy),#2C557F);
+    display:flex;align-items:center;justify-content:flex-end;padding-right:7px;
+    color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;min-width:26px}
+  .freq .fill.top{background:linear-gradient(90deg,var(--gold),#C99A45)}
+  .freq .rounds{flex:0 0 96px;font-family:var(--mono);font-size:10.5px;color:var(--muted);text-align:right}
+
+  /* tables */
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12.5px}
+  th,td{border:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+  th{background:var(--navy);color:#fff;font-weight:700;font-size:12px}
+  tr:nth-child(even) td{background:#F6F8FA}
+  td .st{font-size:11px}
+
+  /* accordion */
+  details{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    margin:0 0 9px;overflow:hidden}
+  details[open]{border-color:var(--navy)}
+  summary{cursor:pointer;padding:12px 14px;font-weight:800;font-size:14px;
+    list-style:none;display:flex;align-items:center;gap:9px;color:var(--text)}
+  summary::-webkit-details-marker{display:none}
+  summary .tag{font-family:var(--mono);font-size:10px;background:var(--gold-soft);
+    color:var(--gold);padding:2px 6px;border-radius:4px;font-weight:800;flex:0 0 auto}
+  summary .arw{margin-left:auto;color:var(--muted);transition:transform .2s}
+  details[open] summary .arw{transform:rotate(90deg)}
+  .acc-body{padding:0 14px 13px}
+  .acc-body ul{margin:4px 0;padding-left:17px}
+  .acc-body li{margin:5px 0;font-size:13px}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:800;
+    padding:2px 7px;border-radius:20px;margin-right:5px}
+  .pill.g{background:var(--green-soft);color:var(--green)}
+  .pill.r{background:var(--red-soft);color:var(--red)}
+  .note{font-size:12px;color:var(--muted);background:#F4F6F8;border-left:3px solid var(--gold);
+    padding:8px 11px;border-radius:0 7px 7px 0;margin:9px 0}
+
+  /* QUIZ */
+  .qz-modes{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+  .qz-modes button{flex:1;min-width:130px;border:1px solid var(--line);background:var(--card);
+    border-radius:9px;padding:13px 10px;cursor:pointer;font-family:var(--sans);
+    font-weight:800;font-size:13px;color:var(--text);transition:.15s}
+  .qz-modes button:hover{border-color:var(--navy)}
+  .qz-modes button span{display:block;font-size:11px;color:var(--muted);font-weight:600;margin-top:3px}
+  .qz-modes button:focus-visible{outline:2px solid var(--gold)}
+
+  #qzStage{display:none}
+  .qz-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;color:var(--muted);font-family:var(--mono)}
+  .qz-prog{height:5px;background:#E2E7EC;border-radius:3px;overflow:hidden;margin-bottom:14px}
+  .qz-prog i{display:block;height:100%;background:var(--gold);width:0;transition:width .3s}
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:17px}
+  .qtype{font-family:var(--mono);font-size:10.5px;font-weight:800;color:var(--gold);letter-spacing:.5px;margin-bottom:7px}
+  .qtext{font-size:15.5px;font-weight:700;line-height:1.5;margin-bottom:14px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{text-align:left;border:1px solid var(--line);background:#fff;border-radius:9px;
+    padding:12px 13px;cursor:pointer;font-family:var(--sans);font-size:13.5px;color:var(--text);
+    transition:.12s;line-height:1.45}
+  .opt:hover:not(:disabled){border-color:var(--navy);background:#F7F9FB}
+  .opt:focus-visible{outline:2px solid var(--gold)}
+  .opt.correct{border-color:var(--green);background:var(--green-soft);font-weight:700}
+  .opt.wrong{border-color:var(--red);background:var(--red-soft)}
+  .opt:disabled{cursor:default}
+  .verdict{margin-top:13px;padding:11px 13px;border-radius:9px;font-size:13px;display:none}
+  .verdict.show{display:block}
+  .verdict.ok{background:var(--green-soft);border:1px solid var(--green)}
+  .verdict.no{background:var(--red-soft);border:1px solid var(--red)}
+  .verdict b{display:block;margin-bottom:3px;font-size:13px}
+  .qz-next{margin-top:13px;width:100%;background:var(--navy);color:#fff;border:none;
+    border-radius:9px;padding:13px;font-family:var(--sans);font-weight:800;font-size:14px;cursor:pointer;display:none}
+  .qz-next.show{display:block}
+  .qz-next:hover{background:var(--ink)}
+  .qz-next:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+  /* flashcard */
+  .flash{perspective:1200px;height:220px;margin-bottom:13px}
+  .flash-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+  .flash.flip .flash-inner{transform:rotateY(180deg)}
+  @media (prefers-reduced-motion:reduce){.flash-inner{transition:none}}
+  .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:20px;text-align:center;border:1px solid var(--line)}
+  .face.front{background:var(--ink);color:#fff}
+  .face.front .q{font-size:17px;font-weight:800}
+  .face.front .hint{font-family:var(--mono);font-size:11px;color:#9DB2CC;margin-top:11px}
+  .face.back{background:var(--card);transform:rotateY(180deg);color:var(--text)}
+  .face.back .a{font-size:15px;font-weight:700;line-height:1.5}
+
+  /* results */
+  #qzResult{display:none;text-align:center}
+  .score-ring{font-family:var(--mono);font-size:46px;font-weight:800;color:var(--navy);margin:8px 0 2px}
+  .score-lab{color:var(--muted);font-size:13px;margin-bottom:6px}
+  .best{font-size:12px;color:var(--gold);font-family:var(--mono);font-weight:700;margin-bottom:16px}
+  .review{text-align:left;margin-top:8px}
+  .review h3{font-size:13px;color:var(--red);margin:14px 0 8px}
+  .rv{background:var(--red-soft);border:1px solid #E9C9C3;border-radius:9px;padding:11px 13px;margin-bottom:8px;font-size:13px}
+  .rv .qq{font-weight:700;margin-bottom:4px}
+  .rv .aa{color:var(--green);font-weight:700}
+  .qz-restart{background:var(--gold);color:#fff;border:none;border-radius:9px;padding:13px 22px;
+    font-family:var(--sans);font-weight:800;font-size:14px;cursor:pointer;margin-top:8px}
+  .qz-restart:hover{background:#946623}
+
+  footer{text-align:center;color:var(--muted);font-size:11px;margin-top:26px;font-family:var(--mono)}
+</style>
 </head>
 <body>
-     <div class="hidden">
-        <h1>파닉스 몬스터 학습 앱</h1>
-        <p>Phonics Monster는 영어를 처음 시작하는 아이들이 알파벳 소리와 단어를 즐겁게 익힐 수 있는 학습 플랫폼입니다. 파닉스 학습, 단어 카드 수집, 포켓몬 진화 시스템을 통해 즐겁게 영어 공부를 시작하세요.</p>
-    </div>
-    <div id="main-wrapper" class="relative w-full max-w-md h-full bg-slate-50 flex flex-col shadow-2xl overflow-hidden mx-auto">
-        <div id="app" class="flex-1 w-full flex flex-col overflow-hidden relative">
-            <div class="flex-1 flex flex-col items-center justify-center bg-blue-500 text-white font-black text-2xl h-full">
-                <i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i> 서버 확인 중...
-            </div>
-        </div>
-        <div id="global-ad" class="w-full bg-slate-100 border-t border-gray-300 flex justify-center items-center shrink-0 h-[65px] pb-safe relative z-[999] overflow-hidden">
-            <span class="absolute text-gray-400 text-[10px] font-bold tracking-widest text-center z-0">AD SPACE</span>
-            <ins class="adsbygoogle w-full h-full relative z-10" style="display:block;" data-ad-client="ca-pub-6453117184750039" data-ad-slot="5112847569" data-ad-format="horizontal" data-full-width-responsive="true"></ins>
-        </div>
-    </div>
-
-    <script>
-        // =========================================================================
-        // 1. 단어, 알파벳, 포켓몬스터(1,025종 분류) 데이터베이스
-        // =========================================================================
-        const ALPHABET_DB = [
-            {u:'A', l:'a', n:'에이', s:'애'}, {u:'B', l:'b', n:'비', s:'브'}, {u:'C', l:'c', n:'씨', s:'크'},
-            {u:'D', l:'d', n:'디', s:'드'}, {u:'E', l:'e', n:'이', s:'에'}, {u:'F', l:'f', n:'에프', s:'프'},
-            {u:'G', l:'g', n:'쥐', s:'그'}, {u:'H', l:'h', n:'에이치', s:'흐'}, {u:'I', l:'i', n:'아이', s:'이'},
-            {u:'J', l:'j', n:'제이', s:'즈'}, {u:'K', l:'k', n:'케이', s:'크'}, {u:'L', l:'l', n:'엘', s:'을'},
-            {u:'M', l:'m', n:'엠', s:'음'}, {u:'N', l:'n', n:'엔', s:'은'}, {u:'O', l:'o', n:'오우', s:'아'},
-            {u:'P', l:'p', n:'피', s:'프'}, {u:'Q', l:'q', n:'큐', s:'쿠'}, {u:'R', l:'r', n:'알', s:'르'},
-            {u:'S', l:'s', n:'에스', s:'스'}, {u:'T', l:'t', n:'티', s:'트'}, {u:'U', l:'u', n:'유', s:'어'},
-            {u:'V', l:'v', n:'브이', s:'브'}, {u:'W', l:'w', n:'더블유', s:'우'}, {u:'X', l:'x', n:'엑스', s:'크스'},
-            {u:'Y', l:'y', n:'와이', s:'여'}, {u:'Z', l:'z', n:'지', s:'즈'}
-        ];
-
-        const LEGEND_IDS = [144,145,146,150, 243,244,245,249,250, 377,378,379,380,381,382,383,384, 480,481,482,483,484,485,486,487,488, 638,639,640,641,642,643,644,645,646, 716,717,718, 772,773, 785,786,787,788, 789,790,791,792, 800, 888,889,890,891,892, 894,895,896,897,898, 1001,1002,1003,1004];
-        const MYTHIC_IDS = [151, 251, 385,386, 489,490,491,492,493, 494, 647,648,649, 719,720,721, 801,802, 807, 808, 809, 893, 1025];
-        const EXCLUDED_IDS = new Set([...LEGEND_IDS, ...MYTHIC_IDS]);
-        const NORMAL_POKE_IDS = [];
-        for(let i=1; i<=1025; i++) { if(!EXCLUDED_IDS.has(i)) NORMAL_POKE_IDS.push(i); }
-
-        async function fetchPokemon(id) {
-            try {
-                const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
-                if (!res.ok) throw new Error('API Fail');
-                const data = await res.json();
-                const krNameObj = data.names.find(n => n.language.name === 'ko');
-                const enNameObj = data.names.find(n => n.language.name === 'en');
-                return {
-                    w: enNameObj ? enNameObj.name : data.name, 
-                    kr: krNameObj ? krNameObj.name : data.name, 
-                    emoji: '✨', 
-                    imgUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
-                };
-            } catch(e) {
-                return { w: 'Pokemon', kr: '비밀의 포켓몬', emoji: '✨', imgUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png` };
-            }
-        }
-
-        const VOWEL_DB = {
-            'a': { sound: '애', fam: [{n:'-at', w:['cat','hat','bat','mat']}, {n:'-an', w:['can','fan','man','pan']}, {n:'-ap', w:['cap','map','tap']}], magic: ['cake','game','name','lake'], var: [{rule:'ar (아)', w:['car','park','star']}] },
-            'e': { sound: '에', fam: [{n:'-en', w:['pen','hen','ten']}, {n:'-et', w:['net','wet','pet']}, {n:'-ell', w:['bell','well','fell']}], magic: ['here'], var: [{rule:'단어 끝 e (이)', w:['he','me','we']}, {rule:'ee/ea (이~)', w:['see','sea','leaf']}] },
-            'i': { sound: '이', fam: [{n:'-it', w:['sit','hit','bit']}, {n:'-in', w:['win','pin','bin']}, {n:'-ig', w:['pig','big','dig']}], magic: ['kite','bike','five','nine'], var: [{rule:'ir (어)', w:['bird','girl','shirt']}] },
-            'o': { sound: '아', fam: [{n:'-ot', w:['hot','pot','dot']}, {n:'-op', w:['mop','top','hop']}, {n:'-og', w:['dog','log','fog']}], magic: ['hope','nose','rose','bone'], var: [{rule:'or (오)', w:['corn','horn','fork']}] },
-            'u': { sound: '어', fam: [{n:'-ug', w:['bug','rug','mug']}, {n:'-ub', w:['tub','rub','cub']}, {n:'-ut', w:['nut','cut','hut']}], magic: ['cute','tube','cube','mule'], var: [{rule:'ur (어)', w:['nurse','purple','turtle']}] }
-        };
-        const CONSONANT_DB = {
-            locations: [
-                { id: 'lips', title: '💋 입술 소리', tags: '(p, b, m, w)', items: [{id: 'p', kr: '프', w: 'pig'}, {id: 'b', kr: '브', w: 'bear'}, {id: 'm', kr: '음', w: 'mouse'}, {id: 'w', kr: '우/워', w: 'water'}]},
-                { id: 'teeth', title: '🦷 혀끝 소리', tags: '(t, d, n, l)', items: [{id: 't', kr: '트', w: 'tiger'}, {id: 'd', kr: '드', w: 'dog'}, {id: 'n', kr: '은', w: 'nest'}, {id: 'l', kr: '을', w: 'lion'}]},
-                { id: 'throat', title: '🗣️ 목 안쪽 소리', tags: '(k, g, c, q)', items: [{id: 'k', kr: '크', w: 'kite'}, {id: 'g', kr: '그', w: 'grapes'}, {id: 'c', kr: '크', w: 'cat'}, {id: 'q', kr: '쿠', w: 'queen'}]},
-                { id: 'wind', title: '🌬️ 이·바람 소리', tags: '(s, z, f, v)', items: [{id: 's', kr: '스', w: 'sun'}, {id: 'z', kr: '즈', w: 'zebra'}, {id: 'f', kr: '프', w: 'fish'}, {id: 'v', kr: '브', w: 'van'}]},
-                { id: 'etc', title: '기타 소리', tags: '(h, j, r, y, x)', items: [{id: 'h', kr: '흐', w: 'house'}, {id: 'j', kr: '즈', w: 'juice'}, {id: 'r', kr: '르', w: 'rabbit'}, {id: 'y', kr: '여', w: 'yo-yo'}, {id: 'x', kr: '크스', w: 'xylophone'}]}
-            ],
-            vs: [
-                { p1: {id: 'p', kr: '바람만(프)', sound: '프', w: 'pig'}, p2: {id: 'b', kr: '목 떨림!(브)', sound: '브', w: 'bear'} },
-                { p1: {id: 't', kr: '바람만(트)', sound: '트', w: 'tiger'}, p2: {id: 'd', kr: '목 떨림!(드)', sound: '드', w: 'dog'} },
-                { p1: {id: 'k', kr: '바람만(크)', sound: '크', w: 'kite'}, p2: {id: 'g', kr: '목 떨림!(그)', sound: '그', w: 'grapes'} },
-                { p1: {id: 's', kr: '바람만(스)', sound: '스', w: 'sun'}, p2: {id: 'z', kr: '목 떨림!(즈)', sound: '즈', w: 'zebra'} },
-                { p1: {id: 'f', kr: '바람만(프)', sound: '프', w: 'fish'}, p2: {id: 'v', kr: '목 떨림!(브)', sound: '브', w: 'van'} }
-            ]
-        };
-        const RAW_WORDS = "cat:고양이:🐱:a,dog:개:🐶:o,pig:돼지:🐷:i,sun:태양:☀️:u,bed:침대:🛏️:e,bat:박쥐:🦇:a,hat:모자:🧢:a,map:지도:🗺️:a,cap:모자:🧢:a,fan:선풍기:🌬️:a,man:남자:👨:a,pan:팬:🍳:a,net:그물:🥅:e,red:빨강:🔴:e,leg:다리:🦵:e,pen:펜:🖊️:e,hen:암탉:🐔:e,sit:앉다:🪑:i,hit:치다:🏏:i,lip:입술:👄:i,six:육:6️⃣:i,box:상자:📦:o,fox:여우:🦊:o,top:팽이:🌀:o,hop:뛰다:🦘:o,mop:걸레:🧹:o,bug:벌레:🐛:u,rug:깔개:🔲:u,mug:머그컵:☕:u,nut:견과:🥜:u,cup:컵:🥤:u,bus:버스:🚌:u,tub:욕조:🛁:u,mud:진흙:🟤:u,web:거미줄:🕸️:e,wet:젖은:💧:e,vet:수의사:👩‍⚕️:e,zip:지퍼:🤐:i,win:이기다:🏆:i,fin:지느러미:🦈:i,bin:쓰레기통:🗑️:i,pin:핀:📍:i,mix:섞다:🥣:i,sad:슬픈:😢:a,mad:화난:😡:a,bad:나쁜:😈:a,bag:가방:👜:a,tag:태그:🏷️:a,wag:흔들다:🐕:a,jam:잼:🍓:a,ham:햄:🍖:a,ram:숫양:🐏:a,can:캔:🥫:a,van:승합차:🚐:a,run:달리다:🏃:u,fun:재미:🎉:u,gum:껌:🍬:u,hot:뜨거운:🔥:o,pot:냄비:🥘:o,dot:점:⏺️:o,log:통나무:🪵:o,jog:조깅:🏃‍♂️:o,cop:경찰:👮:o,pop:터지다:💥:o,sob:흐느끼다:😭:o,rob:도둑질:🦹:o,nod:끄덕이다:😌:o,rod:막대:🦯:o";
-        const CONS_WORDS = "bear:곰:🐻:b,tiger:호랑이:🐯:t,lion:사자:🦁:l,zebra:얼룩말:🦓:z,fish:물고기:🐟:f,mouse:생쥐:🐭:m,nest:둥지:🪹:n,rabbit:토끼:🐰:r,house:집:🏠:h,juice:주스:🧃:j,kite:연:🪁:k,grapes:포도:🍇:g,queen:여왕:👑:q,water:물:💧:w";
-        const WORDS_DB = [...RAW_WORDS.split(','), ...CONS_WORDS.split(',')].map(item => {
-            const [w, kr, emoji, ans] = item.split(':');
-            return { w, kr, emoji, ans, parts: w.split('') };
-        });
-
-        // =========================================================================
-        // 2. 전역 변수 및 상태 관리
-        // =========================================================================
-        window.isAuthReady = false;
-        window.currentUser = null;
-        window.isGuestMode = false;
-        window.state = {
-            tab: 'learning', subTab: 'alphabet',
-            trainingMode: 'alphabet', trainingSubMode: 'match',
-            coins: 200, inventory: [], farmPets: [], altarSelection: [],
-            toastMsg: null, currentQuiz: null, isAnswering: false, packOpening: false, revealedCard: null, animatingCorrect: null,
-            altarResult: null, isFailing: false, isFailingProtected: false, isProcessing: false,
-            // 🟢 광클 훈련용 상태 추가 🟢
-            isClickingMode: false, clickCount: 0, clickTimeLeft: 3, clickTimer: null
-        };
-
-        window.saveData = function() {
-            if (!window.currentUser || window.isGuestMode) {
-                localStorage.setItem('phonicsAppState', JSON.stringify({
-                    coins: window.state.coins, inventory: window.state.inventory, farmPets: window.state.farmPets
-                }));
-                return;
-            }
-            db.collection("users").doc(window.currentUser.uid).set({
-                coins: window.state.coins, inventory: window.state.inventory, farmPets: window.state.farmPets
-            }).catch(e => console.error("데이터 저장 실패:", e));
-        };
-
-        // =========================================================================
-        // 3. TTS 음성 엔진
-        // =========================================================================
-        if (typeof window !== 'undefined' && window.speechSynthesis) {
-            window.speechSynthesis.getVoices();
-            if (window.speechSynthesis.onvoiceschanged !== undefined) {
-                window.speechSynthesis.onvoiceschanged = window.speechSynthesis.getVoices;
-            }
-        }
-
-        window.speak = function(text, lang = 'en-US') {
-            if (!window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-            
-            let speakText = text;
-            if (lang === 'en-US' && speakText.length === 1 && /[a-zA-Z]/.test(speakText)) {
-                speakText = speakText.toLowerCase() + ".";
-            }
-            const utterance = new SpeechSynthesisUtterance(speakText);
-            utterance.lang = lang; utterance.rate = 0.85;
-
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length > 0) {
-                let targetVoice = voices.find(v => v.lang === lang || v.lang === lang.replace('-', '_'));
-                if (!targetVoice) targetVoice = voices.find(v => v.lang.startsWith(lang.substring(0, 2)));
-                if (targetVoice) utterance.voice = targetVoice;
-            }
-            window.speechSynthesis.speak(utterance);
-        };
-
-        window.showToast = function(msg) {
-            window.state.toastMsg = msg; window.render();
-            setTimeout(() => { window.state.toastMsg = null; window.render(); }, 2000);
-        };
-
-        // =========================================================================
-        // 4. 훈련소 출제 로직
-        // =========================================================================
-        window.setLearningSubTab = function(sub) { window.state.subTab = sub; window.render(); };
-        window.setTrainingMode = function(mode) {
-            window.state.trainingMode = mode;
-            if (mode === 'alphabet' && !window.state.trainingSubMode) window.state.trainingSubMode = 'match';
-            window.state.isAnswering = false; window.state.animatingCorrect = null;
-            window.getNewQuiz(); window.render();
-        };
-        window.setTrainingSubMode = function(subMode) {
-            window.state.trainingSubMode = subMode;
-            window.state.isAnswering = false; window.state.animatingCorrect = null;
-            window.getNewQuiz(); window.render();
-        };
-
-        window.getNewQuiz = function() {
-            const mode = window.state.trainingMode || 'alphabet';
-            
-            if (mode === 'alphabet') {
-                const qType = window.state.trainingSubMode || 'match';
-                const target = ALPHABET_DB[Math.floor(Math.random() * ALPHABET_DB.length)];
-                let options = [], ans = '';
-
-                if (qType === 'match') {
-                    const isUpperToLower = Math.random() > 0.5;
-                    ans = isUpperToLower ? target.l : target.u;
-                    window.state.currentQuiz = {
-                        isAlphabet: true, qType: 'match',
-                        display: isUpperToLower ? target.u : target.l,
-                        sub: isUpperToLower ? '소문자 짝꿍은?' : '대문자 짝꿍은?',
-                        ans: ans, speakText: target.l, speakLang: 'en-US'
-                    };
-                    options = ALPHABET_DB.map(x => isUpperToLower ? x.l : x.u);
-                } else if (qType === 'name') {
-                    ans = target.u;
-                    window.state.currentQuiz = {
-                        isAlphabet: true, qType: 'name', display: `🔈 ${target.n}`, sub: '이름을 가진 알파벳은?',
-                        ans: ans, speakText: target.l, speakLang: 'en-US'
-                    };
-                    options = ALPHABET_DB.map(x => x.u);
-                } else if (qType === 'sound') {
-                    ans = target.l;
-                    window.state.currentQuiz = {
-                        isAlphabet: true, qType: 'sound', display: `🔈 ${target.s}`, sub: '소리를 내는 알파벳은?',
-                        ans: ans, speakText: target.s, speakLang: 'ko-KR'
-                    };
-                    options = ALPHABET_DB.map(x => x.l);
-                }
-
-                options = options.filter(x => x !== ans).sort(() => 0.5 - Math.random()).slice(0, 4);
-                options.push(ans);
-                window.state.currentQuiz.options = options.sort(() => 0.5 - Math.random());
-            } 
-            else {
-                let wordObj, targetAns, blankIdx, opts = [];
-                if (mode === 'vowel') {
-                    const vowelWords = WORDS_DB.filter(w => ['a','e','i','o','u'].includes(w.ans) && w.parts.includes(w.ans));
-                    wordObj = vowelWords[Math.floor(Math.random() * vowelWords.length)];
-                    targetAns = wordObj.ans; blankIdx = wordObj.parts.indexOf(targetAns);
-                    opts = ['a', 'e', 'i', 'o', 'u'];
-                } else {
-                    wordObj = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
-                    blankIdx = Math.floor(Math.random() * wordObj.parts.length);
-                    targetAns = wordObj.parts[blankIdx];
-                    opts = [targetAns];
-                    const isVowel = ['a','e','i','o','u'].includes(targetAns);
-                    const pool = isVowel ? ['a','e','i','o','u'] : ['b','c','d','f','g','h','j','k','l','m','n','p','r','s','t','v','w','x','y','z'];
-                    while(opts.length < 5) {
-                        const rnd = pool[Math.floor(Math.random() * pool.length)];
-                        if(!opts.includes(rnd)) opts.push(rnd);
-                    }
-                }
-                opts.sort(() => 0.5 - Math.random());
-                window.state.currentQuiz = { ...wordObj, isAlphabet: false, ans: targetAns, blankIndex: blankIdx, options: opts };
-            }
-        };
-
-        window.checkAnswer = function(selected) {
-            if(window.state.isAnswering) return;
-            window.state.isAnswering = true;
-            const q = window.state.currentQuiz;
-            const isCorrect = selected === q.ans;
-            const mainContent = document.getElementById('main-content'); 
-
-            if(isCorrect) {
-                window.state.coins += 20; window.saveData(); 
-                if(q.isAlphabet) window.speak(q.ans.toLowerCase(), 'en-US'); else window.speak(q.w, 'en-US');
-                window.state.animatingCorrect = selected; window.render();
-                
-                setTimeout(() => {
-                    window.showToast("🎉 정답! +20 코인"); window.state.animatingCorrect = null;
-                    window.state.isAnswering = false; window.getNewQuiz(); window.render();
-                }, 700);
-            } else {
-                window.state.coins = Math.max(0, window.state.coins - 10); window.saveData(); 
-                if (q.isAlphabet) window.speak(selected.toLowerCase(), 'en-US');
-                else {
-                    let soundKr = selected;
-                    if (VOWEL_DB[selected]) soundKr = VOWEL_DB[selected].sound;
-                    else { const found = CONSONANT_DB.locations.flatMap(l=>l.items).find(c => c.id === selected); if(found) soundKr = found.kr; }
-                    window.speak(soundKr, 'ko-KR');
-                }
-
-                if(mainContent) mainContent.classList.add('animate-shake', 'animate-flash');
-                const btn = document.getElementById(`opt-${selected}`);
-                if(btn) btn.classList.replace('bg-blue-500', 'bg-red-500');
-                window.showToast("앗! -10 코인");
-
-                setTimeout(() => {
-                    if(mainContent) mainContent.classList.remove('animate-shake', 'animate-flash');
-                    if(btn) btn.classList.replace('bg-red-500', 'bg-blue-500');
-                    window.state.isAnswering = false; window.render();
-                }, 500);
-            }
-        };
-
-        // =========================================================================
-        // 5. 뽑기, 판매, 메가 진화(제단 + 광클 카드 파괴방지 이벤트) 시스템
-        // =========================================================================
-        window.changeTab = function(tab) {
-            window.state.tab = tab;
-            if(tab === 'training' && !window.state.currentQuiz) window.getNewQuiz();
-            if(tab !== 'altar') window.state.altarSelection = [];
-            window.render();
-        };
-
-        window.getCardGradeStyle = function(grade) { 
-            if(grade === 'MYTHIC') return 'grade-mythic';
-            if(grade === 'LEGEND') return 'grade-legend';
-            if(grade === 'SUPER') return 'grade-super'; 
-            if(grade === 'RARE') return 'grade-rare'; 
-            return 'grade-normal'; 
-        };
-        window.getCardGradeText = function(grade) {
-            if (grade === 'MYTHIC') return '<span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-black shadow-lg">🌌 SSS급 환상</span>';
-            if (grade === 'LEGEND') return '<span class="bg-gradient-to-r from-red-500 to-rose-400 text-white px-3 py-1 rounded-full text-xs font-black shadow-md">💎 SS급 전설</span>';
-            if (grade === 'SUPER') return '<span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-black shadow-sm">👑 S급 일반포켓몬</span>';
-            if (grade === 'RARE') return '<span class="bg-gradient-to-r from-slate-300 to-slate-400 text-slate-700 px-3 py-1 rounded-full text-xs font-black shadow-sm">✨ A급 단어</span>';
-            return '<span class="bg-gray-200 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">NORMAL (일반)</span>';
-        };
-
-        window.openPack = async function() {
-            if(window.state.coins < 50) return window.showToast("코인이 부족해요! (50 필요)");
-            if(window.state.packOpening || window.state.isProcessing) return;
-            
-            window.state.isProcessing = true;
-            window.state.coins -= 50; window.saveData(); 
-            window.state.packOpening = true; window.render();
-            
-            const rand = Math.random(); let grade = 'NORMAL'; let drawnCard = {};
-            
-            if (rand < 0.03) grade = 'SUPER'; 
-            else if (rand < 0.20) grade = 'RARE';
-
-            if (grade === 'SUPER') {
-                const randomId = NORMAL_POKE_IDS[Math.floor(Math.random() * NORMAL_POKE_IDS.length)];
-                drawnCard = await fetchPokemon(randomId);
-            } else {
-                drawnCard = WORDS_DB[Math.floor(Math.random() * WORDS_DB.length)];
-            }
-
-            setTimeout(() => {
-                window.state.revealedCard = { id: Date.now().toString(), ...drawnCard, grade: grade };
-                window.state.isProcessing = false;
-                window.render(); window.speak(drawnCard.w);
-            }, 800);
-        };
-        
-        window.keepCard = function() {
-            window.state.inventory.push(window.state.revealedCard);
-            if(window.state.farmPets.length < 15) { window.state.farmPets.push({...window.state.revealedCard, x: Math.random()*80, y: Math.random()*80}); }
-            window.state.packOpening = false; window.state.revealedCard = null; window.saveData(); window.showToast("도감에 보관했어요! 🎒"); window.render();
-        };
-        
-        window.discardCard = function() {
-            window.state.coins += 10; window.state.packOpening = false; window.state.revealedCard = null;
-            window.saveData(); window.showToast("카드를 버리고 10 코인을 얻었어요! 🪙"); window.render();
-        };
-
-        window.sellCard = function(id) {
-            const card = window.state.inventory.find(c => c.id === id);
-            if (!card) return;
-            const prices = { 'NORMAL': 10, 'RARE': 25, 'SUPER': 100, 'LEGEND': 500, 'MYTHIC': 2000 };
-            const price = prices[card.grade] || 10;
-
-            if (confirm(`'${card.kr}' 카드를 ${price}코인에 판매하시겠습니까?`)) {
-                window.state.inventory = window.state.inventory.filter(c => c.id !== id);
-                window.state.farmPets = window.state.farmPets.filter(p => p.id !== id);
-                window.state.coins += price;
-                window.saveData();
-                window.showToast(`카드를 판매하고 ${price}코인을 얻었습니다! 🪙`);
-                window.render();
-            }
-        };
-
-        window.selectForAltar = function(id) {
-            if(window.state.altarSelection.includes(id)) { window.state.altarSelection = window.state.altarSelection.filter(x => x !== id); } 
-            else {
-                if(window.state.altarSelection.length >= 2) return window.showToast("2개까지만 선택 가능해요!");
-                const card = window.state.inventory.find(c => c.id === id);
-                if(window.state.altarSelection.length === 1) {
-                    const firstCard = window.state.inventory.find(c => c.id === window.state.altarSelection[0]);
-                    if(firstCard.grade !== card.grade) return window.showToast("같은 등급의 카드만 합성할 수 있어요!");
-                }
-                window.state.altarSelection.push(id);
-            }
-            window.render();
-        };
-        
-        // 🟢 3초 광클(터치) 이벤트 시작 함수 🟢
-        window.startClickEvent = function() {
-            if(window.state.altarSelection.length !== 2 || window.state.isProcessing) return;
-            
-            window.state.isClickingMode = true;
-            window.state.clickCount = 0;
-            window.state.clickTimeLeft = 3; 
-            window.render();
-
-            window.state.clickTimer = setInterval(() => {
-                window.state.clickTimeLeft -= 1;
-                
-                if(window.state.clickTimeLeft <= 0) {
-                    clearInterval(window.state.clickTimer);
-                    window.state.isClickingMode = false;
-                    window.tryEvolve(); // 3초 끝나면 바로 진화 확률 계산 시작
-                } else {
-                    window.render();
-                }
-            }, 1000);
-        };
-
-        // 🟢 터치 횟수 증가 및 실시간 성공률 상승 함수 🟢
-        window.doClick = function() {
-            if(!window.state.isClickingMode) return;
-            window.state.clickCount += 1;
-            
-            const btn = document.getElementById('click-btn');
-            if(btn) {
-                btn.classList.remove('animate-pump');
-                void btn.offsetWidth; // 리플로우 강제 트리거
-                btn.classList.add('animate-pump');
-            }
-            window.render();
-        };
-
-        // 🟢 진화 성공 계산 로직 🟢
-        window.tryEvolve = async function() {
-            window.state.isProcessing = true;
-
-            const cardId = window.state.altarSelection[0];
-            const baseCard = window.state.inventory.find(c => c.id === cardId);
-            const grade = baseCard.grade;
-
-            // 🚨 기본 진화 성공률
-            let baseRate = 0.60; 
-            let nextGrade = 'SUPER';
-            let pokeIdList = NORMAL_POKE_IDS;
-
-            if (grade === 'SUPER') { baseRate = 0.30; nextGrade = 'LEGEND'; pokeIdList = LEGEND_IDS; }
-            if (grade === 'LEGEND') { baseRate = 0.20; nextGrade = 'MYTHIC'; pokeIdList = MYTHIC_IDS; }
-
-            // 🟢 광클 부스트: 1클릭 당 +1.5% 상승, 11번 터치 시 카드 파괴 방지!
-            const targetClicks = 11;
-            const isProtected = window.state.clickCount >= targetClicks;
-            const addedRate = window.state.clickCount * 0.015;
-            const finalRate = Math.min(baseRate + addedRate, 1.0);
-
-            if(Math.random() < finalRate) { 
-                // 진화 대성공! (기존 카드 소멸 및 새 카드 지급)
-                window.state.inventory = window.state.inventory.filter(c => !window.state.altarSelection.includes(c.id));
-                window.state.altarSelection = [];
-                
-                const randomId = pokeIdList[Math.floor(Math.random() * pokeIdList.length)];
-                const poke = await fetchPokemon(randomId);
-                const newCard = { id: Date.now().toString(), grade: nextGrade, ...poke };
-                
-                window.state.revealedCard = newCard;
-                window.state.packOpening = true; 
-                window.showToast(`✨ 합성 대성공! (확률 ${Math.floor(finalRate*100)}% 적용)`);
-                window.speak(poke.w);
-                
-                window.state.isProcessing = false;
-                window.state.clickCount = 0; 
-                window.saveData(); window.render();
-            } else {
-                // 진화 실패
-                if (isProtected) {
-                    // 🛡️ 카드 파괴 방지 발동! (카드는 사라지지 않습니다)
-                    window.state.altarSelection = []; 
-                    window.state.isFailingProtected = true;
-                    window.render();
-                    setTimeout(() => {
-                        window.state.isFailingProtected = false;
-                        window.showToast("휴~ 🛡️ 엄청난 터치 덕분에 카드를 지켜냈어요!");
-                        window.state.isProcessing = false;
-                        window.state.clickCount = 0;
-                        window.saveData(); window.render();
-                    }, 2500);
-                } else {
-                    // 💥 카드 완전히 파괴됨
-                    window.state.inventory = window.state.inventory.filter(c => !window.state.altarSelection.includes(c.id));
-                    window.state.altarSelection = [];
-                    window.state.isFailing = true;
-                    window.render();
-                    setTimeout(() => {
-                        window.state.isFailing = false;
-                        window.showToast("💥 합성 실패... 카드가 모두 사라졌습니다.");
-                        window.state.isProcessing = false;
-                        window.state.clickCount = 0;
-                        window.saveData(); window.render();
-                    }, 2000);
-                }
-            }
-        };
-
-        // =========================================================================
-        // 6. UI 렌더링 화면들
-        // =========================================================================
-        window.renderLearning = function() {
-            const sub = window.state.subTab;
-            return `
-                <div class="p-4 max-w-md mx-auto w-full flex flex-col min-h-full">
-                    <div class="flex bg-gray-200 rounded-full p-1 mb-6 shadow-inner text-[10px]">
-                        <button onclick="window.setLearningSubTab('alphabet')" class="flex-1 py-2.5 rounded-full font-bold transition-all ${sub === 'alphabet' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">ABC 알파벳</button>
-                        <button onclick="window.setLearningSubTab('vowel')" class="flex-1 py-2.5 rounded-full font-bold transition-all ${sub === 'vowel' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">A E I O U 모음</button>
-                        <button onclick="window.setLearningSubTab('consonant')" class="flex-1 py-2.5 rounded-full font-bold transition-all ${sub === 'consonant' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">나머지 자음</button>
-                    </div>
-                    <div class="flex-1">
-                        ${sub === 'alphabet' ? window.renderAlphabetLearning() : sub === 'vowel' ? window.renderVowels() : window.renderConsonants()}
-                    </div>
-                </div>
-            `;
-        };
-
-        window.renderAlphabetLearning = function() {
-            return `
-                <div class="grid grid-cols-2 gap-3 pb-4">
-                    ${ALPHABET_DB.map(a => `
-                        <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
-                            <div class="text-3xl font-black text-slate-800 mb-2 cursor-pointer active:scale-95 transition-transform" onclick="window.speak('${a.l}', 'en-US')">
-                                ${a.u} <span class="text-2xl text-slate-500">${a.l}</span>
-                            </div>
-                            <div class="flex w-full gap-1">
-                                <button onclick="window.speak('${a.l}', 'en-US')" class="flex-1 bg-blue-50 text-blue-600 rounded-lg py-1.5 text-[10px] font-bold active:bg-blue-100 transition-colors">이름(${a.n})</button>
-                                <button onclick="window.speak('${a.s}', 'ko-KR')" class="flex-1 bg-red-50 text-red-600 rounded-lg py-1.5 text-[10px] font-bold active:bg-red-100 transition-colors">소리(${a.s})</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        };
-
-        window.renderVowels = function() {
-            return `
-                <div class="flex justify-between gap-2 mb-6">
-                    ${Object.entries(VOWEL_DB).map(([v, data]) => `
-                        <button onclick="window.speak('${v}'); window.showToast('${v} - ${data.sound}')" class="flex-1 aspect-[3/4] bg-white rounded-2xl shadow-sm border-b-4 border-blue-100 flex flex-col items-center justify-center active:translate-y-1 active:border-b-0 transition-all">
-                            <span class="text-3xl font-black text-blue-500 uppercase">${v}</span>
-                            <span class="text-sm font-bold text-gray-400 mt-1">${data.sound}</span>
-                        </button>
-                    `).join('')}
-                </div>
-                <details class="mb-4 bg-sky-50 rounded-2xl border border-sky-100 overflow-hidden group">
-                    <summary class="p-4 font-bold text-sky-800 flex justify-between items-center cursor-pointer">
-                        <span>📚 CVC 단어 섞어 읽기 연습</span>
-                        <i class="fa-solid fa-chevron-down text-sky-300 group-open:rotate-180 transition-transform"></i>
-                    </summary>
-                    <div class="p-4 pt-0 grid grid-cols-5 gap-2 text-center">
-                        ${['cat','pet','pig','dog','cup', 'map','hen','sit','hot','run', 'bag','net','lip','box','gum', 'fan','red','win','mop','bus'].map(w => `
-                            <button onclick="window.speak('${w}')" class="bg-white py-2 rounded-lg shadow-sm text-xs font-black text-slate-700 active:scale-95 transition-transform border border-sky-100 flex items-center justify-center">
-                                ${w}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <p class="text-center text-[10px] text-sky-600 mt-2 font-bold px-4 pb-4">가운데 모음 소리에 집중하며 차례대로 읽어봐요!</p>
-                </details>
-                <details class="mb-4 bg-indigo-50 rounded-2xl border border-indigo-100 overflow-hidden group">
-                    <summary class="p-4 font-bold text-indigo-800 flex justify-between items-center cursor-pointer">
-                        <span>👥 단어 가족 모여라!</span>
-                        <i class="fa-solid fa-chevron-down text-indigo-300 group-open:rotate-180 transition-transform"></i>
-                    </summary>
-                    <div class="p-4 pt-0 flex flex-col gap-3">
-                        ${['a','e','i','o','u'].map(v => VOWEL_DB[v].fam.map(f => `
-                            <div class="bg-indigo-100/50 p-3 rounded-xl">
-                                <div class="text-xs font-bold text-indigo-600 mb-2">🏠 ${f.n} 가족</div>
-                                <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
-                                    ${f.w.map(word => `
-                                        <button onclick="window.speak('${word}')" class="bg-white px-3 py-1.5 rounded-lg shadow-sm font-bold text-slate-700 shrink-0 text-sm border border-indigo-50 flex items-center gap-1 active:scale-95 transition-transform">
-                                            ${word.replace(f.n.replace('-',''), `<span class="text-indigo-500">${f.n.replace('-','')}</span>`)}
-                                        </button>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `).join('')).join('')}
-                    </div>
-                </details>
-                <details class="mb-4 bg-purple-50 rounded-2xl border border-purple-100 overflow-hidden group">
-                    <summary class="p-4 font-bold text-purple-800 flex justify-between items-center cursor-pointer">
-                        <span>⚡ 매직 E가 붙으면? (긴 소리)</span>
-                        <i class="fa-solid fa-chevron-down text-purple-300 group-open:rotate-180 transition-transform"></i>
-                    </summary>
-                    <div class="p-4 pt-0 grid grid-cols-2 gap-2">
-                        ${['a','e','i','o','u'].flatMap(v => VOWEL_DB[v].magic).map(word => `
-                            <button onclick="window.speak('${word}')" class="bg-white p-3 rounded-xl shadow-sm font-bold text-slate-700 text-center border border-purple-50 flex items-center justify-center gap-1 active:scale-95 transition-transform">
-                                ${word.slice(0,-1)}<span class="text-purple-500">e</span>
-                            </button>
-                        `).join('')}
-                    </div>
-                </details>
-            `;
-        };
-
-        window.renderConsonants = function() {
-            return `
-                <div class="flex flex-col gap-4 pb-4">
-                    ${CONSONANT_DB.locations.map(loc => `
-                        <details class="bg-emerald-50 rounded-2xl border border-emerald-100 overflow-hidden group">
-                            <summary class="p-4 font-bold text-emerald-800 flex justify-between items-center cursor-pointer">
-                                <span>${loc.title} <span class="text-xs bg-emerald-200/50 px-2 py-0.5 rounded-full ml-1">${loc.tags}</span></span>
-                                <i class="fa-solid fa-chevron-down text-emerald-300 group-open:rotate-180 transition-transform"></i>
-                            </summary>
-                            <div class="p-4 pt-0 grid grid-cols-2 gap-3">
-                                ${loc.items.map(item => `
-                                    <div class="bg-white p-2 rounded-xl shadow-sm border border-emerald-100 flex flex-col items-center">
-                                        <button onclick="window.speak('${item.kr}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-emerald-50 rounded-lg transition-colors">
-                                            <span class="text-3xl font-black text-slate-700">${item.id}</span>
-                                            <span class="text-[10px] text-emerald-600 font-bold mt-1">${item.kr}</span>
-                                        </button>
-                                        <button onclick="window.speak('${item.w}')" class="mt-1 w-full bg-slate-50 py-1.5 rounded-lg text-xs font-bold text-slate-600 active:bg-slate-200 transition-colors flex items-center justify-center gap-1 shadow-inner">
-                                            ${item.w}
-                                        </button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </details>
-                    `).join('')}
-                    <div class="bg-red-50 rounded-2xl p-4 border border-red-100 mt-2">
-                        <h3 class="font-bold text-red-800 mb-3"><i class="fa-solid fa-ear-listen mr-1"></i> 헷갈리는 소리 짝 (VS)</h3>
-                        <div class="flex flex-col gap-3">
-                            ${CONSONANT_DB.vs.map(pair => `
-                                <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-red-100">
-                                    <div class="flex-1 flex flex-col items-center p-1">
-                                        <button onclick="window.speak('${pair.p1.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
-                                            <span class="text-3xl font-black text-slate-700">${pair.p1.id}</span>
-                                            <span class="text-[10px] text-slate-400 mt-1">${pair.p1.kr}</span>
-                                        </button>
-                                        <button onclick="window.speak('${pair.p1.w}')" class="mt-1 w-full bg-blue-50 py-1.5 rounded-lg text-[11px] font-bold text-blue-600 active:bg-blue-100 flex items-center justify-center gap-1 shadow-sm transition-colors">
-                                            ${pair.p1.w}
-                                        </button>
-                                    </div>
-                                    <div class="text-xs font-black text-red-300 px-1">VS</div>
-                                    <div class="flex-1 flex flex-col items-center p-1">
-                                        <button onclick="window.speak('${pair.p2.sound}', 'ko-KR')" class="w-full flex flex-col items-center p-2 active:bg-slate-50 rounded-lg transition-colors">
-                                            <span class="text-3xl font-black text-red-600">${pair.p2.id}</span>
-                                            <span class="text-[10px] text-red-400 mt-1">${pair.p2.kr}</span>
-                                        </button>
-                                        <button onclick="window.speak('${pair.p2.w}')" class="mt-1 w-full bg-red-50 py-1.5 rounded-lg text-[11px] font-bold text-red-600 active:bg-red-100 flex items-center justify-center gap-1 shadow-sm transition-colors">
-                                            ${pair.p2.w}
-                                        </button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <details class="bg-indigo-50 rounded-2xl border border-indigo-100 overflow-hidden group mt-2">
-                        <summary class="p-4 font-bold text-indigo-800 flex justify-between items-center cursor-pointer">
-                            <span>🎭 W와 Y의 두 얼굴</span>
-                            <i class="fa-solid fa-chevron-down text-indigo-300 group-open:rotate-180 transition-transform"></i>
-                        </summary>
-                        <div class="p-4 pt-0 text-sm text-indigo-900 space-y-3">
-                            <div class="bg-white p-3 rounded-xl shadow-sm border border-indigo-100">
-                                <div class="font-black text-indigo-600 mb-1 text-center">W의 두 얼굴</div>
-                                <ul class="list-disc pl-5 space-y-1 text-[11px] font-bold text-gray-600">
-                                    <li><span class="text-blue-500">단어 맨 앞 (자음):</span> "우/워" (win, wet)</li>
-                                    <li><span class="text-red-500">모음 뒤 (모음팀):</span> "우/오" (cow, saw, new)</li>
-                                </ul>
-                            </div>
-                            <div class="bg-white p-3 rounded-xl shadow-sm border border-indigo-100">
-                                <div class="font-black text-indigo-600 mb-1 text-center">Y의 두 얼굴</div>
-                                <ul class="list-disc pl-5 space-y-1 text-[11px] font-bold text-gray-600">
-                                    <li><span class="text-blue-500">단어 맨 앞 (자음):</span> "여" (yes, yellow)</li>
-                                    <li><span class="text-red-500">단어 끝 (모음):</span> "이/아이" (happy, fly, sky)</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </details>
-                </div>
-            `;
-        };
-
-        window.renderTraining = function() {
-            if(!window.state.currentQuiz) window.getNewQuiz();
-            const mode = window.state.trainingMode;
-            const q = window.state.currentQuiz;
-            
-            let abcSubMenuHtml = '';
-            if (mode === 'alphabet') {
-                const sub = window.state.trainingSubMode;
-                abcSubMenuHtml = `
-                    <div class="flex bg-blue-100/50 rounded-full p-1 mt-3 shadow-inner w-full max-w-[250px] mx-auto border border-blue-100">
-                        <button onclick="window.setTrainingSubMode('match')" class="flex-1 py-1.5 rounded-full font-bold text-[10px] transition-all ${sub === 'match' ? 'bg-blue-500 text-white shadow' : 'text-blue-600'}">대소문자</button>
-                        <button onclick="window.setTrainingSubMode('name')" class="flex-1 py-1.5 rounded-full font-bold text-[10px] transition-all ${sub === 'name' ? 'bg-blue-500 text-white shadow' : 'text-blue-600'}">이름</button>
-                        <button onclick="window.setTrainingSubMode('sound')" class="flex-1 py-1.5 rounded-full font-bold text-[10px] transition-all ${sub === 'sound' ? 'bg-blue-500 text-white shadow' : 'text-blue-600'}">발음</button>
-                    </div>
-                `;
-            }
-
-            let quizAreaHtml = '';
-            if (q.isAlphabet) {
-                quizAreaHtml = `
-                    <div class="bg-white rounded-[2rem] p-8 shadow-xl w-full max-w-sm flex flex-col items-center border-2 border-slate-100 relative z-10 mt-6">
-                        <div class="text-[10px] font-black text-blue-500 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full mb-4">${q.sub}</div>
-                        <div class="text-5xl sm:text-6xl mb-2 drop-shadow-md font-black text-indigo-600 cursor-pointer active:scale-95 transition-transform group relative flex items-center justify-center gap-2 whitespace-nowrap" 
-                             onclick="window.speak('${q.speakText}', '${q.speakLang}')">
-                            ${q.display}
-                            ${(q.qType === 'name' || q.qType === 'sound') ? '<div class="absolute -top-4 -right-4 bg-yellow-300 text-yellow-800 text-[10px] px-2 py-1 font-bold rounded-full animate-bounce shadow-md whitespace-nowrap">눌러서 듣기!</div>' : ''}
-                        </div>
-                    </div>
-                `;
-            } else {
-                const displayHtml = q.parts.map((p, idx) => {
-                    if(idx === q.blankIndex) return window.state.animatingCorrect ? `<span class="text-blue-500 animate-pop inline-block">${p}</span>` : `<span class="text-blue-200 border-b-4 border-blue-200 px-2 inline-block w-8 text-center pb-1">?</span>`;
-                    return `<span class="text-slate-700 inline-block px-1">${p}</span>`;
-                }).join('');
-
-                quizAreaHtml = `
-                    <div class="bg-white rounded-[2rem] p-8 shadow-xl w-full max-w-sm flex flex-col items-center border-2 border-slate-100 relative z-10 mt-6">
-                        <div class="text-7xl mb-4 drop-shadow-sm cursor-pointer active:scale-95 transition-transform group relative" onclick="window.speak('${q.w}')">
-                            ${q.emoji}
-                            <div class="absolute -top-2 -right-8 bg-yellow-300 text-yellow-800 text-[10px] font-black px-2 py-1 rounded-full animate-bounce shadow-md whitespace-nowrap">힌트 듣기!</div>
-                        </div>
-                        <div class="bg-slate-100 text-slate-500 font-bold px-4 py-1.5 rounded-full mb-8">${q.kr}</div>
-                        <div class="text-5xl font-black tracking-widest uppercase flex items-center h-16">${displayHtml}</div>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="flex flex-col h-full w-full">
-                    <div class="flex-1 flex flex-col items-center justify-center p-6">
-                        <div class="flex flex-col w-full">
-                            <div class="flex bg-gray-200 rounded-full p-1 shadow-inner w-full max-w-sm mx-auto">
-                                <button onclick="window.setTrainingMode('alphabet')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'alphabet' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">ABC 기초</button>
-                                <button onclick="window.setTrainingMode('vowel')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'vowel' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">모음 훈련</button>
-                                <button onclick="window.setTrainingMode('all')" class="flex-1 py-2.5 rounded-full font-bold text-[11px] transition-all ${mode === 'all' ? 'bg-white text-blue-600 shadow' : 'text-gray-500'}">종합 훈련</button>
-                            </div>
-                            ${abcSubMenuHtml}
-                        </div>
-
-                        ${quizAreaHtml}
-                        
-                        <div class="flex flex-wrap justify-center gap-3 mt-10 w-full relative z-20">
-                            ${q.options.map(opt => `
-                                <button id="opt-${opt}" onclick="window.checkAnswer('${opt}')" 
-                                    class="w-14 h-14 bg-blue-500 text-white rounded-2xl text-2xl font-black shadow-[0_5px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all ${q.isAlphabet && q.qType === 'match' && opt.toLowerCase() !== opt ? '' : 'uppercase'} relative overflow-hidden">
-                                    <span class="${window.state.animatingCorrect === opt ? 'opacity-0' : 'opacity-100'}">${opt}</span>
-                                    ${window.state.animatingCorrect === opt ? `<span class="absolute inset-0 flex items-center justify-center animate-fly text-3xl font-black text-yellow-300 z-50">${opt}</span>` : ''}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        };
-
-        window.renderShop = function() {
-            return `
-                <div class="p-6 flex flex-col items-center h-full">
-                    <div class="flex-1 flex flex-col items-center justify-center w-full">
-                        <div class="text-6xl mb-6 drop-shadow-lg">🏪</div>
-                        <h2 class="text-2xl font-black text-slate-800 mb-2">단어 몬스터 상점</h2>
-                        <p class="text-slate-500 font-bold mb-10 text-center">코인을 모아 카드를 뽑고<br>나만의 농장을 채우세요!</p>
-                        
-                        <button onclick="window.openPack()" class="bg-gradient-to-b from-yellow-300 to-yellow-500 p-6 rounded-3xl shadow-[0_8px_0_#b45309] active:translate-y-2 active:shadow-none transition-all w-full max-w-xs group relative overflow-hidden">
-                            ${window.state.isProcessing ? '<div class="absolute inset-0 bg-black/20 flex items-center justify-center"><i class="fa-solid fa-spinner fa-spin text-white text-3xl"></i></div>' : ''}
-                            <div class="text-5xl mb-2 group-active:scale-95 transition-transform">🎁</div>
-                            <div class="text-white font-black text-xl drop-shadow-md">카드 팩 뜯기</div>
-                            <div class="mt-2 bg-yellow-600/30 text-yellow-900 font-bold py-1 px-4 rounded-full inline-block text-sm shadow-inner">50 코인</div>
-                        </button>
-
-                        <div class="mt-8 text-xs font-bold text-gray-400 bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-1 w-full max-w-xs">
-                            <div class="text-center mb-1 text-gray-500">🏆 상점 뽑기 확률</div>
-                            <div class="flex justify-between"><span class="font-black text-yellow-600">👑 S급 포켓몬</span> <span class="text-yellow-500">3%</span></div>
-                            <div class="flex justify-between"><span>✨ A급 단어</span> <span class="text-slate-500">17%</span></div>
-                            <div class="flex justify-between"><span>⬜ 일반 단어</span> <span class="text-gray-400">80%</span></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        };
-
-        window.renderAltar = function() {
-            // 🟢 1. 진행 중인 광클 미니게임 화면 🟢
-            if (window.state.isClickingMode) {
-                const cardId = window.state.altarSelection[0];
-                const baseCard = window.state.inventory.find(c => c.id === cardId);
-                const grade = baseCard.grade;
-                let baseRate = 0.60;
-                if (grade === 'SUPER') baseRate = 0.30;
-                if (grade === 'LEGEND') baseRate = 0.20;
-
-                // 실시간 확률 계산
-                let currentRate = Math.min(baseRate + (window.state.clickCount * 0.015), 1.0);
-                const percentRate = Math.floor(currentRate * 100);
-
-                const targetClicks = 11;
-                const remaining = Math.max(targetClicks - window.state.clickCount, 0);
-                const isProtected = remaining === 0;
-
-                return `
-                    <div class="absolute inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-md" onclick="window.doClick()">
-                        <div class="text-[60px] mb-2 animate-bounce">⚡️</div>
-                        <div class="text-white text-xl font-black mb-2 text-center leading-tight">합성 에너지를 모아라!</div>
-                        <div class="text-6xl font-black text-yellow-400 mb-4 font-mono">${window.state.clickTimeLeft}초</div>
-                        
-                        <div class="bg-gray-800 text-white px-4 py-2 rounded-xl mb-6 text-center border-2 ${isProtected ? 'border-green-400' : 'border-red-400'} shadow-lg w-full max-w-[250px]">
-                            <div class="text-yellow-300 font-black text-lg mb-1">현재 성공률: <span class="text-2xl">${percentRate}%</span></div>
-                            ${isProtected 
-                                ? `<div class="text-green-400 font-black text-sm animate-pulse">🛡️ 카드 파괴 방지 100% 활성화!</div>`
-                                : `<div class="text-red-400 font-bold text-xs">카드 보호까지 남은 터치: <span class="text-xl">${remaining}</span>번!</div>`
-                            }
-                        </div>
-
-                        <div id="click-btn" class="w-40 h-40 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full flex flex-col items-center justify-center shadow-[0_0_50px_rgba(168,85,247,0.6)] cursor-pointer select-none border-4 border-white">
-                            <div class="text-4xl mb-1">👇</div>
-                            <div class="text-white font-black text-4xl drop-shadow-md">${window.state.clickCount}</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // 🟢 2. 실패 - 카드 파괴 방어 성공 애니메이션 🟢
-            if (window.state.isFailingProtected) {
-                return `
-                    <div class="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-md">
-                        <div class="text-[120px] mb-4 animate-bounce">🛡️</div>
-                        <h2 class="text-4xl font-black text-blue-400 mb-4 animate-pulse">합성 실패... 지만!</h2>
-                        <p class="text-white font-bold text-lg text-center leading-relaxed">엄청난 터치 에너지 덕분에<br>카드가 파괴되지 않았습니다! 🎉</p>
-                    </div>
-                `;
-            }
-
-            // 🟢 3. 실패 - 카드 파괴 애니메이션 🟢
-            if (window.state.isFailing) {
-                return `
-                    <div class="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-md animate-shake">
-                        <div class="text-[120px] mb-4">💥</div>
-                        <h2 class="text-4xl font-black text-red-500 mb-4 animate-flash">진화 실패!</h2>
-                        <p class="text-white font-bold text-lg text-center leading-relaxed">아앗... 제물의 카드가<br>모두 재가 되어 사라졌습니다...</p>
-                    </div>
-                `;
-            }
-
-            // 🟢 4. 기본 제단 화면 🟢
-            const validCards = window.state.inventory.filter(c => ['RARE', 'SUPER', 'LEGEND'].includes(c.grade)); 
-            const selectedCards = window.state.altarSelection.map(id => window.state.inventory.find(c => c.id === id));
-            
-            let altarStatusMsg = "A급 이상 카드 2장을 골라주세요!<br><span class='text-blue-500'>(등급에 따라 전설, 환상 등장! 실패 시 소멸 💥)</span>";
-            if (selectedCards.length > 0) {
-                const grade = selectedCards[0].grade;
-                if(grade === 'RARE') altarStatusMsg = "기본 성공률: 60% <b class='text-yellow-600'>(광클 시 증가 & 11번 터치 시 파괴 방지!)</b>";
-                if(grade === 'SUPER') altarStatusMsg = "기본 성공률: 30% <b class='text-red-500'>(광클 시 증가 & 11번 터치 시 파괴 방지!)</b>";
-                if(grade === 'LEGEND') altarStatusMsg = "기본 성공률: 20% <b class='text-purple-500'>(광클 시 증가 & 11번 터치 시 파괴 방지!)</b>";
-            }
-
-            return `
-                <div class="p-6 flex flex-col h-full w-full relative">
-                    <div class="text-center mb-6">
-                        <div class="text-5xl mb-2 animate-pulse">⚡</div>
-                        <h2 class="text-2xl font-black text-slate-800">진화의 제단</h2>
-                        <p class="text-[11px] text-slate-500 font-bold mt-2 leading-tight">${altarStatusMsg}</p>
-                    </div>
-                    <div class="flex justify-center gap-4 mb-6">
-                        ${[0, 1].map(i => `
-                            <div class="w-24 h-32 rounded-2xl border-4 border-dashed flex items-center justify-center bg-white shadow-inner overflow-hidden ${selectedCards[i] ? 'border-yellow-400 bg-yellow-50' : 'border-gray-300'}">
-                                ${selectedCards[i] ? (selectedCards[i].imgUrl ? `<img src="${selectedCards[i].imgUrl}" class="w-16 h-16 object-contain" />` : `<div class="text-4xl">${selectedCards[i].emoji}</div>`) : `<span class="text-gray-300 font-bold">카드 ${i+1}</span>`}
-                            </div>
-                        `).join('')}
-                    </div>
-                    ${window.state.altarSelection.length === 2 ? `
-                        <button onclick="window.startClickEvent()" class="relative overflow-hidden w-full bg-yellow-400 text-yellow-900 font-black text-xl py-4 rounded-2xl mb-4 shadow-[0_5px_0_#ca8a04] active:translate-y-1 active:shadow-none animate-bounce">
-                            ${window.state.isProcessing ? '<div class="absolute inset-0 bg-black/20 flex items-center justify-center"><i class="fa-solid fa-spinner fa-spin text-white"></i></div>' : ''}
-                            포켓몬 진화 시작!
-                        </button>
-                    ` : ''}
-                    <div class="flex-1 bg-white rounded-3xl p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border border-gray-100 overflow-y-auto min-h-[150px] w-full">
-                        <h3 class="font-bold text-gray-700 mb-3 text-sm">합성 가능한 카드 (A급 이상)</h3>
-                        <div class="grid grid-cols-4 gap-2">
-                            ${validCards.map(item => {
-                                const isSel = window.state.altarSelection.includes(item.id);
-                                let ringColor = item.grade === 'LEGEND' ? 'border-red-400 bg-red-50' : (item.grade === 'SUPER' ? 'border-yellow-400 bg-yellow-50' : 'border-slate-300 bg-slate-50');
-                                if (isSel) ringColor = 'border-blue-500 bg-blue-100 ring-2 ring-blue-300';
-                                
-                                return `
-                                <button onclick="window.selectForAltar('${item.id}')" class="relative ${ringColor} border-2 rounded-xl p-2 flex flex-col items-center transition-all overflow-hidden">
-                                    <div class="h-8 flex items-center justify-center">
-                                        ${item.imgUrl ? `<img src="${item.imgUrl}" class="w-8 h-8 object-contain drop-shadow-sm" />` : `<div class="text-2xl">${item.emoji}</div>`}
-                                    </div>
-                                    <div class="text-[9px] font-black mt-1 w-full text-center text-slate-700 truncate capitalize">${item.w}</div>
-                                    ${isSel ? '<div class="absolute -top-2 -right-2 bg-blue-500 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold">✓</div>' : ''}
-                                </button>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        };
-
-        window.renderDex = function() {
-            let innerHtml = '';
-            if(window.state.inventory.length === 0) {
-                innerHtml = `<div class="flex-1 flex flex-col items-center justify-center text-slate-400 font-bold gap-4"><i class="fa-solid fa-book-open text-5xl"></i><p>수집한 카드가 없어요.</p></div>`;
-            } else {
-                innerHtml = `
-                    <div class="flex-1 overflow-y-auto w-full pb-4">
-                        <h2 class="text-xl font-black text-slate-800 mb-4 px-2">나의 도감 <span class="text-blue-500">${window.state.inventory.length}</span></h2>
-                        <div class="text-xs text-gray-500 font-bold px-2 mb-4 text-center bg-gray-100 py-2 rounded-lg">💡 카드를 터치하면 발음을 듣거나 판매할 수 있어요.</div>
-                        <div class="grid grid-cols-3 gap-3">
-                            ${window.state.inventory.slice().reverse().map(item => `
-                                <div class="${window.getCardGradeStyle(item.grade)} rounded-2xl p-3 flex flex-col items-center justify-center relative overflow-hidden active:scale-95 transition-transform cursor-pointer" 
-                                     onclick="window.sellCard('${item.id}')">
-                                    ${window.getCardGradeText(item.grade).replace(' px-3 py-1 rounded-full text-xs', ' absolute top-0 right-0 text-[8px] px-2 py-0.5 rounded-bl-lg z-20').replace(' shadow-sm', '').replace(' shadow-md', '').replace(' shadow-lg', '')}
-                                    
-                                    ${item.imgUrl ? `<img src="${item.imgUrl}" class="w-12 h-12 object-contain mb-1 mt-2 z-10 drop-shadow-md" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"/> <div class="text-3xl mb-1 mt-2 z-10 hidden">${item.emoji}</div>` : `<div class="text-3xl mb-1 mt-2 z-10">${item.emoji}</div>`}
-                                    <div class="text-xs font-black text-slate-800 w-full text-center z-10 truncate capitalize">${item.w}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            return `<div class="p-4 flex flex-col h-full w-full">${innerHtml}</div>`;
-        };
-
-        window.renderFarm = function() {
-            let innerHtml = '';
-            if(window.state.farmPets.length === 0) {
-                innerHtml = `<div class="flex-1 flex flex-col items-center justify-center text-green-700 font-bold gap-4 text-center"><i class="fa-solid fa-seedling text-5xl text-green-400"></i><p>농장이 비어있어요!</p></div>`;
-            } else {
-                innerHtml = `
-                    <div class="flex-1 relative w-full rounded-2xl overflow-hidden shadow-inner border-2 border-green-300">
-                        <div class="absolute inset-0 bg-gradient-to-b from-blue-200 via-green-200 to-green-300"></div>
-                        <div class="absolute top-4 left-4 text-white font-black drop-shadow-md z-10">🌳 내 농장 (${window.state.farmPets.length}마리)</div>
-                        ${window.state.farmPets.map((pet, i) => `
-                            <div class="absolute cursor-pointer hover:scale-110 transition-transform flex flex-col items-center drop-shadow-xl z-20"
-                                 style="left: ${pet.x}%; top: ${pet.y}%; animation: shake ${3 + (i%2)}s infinite alternate ease-in-out;"
-                                 onclick="window.speak('${pet.w}')">
-                                <div class="text-4xl bg-white/80 rounded-full w-12 h-12 flex items-center justify-center shadow-inner border-2 border-white/50 backdrop-blur-sm relative overflow-hidden">
-                                    ${pet.imgUrl ? `<img src="${pet.imgUrl}" class="w-10 h-10 object-contain z-10 drop-shadow-sm" />` : pet.emoji}
-                                </div>
-                                <div class="bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 backdrop-blur-sm capitalize">${pet.w}</div>
-                            </div>
-                        `).join('')}
-                        <div class="absolute bottom-10 left-10 text-6xl opacity-50 z-0">🌲</div>
-                        <div class="absolute bottom-20 right-10 text-5xl opacity-50 z-0">🌳</div>
-                    </div>
-                `;
-            }
-            return `<div class="p-4 flex flex-col h-full w-full bg-green-50/50">${innerHtml}</div>`;
-        };
-
-        // =========================================================================
-        // 7. 앱 뼈대 구성 및 초기화
-        // =========================================================================
-        window.render = function() {
-            const app = document.getElementById('app');
-            if (!window.isAuthReady) return;
-
-            if (!window.currentUser && !window.isGuestMode) {
-                app.innerHTML = `
-                    <div class="flex-1 flex flex-col items-center justify-center p-8 w-full bg-gradient-to-b from-blue-50 to-blue-100 h-full overflow-y-auto">
-                        ${window.state.toastMsg ? `<div class="absolute top-10 bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-xl animate-pop text-center z-[100] max-w-[90%]">${window.state.toastMsg}</div>` : ''}
-                        <div class="text-6xl mb-6 animate-bounce">👻</div>
-                        <h1 class="text-4xl font-black text-blue-800 mb-2 tracking-tight text-center">Phonics<br>Monster</h1>
-                        <p class="text-gray-500 font-bold mb-8 text-center text-sm">클라우드 저장소에 연결합니다.</p>
-                        <div class="w-full bg-white p-6 rounded-3xl shadow-xl flex flex-col gap-4 max-w-[300px]">
-                            <input type="email" id="email" placeholder="이메일 주소" class="w-full bg-gray-100 px-4 py-3 rounded-xl font-bold text-gray-800 outline-none focus:ring-2 focus:ring-blue-400">
-                            <input type="password" id="password" placeholder="비밀번호 (6자 이상)" class="w-full bg-gray-100 px-4 py-3 rounded-xl font-bold text-gray-800 outline-none focus:ring-2 focus:ring-blue-400 mb-2">
-                            <button onclick="window.handleAuth(true)" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-[0_4px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all">로그인</button>
-                            <button onclick="window.handleAuth(false)" class="w-full bg-white text-blue-600 border-2 border-blue-200 font-black py-4 rounded-xl active:bg-blue-50 transition-all mt-2">새 계정 만들기</button>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            const toastHtml = window.state.toastMsg ? `<div class="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm shadow-2xl animate-pop whitespace-nowrap">${window.state.toastMsg}</div>` : '';
-
-            const packOverlayHtml = window.state.packOpening ? `
-                <div class="absolute inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center p-6 backdrop-blur-sm">
-                    ${window.state.revealedCard ? `
-                        <div class="${window.getCardGradeStyle(window.state.revealedCard.grade)} rounded-3xl p-8 w-full max-w-[280px] animate-pop flex flex-col items-center text-center relative overflow-hidden">
-                            ${window.state.revealedCard.grade !== 'NORMAL' ? '<div class="absolute inset-0 bg-[url(\'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=\')] opacity-50 mix-blend-overlay"></div>' : ''}
-                            <div class="relative z-10 w-full flex flex-col items-center">
-                                <div class="mb-6">${window.getCardGradeText(window.state.revealedCard.grade)}</div>
-                                ${window.state.revealedCard.imgUrl 
-                                    ? `<img src="${window.state.revealedCard.imgUrl}" class="w-32 h-32 object-contain drop-shadow-xl animate-bounce mb-4" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"/> <div class="text-8xl mb-4 drop-shadow-md hidden">${window.state.revealedCard.emoji}</div>`
-                                    : `<div class="text-8xl mb-4 drop-shadow-md">${window.state.revealedCard.emoji}</div>`
-                                }
-                                <div class="text-gray-500 font-black mb-1 bg-white/50 px-3 py-1 rounded-full text-sm">${window.state.revealedCard.kr}</div>
-                                <div class="text-4xl font-black mb-8 text-gray-800 tracking-wider capitalize">${window.state.revealedCard.w}</div>
-                                <div class="w-full flex gap-2 flex-col">
-                                    <button onclick="window.keepCard()" class="w-full py-3.5 bg-blue-500 text-white rounded-xl font-black text-lg shadow-[0_4px_0_#1d4ed8] active:translate-y-1 active:shadow-none transition-all">도감에 넣기</button>
-                                    <button onclick="window.discardCard()" class="w-full py-3 bg-red-50 text-red-500 border border-red-200 rounded-xl font-bold text-sm active:bg-red-100 transition-colors">버리기 (+10 코인)</button>
-                                </div>
-                            </div>
-                        </div>
-                    ` : `<div class="text-9xl animate-pack-open filter drop-shadow-2xl mb-8">📦</div><div class="text-white font-bold text-2xl animate-pulse">카드를 뽑는 중...</div>`}
-                </div>
-            ` : '';
-
-            let contentHtml = '';
-            if(window.state.tab === 'learning') contentHtml = window.renderLearning();
-            if(window.state.tab === 'training') contentHtml = window.renderTraining();
-            if(window.state.tab === 'shop') contentHtml = window.renderShop();
-            if(window.state.tab === 'altar') contentHtml = window.renderAltar();
-            if(window.state.tab === 'dex') contentHtml = window.renderDex();
-            if(window.state.tab === 'farm') contentHtml = window.renderFarm();
-
-            const userEmailPrefix = window.currentUser && window.currentUser.email ? window.currentUser.email.split('@')[0] : 'Guest';
-            const statusLabel = window.isGuestMode ? '<span class="text-[9px] text-red-400 font-black">(오프라인 모드)</span>' : '<span class="text-[9px] text-gray-400">로그아웃</span>';
-
-            app.innerHTML = `
-                <header class="pt-safe bg-white border-b shrink-0 z-50 shadow-sm relative">
-                    <div class="h-14 flex items-center justify-between px-5">
-                        <button onclick="window.logout()" class="flex items-center gap-2 font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded-lg active:scale-95 transition-transform border border-gray-100">
-                            <div class="w-8 h-8 ${window.isGuestMode ? 'bg-red-100' : 'bg-blue-100'} rounded-full flex items-center justify-center text-lg">👦</div>
-                            <div class="flex flex-col items-start">
-                                <span class="text-xs ${window.isGuestMode ? 'text-red-600' : 'text-blue-600'}">${userEmailPrefix}</span>
-                                ${statusLabel}
-                            </div>
-                        </button>
-                        <div class="bg-yellow-50 px-4 py-1.5 rounded-full border border-yellow-200 font-black text-yellow-600 shadow-inner flex items-center gap-1">
-                            <i class="fa-solid fa-coins"></i> ${window.state.coins}
-                        </div>
-                    </div>
-                </header>
-                ${toastHtml}
-                ${packOverlayHtml}
-                <main class="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50 w-full hide-scrollbar flex flex-col" id="main-content">
-                    ${contentHtml}
-                </main>
-                <nav class="pb-safe bg-white border-t shrink-0 z-50 relative">
-                    <div class="h-16 flex items-center justify-between px-1">
-                        <button onclick="window.changeTab('learning')" class="flex-1 flex flex-col items-center justify-center gap-1 py-1 transition-all ${window.state.tab === 'learning' ? 'text-blue-600 scale-110' : 'text-gray-400'}"><div class="${window.state.tab === 'learning' ? 'bg-blue-100' : ''} w-9 h-9 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-book-open"></i></div><span class="text-[9px] font-bold">학습장</span></button>
-                        <button onclick="window.changeTab('training')" class="flex-1 flex flex-col items-center justify-center gap-1 py-1 transition-all ${window.state.tab === 'training' ? 'text-blue-600 scale-110' : 'text-gray-400'}"><div class="${window.state.tab === 'training' ? 'bg-blue-100' : ''} w-9 h-9 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-dumbbell"></i></div><span class="text-[9px] font-bold">훈련소</span></button>
-                        <button onclick="window.changeTab('shop')" class="flex-1 flex flex-col items-center justify-center gap-1 py-1 transition-all ${window.state.tab === 'shop' ? 'text-blue-600 scale-110' : 'text-gray-400'}"><div class="${window.state.tab === 'shop' ? 'bg-blue-100' : ''} w-9 h-9 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-store"></i></div><span class="text-[9px] font-bold">상점</span></button>
-                        <button onclick="window.changeTab('altar')" class="flex-1 flex flex-col items-center justify-center gap-1 py-1 transition-all ${window.state.tab === 'altar' ? 'text-blue-600 scale-110' : 'text-gray-400'}"><div class="${window.state.tab === 'altar' ? 'bg-blue-100' : ''} w-9 h-9 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-bolt"></i></div><span class="text-[9px] font-bold">제단</span></button>
-                        <button onclick="window.changeTab('dex')" class="flex-1 flex flex-col items-center justify-center gap-1 py-1 transition-all ${window.state.tab === 'dex' ? 'text-blue-600 scale-110' : 'text-gray-400'}"><div class="${window.state.tab === 'dex' ? 'bg-blue-100' : ''} w-9 h-9 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-address-book"></i></div><span class="text-[9px] font-bold">도감</span></button>
-                        <button onclick="window.changeTab('farm')" class="flex-1 flex flex-col items-center justify-center gap-1 py-1 transition-all ${window.state.tab === 'farm' ? 'text-blue-600 scale-110' : 'text-gray-400'}"><div class="${window.state.tab === 'farm' ? 'bg-blue-100' : ''} w-9 h-9 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-tree"></i></div><span class="text-[9px] font-bold">농장</span></button>
-                    </div>
-                </nav>
-            `;
-        };
-
-        window.addEventListener('load', () => {
-            try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
-        });
-
-        window.startGuestMode = function(reason) {
-            if (window.isGuestMode) return;
-            window.isAuthReady = true; window.isGuestMode = true;
-            window.currentUser = { uid: "guest", email: "Guest@offline" };
-            const savedData = localStorage.getItem('phonicsAppState');
-            if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
-                    window.state.coins = data.coins !== undefined ? data.coins : 200;
-                    window.state.inventory = data.inventory || [];
-                    window.state.farmPets = data.farmPets || [];
-                } catch(e) {}
-            }
-            window.changeTab('learning');
-        };
-
-        const fallbackTimer = setTimeout(() => {
-            if (!window.isAuthReady) {
-                window.showToast("네트워크 차단됨: 앱을 바로 엽니다!");
-                window.startGuestMode("3초 무응답 타임아웃");
-            }
-        }, 3000); 
-
-        try {
-            if (typeof firebase === 'undefined') throw new Error("Firebase 차단됨");
-
-            // 🚨🚨🚨 [매우 중요] 🚨🚨🚨 아래 firebaseConfig를 선생님의 것으로 꼭 교체해주세요!
-            const firebaseConfig = {
-                apiKey: "AIzaSyBC5ffBjfAuLmq_Dg-J9XFOp6y7lzdhHYI",
-                authDomain: "phonicsmonster-2d495.firebaseapp.com",
-                projectId: "phonicsmonster-2d495",
-                storageBucket: "phonicsmonster-2d495.firebasestorage.app",
-                messagingSenderId: "961679319312",
-                appId: "1:961679319312:web:8eb58f35e963585bab8595",
-                measurementId: "G-RFDMSR7G82"
-            };
-
-            firebase.initializeApp(firebaseConfig);
-            const auth = firebase.auth();
-            const db = firebase.firestore();
-
-            window.saveData = function() {
-                if (!window.currentUser || window.isGuestMode) {
-                    localStorage.setItem('phonicsAppState', JSON.stringify({ coins: window.state.coins, inventory: window.state.inventory, farmPets: window.state.farmPets })); return;
-                }
-                db.collection("users").doc(window.currentUser.uid).set({ coins: window.state.coins, inventory: window.state.inventory, farmPets: window.state.farmPets }).catch(e => {});
-            };
-
-            window.handleAuth = async function(isLogin) {
-                const email = document.getElementById('email').value; const password = document.getElementById('password').value;
-                if(!email || !password) return window.showToast('이메일과 비밀번호를 모두 입력해주세요.');
-                if(password.length < 6) return window.showToast('비밀번호는 6자리 이상이어야 합니다.');
-                
-                window.showToast("서버와 통신 중...");
-                try {
-                    if (isLogin) await auth.signInWithEmailAndPassword(email, password);
-                    else { await auth.createUserWithEmailAndPassword(email, password); window.showToast('가입 환영! 시작합니다. 🪙'); }
-                } catch (error) {
-                    if (error.code === 'auth/email-already-in-use') window.showToast('이미 가입된 이메일입니다.');
-                    else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') window.showToast('이메일이나 비밀번호가 틀렸습니다.');
-                    else window.showToast('오류 발생: 다시 시도해주세요.');
-                }
-            };
-
-            window.logout = async function() { await auth.signOut(); window.showToast('로그아웃 되었습니다.'); };
-
-            auth.onAuthStateChanged(async (user) => {
-                if (window.isGuestMode) return; 
-                clearTimeout(fallbackTimer); 
-                window.isAuthReady = true;
-                
-                if (user) {
-                    window.currentUser = user;
-                    try {
-                        const docRef = db.collection("users").doc(user.uid);
-                        const docSnap = await docRef.get();
-                        if (docSnap.exists) {
-                            const data = docSnap.data();
-                            window.state.coins = data.coins !== undefined ? data.coins : 200;
-                            window.state.inventory = data.inventory || [];
-                            window.state.farmPets = data.farmPets || [];
-                        } else {
-                            window.state.coins = 200; window.state.inventory = []; window.state.farmPets = [];
-                            window.saveData();
-                        }
-                        window.changeTab('learning');
-                    } catch(error) {
-                        console.error("DB 거부 에러:", error);
-                        window.showToast("⚠️ Firebase 정보가 다르거나 규칙이 닫혀있습니다.");
-                        window.startGuestMode("Firestore 권한 오류");
-                    }
-                } else {
-                    window.currentUser = null;
-                    window.render();
-                }
-            });
-
-        } catch(error) {
-            console.error("Firebase 로딩 실패:", error);
-            clearTimeout(fallbackTimer);
-            window.showToast("보안 환경 감지: 앱을 바로 엽니다!");
-            window.startGuestMode("스크립트 차단");
-        }
-
-        if (document.readyState === 'complete' || document.readyState === 'interactive') window.render();
-        else document.addEventListener('DOMContentLoaded', window.render);
-    </script>
+<header>
+  <div class="hd">
+    <h1>책임수사관 8회 — 암기 마스터</h1>
+    <div class="sub">1~7회 기출 통합 · <b>빈출/절차암기/사기 기수·미수/예상/퀴즈</b></div>
+    <nav id="nav">
+      <button class="tab on" data-p="freq">📊 빈출 영역</button>
+      <button class="tab" data-p="memo">📋 절차 암기</button>
+      <button class="tab" data-p="fraud">⚖️ 사기 기수·미수</button>
+      <button class="tab" data-p="pred">🔮 출제 예상</button>
+      <button class="tab" data-p="signal">🔍 기록 신호어</button>
+      <button class="tab" data-p="plan">📅 D-7 플랜·실전순서</button>
+      <button class="tab" data-p="docs">📂 제공자료 전략</button>
+      <button class="tab" data-p="quiz">✅ 암기 테스트</button>
+      <button class="tab" data-p="write">✍️ 답안작성·함정</button>
+      <button class="tab" data-p="fix">🎯 오답 보강</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ============ 빈출 ============ -->
+<section class="panel on" id="freq">
+  <p class="lead">1~7회 출제 횟수 기준. 막대가 길수록(금색=최상위) 8회 적중 가능성이 높습니다. 막대 옆은 출제 회차.</p>
+
+  <div class="card">
+    <div class="freq"><div class="lab">특경법(사기) 의율</div><div class="bar"><div class="fill top" style="width:100%">5</div></div><div class="rounds">2·4·5·6·7</div></div>
+    <div class="freq"><div class="lab">전자정보 압수수색</div><div class="bar"><div class="fill top" style="width:100%">5</div></div><div class="rounds">1·3·4·5·7</div></div>
+    <div class="freq"><div class="lab">영장 작성(체포·구속·압수·통신)</div><div class="bar"><div class="fill top" style="width:100%">5</div></div><div class="rounds">1·2·3·5·6</div></div>
+    <div class="freq"><div class="lab">수사지휘서 빈칸 (50점)</div><div class="bar"><div class="fill" style="width:62%">3</div></div><div class="rounds">1·6·7</div></div>
+    <div class="freq"><div class="lab">영장없는 압수 5유형</div><div class="bar"><div class="fill" style="width:62%">3</div></div><div class="rounds">3·5·7</div></div>
+    <div class="freq"><div class="lab">범죄사실 작성</div><div class="bar"><div class="fill" style="width:62%">3</div></div><div class="rounds">1·4·5</div></div>
+    <div class="freq"><div class="lab">심야조사·장시간조사</div><div class="bar"><div class="fill" style="width:62%">3</div></div><div class="rounds">2·3·6</div></div>
+    <div class="freq"><div class="lab">소송사기 기수/미수</div><div class="bar"><div class="fill" style="width:62%">3</div></div><div class="rounds">2·3·7</div></div>
+    <div class="freq"><div class="lab">횡령·배임/가상자산</div><div class="bar"><div class="fill" style="width:80%">4</div></div><div class="rounds">1·4·5·6</div></div>
+    <div class="freq"><div class="lab">친족상도례 (개정)</div><div class="bar"><div class="fill" style="width:42%">2</div></div><div class="rounds">6·7</div></div>
+    <div class="freq"><div class="lab">체포·긴급체포 요건</div><div class="bar"><div class="fill" style="width:62%">3</div></div><div class="rounds">2·3·7</div></div>
+    <div class="freq"><div class="lab">언론대응(수사공보)</div><div class="bar"><div class="fill" style="width:25%">1+</div></div><div class="rounds">6·(미특정)</div></div>
+  </div>
+
+  <h2 class="sec"><span class="n">TOP</span> 1순위 — 거의 확실</h2>
+  <div class="card">
+    <ul>
+      <li><b class="k">수사지휘서 빈칸(50점)</b> — 단일 최고배점. 형식(적용죄명/구성요건 해당성/송치 여부) 암기가 곧 점수.</li>
+      <li><b class="k">영장없는 압수 5유형</b> — 표 통째 암기형, 절차 탭 참고.</li>
+      <li><b class="k">특경법 이득액</b> — 5억/50억 구간별 법정형 + 포괄일죄 + 공동정범 전체이득액.</li>
+      <li><b class="k">친족상도례 개정(형법 제328조 제1항)</b> — 구답안 '형면제' 함정. 개정 친고죄화 기준.</li>
+      <li><b class="k">전자정보 참여권·관련성·별건</b> — 최신 판례, 함정 최다.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 절차 암기 ============ -->
+<section class="panel" id="memo">
+  <p class="lead">사건 분석 없이 <b>외우면 바로 득점</b>되는 절차·조문·수치. 답안에는 반드시 <b class="k">법령명 + 조·항·호</b>까지 적어야 근거 배점을 받습니다. 항목을 눌러 펼치세요.</p>
+
+  <h2 class="sec"><span class="n">A</span> 강제수사 시한·요건</h2>
+
+  <details open><summary><span class="tag">표암기</span>영장없는 압수·수색·검증 5유형<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>유형</th><th>근거</th><th>요급처분</th><th>사후영장</th></tr>
+      <tr><td>체포현장</td><td><span class="st">형사소송법 제216조 제1항</span></td><td class="gn">가능</td><td>계속압수시 48h <span class="st">형사소송법 제217조 제2항</span></td></tr>
+      <tr><td>범죄장소</td><td><span class="st">형사소송법 제216조 제3항</span></td><td class="gn">가능</td><td class="rd">무조건 지체없이</td></tr>
+      <tr><td>긴급체포 후 소유물</td><td><span class="st">형사소송법 제217조 제1항</span></td><td class="rd">불가</td><td>체포 때부터 48h <span class="st">형사소송법 제217조 제2항</span></td></tr>
+      <tr><td>임의제출물</td><td><span class="st">형사소송법 제218조</span></td><td>—</td><td>불요</td></tr>
+      <tr><td>유류물</td><td><span class="st">형사소송법 제218조</span></td><td>—</td><td>불요</td></tr>
+    </table>
+    <div class="note">임의제출 임의성: 수갑·억압·이유 미설명 → 임의성 부정 <span class="st">대법원 2009도14376</span></div>
+  </div></details>
+
+  <details><summary><span class="tag">시한</span>긴급체포 요건 & 사후 시간<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li>요건: 혐의 상당성(전제) + <b>중대성</b>(사형·무기·장기 3년↑) + <b>긴급성</b> + <b>필요성</b>(도주·증거인멸 <span class="rd">둘 다</span>) — <span class="st">형사소송법 제200조의3 제1항</span></li>
+      <li>※ 2회 공식답안은 <b class="k">상당성 포함 4요소</b>로 채점 → 답안엔 4개 모두 기재</li>
+      <li>긴급체포서 즉시 작성 → 검사 승인 건의 <b class="k">12시간 내</b> — <span class="st">형사소송법 제200조의3 제2항</span></li>
+      <li>구속영장 청구 <b class="k">48시간 내</b> — <span class="st">형사소송법 제200조의4 제1항</span></li>
+    </ul>
+  </div></details>
+
+  <details><summary><span class="tag">6요건</span>심야조사·장시간조사<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li>심야조사(21~06시)는 피의자 <b class="k">요청서</b> (동의서 <span class="rd">불가</span>) — <span class="st">수사준칙 제21조 제2항</span></li>
+      <li><b class="k">인권보호관</b>(야간 상황관리관) 허가 (팀장 결재 <span class="rd">불가</span>) — <span class="st">수사준칙 제21조 제3항</span></li>
+      <li><b>2시간마다 10분 이상</b> 휴식 — <span class="st">수사준칙 제22조 제1항</span></li>
+      <li>중단·재개 이유·시각 <b>수사과정확인서</b> 기재 — <span class="st">경찰수사규칙 제37조</span></li>
+      <li>실제 조사시간 <b class="k">8시간 초과 금지</b>(휴식·열람 제외) — <span class="st">수사준칙 제22조 제2항</span></li>
+      <li>종료 후 <b class="k">8시간 경과 전 재조사 금지</b> — <span class="st">수사준칙 제23조 제1항</span></li>
+    </ul>
+    <div class="note">근거 종합 <span class="st">수사준칙 제21조·제22조·제23조</span> · <span class="st">경찰수사규칙 제36조·제37조</span> · 2회 30점 단독 출제</div>
+  </div></details>
+
+  <h2 class="sec"><span class="n">B</span> 구제·통보·고소처리</h2>
+
+  <details><summary><span class="tag">기한</span>수사이의제도<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>결정</th><th>명칭</th><th>기한·대상</th><th>근거</th></tr>
+      <tr><td>불송치</td><td class="gn">이의신청</td><td>기한 제한 없음<br>(고발인 <span class="rd">제외</span>)</td><td><span class="st">형사소송법 제245조의7 제1항</span></td></tr>
+      <tr><td>수사중지</td><td class="gn">이의제기</td><td><b>30일</b>·상급관서장</td><td><span class="st">수사준칙 제54조 제1항</span></td></tr>
+    </table>
+    <div class="note">법령위반·인권침해 의심 → 검사 신고 <span class="st">수사준칙 제54조 제3항</span> · <span class="st">형사소송법 제197조의3 제1항</span><br><span class="rd">⚠️ 90일 혼동 주의</span>: 불송치 기록을 송부받은 <b>검사의 반환 기한이 90일</b>(<span class="st">형사소송법 제245조의5 제2호</span>, 이 기간 내 재수사요청 검토) — 이의신청 기한이 아님. "90일 내 신청 권고"는 실무 안내일 뿐, 답안은 <b>기한 제한 없음</b>으로.</div>
+  </div></details>
+
+  <details><summary><span class="tag">처리</span>고소 수리·각하·공람종결·통보<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li>요건 갖춘 고소 → <b>고소 수리</b> — <span class="st">경찰수사규칙 제21조 제1항</span> ('진정' 임의저장 부적절)</li>
+      <li>법정대리인 독립 고소권 = <b class="k">고유권</b> — <span class="st">형사소송법 제225조 제1항</span> (위임장 불요)</li>
+      <li>공람종결 — <span class="st">경찰수사규칙 제19조 제2항 제5호</span> — 고소사건은 <span class="rd">대상 아님</span> · 간소화 '24.11.1</li>
+      <li>공무원 범죄: 각하라도 <b>수사개시·결과 통보</b> — <span class="st">범죄수사규칙 제46조</span> (정무직 제외)</li>
+    </ul>
+  </div></details>
+
+  <details><summary><span class="tag">외국인</span>영사통보 · 출국금지 기간 체계 · 지문채취<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li>외국인 체포 → <b class="k">영사기관 통보</b> — <span class="st">영사관계에 관한 비엔나협약 제36조 제1항</span> (본인 거부 무관)</li>
+    </ul>
+    <p style="margin:8px 0 4px;font-weight:800;font-size:13px">출국금지·출국정지 기간 체계 (<span class="st">출입국관리법</span>)</p>
+    <table>
+      <tr><th>유형</th><th>기간</th><th>근거</th></tr>
+      <tr><td>일반 출국금지 (형사재판 계속·형 미집행·벌금/추징금 미납)</td><td><b>6개월 이내</b></td><td><span class="st">제4조 제1항</span></td></tr>
+      <tr><td>범죄 수사 목적</td><td><b class="k">1개월 이내</b> (원칙)</td><td><span class="st">제4조 제2항 본문</span></td></tr>
+      <tr><td>소재불명 기소중지·수사중지(피의자중지 한정) 또는 도주 등 특별한 사유로 수사진행 곤란</td><td><b>3개월 이내</b></td><td><span class="st">제4조 제2항 제1호</span></td></tr>
+      <tr><td>기소중지·수사중지(피의자중지) + <b>체포·구속영장 발부</b></td><td><b class="k">영장 유효기간 이내</b><br>(실무: 영장 유효기간을 공소시효 만료일까지 발부받아 장기 유지)</td><td><span class="st">제4조 제2항 제2호</span></td></tr>
+      <tr><td>기간 연장</td><td>만료 <b>3일 전</b>까지 연장 요청</td><td><span class="st">제4조의2</span></td></tr>
+      <tr><td>이의신청</td><td>통지받은 날부터 <b>10일 이내</b></td><td><span class="st">제4조의5</span></td></tr>
+      <tr><td>외국인 = 출국정지 / 긴급출국정지</td><td>위 규정 준용</td><td><span class="st">제29조·제29조의2</span></td></tr>
+    </table>
+    <p style="margin:10px 0 4px;font-weight:800;font-size:13px">긴급출국금지 (<span class="st">제4조의6</span>) — 3중 시한 구조</p>
+    <ul>
+      <li>요건: 사형·무기·장기 <b>3년 이상</b> 죄의 상당한 혐의 + (증거인멸 염려 <b>또는</b> 도망·도망 우려) + 긴급한 필요 — <b class="k">긴급체포 요건과 동일 구조</b>로 암기</li>
+      <li>① 요청한 때부터 <b class="k">6시간 이내</b> 법무부장관 승인 요청 (검사 검토의견서 + 긴급출국금지보고서 첨부, <span class="st">시행령 제5조의3</span>)</li>
+      <li>② 승인 요청한 때부터 <b class="k">12시간 이내</b> 승인 못 받으면 출국금지 해제 (<span class="st">제4조의6 제4항</span>)</li>
+      <li>③ 해제되면 <b>동일 범죄사실로 재요청 불가</b> (<span class="st">제4조의6 제5항</span>) — 한 번뿐인 카드</li>
+    </ul>
+    <div class="note">통지 예외(수사 장애 우려)로 미통지 가능하나, 연장 포함 총 기간 <b>3개월 초과 시 반드시 통지</b>(<span class="st">제4조의4 제3항</span>). 6회 문제4①: 출국 임박인데 '요청시부터 3개월' 일반 규제 서류 발송 후 이동 = 부적절 → 긴급출국금지가 정답 방향.</div>
+    <ul>
+      <li>수사자료표 지문채취(근거: <span class="st">형실효법 제5조 제1항</span>) 거부 시 — ① 간접강제: <span class="st">경범죄처벌법 제3조 제1항 제34호</span>(요건: <b>다른 방법으로 신원확인 불가</b> + 정당한 이유 없는 거부, 헌재 <span class="st">2002헌가17·18</span> 합헌) ② 직접강제: 불구속 피의자는 <b class="k">검증영장</b>(<span class="st">형사소송법 제215조</span>) 필요, 체포·구속 피의자는 부수처분으로 가능(다수설). <span class="rd">신원이 이미 확인된 사안</span>이면 요건·필요성 없음 → 곧바로 영장 신청은 부적절 (6회 문제4③)</li>
+    </ul>
+  </div></details>
+
+  <h2 class="sec"><span class="n">C</span> 죄·법정형 수치</h2>
+
+  <details><summary><span class="tag">수치</span>특경법 사기 이득액 구간<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>이득액</th><th>법정형</th><th>근거</th></tr>
+      <tr><td>5억↑ ~ 50억 미만</td><td><b>3년 이상</b> 유기징역</td><td><span class="st">특정경제범죄 가중처벌 등에 관한 법률 제3조 제1항 제2호</span></td></tr>
+      <tr><td>50억 이상</td><td><b>무기 또는 5년 이상</b></td><td><span class="st">동법 제3조 제1항 제1호</span></td></tr>
+    </table>
+    <div class="note">편취액=현실 교부액 · 미수도 (예정)이득액 5억↑이면 <span class="st">특정경제범죄가중처벌법 제3조 + 형법 제352조(미수범)</span> 적용</div>
+  </div></details>
+
+  <details><summary><span class="tag">조문</span>주요 신종·청렴·공보 법정형<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li>피의사실공표죄 — <span class="st">형법 제126조</span>: 3년↓ 징역 / 5년↓ 자격정지</li>
+      <li>딥페이크(허위영상물) — <span class="st">성폭력범죄의 처벌 등에 관한 특례법 제14조의2</span> (미성년 대상 가중)</li>
+      <li>컴퓨터등사용사기 — <span class="st">형법 제347조의2</span> (보이스피싱 계좌이체형)</li>
+      <li>변호사법 <span class="st">제111조 제1항</span> ↔ <span class="st">특정범죄 가중처벌 등에 관한 법률 제3조</span>(알선수재) 상상적경합 — <span class="st">형법 제40조</span></li>
+      <li>범죄단체조직 — <span class="st">형법 제114조</span> — 핵심요건 <b class="k">통솔체계</b> <span class="st">대법원 2017도8600</span></li>
+    </ul>
+  </div></details>
+
+  <details><summary><span class="tag">시효</span>공소시효 · 친족상도례<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li>사기죄 공소시효 <b>10년</b> — <span class="st">형사소송법 제249조 제1항 제5호</span></li>
+      <li>국외도피 정지 — <span class="st">형사소송법 제253조 제3항</span> (형사처분 면할 목적 국외체류)</li>
+      <li>공범 시효정지 효력 — <span class="st">형사소송법 제253조 제2항</span> — 단 국외도피 정지효의 국내 공범 적용은 별도 쟁점</li>
+      <li><b class="k">친족상도례 개정 확정</b> — <span class="st">형법 제328조</span> ('25.12.30 국회 통과·12.31 공포)
+        <ul style="margin-top:4px">
+          <li>제1항: 형면제 <span class="rd">삭제</span> → 근친·원친 불문 <b>전면 친고죄화</b> / 제2항 삭제 / 제3항: 비친족 공범 적용 배제</li>
+          <li><b class="k">직계존속 고소 가능 특례</b>: 형사소송법 제224조·군사법원법 제266조에도 불구하고 자기·배우자의 직계존속 고소 가능</li>
+          <li><b class="k">부칙</b>: 헌법불합치('24.6.27)~개정 완료 사이 <b>경과사건에 소급 적용</b> + 고소기간(6개월) 특례</li>
+        </ul>
+      </li>
+    </ul>
+  </div></details>
+
+  <h2 class="sec"><span class="n">D</span> 보호조치·서류형식</h2>
+
+  <details><summary><span class="tag">3단계</span>스토킹 피해자 보호조치<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li>① 응급조치 — <span class="st">스토킹범죄의 처벌 등에 관한 법률 제3조</span> (제지·분리·안내)</li>
+      <li>② 긴급응급조치 — <span class="st">동법 제4조</span> (100m·전기통신 접근금지)</li>
+      <li>③ 잠정조치 — <span class="st">동법 제9조 제1항</span> (경고·접근금지·전기통신 금지·<b class="k">유치장 유치(제4호)</b>·전자장치)</li>
+    </ul>
+    <div class="note">강제격리 2법: 스토킹 <b>잠정조치 유치</b>(<span class="st">스토킹처벌법 제9조 제1항 제4호</span>) + <b>정신건강복지법 제50조</b>(응급입원)</div>
+  </div></details>
+
+  <details><summary><span class="tag">형식</span>수사서류 기재사항<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li>범죄인지서: <b class="k">죄명 / 적용법조 / 범죄사실 요지</b> (복수 조항 모두 기재) — <span class="st">경찰수사규칙 제18조 관련</span></li>
+      <li>구속영장 필요적 고려사항 — <span class="st">형사소송법 제70조 제2항</span>: <b>중대성 / 재범위험 / 위해우려</b></li>
+      <li>전자정보 절차: 사본교부(피의자만 원본+사본) / 상세목록=압수파일 전부 / 봉인반출 — <span class="st">수사준칙 제41조 제3항</span></li>
+      <li>수사보고서 내 참고인 진술: 원진술자 서명 없으면 증거능력 X — <span class="st">형사소송법 제313조 제1항</span></li>
+    </ul>
+  </div></details>
+
+  <details><summary><span class="tag">판례</span>핵심 판례 사건번호 (확정 검증)<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li><b class="k">가상자산 착오이체 배임 무죄</b> — <span class="st">대법원 2021. 12. 16. 선고 2020도9789</span> (타인의 사무를 처리하는 자 X, 신의칙 유추 = 죄형법정주의 위반)</li>
+      <li>가상자산 = <b>재산상 이익</b> — <span class="st">대법원 2021. 11. 11. 선고 2021도9855</span></li>
+      <li>비트코인 <b>몰수 가능</b>(재산적 가치 있는 무형재산) — <span class="st">대법원 2018. 5. 30. 선고 2018도3619</span></li>
+      <li>임의제출 임의성 부정 — <span class="st">대법원 2009도14376</span></li>
+      <li>변호인 참여권 고유권 — <span class="st">대법원 2020도10729</span> / 전자정보 탐색 참여권 — <span class="st">대법원 2011모1839 전합</span></li>
+      <li>범죄단체 통솔체계 — <span class="st">대법원 2017도8600</span> (보이스피싱 조직 = 형법 제114조 범죄단체 인정)</li>
+      <li>친족상도례 헌법불합치 — <span class="st">헌재 2024. 6. 27. 2020헌마468 등</span></li>
+    </ul>
+  </div></details>
+</section>
+
+<!-- ============ 사기 기수/미수 ============ -->
+<section class="panel" id="fraud">
+  <p class="lead">사기 유형별 <b>실행착수 → 기수시기 → 미수</b> 분기점. <span class="gn">기수</span>는 재물·이익의 <b>현실 취득</b>, <span class="rd">미수</span>는 그 직전 단절. 책임수사관 시험의 단골 변별 포인트입니다.</p>
+
+  <div class="card">
+    <p style="margin:0;font-size:13px"><b>대원칙</b> — 사기죄 실행착수 = <b class="k">기망행위 개시</b> / 기수 = <b class="k">처분행위로 재물·재산상 이익 취득</b>(<span class="st">형법 제347조 제1항</span>). 처분권자가 피해자와 다르면(법원 등) <b>삼각사기</b>. 미수는 <span class="st">형법 제352조</span>.</p>
+  </div>
+
+  <table>
+    <tr><th>유형</th><th>실행착수</th><th>기수시기</th><th class="">미수 사례</th></tr>
+    <tr><td><b>일반(대면) 사기</b><br><span class="st">형법 제347조 제1항</span></td><td>기망행위 개시</td><td class="gn">피해자 처분행위로 취득</td><td class="rd">피해자가 간파해 처분 안 함</td></tr>
+    <tr><td><b>차용금 사기</b><br><span class="st">형법 제347조 제1항</span></td><td>변제의사 없이 차용 요청</td><td class="gn">금원 교부받은 때</td><td class="rd">차용 거절</td></tr>
+    <tr><td><b>소송사기</b><br>(삼각사기, <span class="st">형법 제347조 제1항</span>)</td><td>법원에 허위 주장·증거 제출</td><td class="gn">승소·인용 확정 + 집행으로 <b>이익 현실화</b></td><td class="rd">채권압류·추심명령 인용만 받고 <b>미추심</b> (7회)</td></tr>
+    <tr><td><b>보험 사기</b><br><span class="st">형법 제347조 제1항</span></td><td>보험사고 가장·보험금 청구</td><td class="gn">보험금 수령</td><td class="rd">지급 거절</td></tr>
+    <tr><td><b>컴퓨터등사용사기</b><br><span class="st">형법 제347조의2</span></td><td>허위정보·부정명령 입력 개시</td><td class="gn">정보처리로 이익취득(계좌 입금)</td><td class="rd">입력했으나 처리 실패</td></tr>
+    <tr><td><b>보이스피싱<br>(대면편취형)</b><br><span class="st">형법 제347조 제1항</span></td><td>기망 전화 개시</td><td class="gn">전달책에게 현금 교부 시</td><td class="rd">인출·교부 전 검거</td></tr>
+    <tr><td><b>보이스피싱<br>(계좌이체형)</b><br><span class="st">형법 제347조의2</span></td><td>기망 전화 개시</td><td class="gn">사기계좌 <b>입금된 때</b></td><td class="rd">이체 직전 지급정지</td></tr>
+    <tr><td><b>전세·부동산 사기</b><br><span class="st">형법 제347조 제1항</span></td><td>허위 권리관계 기망</td><td class="gn">보증금·대금 교부받은 때</td><td class="rd">계약 결렬</td></tr>
+    <tr><td><b>무전취식·숙박</b><br><span class="st">형법 제347조 제1항</span></td><td>지급의사 없이 주문</td><td class="gn">음식·서비스 제공받은 때</td><td class="rd">제공 전 발각</td></tr>
+  </table>
+
+  <div class="note"><b>특경법 연계</b> — 사기·소송사기·컴퓨터등사용사기 모두 <b>미수범 처벌</b>(<span class="st">특정경제범죄 가중처벌 등에 관한 법률 제3조</span> + <span class="st">형법 제352조</span>). 따라서 <span class="rd">미수</span>라도 노린 이득액이 5억↑이면 <span class="st">특경법(사기) 미수</span>로 의율. 7회 7억 소송사기 미수가 그 예.</div>
+
+  <div class="card">
+    <h3>⚠️ 시험장 함정 3가지</h3>
+    <ul>
+      <li><b>소송사기 기수 오판</b>: 인용 '결정'을 기수로 적으면 감점 — <b class="k">추심·변제로 현실화</b>돼야 기수.</li>
+      <li><b>계좌이체형 기수시기</b>: '인출한 때'가 아니라 <b class="k">입금된 때</b>. 이후 인출은 불가벌적 사후행위.</li>
+      <li><b>차용금 편취고의 판단시점</b>: 사후 변제불능이 아니라 <b class="k">차용 당시</b> 변제의사·능력 기준 (7회).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 출제 예상 ============ -->
+<section class="panel" id="pred">
+  <p class="lead">아직 출제 안 됐거나 가볍게만 나왔지만, <b>최신 제·개정 + 책임수사관 직무 특성상 적중 가능성 높은</b> 영역. 조직범죄·보이스피싱 수사관 관점에서 우선순위로 추렸습니다.</p>
+
+  <h2 class="sec"><span class="n">HOT</span> 최근 이슈 — 시험 직전 개정·정책 (적중 1순위)</h2>
+
+  <div class="card">
+    <h3><span class="pill r">개정</span>통신사기피해환급법 — 전기통신금융사기죄 직접 처벌 ★★</h3>
+    <ul>
+      <li><b class="k">전기통신금융사기죄</b> — <span class="st">통신사기피해환급법 제15조의2</span>: 전기통신 이용 기망·공갈로 자금 이체·송금(정보·명령 입력, 타인정보 이용 입력) → 별도 처벌 + <b>미수범 처벌</b>. '23.5.16 개정으로 범위 확대(<b>대면편취형·대출 가장 포함</b>)·법정형 강화</li>
+      <li>사기죄(형법 제347조)와의 관계 — 특별법 우선 적용 여부·죄수 쟁점으로 출제 가능</li>
+      <li><b>'26.2.3 공포 개정(8.4 시행)</b>: <b class="k">정보공유분석기관</b> 지정제도(제13조의4), 금융회사-선불업자 간 사기이용계좌 정보공유, 피해의심거래탐지시스템 상시점검</li>
+      <li>신종스캠 대응: <b>투자리딩방·로맨스스캠·통장협박(간편송금 악용)</b> — 지급정지·환수 절차 확대 방향</li>
+    </ul>
+    <div class="note">보이스피싱 사건기록에서 "지급정지·사기이용계좌·선불업자(페이)" 단어가 보이면 이 법 체계로 답할 것. 조직범죄 수사관 영역 직격 — 8회 최유력.</div>
+  </div>
+
+  <div class="card">
+    <h3><span class="pill r">확대</span>위장수사 — 신분비공개·신분위장 ★</h3>
+    <ul>
+      <li>현행: <span class="st">청소년성보호법 제25조의2</span> — 디지털 성범죄에 한해 <b>신분비공개수사</b>(상급자 승인) / <b>신분위장수사</b>(법원 허가, 문서 작성·행사 가능)</li>
+      <li>'24년 성폭력처벌법 개정으로 <b>성인 대상 딥페이크 범죄에도 위장수사 확대</b> — 긴급 신분비공개수사 도입</li>
+      <li>마약·도박 등 타 범죄 확대 논의 중 — <b>함정수사 구별</b>(기회제공형=적법 vs 범의유발형=위법)과 세트로 정리</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><span class="pill r">강화</span>스토킹 전자장치 + 마약 대응</h3>
+    <ul>
+      <li>스토킹 잠정조치에 <b class="k">위치추적 전자장치 부착</b>(제9조 제1항 제3호의2, '23 도입) — 6회 기출 보호수단에 추가된 최신 항목</li>
+      <li>마약: 청소년 대상 공급 가중, <b>통제배달</b>(마약류 불법거래 방지에 관한 특례법 제4조), 투약자 재활 연계 — 기소 전 추징보전(제53조)과 연결</li>
+    </ul>
+  </div>
+
+  <h2 class="sec"><span class="n">A</span> 미출제·저빈도 예상 영역</h2>
+
+  <div class="card">
+    <h3><span class="pill g">신설법</span>가상자산이용자보호법</h3>
+    <p>2024.7.19 시행. 이용자 예치금 보호·불공정거래(시세조종·미공개정보) 규율. 코인 투자사기·유사수신과 결합 출제 가능. 가상자산 <b>재물성 부정</b>(횡령·배임 불성립)과 함께 정리.</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="pill g">개정</span>통신수사 3종 구분 ★고가능성</h3>
+    <ul>
+      <li><b>통신이용자정보 제공요청</b>(구 통신자료, 가입자정보) — 사후 통지 의무 신설</li>
+      <li><b>통신사실확인자료</b>(통화내역·기지국·위치) — 법원 허가 필요</li>
+      <li><b>통신제한조치</b>(감청) — 법원 허가, 보충성 엄격</li>
+      <li>긴급통신·기지국수사·역추적 절차 구분</li>
+    </ul>
+    <div class="note">보이스피싱 발신지·대포폰 추적의 핵심. 세 가지 요건·절차 혼동 주의.</div>
+  </div>
+
+  <div class="card">
+    <h3><span class="pill g">절차</span>압수물 처리</h3>
+    <p>환부·가환부 <span class="st">형사소송법 제133조</span> / 폐기 / 대가보관 / 국고귀속. 6회 ④(지퍼백 임의반환)처럼 <b>적정 절차 위반</b>형으로 출제 가능.</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="pill g">피해자</span>피해자 보호·2차피해 방지</h3>
+    <ul>
+      <li>신뢰관계인 동석 — <span class="st">형사소송법 제163조의2</span> / 진술조력인 / 영상녹화</li>
+      <li>피해자 국선변호사(성폭력·아동) · 가명조서 — <span class="st">특정범죄신고자 등 보호법 제7조</span></li>
+      <li>범죄피해자 안전조치(신변경호·스마트워치·112등록·임시숙소 등)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><span class="pill g">증거</span>디지털 증거 무결성</h3>
+    <p>해시값(SHA-256) 동일성·무결성 입증, 이미징, 봉인, 연계보관성(CoC). 전자정보 압수(<span class="st">형사소송법 제106조·제219조</span>)와 세트로 출제 여지.</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="pill g">조직범죄</span>몰수·추징보전 & 통제배달</h3>
+    <ul>
+      <li>범죄수익 몰수·추징보전 — <span class="st">범죄수익은닉의 규제 및 처벌 등에 관한 법률 제8조·제10조</span> / <span class="st">마약류 불법거래 방지에 관한 특례법 제53조</span> 준용</li>
+      <li>마약 통제배달·위장거래 적법성 / 함정수사(기회제공형 vs 범의유발형)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><span class="pill r">신종</span>딥보이스·AI 합성 신종범죄</h3>
+    <p>AI 음성·영상 합성 보이스피싱, 딥페이크 협박. <span class="st">성폭력범죄의 처벌 등에 관한 특례법 제14조의2</span> + 공갈(<span class="st">형법 제350조</span>) + 정통망법(<span class="st">정보통신망 이용촉진 및 정보보호 등에 관한 법률 제44조의7</span>) 결합형 신종범죄 독립문제 가능성.</p>
+  </div>
+</section>
+
+<!-- ============ 기록 신호어 ============ -->
+<section class="panel" id="signal">
+  <p class="lead">사건기록에는 <b>"의도적 오류"</b>가 심어져 있습니다. 기록을 읽다가 아래 단어·상황이 보이면 <b class="k">그 자리에서 쟁점 플래그</b>를 세우세요. 신호어 → 즉시 떠올릴 쟁점 순서로 정리했습니다.</p>
+
+  <details open><summary><span class="tag">시간</span>날짜·시각 신호<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>기록 속 신호</th><th>즉시 떠올릴 쟁점</th></tr>
+      <tr><td><b>"21:00" 이후 조사 시각</b></td><td>심야조사 → 요청서·인권보호관 허가 여부 (수사준칙 제21조)</td></tr>
+      <tr><td><b>조사 시작~종료 시간이 김</b></td><td>총조사 8시간 초과? 2시간마다 휴식? 종료 후 8시간 내 재조사?</td></tr>
+      <tr><td><b>체포 시각 명시</b></td><td>48시간 계산 시작점 — 사후영장(제217조 제2항)·구속영장 청구 시한</td></tr>
+      <tr><td><b>긴급체포 후 경과 시간</b></td><td>12시간 내 검사 승인 건의 했는지</td></tr>
+      <tr><td><b>영장 유효기간 vs 집행일</b></td><td>기간 도과 여부 + "다른 사건 출장 후 집행" = 신속집행 위반 신호 (6회 문제4②)</td></tr>
+      <tr><td><b>토·일요일 날짜</b></td><td>영장실질심사·기간 계산 함정 확인</td></tr>
+      <tr><td><b>범행일과 고소일 간격이 큼</b></td><td>공소시효 계산 + "출국" 있으면 제253조 제3항 정지</td></tr>
+      <tr><td><b>'2024.6.27~2025.12.31' 사이 친족 재산범죄</b></td><td>친족상도례 <b>경과사건 소급 적용</b> + 고소기간 특례 (개정 부칙)</td></tr>
+    </table>
+  </div></details>
+
+  <details><summary><span class="tag">인물</span>신분·상태 신호<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>기록 속 신호</th><th>즉시 떠올릴 쟁점</th></tr>
+      <tr><td><b>"외국인" / 국적 표기</b></td><td>영사통보(비엔나협약 제36조, 거부 무관) — 중국 국적은 별도 협정 기한</td></tr>
+      <tr><td><b>"공무원" 피의자</b></td><td>수사개시·결과 통보(범죄수사규칙 제46조) — 각하도 통보, 정무직만 제외</td></tr>
+      <tr><td><b>"16세" / 미성년 피해자</b></td><td>법정대리인 독립 고소권(형사소송법 제225조 제1항, 위임장 불요) + 2차피해 방지</td></tr>
+      <tr><td><b>"퇴직 경찰관·공무원" + 금품</b></td><td>알선수재(특가법 제3조)·변호사법 제111조 — 상상적경합(형법 제40조)</td></tr>
+      <tr><td><b>"조현병·정신병원 입퇴원"</b></td><td>응급입원(정신건강복지법 제50조) — 강제격리 수단 (6회 문제4)</td></tr>
+      <tr><td><b>"친족·삼촌·형" 재산범죄</b></td><td>개정 제328조 친고죄 → 고소 유무 확인 / 비친족 공범 배제(제3항)</td></tr>
+      <tr><td><b>피해자 여러 명 + 피해액 각각</b></td><td>피해법익 별개 → 포괄일죄 부정 → 개별 사기 / 5억 합산 함정</td></tr>
+      <tr><td><b>"대표이사가 회사 명의 서류 작성"</b></td><td>권한 범위 내? 초과? — 자격모용·위조 구별 (4·7회)</td></tr>
+    </table>
+  </div></details>
+
+  <details><summary><span class="tag">서류</span>문서·절차 신호<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>기록 속 신호</th><th>즉시 떠올릴 쟁점</th></tr>
+      <tr><td><b>"동의서"</b></td><td>심야조사는 <span class="rd">요청서</span>여야 — 동의서면 위법</td></tr>
+      <tr><td><b>"팀장 결재·전결"</b></td><td>인권보호관 허가 필요 사항 아닌지 / 불입건 기안전결 적정성 (6회 문제5③)</td></tr>
+      <tr><td><b>"압축파일로 목록 작성"</b></td><td>상세목록은 압수대상 <span class="rd">파일 전부</span> 기재</td></tr>
+      <tr><td><b>"위임장" + 인감</b></td><td>명의인 승낙 있었나? → 사문서위조 + 공정증서원본부실기재(제228조) 연쇄 (7회)</td></tr>
+      <tr><td><b>"확인서·차용증" 피해자 아닌 자 작성</b></td><td>소송사기 기망 수단 — 법원 제출 여부 확인</td></tr>
+      <tr><td><b>"수사보고서에 참고인 진술 요지"</b></td><td>원진술자 서명·날인 없으면 증거능력 X (제313조 제1항)</td></tr>
+      <tr><td><b>"기록 말미에 고정·보관"</b></td><td>압수물은 압수조서·목록교부·별도보관 — 임의방식 위법 (6회 문제5②)</td></tr>
+      <tr><td><b>"우편·택배로 반환"</b></td><td>압수물 환부 절차(제133조) 미준수 신호 (6회 문제5④)</td></tr>
+      <tr><td><b>영장에 참고인 인적사항 기재</b></td><td>익명처리 필요 — 사본교부 시 권리침해 (7회 답안Ⅲ)</td></tr>
+    </table>
+  </div></details>
+
+  <details><summary><span class="tag">행위</span>행위·상황 신호<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>기록 속 신호</th><th>즉시 떠올릴 쟁점</th></tr>
+      <tr><td><b>"인용결정 받았다" (끝)</b></td><td>실제 추심·집행 있었나? 없으면 소송사기 <span class="rd">미수</span> (7회 핵심)</td></tr>
+      <tr><td><b>"자신의 다른 계정·지갑으로 이체"</b></td><td>가상자산 → 횡령·배임 불성립 (2020도9789)</td></tr>
+      <tr><td><b>"공항·출국·항공권"</b></td><td>긴급출국금지(출입국관리법 제4조의6) — 6h 승인요청/12h 미승인 해제/재요청 불가. 일반규제(1개월·3개월)로는 임박 출국 못 막음 (6회 문제4①)</td></tr>
+      <tr><td><b>"기소중지·수사중지 + 체포영장 발부"</b></td><td>출국금지 기간 = <b>영장 유효기간 이내</b>(제4조 제2항 제2호) — 실무상 공소시효 만료일까지 영장 발부받아 유지</td></tr>
+      <tr><td><b>"수갑 찬 채·체포된 상태에서 제출"</b></td><td>임의제출 임의성 부정 신호 (2009도14376)</td></tr>
+      <tr><td><b>"탐색 중 다른 범죄 파일 발견"</b></td><td>즉시 중단 → 별건 영장 — 계속 탐색 시 위법</td></tr>
+      <tr><td><b>"사무실로 가져가 분석"</b></td><td>이동 후 탐색에도 참여권 별도 보장 (2011모1839)</td></tr>
+      <tr><td><b>"피의자는 참여 안 한다고 함"</b></td><td>변호인에겐 별도 통지·보장했나? (고유권, 2020도10729)</td></tr>
+      <tr><td><b>"차용 당시 재산·신용 있었음"</b></td><td>편취고의 부정 방향 — 차용 시점 기준 판단 (7회)</td></tr>
+      <tr><td><b>"거부 의사에도 반복 방문·문자 수백회"</b></td><td>스토킹처벌법 + 채권추심법 병행 검토 (6회 문제4)</td></tr>
+      <tr><td><b>"모집책·관리책·상담원 역할 분담"</b></td><td>범죄단체(제114조) 통솔체계 신호 + 공동정범 전체이득액</td></tr>
+      <tr><td><b>기사에 "소식통에 따르면"</b></td><td>내부 유출 → 언론대응 + 보안점검·감찰 (6회 문제1)</td></tr>
+    </table>
+  </div></details>
+
+  <details><summary><span class="tag">금액</span>금액·수치 신호<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>기록 속 신호</th><th>즉시 떠올릴 쟁점</th></tr>
+      <tr><td><b>4억대·5억대·수십억 금액</b></td><td>특경법 5억/50억 경계 — 합산 가능성(동일 피해자·단일 범의)까지 검토</td></tr>
+      <tr><td><b>"미수인데 7억"</b></td><td>미수도 특경법(사기) 적용 (제3조 + 형법 제352조) (7회)</td></tr>
+      <tr><td><b>"수익금 일부 돌려줌"</b></td><td>편취액 = 현실 교부액, 반환액 불공제</td></tr>
+      <tr><td><b>"3,000만원 + 7억" 등 건별 분리</b></td><td>범의 단일성·피해법익별로 죄수 분리 — 건별 기수/미수 각각 판단</td></tr>
+    </table>
+  </div></details>
+
+  <div class="note"><b>읽기 루틴</b> — 기록목록 먼저 → 인물관계도 메모 → 날짜를 시간순 정렬 → 위 신호어 체크. 신호어 하나가 문제 하나와 1:1로 대응하는 경우가 대부분입니다. "이 문장이 왜 굳이 들어 있지?"라는 감각이 곧 출제 포인트입니다.</div>
+</section>
+
+<!-- ============ D-7 플랜 ============ -->
+<section class="panel" id="plan">
+  <p class="lead"><b>시험: 7/11(토) 14:00.</b> 오늘(7/4 토)부터 D-7 — 주말엔 통짜 실전 모의, 평일 저녁은 2시간 단위 오답·암기로 배분했습니다. 뒤에 <b class="k">실전 문제 풀이 순서·방법</b>이 이어집니다.</p>
+
+  <div class="card">
+    <h3>🗓️ 일자별 플랜 (7/4 ~ 7/11)</h3>
+    <table>
+      <tr><th>날짜</th><th>학습 내용</th><th>목표</th></tr>
+      <tr><td><b>7/4 (토) D-7</b></td><td><b class="k">수사지휘서 집중</b> — 1·6·7회 기출 지휘서 빈칸을 직접 다시 채워보기 + 특경법 의율(이득액·포괄일죄)</td><td>50점 형식 체화</td></tr>
+      <tr><td><b>7/5 (일) D-6</b></td><td><b class="k">7회 기출 실전 모의</b> — 1교시 100분 + 2교시 60분, 시간 재고 컴퓨터로 실제 작성 (아래 풀이 순서대로 연습)</td><td>시간관리 감각</td></tr>
+      <tr><td><b>7/6 (월) D-5</b></td><td>퇴근 후 2h: 모의 답안 ↔ 모범답안·채점기준 대조, 빠진 <b>키워드·조문</b> 목록화</td><td>감점 요인 제거</td></tr>
+      <tr><td><b>7/7 (화) D-4</b></td><td>퇴근 후 2h: 영장없는 압수 5유형 + 전자정보 5종 + 체포·긴급체포·출국금지 시한(6h/12h/48h/1·3·6개월) 백지 재현</td><td>표·숫자 완성</td></tr>
+      <tr><td><b>7/8 (수) D-3</b></td><td>퇴근 후 2h: 절차·인권(심야 6요건·수사이의·언론대응·호송) + 사기 기수/미수 표 + 친족상도례 개정</td><td>공통 대비 완성</td></tr>
+      <tr><td><b>7/9 (목) D-2</b></td><td>퇴근 후 2h: 이 앱 <b>퀴즈 40문항 만점 반복</b> + 함정·신호어 정독 · <span class="rd">오늘부터 새 내용 금지</span></td><td>퀴즈 100%</td></tr>
+      <tr><td><b>7/10 (금) D-1</b></td><td>퇴근 후 1h만: 숫자표+조문 즉답 세트+판례 7개 손으로 써보기 → 마지막 5장 준비 → <b>일찍 취침</b></td><td>컨디션 관리</td></tr>
+      <tr><td><b>7/11 (토) 시험</b></td><td>오전: 마지막 5장만 훑기(새 내용 절대 금지) → 11:30 가벼운 점심 → <b>13:00 도착</b> → 13:30 착석·심호흡</td><td>14:00 스타트</td></tr>
+    </table>
+    <div class="note">6회 기출 모의를 넣을 여유가 있으면 7/7~7/8 저녁에 <b>1교시 문제1(지휘서 50점)만</b> 발췌 연습 — 통짜 2회는 무리, 지휘서 반복이 더 남는 장사.</div>
+  </div>
+
+  <h2 class="sec"><span class="n">1교시</span> 수사 100분 · 4문제 — 풀이 순서</h2>
+
+  <div class="card">
+    <table>
+      <tr><th>순서</th><th>시간</th><th>할 일</th></tr>
+      <tr><td>⓪</td><td>~90초</td><td><b>제공자료 세팅</b>: 버전 확인(형법 개정 반영?) → zip 해제 → 핵심 파일 창 열기</td></tr>
+      <tr><td>①</td><td>5분</td><td><b>문제 4개 전부 먼저 읽기</b> (기록보다 문제 먼저!) — 배점·답안형식 예시 확인, 쟁점별 "볼 파일" 메모</td></tr>
+      <tr><td>②</td><td>12분</td><td><b>기록 무관 독립문제부터 처리</b> (보통 15~20점 × 2) — 아는 것 즉답으로 확보, 멘탈 안정. 조문 번호는 비워두고 [ ] 표시</td></tr>
+      <tr><td>③</td><td>13분</td><td><b>기록 정독</b>: 기록목록 → 인물관계 메모 → 날짜 시간순 정렬 → 신호어 체크 (문제를 이미 읽었으니 뭘 찾을지 앎)</td></tr>
+      <tr><td>④</td><td>38분</td><td><b class="k">50점 지휘서</b> — 형식 예시 목차를 먼저 통째로 타이핑(빈 뼈대) → 죄명/해당성/결정의견 순으로 채우기</td></tr>
+      <tr><td>⑤</td><td>20분</td><td>나머지 기록 기반 문제</td></tr>
+      <tr><td>⑥</td><td>12분</td><td><b>조문 일괄 검산</b>(Ctrl+F로 [ ] 표시 채우기) → 죄명 표기 예규 대조 → 분량·개인정보 확인</td></tr>
+    </table>
+  </div>
+
+  <h2 class="sec"><span class="n">2교시</span> 공통 60분 · 5문제 — 풀이 순서</h2>
+
+  <div class="card">
+    <table>
+      <tr><th>순서</th><th>시간</th><th>할 일</th></tr>
+      <tr><td>①</td><td>3분</td><td>문제 5개 훑기 — 배점 확인 (60분에 5문제 = 평균 11분, 여유 없음)</td></tr>
+      <tr><td>②</td><td>15분</td><td><b>독립 사례형(적부판단·부적절 찾기)부터</b> — 기록 없이 즉답 가능, 신호어(동의서·팀장결재·공람종결·우편반환...)가 그대로 나옴</td></tr>
+      <tr><td>③</td><td>10분</td><td>최고배점 문제(보통 25점) 착수</td></tr>
+      <tr><td>④</td><td>25분</td><td>나머지 기록 기반 문제 — 배점 큰 순</td></tr>
+      <tr><td>⑤</td><td>7분</td><td>조문 검산 + 빠뜨린 문제 없는지 확인</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>✍️ 작성 방법 원칙 (두 교시 공통)</h3>
+    <ul>
+      <li><b>뼈대 먼저</b>: 답안형식 예시의 목차(가/나/다, 1/2/3)를 그대로 먼저 타이핑 — 시간이 모자라도 뼈대에 키워드만 채우면 부분점수</li>
+      <li><b>결론 → 이유 → 근거 순서 고정</b>: "부적절하다. ~이기 때문이다(조문)." 채점은 키워드 단위이므로 <b class="k">문장은 짧게, 키워드 밀도는 높게</b></li>
+      <li><b>조문은 [ ]로 비우고 진행</b>: 흐름 끊지 말고 마지막 검산 단계에서 Ctrl+F로 일괄 채움 (미기재 시 1점씩 감점되는 배점을 회수하는 단계)</li>
+      <li><b>3분 룰</b>: 한 항목에서 3분 이상 막히면 ★ 표시하고 다음으로 — 50점 문제도 항목 단위로 건너뛰며 채움</li>
+      <li><b>분량은 배점 비례</b>: 5쪽 제한이므로 15점 문제에 1쪽 이상 쓰지 않기</li>
+      <li><b>양자택일 표현 금지</b>: "적법할 수도 있다" ❌ → 대법원 입장으로 단정 + 근거</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>⚡ 마지막 순간까지 쥐고 갈 5장 (7/11 오전용)</h3>
+    <ul>
+      <li>① 영장없는 압수 5유형 표 (요급처분·사후영장)</li>
+      <li>② 숫자표: 12h/48h(긴급체포) · 6h/12h(긴급출국금지) · 30일 · 2h·10분 · 8h · 1/3/6개월 · 5억/50억 · 10년</li>
+      <li>③ 친족상도례 개정 3줄: 형면제 삭제·전면 친고죄·직계존속 고소 특례·경과사건 소급</li>
+      <li>④ 심야조사 6요건 + 수사이의(이의신청/이의제기) 구분</li>
+      <li>⑤ 판례 번호 7개 (2020도9789 · 2021도9855 · 2018도3619 · 2009도14376 · 2020도10729 · 2011모1839 · 2017도8600)</li>
+    </ul>
+  </div>
+
+  <div class="note"><b>당일 컨디션</b> — 14시 시작이라 점심이 변수: 11:30 가볍게(졸음 방지), 카페인은 평소 루틴대로, 13:00 도착해 90초 루틴(자료 버전·zip·창 배치) 리허설. 1교시 끝나고 쉬는 시간엔 <b>1교시 복기 금지</b> — 2교시 5장만 봅니다.</div>
+</section>
+
+<!-- ============ 제공자료 전략 ============ -->
+<section class="panel" id="docs">
+  <p class="lead">시험장에는 법령·매뉴얼이 제공됩니다(6회 기준 60여 개, <b>"쟁점과 관련 없는 것들도 모두 포함"</b> 명시). 조문 암기가 아니라 <b class="k">어디에 있는지 아는 것</b>과 <b class="k">자료로도 못 찾는 것의 암기</b>가 전략입니다.</p>
+
+  <div class="card">
+    <h3>활용 5원칙</h3>
+    <ul>
+      <li><b>① 자료는 검산용, 머리는 판단용</b> — 루틴: 쟁점 확정 → 키워드 초안 → <b class="k">마지막에 조문 검산</b>. 조문 찾기부터 시작하면 시간 붕괴.</li>
+      <li><b>② 노이즈 필터</b> — 60여 개 중 기출 인용 실적은 15개 내외. 건설·안전·관광·변사 등은 해당 죄명이 기록에 등장할 때만 연다.</li>
+      <li><b>③ Ctrl+F가 인덱스보다 빠르다</b> — 컴퓨터 시험이므로 파일별 <b class="k">검색어</b>를 외울 것 (아래 표 병기).</li>
+      <li><b>④ 페이지 인용형 매뉴얼은 사전 태깅이 곧 점수</b> — 채점기준이 "매뉴얼 ○○면"으로 근거를 다는 자료는 미리 확인한 사람만 배점 취득.</li>
+      <li><b>⑤ 죄명 표기는 예규로 검산</b> — 「공소장 및 불기소장 죄명 예규」 표기 그대로 (예: 특정경제범죄가중처벌등에관한법률위반(사기)).</li>
+    </ul>
+  </div>
+
+  <h2 class="sec"><span class="n">S</span> 4대 법령 — 위치를 몸에 익힐 것</h2>
+
+  <details open><summary><span class="tag">지도</span>형사소송법 태그 지도<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>태그</th><th>조문</th><th>쟁점</th></tr>
+      <tr><td>🔴체포</td><td>제200조의2~4 · 제211조 · 제212조</td><td>체포·긴급체포(12h/48h)·현행범</td></tr>
+      <tr><td>🔴압수</td><td>제215조~제218조의2</td><td>영장없는 압수 5유형·환부</td></tr>
+      <tr><td>🔴집행·참여</td><td>제85조·제118조·제121조 (제219조 준용)</td><td>제시·사본교부·참여권</td></tr>
+      <tr><td>🟡구속·증거</td><td>제70조② · 제307~318조의2(제313조①)</td><td>고려사항·증거능력</td></tr>
+      <tr><td>🟡시효·구제</td><td>제249조 · 제253조②③ · 제245조의7 · 제197조의3</td><td>공소시효·이의신청</td></tr>
+      <tr><td>🟢고소·신문</td><td>제223~232조(제225조①) · 제243조의2</td><td>고유권·직계존속 특례·변호인 참여</td></tr>
+    </table>
+  </div></details>
+
+  <details><summary><span class="tag">통독</span>수사준칙·경찰수사규칙·범죄수사규칙<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li><b>수사준칙</b>(얇음, 통독 1회): 제21~23조(심야·장시간) / 제41조③(봉인) / 제54조(수사중지 이의제기·검사신고)</li>
+      <li><b>경찰수사규칙</b>: 제13조(준항고 고지) / 제19조②5호(공람종결) / 제21조(고소수리) / 제36·37조(심야) / 제64조(압수목록) / 제89조(미성년) / 제101조(이의제기)</li>
+      <li><b>범죄수사규칙</b>(zip — <span class="rd">시험 시작 직후 압축 해제!</span>): 제23조+별표1·2(내부보고) / 제46조(공무원 통보) / 제50조의3(각하)</li>
+    </ul>
+  </div></details>
+
+  <h2 class="sec"><span class="n">A</span> 페이지 인용 매뉴얼 — 사전 태깅 필수 9종</h2>
+
+  <details open><summary><span class="tag">태깅</span>매뉴얼 태그·검색어 표<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>파일</th><th>태그 위치</th><th>검색어</th><th>기출</th></tr>
+      <tr><td><b>2023 수사인권 매뉴얼</b></td><td>p.31·49·61·80·100 + 목차</td><td>전과, 접견, 신뢰관계</td><td>5회 공통 5문제 전부</td></tr>
+      <tr><td><b>2020 디지털증거 압수수색 매뉴얼</b></td><td>37~38면(봉인·원본반출확인서)</td><td>봉인, 상세목록, 참여</td><td>5회</td></tr>
+      <tr><td><b>2024 개정 형소법 수사실무지침(5판)</b></td><td>압수목록 교부·사본교부 (목차 재확인)</td><td>압수목록, 사본</td><td>5회</td></tr>
+      <tr><td><b>2023 영장신청실무</b></td><td>체포·구속·압수 "필요 사유" 작성례</td><td>필요로 하는 사유</td><td>영장 전 회차</td></tr>
+      <tr><td><b>2023 범죄사실 작성방법·작성례</b></td><td>사기·공갈·횡령 작성례</td><td>기망, 편취</td><td>1·4·5회</td></tr>
+      <tr><td><b>2019 수사지휘 표준절차</b></td><td>수사지휘서 양식·기재례</td><td>지휘</td><td>50점 형식</td></tr>
+      <tr><td><b class="k">2022 기소 전 몰수·추징보전의 디딤돌</b></td><td>추징보전 신청서 기재례</td><td>추징보전, 제53조</td><td><b>6회 문제1③ 직접 근거</b></td></tr>
+      <tr><td><b>2023 불송치 결정서 작성기법</b></td><td>혐의없음·각하 주문례</td><td>혐의없음, 주문</td><td>결정주문</td></tr>
+      <tr><td><b>2024 수사단계별 준수사항</b></td><td>심야조사·조사시간 표</td><td>심야, 8시간</td><td>2회 30점 후신</td></tr>
+    </table>
+    <div class="note">「추징보전의 디딤돌」이 목록에 있었다는 것 자체가 6회 출제 신호였음 — <b>제공 목록의 이례적 파일 = 출제 예고</b>로 읽을 것.</div>
+  </div></details>
+
+  <h2 class="sec"><span class="n">B</span> 특별법·훈령 — 처벌조항 1곳씩만 태그</h2>
+
+  <details><summary><span class="tag">조항</span>특별법 태그 목록<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li>통신사기피해환급법 <b>제2조·제15조의2</b>(처벌·미수)·제3조(지급정지) — 검색어 "전기통신금융사기"</li>
+      <li>특경법 <b>제3조</b>(5억/50억) / 스토킹처벌법 <b>제3·4·9조</b>(①4호 유치·3호의2 전자장치) + 2024 스토킹 대응 매뉴얼</li>
+      <li>성폭력처벌법 <b>제14조·제14조의2</b>(딥페이크) / 청소년성보호법 제25조의2(위장수사)</li>
+      <li>유사수신규제법 제2·3·6조 / 방문판매법 제23·24·58조 / 범죄수익은닉규제법 제2·8·10조 / 마약특례법 <b>제53조</b>·제4조</li>
+      <li>출입국관리법 <b>제4조의6</b>(긴급출국금지) / 정신건강복지법 <b>제50조</b>(응급입원) / 변호사법 제34·<b>111조</b> / 국제형사사법공조법 제29조</li>
+      <li>수사공보규칙(창구 일원화) / 형실효법 제5조(수사자료표)+경범죄처벌법 제3조①34호(지문채취불응) / 피의자 유치 및 호송 규칙(계호·보호장비) / 통신비밀보호법 제2·5·6·13조 + 통신수사 길라잡이</li>
+      <li><b>사이버·가상자산 묶음</b>: 사이버범죄 수사 기본 매뉴얼(피싱·파밍 초동) / 가상자산 추적 문답집(TXID·거래소 영장) / 글로벌 IT 국제공조 매뉴얼(보존요청) / <b class="k">디지털증거 판례 해설자료집</b>(유일한 판례 자료 — 전자정보 판례 요지 태그)</li>
+    </ul>
+    <div class="note"><span class="rd">⚠️ 6회 목록에 전자금융거래법 없음</span> — 접근매체 양수(3회 기출)의 근거법. 8회 미제공 대비 제6조·제49조는 암기로 커버.</div>
+  </div></details>
+
+  <h2 class="sec"><span class="n">GO</span> 시험 시작 90초 루틴 + 암기 유지 목록</h2>
+
+  <div class="card">
+    <ul>
+      <li>① 제공 폴더 열기 → <b class="k">버전 확인</b> (형법이 '25.12.31 개정 반영판인지 → 친족상도례 답안 기준 확정)</li>
+      <li>② zip 파일(범죄수사규칙·죄명예규) <b>압축 해제</b></li>
+      <li>③ S티어 4개 + 영장신청실무 + 인권매뉴얼 <b>창 미리 열어두기</b></li>
+      <li>④ 문제 전체 훑기 → 쟁점별 "볼 파일" 메모 → 초안 → 조문 검산</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>자료가 있어도 안 되는 것 (암기 유지)</h3>
+    <ul>
+      <li><b>판례 결론·번호</b> — 판례집 미제공(디지털증거 판례집만 예외): 2020도9789 · 2021도9855 · 2018도3619 · 2009도14376 · 2020도10729 · 2011모1839 · 2017도8600</li>
+      <li><b>기수/미수 분기</b>(소송사기 추심·계좌이체형 입금시) / <b>의율 판단</b>(포괄일죄·특경법 합산·채권추심자 해당성)</li>
+      <li><b>답안 틀·키워드 개수</b>(긴급체포 4요소·심야 6요건) / <b>이 태그 지도 자체</b></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 퀴즈 ============ -->
+<section class="panel" id="quiz">
+  <p class="lead">절차·조문·수치 암기를 점검하세요. 객관식·OX는 즉시 채점+해설, 암기카드는 뒤집어 자가확인합니다.</p>
+
+  <div class="qz-modes" id="qzModes">
+    <button data-mode="mc">객관식 + OX<span>전체 문제 풀이 · 채점</span></button>
+    <button data-mode="flash">암기 카드<span>용어 → 정답 뒤집기</span></button>
+  </div>
+
+  <div id="qzStage">
+    <div class="qz-top"><span id="qzCount">1 / 30</span><button id="qzQuit" style="background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:underline">그만두기</button></div>
+    <div class="qz-prog"><i id="qzBar"></i></div>
+    <div id="qzBody"></div>
+  </div>
+
+  <div id="qzResult"></div>
+</section>
+
+<!-- ============ 답안작성·함정 ============ -->
+<section class="panel" id="write">
+  <p class="lead">답안을 <b>어떻게 쓰느냐</b>가 아는 것과 별개로 점수를 가릅니다. 작성법 → 필수 암기 총정리 → 시험 전 체크리스트 → 함정 모음 순으로 정리했습니다.</p>
+
+  <h2 class="sec"><span class="n">1</span> 답안 작성법 — 형식에서 점수 새지 않기</h2>
+
+  <div class="card">
+    <h3>채점은 결론이 아니라 키워드 단위</h3>
+    <ul>
+      <li>모범답안은 <b class="k">밑줄=키워드 1점, 물결밑줄=0.5점</b> 구조. "결론만" 쓰면 절반밖에 못 받음.</li>
+      <li>근거(조문·판례·지침)를 <b>쓰면 배점 취득, 안 쓰면 항목당 1점씩 감점</b> — 채점기준에 명시된 규칙.</li>
+      <li>즉 모든 답에 <b class="k">결론 + 이유 + 근거(조문/판례)</b> 3단을 세트로 채울 것.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>답안 형식 — 어기면 무조건 불이익</h3>
+    <ul>
+      <li>문체부 바탕체 / 글자크기 15 / 문단 위 15 / 줄간격 160 / 자간 ±5까지</li>
+      <li>컴퓨터 작성(한글 → PDF), 파일명에 응시번호. <b class="rd">최대 5쪽</b>, 초과분 불인정</li>
+      <li>답안에 소속·성명 등 <b class="rd">개인정보 기재 금지</b></li>
+      <li>문제가 제시한 답안 형식(가/나/다, 번호)을 <b>그대로 따를 것</b> — 형식 이탈은 감점</li>
+      <li>줄 수·개수 제한("10개 이내" 등)을 초과하면 <b class="rd">초과분 배점 없음</b></li>
+      <li>견해 대립 시 <b>대법원 판례 + 경찰청 매뉴얼·지침</b> 기준으로 작성. "판례에 의함" 지시 있으면 그대로 따름</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>문제 유형별 고정 서술 틀 — 시간 절약의 핵심</h3>
+    <table>
+      <tr><th>문제 유형</th><th>답안 틀</th></tr>
+      <tr><td>죄명 판단</td><td>죄명 / 구성요건 해당성 인정·불인정 근거 / 결정의견(송치·불송치)</td></tr>
+      <tr><td>위법사항 지적</td><td>위반내용 / 이유(조문·판례)</td></tr>
+      <tr><td>적부 판단(사례형)</td><td>적절·부적절 / 이유 / (부적절 시) 바람직한 내용으로 수정</td></tr>
+      <tr><td>영장 필요사유</td><td>(혐의 상당성) + 각 요소 + 사안 사실 포섭 + 근거</td></tr>
+      <tr><td>대응방안 나열형</td><td>가·나·다 항목별 독립 서술, 중복 없이 병렬</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>실전 작성 순서 (100분·60분 시간관리)</h3>
+    <ul>
+      <li>① 문제지 먼저 전부 훑기 → 배점 큰 문제(수사지휘서 50점 등) 시간 배분 먼저 확정</li>
+      <li>② 사건기록은 <b class="k">기록목록·인물관계·날짜순 사실관계</b>부터 표로 메모 후 진입</li>
+      <li>③ "기록에 의도적 오류 있음" 전제 — <b>날짜·명의·권한·관련성</b> 불일치를 의심하며 읽기</li>
+      <li>④ 답안은 형식 예시(답안작성 형식 예시)에 맞춰 <b>번호·항목을 문제와 동일하게</b> 매칭</li>
+      <li>⑤ 마지막 10분 — 조문 번호·판례 사건번호·법정형 숫자 재확인 (오기재 시 감점)</li>
+    </ul>
+  </div>
+
+  <h2 class="sec"><span class="n">2</span> 필수 암기 총정리 — 절대 놓치면 안 되는 것</h2>
+
+  <div class="card">
+    <h3>숫자·기한 (한 글자만 틀려도 감점)</h3>
+    <table>
+      <tr><th>항목</th><th>숫자</th></tr>
+      <tr><td>체포현장 계속압수 사후영장</td><td><b>48시간</b> (체포한 때부터)</td></tr>
+      <tr><td>긴급체포 → 검사 승인 건의</td><td><b>12시간</b></td></tr>
+      <tr><td>긴급체포 → 구속영장 청구</td><td><b>48시간</b></td></tr>
+      <tr><td>심야조사 휴식</td><td><b>2시간마다 10분 이상</b></td></tr>
+      <tr><td>심야조사 실제조사시간 한도</td><td><b>8시간</b> (휴식·열람 제외)</td></tr>
+      <tr><td>조사종료 후 재조사 금지</td><td><b>8시간</b> 경과 전</td></tr>
+      <tr><td>수사중지 이의제기 기한</td><td><b>30일</b></td></tr>
+      <tr><td>불송치 이의신청 기한</td><td><b>제한 없음</b> (고발인 제외)</td></tr>
+      <tr><td>출국금지 — 일반 / 수사목적</td><td><b>6개월</b> / <b>1개월</b> (원칙)</td></tr>
+      <tr><td>출국금지 — 소재불명·도주 등 수사곤란</td><td><b>3개월</b></td></tr>
+      <tr><td>출국금지 — 기소·수사중지 + 체포·구속영장</td><td><b>영장 유효기간 이내</b> (실무: 공소시효 만료일까지 발부)</td></tr>
+      <tr><td>긴급출국금지 승인요청 / 미승인 해제</td><td><b>6시간</b> / <b>12시간</b> (해제 시 동일 범죄사실 재요청 불가)</td></tr>
+      <tr><td>특경법(사기) 저단계</td><td><b>5억↑~50억 미만</b> → 3년 이상</td></tr>
+      <tr><td>특경법(사기) 고단계</td><td><b>50억 이상</b> → 무기 또는 5년 이상</td></tr>
+      <tr><td>사기죄 공소시효</td><td><b>10년</b></td></tr>
+      <tr><td>범죄피해자 안전조치 유형</td><td>기재 시 <b>10개 이내</b> (초과 배점 없음)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>조문 즉답 세트 (묻는 즉시 나와야 함)</h3>
+    <ul>
+      <li>영장없는 압수 5유형: <span class="st">형사소송법 제216조 제1항</span> 체포현장 / <span class="st">동법 제216조 제3항</span> 범죄장소 / <span class="st">동법 제217조 제1항·제2항</span> 긴급체포후 소유물 / <span class="st">동법 제218조</span> 임의제출·유류물</li>
+      <li>긴급체포 <span class="st">형사소송법 제200조의3</span> / 현행범 <span class="st">동법 제211조 제1항</span> / 준현행범 <span class="st">동법 제211조 제2항</span></li>
+      <li>구속 필요적 고려사항 <span class="st">형사소송법 제70조 제2항</span> / 국외도피 시효정지 <span class="st">동법 제253조 제3항</span> / 공범 시효정지 <span class="st">동법 제253조 제2항</span></li>
+      <li>불송치 이의신청 <span class="st">형사소송법 제245조의7</span> / 수사중지 이의제기 <span class="st">수사준칙 제54조 제1항</span> / 검사신고 <span class="st">형사소송법 제197조의3</span></li>
+      <li>친족상도례 <span class="st">형법 제328조</span> / 명예훼손 <span class="st">형법 제307조 제1항·제310조</span> / 피의사실공표 <span class="st">형법 제126조</span></li>
+      <li>사기 <span class="st">형법 제347조</span> / 컴퓨터등사용사기 <span class="st">형법 제347조의2</span> / 공갈 <span class="st">형법 제350조</span> / 소송사기 미수 <span class="st">형법 제352조</span></li>
+      <li>딥페이크 <span class="st">성폭력처벌법 제14조의2</span> / 범죄단체조직 <span class="st">형법 제114조</span> / 알선수재 <span class="st">특정범죄가중처벌법 제3조</span></li>
+      <li>스토킹 응급·긴급응급·잠정조치 <span class="st">스토킹처벌법 제3조·제4조·제9조</span> / 정신건강복지법 응급입원 <span class="st">동법 제50조</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>표·순서 통째 암기형 (부분점수 구조라 순서까지 외울 것)</h3>
+    <ul>
+      <li><b class="k">영장없는 압수 5유형</b> — 근거·요급처분·사후영장 3열 표</li>
+      <li><b class="k">긴급체포 4요소</b> — 상당성·중대성·긴급성·필요성(도주+증거인멸)</li>
+      <li><b class="k">심야조사 6요건</b> — 요청서·인권보호관·2h10분·확인서기재·8h한도·8h재조사금지</li>
+      <li><b class="k">스토킹 3단계</b> — 응급조치→긴급응급조치→잠정조치</li>
+      <li><b class="k">구속 필요이유(증거인멸·도망·중대성) vs 필요적고려사항(중대성·재범위험·위해우려)</b> — 서로 다른 항목, 혼동 주의</li>
+    </ul>
+  </div>
+
+  <h2 class="sec"><span class="n">3</span> 시험 전 최종 체크리스트</h2>
+
+  <div class="card">
+    <ul>
+      <li>☑ 친족상도례 <b class="k">개정 형법 제328조</b> — '25.12.30 통과 확정: 형면제 삭제·전면 친고죄·직계존속 고소 특례·경과사건 소급 (구답안 '형면제/적용중지' 표현 쓰지 않기)</li>
+      <li>☐ 전자정보 참여권 최신 대법 전합 판례 흐름 재확인</li>
+      <li>☐ 경찰수사규칙·수사준칙 <b>이의신청·이의제기 기한</b> 최신본 확인 (개정 가능성)</li>
+      <li>☐ 긴급체포 사후시간(12h 승인 / 48h 영장) / 계속압수 48h(<span class="st">형사소송법 제217조 제2항</span>) 다시 손으로 써보기</li>
+      <li>☐ 딥페이크 <span class="st">성폭력처벌법 제14조의2</span> 법정형 수치</li>
+      <li>☐ 특경법(<span class="st">특정경제범죄가중처벌법 제3조</span>) 이득액 구간별 법정형(5억/50억) 즉답 연습</li>
+      <li>☐ 외국인 영사통보(<span class="st">비엔나영사협약 제36조</span>) — 거부해도 통보의무 있다는 결론 암기</li>
+      <li>☑ 가상자산 횡령·배임 불성립 판례 확정 — <span class="st">대법원 2020도9789</span>(배임 무죄) · <span class="st">2021도9855</span>(재산상 이익) · <span class="st">2018도3619</span>(몰수 가능)</li>
+      <li>☐ 심야조사 6요건 / 언론대응(공보 일원화) 서술형으로 한번 손으로 써보기</li>
+      <li>☐ 답안 형식(글꼴·크기·간격·5쪽 제한·개인정보 미기재) 마지막 재확인</li>
+      <li>☐ 시험 당일 지참물(신분증·응시표·필기구·컴퓨터 작성 여부) 확인</li>
+    </ul>
+  </div>
+
+  <h2 class="sec"><span class="n">4</span> 주요 함정 모음 — 실제로 감점 나는 지점</h2>
+
+  <details open><summary><span class="tag">함정</span>절차·시한 관련<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li><b>심야조사 = 동의서로 착각</b> → 반드시 <b class="k">요청서</b> + 인권보호관 허가(팀장 결재 아님) — <span class="st">수사준칙 제21조</span></li>
+      <li><b>범죄장소 무영장 수색(형사소송법 제216조 제3항) 사후서류를 검증조서로 착각</b> → 수색조서 + 사후영장신청서 + 수사보고서가 맞음</li>
+      <li><b>범죄장소(형사소송법 제216조 제3항) 사후영장을 48시간으로 착각</b> → 이건 "무조건 지체없이"이고, 48시간은 <span class="st">동법 제217조 제2항</span>(긴급체포·체포현장 계속압수)만</li>
+      <li><b>구속 필요이유와 필요적 고려사항을 섞어 씀</b> → 증거인멸·도망·중대성(필요이유) ≠ 중대성·재범위험·위해우려(<span class="st">형사소송법 제70조 제2항</span> 고려사항)</li>
+      <li><b>불송치·수사중지 구제수단 명칭·기한 뒤바꿔 씀</b> → 불송치=이의신청(<span class="st">형사소송법 제245조의7</span>, 무기한), 수사중지=이의제기(<span class="st">수사준칙 제54조 제1항</span>, 30일)</li>
+    </ul>
+  </div></details>
+
+  <details><summary><span class="tag">함정</span>실체법·의율 관련<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li><b>소송사기 기수를 '인용결정 시'로 오판</b> → <b class="k">추심·현실화</b>돼야 기수, 인용만 받으면 미수(<span class="st">형법 제352조</span>)</li>
+      <li><b>보이스피싱 계좌이체형 기수를 '인출 시'로 오판</b> → <b class="k">입금된 때</b>가 기수(<span class="st">형법 제347조의2</span>), 인출은 사후행위</li>
+      <li><b>가상자산을 재물로 보고 횡령 인정</b> → 재물성 부정되어 <span class="st">형법 제355조</span>(횡령)·<span class="st">제355조 제2항</span>(배임) 모두 불성립</li>
+      <li><b>자기명의 허위문서를 위조로 오판</b> → 무형위조는 원칙 불벌, 타인명의 도용만 위조(<span class="st">형법 제231조</span>)</li>
+      <li><b>친족상도례를 구법(형면제 유지)이나 '적용중지' 상태로 서술</b> → '25.12.30 개정 확정: 형면제 삭제·전면 친고죄·직계존속 고소 특례·경과사건 소급. 8회는 반드시 개정 <span class="st">형법 제328조</span> 기준</li>
+      <li><b>범죄단체 요건에 폭처법식 요소(폭력성·합숙) 대입</b> → <span class="st">형법 제114조</span>는 통솔체계가 핵심, 오답 처리</li>
+      <li><b>채권추심법을 일반 채권자에게도 적용</b> → 주체가 '채권추심자'여야 함(<span class="st">채권의 공정한 추심에 관한 법률 제2조</span>), 구성요건에서 배제해야</li>
+    </ul>
+  </div></details>
+
+  <details><summary><span class="tag">함정</span>전자정보·압수 관련<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li><b>피의자 참여포기 = 변호인 참여권도 소멸로 오판</b> → 변호인 참여권은 고유권, 별도 보장</li>
+      <li><b>사본교부를 모든 처분대상자에게 인정</b> → 피의자에게만 원본+사본, 피의자 아닌 자는 제시·열람만</li>
+      <li><b>상세목록을 압축파일명으로만 기재해도 된다고 서술</b> → 압수대상 파일 전부 기재해야</li>
+      <li><b>별건정보 발견 시 계속 탐색·압수</b> → 즉시 중단 후 별도 영장이 원칙</li>
+      <li><b>임의제출을 절차만 지키면 무조건 유효로 서술</b> → 억압상태·이유미고지 시 임의성 자체가 부정될 수 있음</li>
+    </ul>
+  </div></details>
+
+  <details><summary><span class="tag">함정</span>서류·행정처리 관련<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li><b>고소사건을 공람종결 대상으로 서술</b> → 고소사건은 공람종결(<span class="st">경찰수사규칙 제19조 제2항 제5호</span>) 대상 아님</li>
+      <li><b>공무원 범죄를 각하하면 통보도 생략된다고 서술</b> → 각하라도 수사개시·결과 통보 의무 있음(<span class="st">범죄수사규칙 제46조</span>, 정무직 제외)</li>
+      <li><b>지문채취 거부 대응을 일률적으로 서술</b> → 사안 구별이 핵심: <span class="rd">신원 확인 완료</span> 사안은 경범죄처벌법 34호 요건("다른 방법으로 확인 불가") 불충족 + 강제 필요성 없음 → 곧바로 영장 신청 부적절(6회) / <span class="gn">신원불상</span> 사안은 간접강제(경범죄처벌법) 또는 <b>검증영장 강제채취(형사소송법 제215조)</b>가 정답 방향</li>
+      <li><b>외국인이 통보를 거부하면 영사통보 생략</b> → 협약상 의무이므로 거부와 무관하게 통보(<span class="st">비엔나영사협약 제36조</span>)</li>
+      <li><b>수사자료표·진술서 등 서명없는 참고인진술을 그대로 증거로 서술</b> → 원진술자 서명·날인 없으면 증거능력 없음(<span class="st">형사소송법 제313조 제1항</span>)</li>
+    </ul>
+  </div></details>
+
+  <div class="note">공통 패턴 — 함정은 대개 <b>"비슷해 보이는 두 절차·두 시한·두 조문을 섞어 쓰게" 유도</b>합니다. 답안 쓰기 전 "이게 그 항목이 맞나?"를 한 번 더 확인하는 습관이 가장 확실한 방어입니다.</div>
+</section>
+
+<!-- ============ 오답 보강 ============ -->
+<section class="panel" id="fix">
+  <p class="lead">7회 실전 답안에서 드러난 취약점 3가지를 정면으로 보강합니다: <b>① 사기 착수·기수 법률판단 ② 조문 빠른 검색·적용 ③ 답안 오답 줄이기.</b></p>
+
+  <h2 class="sec"><span class="n">1</span> 사기 착수·기수 — 법률판단 정밀</h2>
+
+  <div class="card">
+    <h3>⚠️ 7회에서 틀린 지점</h3>
+    <p>"소송사기 <b>실행착수 = 추심명령 인용결정을 받은 때</b>"로 쓰셨는데 <span class="rd">오류</span>입니다. 착수는 <b class="k">법원에 허위 신청·증거를 낸 때</b>, 인용결정은 그 이후의 중간 단계, 기수는 <b class="k">현실적 이익 취득 시</b>. 세 시점을 절대 뭉개지 말 것.</p>
+  </div>
+
+  <details open><summary><span class="tag">3분할</span>소송사기 단계 정밀 (삼각사기)<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>단계</th><th>시점</th><th>비고</th></tr>
+      <tr><td><b>실행착수</b></td><td>법원에 <b>허위 소장·신청서·증거 제출</b>한 때 (지급명령 신청, 채권압류·추심명령 신청 포함)</td><td>여기서 미수 시작</td></tr>
+      <tr><td>중간</td><td>인용결정·승소판결 취득</td><td class="rd">아직 기수 아님</td></tr>
+      <tr><td><b>기수</b></td><td>집행권원으로 <b class="k">현실적 재산·이익 취득</b>(추심금 수령·배당)</td><td>미실현이면 미수 <span class="st">형법 제352조</span></td></tr>
+    </table>
+    <div class="note">삼각사기 구조: <b>피기망자(법원) ≠ 피해자</b>. 처분권한 있는 자(법원)의 처분행위로 성립. 7회 7억 건은 인용결정만 받고 미추심 → <b>특경법위반(사기)미수</b>(이득액 5억↑ → 미수에도 특경법 §3 + 형법 §352).</div>
+  </div></details>
+
+  <details><summary><span class="tag">유형표</span>착수·기수 한눈에 (보이스피싱 포함)<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>유형</th><th>실행착수</th><th>기수</th></tr>
+      <tr><td>일반·차용금 사기</td><td>기망행위 개시</td><td class="gn">재물·이익 교부받은 때</td></tr>
+      <tr><td>소송사기</td><td>허위 신청·증거 제출</td><td class="gn">집행으로 이익 현실화</td></tr>
+      <tr><td>보이스피싱 <b>대면편취형</b></td><td>기망 전화</td><td class="gn">전달책에 현금 교부 시</td></tr>
+      <tr><td>보이스피싱 <b>계좌이체형</b><br><span class="st">형법 제347조의2</span></td><td>기망 전화</td><td class="gn">사기계좌 <b>입금된 때</b>(인출 아님)</td></tr>
+      <tr><td>보험사기</td><td>보험금 청구</td><td class="gn">보험금 수령</td></tr>
+    </table>
+  </div></details>
+
+  <details><summary><span class="tag">의율</span>자료로 못 찾는 판단 (암기 필수)<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li><b>편취고의 판단시점</b>: <b class="k">차용 당시</b> 변제의사·능력 (사후 변제불능 ≠ 곧바로 사기). 단 차용 당시 자력 있어도 <b>기망이 수단</b>이면 사기 (7회 항목2 ✔)</li>
+      <li><b>포괄일죄 성부</b>: 단일 범의 + <b>동일 피해법익(동일 피해자)</b> → 포괄일죄 / 피해자·법익 다르면 개별 사기 → <span class="rd">특경법 합산 불가</span></li>
+      <li><b>특경법 공동정범</b>: <b class="k">전체 이득액</b> 기준 (역할분담 조직은 가담자 전원 전체액)</li>
+      <li><b>사기 vs 배임 비양립</b>: 양도담보 제공자는 '타인의 사무 처리자' 아님 → 배임 X</li>
+      <li><b>사기 vs 컴퓨터등사용사기</b>: <b>사람</b> 기망 = <span class="st">제347조</span> / <b>정보처리장치</b> 부정입력 = <span class="st">제347조의2</span>(계좌이체형)</li>
+      <li><b>위조 대상 특정</b>: 자기명의 허위문서 = 위조 아님(무형위조 불벌) / <b class="k">타인명의 도용 = 위조</b> (7회 위임장=빛나타일 명의 → 위조 O)</li>
+    </ul>
+  </div></details>
+
+  <h2 class="sec"><span class="n">2</span> 조문 빠른 검색·적용</h2>
+
+  <div class="card">
+    <h3>⚠️ 7회에서 틀린 지점</h3>
+    <p>법정대리인 독립 고소권 근거를 <span class="rd">개인정보보호법·위치정보법</span>으로 쓰셨는데, 정답은 <b class="k">형사소송법 제225조 제1항</b>입니다. 개인정보법 제22조는 '동의' 조항으로 전혀 다른 제도. → <b>근거 조문은 기억으로 쓰지 말고 검산 단계에 법령집으로 확인</b>.</p>
+  </div>
+
+  <details open><summary><span class="tag">즉검색</span>쟁점 → 법령·검색어 빠른표<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>쟁점</th><th>법령·조문</th><th>Ctrl+F</th></tr>
+      <tr><td>법정대리인 고소권</td><td>형사소송법 제225조 제1항</td><td>법정대리인</td></tr>
+      <tr><td>고소취소·불가분</td><td>형사소송법 제232조·제233조</td><td>고소를 취소</td></tr>
+      <tr><td>변호사 선임/직무 알선</td><td>변호사법 제34조·제109조·제111조</td><td>알선</td></tr>
+      <tr><td>청탁금지 형벌 vs 과태료</td><td>청탁금지법 제22조(형벌)·제23조(과태료)</td><td>1회 100만원</td></tr>
+      <tr><td>소송사기 미수</td><td>형법 제347조·제352조</td><td>미수</td></tr>
+      <tr><td>공정증서 부실기재·행사</td><td>형법 제228조·제229조</td><td>공정증서</td></tr>
+      <tr><td>전기통신금융사기</td><td>통신사기피해환급법 제15조의2</td><td>전기통신금융사기</td></tr>
+      <tr><td>범죄단체조직</td><td>형법 제114조</td><td>단체</td></tr>
+      <tr><td>추징보전</td><td>마약특례법 제53조</td><td>추징보전</td></tr>
+      <tr><td>접근매체 양수·대여</td><td>전자금융거래법 제6조·제49조</td><td>접근매체</td></tr>
+    </table>
+    <div class="note">위 10개는 보이스피싱·조직범죄 사건에서 반복 등장 — 검색어를 손에 익히면 조문 찾는 시간이 절반으로.</div>
+  </div></details>
+
+  <details><summary><span class="tag">기법</span>특별법 처벌조항 빨리 찾기<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li>벌칙은 법 <b>뒤쪽 "제○장 벌칙"</b>에 몰려 있음 → 목차/끝부분 먼저</li>
+      <li><b>"년 이하" · "년 이상"</b> 검색으로 법정형 조항에 직행</li>
+      <li>죄명 정식표기는 <b>죄명 예규</b>로 확정 (약칭 감점 방지)</li>
+      <li>조문 찾으면 <b class="k">항·호 번호까지</b> 옮겨적기 — 미기재 시 1점씩 감점</li>
+      <li>"이 쟁점 어느 법?" 3초 판단: 절차=형소법/수사준칙/경찰수사규칙 · 죄명=형법/특별법 · 처리=범죄수사규칙</li>
+    </ul>
+  </div></details>
+
+  <h2 class="sec"><span class="n">3</span> 답안 오답 줄이기</h2>
+
+  <details open><summary><span class="tag">패턴</span>내 실수(7회) → 방지 루틴<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>7회 실수</th><th>방지 루틴</th></tr>
+      <tr><td>알선 2종 중 하나만(§34/§111)</td><td>유사 <b>행위·객체가 2개</b> 나오면 반드시 각각 검토</td></tr>
+      <tr><td>확인서/위임장 중 하나만</td><td>"<b>위조 대상 문서 특정</b>"을 먼저 — 명의인이 누구인가</td></tr>
+      <tr><td>결론 쓰고 구성요건 <b>공란</b></td><td>뼈대에 <b class="k">키워드 한 줄이라도</b> — 공란은 그 항목 배점 절반 상실</td></tr>
+      <tr><td>조문 엉뚱하게(개인정보법)</td><td>근거 조문은 <b>기억 금지</b>, 검산 때 법령집 확인</td></tr>
+      <tr><td>조문 미기재</td><td><b>[ ] 표시</b> 후 마지막 일괄 검산</td></tr>
+      <tr><td>착수/기수 혼동</td><td><b>3시점 분할</b>(착수→중간→기수) 확인</td></tr>
+    </table>
+  </div></details>
+
+  <div class="card">
+    <h3>✅ 제출 전 30초 셀프체크 (문항마다)</h3>
+    <ul>
+      <li>☐ 결론(적법/부적법·기수/미수·송치/불송치)을 <b>명시</b>했나</li>
+      <li>☐ 근거 조문을 <b>항·호까지</b> 달았나</li>
+      <li>☐ 죄명을 <b>예규 정식표기</b>로 썼나</li>
+      <li>☐ 결론 뒤 <b>구성요건 칸 공란</b> 없나</li>
+      <li>☐ 유사 객체·행위 <b>빠뜨린 축</b> 없나 (문서 2개·알선 2개)</li>
+      <li>☐ 문제의 <b>답안형식 예시 목차</b>를 그대로 따랐나</li>
+    </ul>
+  </div>
+
+  <div class="note"><b>보이스피싱·조직범죄 특화</b> — 계좌이체형은 <b>입금 시 기수</b>(컴퓨터등사용사기 §347의2), 조직은 <b>전체 이득액</b>으로 특경법, 수익은 <b>추징보전</b>(마약특례법 §53 준용)까지 지휘. 대포통장은 접근매체 양수(전자금융거래법 §49). 이 4종은 세트로 답안에 엮을 것.</div>
+
+  <h2 class="sec"><span class="n">4</span> 강력범죄 이슈 대비 (신설·시의성)</h2>
+
+  <div class="card">
+    <p style="margin:0;font-size:12.5px">사회적 이목이 쏠린 <b>강력범죄(살인·성폭력) + 경찰관 신분 + 증거인멸</b> 유형은 시의성이 높아 변형 출제 가능. 아래는 실제 사건이 아닌 <b>쟁점 구조</b>로만 정리(시험도 허구 사례로 변형).</p>
+  </div>
+
+  <details open><summary><span class="tag">★구별</span>증거인멸 친족특례 vs 친족상도례<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>구분</th><th>증거인멸 특례</th><th>친족상도례</th></tr>
+      <tr><td>조문</td><td><span class="st">형법 제155조 제4항</span></td><td><span class="st">형법 제328조</span></td></tr>
+      <tr><td>대상 범죄</td><td>증거인멸·은닉·위조(제155조①, 5년↓/700만원↓)</td><td>재산범죄(절도·사기·횡령 등)</td></tr>
+      <tr><td>효과</td><td>친족·동거가족이 <b>본인을 위하여</b> 범하면 <b class="k">처벌 안 함</b></td><td>개정으로 형면제 삭제 → <b class="k">친고죄화</b></td></tr>
+      <tr><td>8회 상태</td><td class="gn">개정 대상 아님 → 그대로 유지</td><td class="rd">'25.12.30 개정 반영 필수</td></tr>
+    </table>
+    <div class="box r"><b class="h">⚠️ 최대 함정</b>"둘 다 친족이니 같은 결론" ❌. 완전히 <b>다른 제도</b>. 증거인멸 특례는 유지, 친족상도례는 개정. · 특례는 <b class="k">"본인(친족)을 위하여"</b>일 때만 — 타인·공범 위한 인멸이면 배제. · 형사 불처벌이어도 <b>공무원이면 징계·감찰은 별개</b>(국가공무원법 제63조 품위유지).</div>
+  </div></details>
+
+  <details><summary><span class="tag">적부</span>공무원 직무범죄 법정형 → 긴급체포 가부<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <table>
+      <tr><th>죄명</th><th>법정형</th><th>긴급체포(장기 3년↑)</th></tr>
+      <tr><td>직무유기 <span class="st">§122</span></td><td>1년↓</td><td class="rd">불가</td></tr>
+      <tr><td>피의사실공표 <span class="st">§126</span></td><td>3년↓</td><td class="rd">불가</td></tr>
+      <tr><td>직권남용 <span class="st">§123</span></td><td>5년↓</td><td class="gn">가능</td></tr>
+      <tr><td>증거인멸 <span class="st">§155①</span></td><td>5년↓</td><td class="gn">가능</td></tr>
+      <tr><td>불법체포·감금 <span class="st">§124</span></td><td>7년↓</td><td class="gn">가능</td></tr>
+    </table>
+    <div class="box r"><b class="h">적부판단형 대비</b>"수사관을 긴급체포한 것이 적법한가?" → <b>직무유기(1년)만으로는 중대성 요건 미충족 = 긴급체포 위법</b>. 직권남용·증거인멸 등 3년↑ 죄가 서야 정당화. 죄명별 법정형을 알아야 적부 판단 가능(6회 문제4·5 구조).</div>
+  </div></details>
+
+  <details><summary><span class="tag">신설</span>특정중대범죄 신상정보 공개법<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li><b class="k">특정중대범죄 피의자 등 신상정보 공개에 관한 법률</b>('24.1 시행) — 종전 특정강력범죄법·성폭력처벌법 흩어진 규정 통합·확대. <b>미출제 최신법 → 적중 후보</b></li>
+      <li>요건: ① 범행수단 잔인·중대 ② 충분한 증거 ③ 공공의 이익 ④ 재범위험(청소년 제외 원칙)</li>
+      <li>절차: <b>신상정보공개심의위원회</b> · 피의자 <b>의견진술 기회</b> · <b class="k">머그샷</b>(결정일 30일 이내 현재 모습) 촬영·공개</li>
+    </ul>
+  </div></details>
+
+  <details><summary><span class="tag">병합</span>강력사건 초동·보호·공보 세트<span class="arw">▸</span></summary>
+  <div class="acc-body">
+    <ul>
+      <li><b>초동·강제수사</b>: 현행범/긴급체포(살인=중대성 충족) · 범죄장소 무영장 압수(§216③) · 변사·검시(<span class="st">형사소송법 제222조</span>)</li>
+      <li><b>유족·증인 보호</b>: 범죄피해자 안전조치(신변경호·112등록·스마트워치) · 보복우려 시 접근금지 · 미성년은 신뢰관계인 동석(<span class="st">§163의2</span>)</li>
+      <li><b>언론대응</b>: 피의사실공표(<span class="st">§126</span>) · 공보 창구 일원화 · 유족 신상 비공개 (6회 문제1 변형)</li>
+      <li><b>병합 죄명</b>: 살인·살인미수 + 스토킹처벌법 + 성폭력처벌법 (외국인 피해자면 통역·영사통보)</li>
+    </ul>
+  </div></details>
+
+  <h2 class="sec"><span class="n">5</span> 오늘 풀이 부족분 정리 (6회 실전)</h2>
+
+  <div class="card">
+    <div class="box r"><b class="h">① 가상자산 임의처분 = 형법적 공백</b>"빼돌렸으니 사기" ❌ → 전송 <b>당시 기망 고의</b>가 없으면 사기도 불성립. 횡령(재물 아님)·배임(신임관계 부정) 모두 불성립 <span class="st">대법원 2020도9789</span>. 사후 영득의사만으로는 죄 안 됨.</div>
+    <div class="box r"><b class="h">② 강제격리 = 가해자 신병 격리만</b>"상담소·보호시설 인도"는 <b>피해자 이동 + 동의 필요</b> → 강제격리 아님. 정답: <b class="k">잠정조치 유치(스토킹처벌법 §9①4호) + 정신건강복지법 §50 응급입원</b>. "정신병원 입퇴원 반복" = 응급입원 신호.</div>
+    <div class="box r"><b class="h">③ 신병확보 3종 세트 구별</b>격리 물으면 <b>유치 + 응급입원</b> / 체포는 별개. 긴급체포는 "스토킹처벌법 의거"가 아니라 <b>형사소송법 §200의3</b>, 스토킹 기본범(3년↓)은 중대성 미충족.</div>
+    <div class="box r"><b class="h">④ 추징보전 근거법 정확히</b>유사수신·사기 사건 = <b class="k">범죄수익은닉규제법 + 마약특례법 §53 준용</b>. 부패재산몰수법은 뇌물·횡령 등 부패범죄용 → 축 어긋남 주의. 물음이 '추징보전'이면 주문도 추징보전으로.</div>
+    <div class="box g"><b class="h">⑤ 잘한 것 (유지)</b>피해자별 법익 구분(김슬픔 5억만 특경법) · 추징보전 이유·필요성 서술 · 명예훼손 §310 논증 · 조문 항·호 기재 습관. 이 감각 유지하면 합격권.</div>
+  </div>
+</section>
+
+<footer>1~7회 모범답안·채점기준 + 7회 사건기록 풀이 통합 · 법령·판례는 시험 시점 최신본 재확인</footer>
+</div>
+
+<script>
+/* ---------- Tabs ---------- */
+const nav=document.getElementById('nav');
+nav.addEventListener('click',e=>{
+  const b=e.target.closest('.tab'); if(!b)return;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id===b.dataset.p));
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/* ---------- Quiz data ---------- */
+const QUESTIONS=[
+ {t:'OX',q:'심야조사(21~06시)는 피의자의 동의서를 받으면 실시할 수 있다.',o:['O','X'],a:1,e:'동의서가 아니라 피의자의 <b>요청서</b>가 있어야 한다(수사준칙 제21조 제2항). 인권보호관(야간 상황관리관)의 허가도 필요(동조 제3항).'},
+ {t:'객관식',q:'영장 없는 압수 5유형 중 요급처분이 \u2018불가능\u2019한 것은?',o:['체포현장(형사소송법 제216조 제1항)','범죄장소(동법 제216조 제3항)','긴급체포 후 소유물(동법 제217조 제1항)','임의제출물(동법 제218조)'],a:2,e:'긴급체포 후 소유물(형사소송법 제217조 제1항)은 요급처분이 불가하다. 계속압수 시 체포한 때부터 48시간 내 사후영장(동조 제2항).'},
+ {t:'객관식',q:'체포현장 압수물을 계속 압수할 때 사후영장 청구 기한은?',o:['지체없이(기한 없음)','체포한 때부터 24시간','체포한 때부터 48시간','압수한 때부터 72시간'],a:2,e:'형사소송법 제217조 제2항에 따라 체포한 때부터 <b>48시간 이내</b> 청구. (범죄장소 관련 동법 제216조 제3항은 \u2018무조건 지체없이\u2019)'},
+ {t:'객관식',q:'긴급체포 후 검사 승인 건의 / 구속영장 청구 시한을 옳게 짝지은 것은?',o:['12시간 / 48시간','24시간 / 48시간','12시간 / 24시간','즉시 / 36시간'],a:0,e:'승인 건의 <b>12시간</b>(형사소송법 제200조의3 제2항), 구속영장 청구 <b>48시간</b>(동법 제200조의4 제1항).'},
+ {t:'OX',q:'불송치 결정에 대한 이의신청은 고발인도 할 수 있다.',o:['O','X'],a:1,e:'형사소송법 제245조의7 이의신청권에서 <b>고발인은 제외</b>된다. (불송치 이의신청은 기한 제한 없음)'},
+ {t:'객관식',q:'수사중지 결정에 대한 구제수단과 기한은?',o:['이의신청 / 기한 없음','이의제기 / 30일','이의신청 / 30일','심사신청 / 60일'],a:1,e:'수사중지 → <b>이의제기</b>, 통지받은 날부터 <b>30일</b>, 상급 경찰관서장에게(수사준칙 제54조 제1항).'},
+ {t:'객관식',q:'특경법(사기) 이득액 5억 이상 50억 미만의 법정형은?',o:['1년 이상','3년 이상 유기징역','무기 또는 5년 이상','5년 이하'],a:1,e:'특정경제범죄 가중처벌 등에 관한 법률 제3조 제1항 제2호: 5억~50억 미만 = <b>3년 이상 유기징역</b>, 동항 제1호: 50억 이상 = 무기 또는 5년 이상.'},
+ {t:'OX',q:'가상자산을 위탁받은 자가 임의처분하면 횡령죄가 성립한다.',o:['O','X'],a:1,e:'가상자산은 <b>재물이 아니어서 횡령(형법 제355조 제1항) 불성립</b>, 신임관계도 부정되어 배임(동조 제2항)도 불성립(대법원 2020도9789, 6회 문제2).'},
+ {t:'객관식',q:'소송사기에서 채권압류·추심명령 인용결정만 받고 실제 추심이 없었다면?',o:['기수','미수','불능범','예비'],a:1,e:'이익이 현실화되지 않았으므로 <b>미수</b>(형법 제352조). 미수도 5억↑이면 특정경제범죄가중처벌법 제3조 적용.'},
+ {t:'객관식',q:'보이스피싱 \u2018계좌이체형\u2019 사기의 기수시기는?',o:['기망 전화를 한 때','피해자가 사기계좌로 입금한 때','범인이 현금을 인출한 때','피해자가 송금을 인지한 때'],a:1,e:'사기계좌에 <b>입금된 때</b> 기수(형법 제347조의2). 이후 인출은 불가벌적 사후행위.'},
+ {t:'객관식',q:'차용금 사기에서 편취고의(변제의사·능력)의 판단 기준시점은?',o:['차용 당시','변제기 도래시','고소 시점','사후 변제불능 확인시'],a:0,e:'<b>차용 당시</b>를 기준으로 판단(형법 제347조 제1항, 7회 쟁점). 사후 변제불능만으로는 곧바로 사기 아님.'},
+ {t:'OX',q:'전자정보 압수 시 피의자가 참여를 포기하면 변호인의 참여권도 함께 포기된다.',o:['O','X'],a:1,e:'변호인 참여권(형사소송법 제121조·제219조)은 <b>고유권</b>으로, 피의자 포기와 무관하게 별도 통지·보장(대법원 2020도10729).'},
+ {t:'객관식',q:'친족상도례(형법 제328조 제1항)의 현재 상태로 옳은 것은?',o:['종전대로 형 면제 유지','헌법불합치 후 개정으로 형면제 폐지·친고죄화','전면 폐지되어 친족도 가중처벌','비친족 공범에게도 적용'],a:1,e:'헌재 헌법불합치 → 개정으로 <b>형면제 폐지, 친족 간 재산범죄 전면 친고죄화</b>(형법 제328조). 8회는 개정 기준.'},
+ {t:'객관식',q:'딥페이크(허위영상물) 편집·반포에 적용되는 핵심 조문은?',o:['성폭력처벌법 제14조','성폭력처벌법 제14조의2','정보통신망법 제44조의7','형법 제244조'],a:1,e:'<b>성폭력범죄의 처벌 등에 관한 특례법 제14조의2</b>(허위영상물). 미성년 대상이면 청소년성보호법 가중.'},
+ {t:'OX',q:'외국인 피의자를 체포한 경우, 본인이 통보를 거부하면 영사기관 통보를 생략한다.',o:['O','X'],a:1,e:'영사관계에 관한 비엔나협약 제36조상 통보의무가 있어 <b>본인 거부와 무관</b>(국가별 협정에 따름).'},
+ {t:'객관식',q:'범죄단체조직죄(형법 제114조)의 핵심 성립요건은?',o:['폭력성·관할구역','합숙·자금','공동목적·계속결합·통솔체계','상습성'],a:2,e:'공동목적+계속적 결합체+<b>최소한의 통솔체계</b>(대법원 2017도8600). 폭처법 단체요건과 구별.'},
+ {t:'객관식',q:'구속영장 \u2018필요적 고려사항\u2019(형사소송법 제70조 제2항) 세 가지가 아닌 것은?',o:['범죄의 중대성','재범의 위험성','피해자·중요참고인 위해 우려','증거인멸 염려'],a:3,e:'증거인멸·도망 염려는 \u2018구속 필요 이유\u2019(동조 제1항). 필요적 고려사항(제2항)은 중대성·재범위험·위해우려.'},
+ {t:'객관식',q:'형사소송법 제216조 제3항(범죄장소) 무영장 수색 후 작성·청구해야 하는 사후서류로 옳은 것은?',o:['검증조서','사후 압수·수색영장 신청서 + 수사보고서','감정의뢰서','체포보고서'],a:1,e:'사후영장 신청서와 수사보고서(현장 수색조서). <b>검증조서가 아님</b>에 주의(7회).'},
+ {t:'OX',q:'임의제출물(형사소송법 제218조)은 사후영장이 필요 없다.',o:['O','X'],a:0,e:'맞다. 임의제출물·유류물은 사후영장 불요.'},
+ {t:'객관식',q:'컴퓨터등사용사기죄의 조문은?',o:['형법 제347조','형법 제347조의2','형법 제348조','형법 제350조'],a:1,e:'<b>형법 제347조의2</b>. 보이스피싱 계좌이체형의 의율에 활용.'},
+ {t:'객관식',q:'범죄인지서의 필수 기재사항으로 옳은 것은?',o:['죄명·적용법조·범죄사실 요지','피의자 인적사항만','압수목록','진술 요지'],a:0,e:'<b>죄명 / 적용법조 / 범죄사실 요지</b>. 같은 법 복수 조항은 모두 기재.'},
+ {t:'OX',q:'책임수사관 1교시 수사 \u2018수사지휘서 빈칸\u2019 문제는 50점 배점으로 단일 최고배점이다.',o:['O','X'],a:0,e:'맞다. 1·6·7회 모두 50점. 형식 암기가 곧 점수.'},
+ {t:'객관식',q:'스토킹 가해자를 강제로 격리하는 방법 2가지로 옳은 것은?',o:['긴급응급조치·서면경고','잠정조치 유치(스토킹처벌법 제9조 제1항 제4호)·정신건강복지법 응급입원(동법 제50조)','과태료·접근금지','구인장·통고처분'],a:1,e:'스토킹범죄의 처벌 등에 관한 법률 제9조 제1항 제4호 <b>잠정조치 유치</b> + (조현병 등 자·타해 위험) 정신건강복지법 제50조 <b>응급입원</b>.'},
+ {t:'객관식',q:'전자정보 압수에서 \u2018상세목록\u2019에 기재해야 하는 대상은?',o:['압축파일명만','압수대상 파일 전부','피의자 진술','매체 일련번호'],a:1,e:'압축파일이 아닌 <b>압수대상 파일 전부</b>를 기재(형사소송법 제219조·제129조). 전자정보 확인서는 사경 명의.'},
+ {t:'OX',q:'피의사실공표죄(형법 제126조)는 공소제기 후 피의사실을 공표한 경우에 성립한다.',o:['O','X'],a:1,e:'<b>공소제기 전</b> 공표가 구성요건. 무죄추정·비밀엄수(형사소송법 제198조 제2항)와 연결.'},
+ {t:'객관식',q:'명예훼손(형법 제307조 제1항)에서 진실한 사실 + 공공의 이익이면 적용되는 위법성조각 조문과 결정주문은?',o:['형법 제310조 / 불송치(혐의없음)','형법 제20조 / 송치','형법 제16조 / 각하','형법 제310조 / 기소의견'],a:0,e:'<b>형법 제310조</b> 위법성 조각 → <b>불송치(혐의없음)</b> 주문(6회 문제3).'},
+ {t:'객관식',q:'기소 전 추징보전 신청의 적용법조 근거로 옳은 것은?',o:['형사소송법 제106조','범죄수익은닉의 규제 및 처벌 등에 관한 법률·마약류 불법거래 방지에 관한 특례법 제53조 준용','경찰관직무집행법 제7조','형법 제48조'],a:1,e:'추징보전은 범죄수익은닉규제법 + <b>마약류 불법거래 방지에 관한 특례법 제53조</b> 준용(6회 문제1③).'},
+ {t:'OX',q:'채권의 공정한 추심에 관한 법률은 모든 채권자에게 적용된다.',o:['O','X'],a:1,e:'주체가 <b>\u2018채권추심자\u2019</b>(동법 제2조)에 해당해야 적용. 일반 채권자는 구성요건 단계에서 배제(7회).'},
+ {t:'객관식',q:'임의제출의 \u2018임의성\u2019이 부정된 대표 판례 사안은?',o:['수갑 채운 억압상태에서 이유 설명 없이 다수 수색','피의자가 자발적으로 휴대폰 제출','변호인 입회 후 제출','영장 제시 후 제출'],a:0,e:'억압·미고지 상태의 제출은 임의성 부정(대법원 2009도14376, 형사소송법 제218조 관련).'},
+ {t:'OX',q:'언론대응 시 수사 내용 공개 창구는 수사팀원 각자가 자유롭게 대응한다.',o:['O','X'],a:1,e:'<b>공보 창구 일원화</b>(공보담당관, 경찰 수사사건등의 공보에 관한 규칙). 사건관계인 신상 비공개·익명, 피의사실공표(형법 제126조) 방지(6회 문제1).'},
+ {t:'객관식',q:'개정 형법 제328조(친족상도례)에 따라 새로 가능해진 것은?',o:['친족 간 재산범죄 형면제 유지','자기 또는 배우자의 직계존속에 대한 고소','비친족 공범에게도 친고죄 적용','고소 없이도 공소제기'],a:1,e:'개정법은 형사소송법 제224조에도 불구하고 <b>자기·배우자의 직계존속 고소를 허용</b>하는 특례를 뒀다. 형면제는 삭제, 전면 친고죄화.'},
+ {t:'OX',q:'개정 친족상도례는 헌법불합치 결정 이후 개정 완료 전에 발생한 사건에는 적용되지 않는다.',o:['O','X'],a:1,e:'부칙으로 <b>경과사건에 소급 적용</b>하고 고소기간(6개월) 특례도 마련했다. 소급하지 않으면 고소 없이도 기소 가능해지는 공백이 생기기 때문.'},
+ {t:'객관식',q:'가상자산 착오이체 배임 무죄를 선고한 대법원 판례는?',o:['2017도8600','2020도9789','2009도14376','2011모1839'],a:1,e:'<b>대법원 2021. 12. 16. 선고 2020도9789</b>. 2017도8600=범죄단체(보이스피싱), 2009도14376=임의제출 임의성, 2011모1839=전자정보 참여권.'},
+ {t:'객관식',q:'보이스피싱을 직접 처벌하는 전기통신금융사기죄의 근거 조문은?',o:['형법 제347조의2','통신사기피해환급법 제15조의2','전자금융거래법 제6조','정보통신망법 제70조'],a:1,e:'<b>통신사기피해환급법 제15조의2</b> — 미수범도 처벌. 개정으로 대면편취형·대출 가장 행위까지 포함.'},
+ {t:'객관식',q:'디지털 성범죄 신분위장수사(문서 작성·행사 포함)에 필요한 통제 절차는?',o:['상급자 승인','법원 허가','검사 지휘','국가수사본부 보고'],a:1,e:'신분위장수사는 <b>법원 허가</b>(청소년성보호법 제25조의2 이하), 신분비공개수사는 상급자 승인. 구별 주의.'},
+ {t:'OX',q:'기회제공형 함정수사는 위법하여 공소제기가 무효이다.',o:['O','X'],a:1,e:'<b>범의유발형</b>이 위법(공소기각). 이미 범의 있는 자에게 기회만 제공한 <b>기회제공형은 적법</b>.'},
+ {t:'객관식',q:'사건기록에 "채권압류·추심명령 인용결정을 받았다"고만 기재되어 있을 때 가장 먼저 확인할 것은?',o:['영장 유효기간','실제 추심·집행 여부','피의자 전과','고소 취소 여부'],a:1,e:'추심·집행으로 <b>이익이 현실화됐는지</b>가 기수/미수 분기점. 인용결정만으로는 미수(7회 핵심 신호어).'},
+ {t:'객관식',q:'범죄 수사 목적 출국금지의 원칙적 기간은?',o:['10일','1개월','3개월','6개월'],a:1,e:'수사 목적은 <b>1개월 이내</b>(출입국관리법 제4조 제2항 본문). 6개월은 일반 출국금지(제1항), 3개월은 소재불명·도주 등 수사곤란(제2항 제1호).'},
+ {t:'객관식',q:'기소중지(수사중지)된 피의자에게 체포영장이 발부된 경우 출국금지 기간은?',o:['1개월 이내','3개월 이내','6개월 이내','영장 유효기간 이내'],a:3,e:'<b>영장 유효기간 이내</b>(출입국관리법 제4조 제2항 제2호). 실무상 영장 유효기간을 공소시효 만료일까지로 발부받아 장기 유지.'},
+ {t:'객관식',q:'긴급출국금지의 시한 구조로 옳은 것은?',o:['요청 후 12시간 내 승인요청, 24시간 내 미승인 시 해제','요청 후 6시간 내 승인요청, 12시간 내 미승인 시 해제, 동일 범죄사실 재요청 불가','요청 후 48시간 내 승인요청','시한 없음'],a:1,e:'<b>6시간 내 승인요청</b>(검사 검토의견서 첨부) → <b>12시간 내 미승인 시 해제</b> → <b>재요청 불가</b>(출입국관리법 제4조의6 제3~5항). 긴급체포(12h/48h)와 혼동 주의.'},
+ {t:'객관식',q:'소송사기의 실행의 착수 시기로 옳은 것은?',o:['법원에 허위 소장·신청서·증거를 제출한 때','추심명령 인용결정을 받은 때','승소판결이 확정된 때','실제 추심금을 수령한 때'],a:0,e:'착수는 <b>법원에 허위 신청·증거를 낸 때</b>. 인용결정은 중간 단계, 현실적 이익 취득이 기수. 인용결정을 착수로 보면 오답(7회 빈출 오류).'},
+ {t:'OX',q:'차용 당시 변제능력이 충분했다면 어떤 경우에도 사기가 성립할 수 없다.',o:['O','X'],a:1,e:'자력이 있어도 <b>기망이 편취 수단</b>으로 이용되면 사기 성립(7회 항목2). 편취고의는 차용 당시 기준이되, 자력 유무만으로 단정 불가.'},
+ {t:'OX',q:'법정대리인의 독립 고소권 근거는 개인정보 보호법이다.',o:['O','X'],a:1,e:'근거는 <b>형사소송법 제225조 제1항</b>. 개인정보보호법 제22조는 법정대리인 \u2018동의\u2019 조항으로 별개 제도(7회 오답 지점).'}
+];
+
+const FLASH=[
+ {f:'영장없는 압수 중 \u2018요급처분 불가\u2019 유형',b:'긴급체포 후 소유물 (형사소송법 제217조 제1항)'},
+ {f:'체포현장 계속압수 사후영장 기한',b:'체포한 때부터 48시간 (형사소송법 제217조 제2항)'},
+ {f:'긴급체포 후 검사 승인 / 구속영장 청구',b:'12시간(형사소송법 제200조의3 제2항) / 48시간(동법 제200조의4 제1항)'},
+ {f:'심야조사 가능 요건',b:'피의자 요청서 + 인권보호관 허가 (수사준칙 제21조, 동의서 X)'},
+ {f:'장시간조사 실제 조사시간 한도',b:'8시간(수사준칙 제22조 제2항, 휴식·열람 제외) / 2시간마다 10분 휴식(동조 제1항)'},
+ {f:'불송치 불복 / 수사중지 불복',b:'이의신청(형사소송법 제245조의7, 기한없음, 고발인 제외) / 이의제기(수사준칙 제54조 제1항, 30일)'},
+ {f:'특경법 사기 5억↑·50억↑ 법정형',b:'3년 이상 / 무기 또는 5년 이상 (특정경제범죄가중처벌법 제3조 제1항)'},
+ {f:'친족상도례 형법 제328조 개정 핵심 (25.12.30)',b:'형면제 삭제 → 전면 친고죄화 + 직계존속 고소 특례 + 경과사건 소급'},
+ {f:'가상자산 착오이체 배임 무죄 판례',b:'대법원 2021. 12. 16. 선고 2020도9789'},
+ {f:'가상자산=재산상 이익 / 비트코인 몰수 판례',b:'2021도9855 / 2018도3619'},
+ {f:'딥페이크(허위영상물) 조문',b:'성폭력범죄의 처벌 등에 관한 특례법 제14조의2'},
+ {f:'컴퓨터등사용사기 조문',b:'형법 제347조의2 (보이스피싱 계좌이체형)'},
+ {f:'외국인 체포 영사통보 근거',b:'영사관계에 관한 비엔나협약 제36조 (본인 거부 무관)'},
+ {f:'범죄단체조직 형법 제114조 핵심요건',b:'공동목적·계속결합·통솔체계 (대법원 2017도8600)'},
+ {f:'구속영장 필요적 고려사항 (형사소송법 제70조 제2항)',b:'중대성 · 재범위험 · 위해우려'},
+ {f:'가상자산 임의처분 죄책',b:'횡령(형법 제355조 제1항)·배임(동조 제2항) 모두 불성립 — 대법원 2020도9789'},
+ {f:'소송사기 기수시기',b:'승소·집행으로 이익 현실화 (인용결정만 = 미수, 형법 제352조)'},
+ {f:'보이스피싱 계좌이체형 기수',b:'사기계좌에 입금된 때 (형법 제347조의2)'},
+ {f:'차용금 사기 편취고의 판단시점',b:'차용 당시 변제의사·능력 (형법 제347조 제1항)'},
+ {f:'범죄인지서 기재 3요소',b:'죄명 / 적용법조 / 범죄사실 요지'},
+ {f:'스토킹 강제격리 2법',b:'잠정조치 유치(스토킹처벌법 제9조 제1항 제4호) + 정신건강복지법 응급입원(동법 제50조)'},
+ {f:'명예훼손 위법성조각 → 결정주문',b:'형법 제310조 → 불송치(혐의없음)'},
+ {f:'추징보전 적용법조 근거',b:'범죄수익은닉규제법 · 마약류 불법거래 방지에 관한 특례법 제53조 준용'},
+ {f:'피의사실공표죄 성립 시점·조문',b:'공소제기 전 공표 · 형법 제126조'},
+ {f:'출국금지 기간 4단계',b:'일반 6개월 / 수사목적 1개월 / 소재불명·도주 3개월 / 기소·수사중지+체포영장 = 영장 유효기간 이내'},
+ {f:'긴급출국금지 3중 시한',b:'6시간 내 승인요청 → 12시간 내 미승인 시 해제 → 동일 범죄사실 재요청 불가 (제4조의6)'}
+];
+
+/* ---------- Quiz engine ---------- */
+const modes=document.getElementById('qzModes');
+const stage=document.getElementById('qzStage');
+const result=document.getElementById('qzResult');
+const body=document.getElementById('qzBody');
+const bar=document.getElementById('qzBar');
+const count=document.getElementById('qzCount');
+let pool=[],idx=0,score=0,wrong=[],mode='mc';
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+modes.addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  mode=b.dataset.mode; startQuiz();
+});
+document.getElementById('qzQuit').addEventListener('click',endToModes);
+
+function endToModes(){stage.style.display='none';result.style.display='none';modes.style.display='flex';}
+
+function startQuiz(){
+  modes.style.display='none';result.style.display='none';stage.style.display='block';
+  idx=0;score=0;wrong=[];
+  pool = mode==='mc' ? shuffle(QUESTIONS) : shuffle(FLASH);
+  render();
+}
+
+function render(){
+  const total=pool.length;
+  bar.style.width=((idx)/total*100)+'%';
+  count.textContent=(idx+1)+' / '+total;
+  if(mode==='flash'){renderFlash();return;}
+  const it=pool[idx];
+  let html='<div class="qcard"><div class="qtype">'+it.t+'</div><div class="qtext">'+it.q+'</div><div class="opts">';
+  it.o.forEach((o,i)=>{html+='<button class="opt" data-i="'+i+'">'+o+'</button>';});
+  html+='</div><div class="verdict" id="vd"></div></div><button class="qz-next" id="nx">다음 문제 ▸</button>';
+  body.innerHTML=html;
+  body.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>answer(b,it)));
+  const nx=document.getElementById('nx');
+  nx.addEventListener('click',next);
+}
+
+function answer(btn,it){
+  const chosen=+btn.dataset.i;
+  const opts=body.querySelectorAll('.opt');
+  opts.forEach((b,i)=>{b.disabled=true;if(i===it.a)b.classList.add('correct');});
+  const vd=document.getElementById('vd');
+  if(chosen===it.a){score++;vd.className='verdict ok show';vd.innerHTML='<b class="gn">정답</b>'+it.e;}
+  else{btn.classList.add('wrong');vd.className='verdict no show';vd.innerHTML='<b class="rd">오답</b>'+it.e;
+    wrong.push({q:it.q,a:it.o[it.a],e:it.e});}
+  document.getElementById('nx').classList.add('show');
+}
+
+function next(){idx++;if(idx>=pool.length){finish();}else{render();}}
+
+function renderFlash(){
+  const it=pool[idx];
+  body.innerHTML='<div class="flash" id="fc"><div class="flash-inner">'+
+    '<div class="face front"><div class="q">'+it.f+'</div><div class="hint">탭하여 정답 확인 ▸</div></div>'+
+    '<div class="face back"><div class="a">'+it.b+'</div></div></div></div>'+
+    '<button class="qz-next show" id="nx">'+(idx+1>=pool.length?'완료':'다음 카드 ▸')+'</button>';
+  const fc=document.getElementById('fc');
+  fc.addEventListener('click',()=>fc.classList.toggle('flip'));
+  document.getElementById('nx').addEventListener('click',next);
+}
+
+function finish(){
+  bar.style.width='100%';
+  stage.style.display='none';result.style.display='block';
+  if(mode==='flash'){
+    result.innerHTML='<div class="score-ring">✓</div><div class="score-lab">암기 카드 '+pool.length+'장 완료</div>'+
+      '<button class="qz-restart" id="rs">다시 풀기</button>';
+    document.getElementById('rs').addEventListener('click',endToModes);return;
+  }
+  const total=pool.length, pct=Math.round(score/total*100);
+  saveBest(pct).then(best=>{
+    let html='<div class="score-ring">'+score+'<span style="font-size:22px;color:var(--muted)">/'+total+'</span></div>'+
+      '<div class="score-lab">정답률 '+pct+'%</div>';
+    if(best!=null) html+='<div class="best">최고 기록 '+best+'%</div>';
+    if(wrong.length){
+      html+='<div class="review"><h3>틀린 문제 복습 ('+wrong.length+')</h3>';
+      wrong.forEach(w=>{html+='<div class="rv"><div class="qq">'+w.q+'</div><div class="aa">→ '+w.a+'</div><div style="margin-top:5px;color:var(--muted)">'+w.e+'</div></div>';});
+      html+='</div>';
+    }else{html+='<div class="best" style="color:var(--green)">전부 정답! 🎯</div>';}
+    html+='<button class="qz-restart" id="rs">다시 풀기</button>';
+    result.innerHTML=html;
+    document.getElementById('rs').addEventListener('click',endToModes);
+  });
+}
+
+async function saveBest(pct){
+  try{
+    let best=null;
+    try{const r=await window.storage.get('best_mc');if(r&&r.value!=null)best=parseInt(r.value);}catch(_){}
+    if(best==null||pct>best){await window.storage.set('best_mc',String(pct));best=pct;}
+    return best;
+  }catch(_){return null;}
+}
+</script>
 </body>
 </html>
