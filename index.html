@@ -616,6 +616,8 @@
   .fo-vol{display:flex;align-items:center;gap:8px;margin-top:12px;}
   .fo-vol input{flex:1;accent-color:var(--accent);}
   .fo-hint{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5;}
+  .fo-awake{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:700;color:var(--slate);}
+  .fo-awake input{width:18px;height:18px;accent-color:var(--accent);}
   .bnav-pill button .lbl{font-variant-numeric:tabular-nums;white-space:nowrap;}
   /* ----- 아래쪽 메뉴 ----- */
   .bnav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:40;
@@ -2567,7 +2569,7 @@ function setTab(t, force){
   const prevView=state.view;
   if(t===state.tab && !force){ window.scrollTo({top:0,behavior:"smooth"}); return; }
   state.tab=t;
-  if(t==="timer") focusTasks=null;          // 들어올 때마다 오늘 과제 새로 읽기
+  if(t==="timer"){ focusTasks=null; FocusSound.prepareAll(); }   // 오늘 과제 새로 읽기 · 소리 미리 만들기
   if(t==="todo") state.view="day";
   else if(t==="plan") state.view=state.planView||"week";
   if(state.view!==prevView || force) subscribeTasks(); else render();
@@ -2798,7 +2800,7 @@ function focusLoad(){
   try{ const o=JSON.parse(localStorage.getItem(FOCUS_KEY)||"null"); if(o) F=Object.assign(F,o); }catch(_){}
   FocusSound.setVolume(F.vol);
   // 새로고침 뒤에는 브라우저가 자동 재생을 막으므로, 처음 화면을 누를 때 사운드를 다시 켬
-  if(F.mode==="run" && F.sound) document.addEventListener("pointerdown", ()=>{ if(F.mode==="run" && F.sound) FocusSound.play(F.sound); }, {once:true});
+  if(F.mode==="run"||F.mode==="break") document.addEventListener("pointerdown", ()=>{ if(F.mode==="run"||F.mode==="break"){ focusAudioOn(); focusWake(); } }, {once:true});
   if(F.mode==="run" || F.mode==="break"){
     if(Date.now()>=F.endAt){ F.mode==="run"? focusFinish(true) : focusBreakEnd(true); }
     else focusStartTick();
@@ -2910,7 +2912,8 @@ function renderFocus(){
         ${Object.entries(S).map(([k,t])=>`<button class="${F.sound===k?"on":""}" onclick="focusSound('${k}')">${t.emo} ${t.name}</button>`).join("")}
       </div>
       <div class="fo-vol"><span>🔈</span><input type="range" min="0" max="100" value="${Math.round(F.vol*100)}" oninput="focusVol(this.value)" aria-label="사운드 크기"><span>🔊</span></div>
-      <div class="fo-hint">타이머가 돌아가는 동안 재생돼요. 멈춰 있을 때 고르면 6초 미리 들려 드려요.</div>
+      <label class="fo-awake"><input type="checkbox" ${F.keepAwake?"checked":""} onchange="focusKeepAwake(this.checked)"> 📱 타이머가 도는 동안 화면 켜 두기</label>
+      <div class="fo-hint">타이머가 도는 동안 재생되고, <b>휴대폰 화면이 꺼져도 소리와 끝 알림이 이어져요</b>(잠금 화면에 재생 컨트롤이 보여요). 브라우저를 닫거나 앱을 완전히 끄면 멈춰요. 멈춰 있을 때 고르면 6초 미리 들려 드려요. iPhone은 음량 버튼으로 크기를 조절하세요.</div>
     </div>`;
   const tsel=(F.mode==="idle")? `<div class="fo-card">
       <div class="fo-card-h">📌 무엇을 공부하나요? <span>고르면 집중한 시간이 그 과제에 기록돼요</span></div>
@@ -2955,17 +2958,17 @@ function focusStart(){
   if(state.timer && F.taskId && state.timer.taskId===F.taskId) stopTimer(true);
   F.total=F.setMin*60000; F.endAt=Date.now()+F.total; F.accSec=0; F.segAt=Date.now(); F.mode="run";
   focusSave(); focusStartTick();
-  if(F.sound) FocusSound.play(F.sound);
+  focusAudioOn(); focusWake();
   toast("⏱ 집중 시작! 끝나면 알려 드릴게요","good");
   render();
 }
 function focusPause(){
   if(F.mode==="run"){
     F.accSec+=(Date.now()-F.segAt)/1000; F.remaining=Math.max(0,F.endAt-Date.now()); F.mode="pause";
-    focusStopTick(); FocusSound.stop();
+    focusStopTick(); FocusSound.stop(); focusWake();
   }else if(F.mode==="pause"){
     F.endAt=Date.now()+F.remaining; F.segAt=Date.now(); F.mode="run";
-    focusStartTick(); if(F.sound) FocusSound.play(F.sound);
+    focusStartTick(); focusAudioOn(); focusWake();
   }
   focusSave(); render();
 }
@@ -2999,38 +3002,69 @@ async function focusRecord(sec, natural){
 async function focusFinish(silent){
   // 끝까지 집중한 시간 (새로고침 뒤 늦게 확인해도 종료 시각까지만 계산)
   const used=F.mode==="run"? F.accSec+(Math.min(Date.now(),F.endAt)-F.segAt)/1000 : F.accSec;
-  focusStopTick(); FocusSound.stop();
-  F.mode="done"; focusSave(); focusNavLabel();
+  focusStopTick();
+  if(!silent) FocusSound.chime(); else FocusSound.stop();
+  F.mode="done"; focusSave(); focusNavLabel(); focusWake();
+  FocusSound.setMeta({title:"🎉 집중 완료!"});
   await focusRecord(Math.min(used, F.total/1000), true);
   focusSave();
-  if(!silent){ FocusSound.chime(); toast(`🎉 ${F.doneMin}분 집중 완료!`,"cheer"); if(navigator.vibrate) try{navigator.vibrate([200,100,200]);}catch(_){} }
+  if(!silent){ toast(`🎉 ${F.doneMin}분 집중 완료!`,"cheer"); if(navigator.vibrate) try{navigator.vibrate([200,100,200]);}catch(_){} }
   if(state.tab==="timer") render();
 }
 async function focusEnd(){
   const used=focusElapsedSec();
   if(!confirm(`지금까지 ${Math.round(used/60)}분 집중했어요. 여기서 끝낼까요?`)) return;
   focusStopTick(); FocusSound.stop();
-  F.mode="done"; focusSave(); focusNavLabel();
+  F.mode="done"; focusSave(); focusNavLabel(); focusWake();
   await focusRecord(used, false);
   focusSave(); render();
 }
 function focusBreak(min){
   F.total=min*60000; F.endAt=Date.now()+F.total; F.mode="break";
-  focusSave(); focusStartTick(); render();
+  focusSave(); focusStartTick(); focusAudioOn(); focusWake(); render();
 }
 function focusBreakEnd(silent){
-  focusStopTick(); F.mode="idle"; focusSave(); focusNavLabel();
-  if(!silent){ FocusSound.chime(); toast("☕ 휴식 끝! 다시 집중해 볼까요?","info"); }
+  focusStopTick(); F.mode="idle"; focusSave(); focusNavLabel(); focusWake();
+  if(!silent){ FocusSound.chime(); toast("☕ 휴식 끝! 다시 집중해 볼까요?","info"); } else FocusSound.stop();
   if(state.tab==="timer") render();
 }
 function focusReset(){ F.mode="idle"; F.accSec=0; focusSave(); render(); }
 function focusSound(k){
   F.sound=k; focusSave();
-  if(!k) FocusSound.stop();
-  else if(F.mode==="run") FocusSound.play(k);
+  if(F.mode==="run"||F.mode==="break") focusAudioOn();
+  else if(!k) FocusSound.stop();
   else FocusSound.preview(k, 6);
   render();
 }
+// 타이머가 도는 동안: 고른 배경음, 없으면 거의 들리지 않는 소리로 재생을 유지(끝 알림용)
+function focusAudioOn(){
+  const id=(F.mode==="run" && F.sound)? F.sound : "silent";
+  FocusSound.setMeta({title: F.mode==="break"? "☕ 쉬는 시간" : `⏱ 포커스 ${Math.round(F.total/60000)}분`});
+  FocusSound.play(id);
+}
+FocusSound.setActions({
+  play:()=>{ if(F.mode==="pause") focusPause(); },
+  pause:()=>{ if(F.mode==="run") focusPause(); },
+  stop:()=>{ if(F.mode==="run") focusPause(); },
+});
+// 화면이 꺼져 있어도 <audio> 재생 신호로 끝났는지 확인
+let focusEnding=false;
+FocusSound.onTick(()=>{
+  if(focusEnding || !(F.mode==="run"||F.mode==="break") || focusRemaining()>0) return;
+  focusEnding=true;
+  Promise.resolve(F.mode==="run"? focusFinish() : focusBreakEnd()).finally(()=>{ focusEnding=false; });
+});
+// 📱 화면 켜 두기 (Screen Wake Lock)
+let wakeLock=null;
+async function focusWake(){
+  const want=F.keepAwake && (F.mode==="run"||F.mode==="break") && document.visibilityState==="visible";
+  try{
+    if(want && !wakeLock && navigator.wakeLock){ wakeLock=await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release",()=>{ wakeLock=null; }); }
+    else if(!want && wakeLock){ await wakeLock.release(); wakeLock=null; }
+  }catch(e){ console.warn("화면 켜 두기", e); }
+}
+document.addEventListener("visibilitychange", ()=>{ focusWake(); if(document.visibilityState==="visible" && (F.mode==="run"||F.mode==="break") && focusRemaining()<=0) (F.mode==="run"? focusFinish() : focusBreakEnd()); });
+function focusKeepAwake(on){ F.keepAwake=!!on; focusSave(); focusWake(); render(); }
 function focusVol(v){ F.vol=Number(v)/100; FocusSound.setVolume(F.vol); focusSave(); }
 
 /* ----- 👨‍👩‍👧 가족 연결: 상대 이메일로 신청 → 상대가 승인 ----- */
