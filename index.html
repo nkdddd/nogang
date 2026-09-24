@@ -938,19 +938,35 @@ const defaultSettings=()=>({
     wReview:15,       // 복습 이행 가중치(%)
     wTime:30,         // 학습시간 달성 가중치(%) — 총 학습량이 가장 큰 비중
     wDays:15,         // 학습일수(꾸준함) 가중치(%)
-    reviewTarget:5,   // 주간 복습 목표 횟수
-    timeTargetMin:900,// 주간 목표 학습시간(분) — 만점 기준(15시간)
-    daysTarget:6,     // 주간 목표 학습일수 — 만점 기준
-    curve:1.6,        // 난이도 커브(1=선형, 높을수록 상위 구간이 어려움)
-    minMin:300,       // 최소 학습시간(분) 미달 시 비례 감액
-    minDays:4,        // 최소 학습일수(일) 미달 시 비례 감액
-    manualRate:0.85,  // 손으로 적은 시간의 인정률(타이머 실측은 100%)
+    reviewTarget:3,   // 주간 복습 목표 횟수
+    timeTargetMin:900,// 주간 목표 학습시간(분) — '자동'을 끈 경우의 고정 목표
+    timeTargetRate:0.6,// 자동 주간 목표 = 하루 목표시간 합계 × 이 비율 (타이머 실측만 인정하므로 낮춤)
+    daysTarget:5,     // 주간 목표 학습일수 — 만점 기준
+    curve:1.15,       // 난이도 커브(1=선형, 높을수록 상위 구간이 어려움)
+    minMin:180,       // 최소 학습시간(분) 미달 시 비례 감액
+    minDays:3,        // 최소 학습일수(일) 미달 시 비례 감액
+    manualRate:0,     // 학습시간은 타이머 실측만 인정 (손으로 적은 시간 0%)
     taskCapMin:480,   // 학습 1건당 인정 상한(분)
     planMulti:3,      // 학습 1건당 계획시간의 N배까지만 인정
-    bonusPerHour:500, // 목표 초과 학습 1시간당 보너스(원) — 상한과 별도
-    bonusMax:5000,    // 초과 보너스 최대(원)
+    bonusPerHour:1000,// 목표 초과 학습 1시간당 보너스(원) — 상한과 별도
+    bonusMax:8000,    // 초과 보너스 최대(원)
+    ver:2,            // 용돈 기준 버전 (2 = 타이머 실측만 · 관대한 지급)
   }
 });
+// 용돈 기준 v2 (타이머 실측만 인정 · 대신 관대하게 지급)
+// 부모가 직접 바꾼 값은 그대로 두고, 옛 기본값 그대로인 항목만 새 값으로 올림. 수기 인정률은 항상 0.
+const ALLOW_V2=[["curve",1.6,1.15],["minMin",300,180],["minDays",4,3],["reviewTarget",5,3],["daysTarget",6,5],
+  ["bonusPerHour",500,1000],["bonusMax",5000,8000],["timeTargetRate",undefined,0.6]];
+function migrateAllowance(a){
+  a=Object.assign({}, a||{});
+  let changed=false;
+  if((Number(a.ver)||1)<2){
+    ALLOW_V2.forEach(([k,oldV,newV])=>{ if(a[k]===undefined || a[k]===oldV){ a[k]=newV; changed=true; } });
+    a.ver=2; changed=true;
+  }
+  if(a.manualRate!==0){ a.manualRate=0; changed=true; }
+  return {a, changed};
+}
 const wonFmt=n=>"₩"+Number(n||0).toLocaleString("ko-KR");
 function toast(msg,type){
   const w=document.getElementById("toastWrap"); if(!w)return;
@@ -2388,8 +2404,10 @@ function subscribeCategories(){
   plannerRef().collection("meta").doc("settings").get().then(d=>{
     const base=defaultSettings();
     const loaded=d.exists? d.data():{};
-    state.settings = Object.assign(base, loaded, { allowance: Object.assign(base.allowance, loaded.allowance||{}) });
+    const mig=migrateAllowance(Object.assign({}, loaded.allowance||{}));
+    state.settings = Object.assign(base, loaded, { allowance: Object.assign(base.allowance, mig.a) });
     if(!d.exists && !state.viewingChild) plannerRef().collection("meta").doc("settings").set(state.settings);
+    else if(d.exists && mig.changed) plannerRef().collection("meta").doc("settings").set({allowance:state.settings.allowance},{merge:true}).catch(()=>{});
     render();
   });
 }
@@ -3806,8 +3824,8 @@ function renderTaskRow(t){
     : (_tim>=_act
         ? `<span class="verify-tag" style="background:#F3FBF7;color:#0E7A55;border:1px solid #BFE8D6">⏱ 실측 100%</span>`
         : (_tim>0
-            ? `<span class="verify-tag" style="background:#FFF7E8;color:#8A6516;border:1px solid #F5DFA6">⏱ ${_tim}분 실측 + 수기</span>`
-            : `<span class="verify-tag" style="background:#F1F4F8;color:#64748B;border:1px solid #E2E8F0">✍️ 수기 ${Math.round((allowCrit().manualRate!=null?allowCrit().manualRate:.85)*100)}% 인정</span>`));
+            ? `<span class="verify-tag" style="background:#FFF7E8;color:#8A6516;border:1px solid #F5DFA6">⏱ ${_tim}분만 인정 (수기 ${_act-_tim}분 제외)</span>`
+            : `<span class="verify-tag" style="background:#FFF5F6;color:#A5323A;border:1px solid #FADADD">✍️ 수기 · 인정 안 됨 (▶ 타이머로 재세요)</span>`));
   const scoreExec = isScored? `
           <div class="exec-fld">
             <label class="exec-lbl">점수(맞은/만점)</label>
@@ -3904,7 +3922,7 @@ function creditFor(dateStr, now){
   if(d===1) return {rate:0.5, label:"다음날 체크 · 50% 인정", ok:true};
   return {rate:0, label:`${d}일 지나 체크 불가`, ok:false};
 }
-/* ----- 학습시간 검증: 타이머 실측 100% · 수기 입력 85% · 이상치 차단 ----- */
+/* ----- 학습시간 검증: 타이머 실측만 100% 인정 (수기 입력은 인정 안 함) · 이상치 차단 ----- */
 function allowCrit(){ return (state.settings&&state.settings.allowance)||defaultSettings().allowance; }
 function verifiedMin(t){
   const A=allowCrit();
@@ -3914,10 +3932,9 @@ function verifiedMin(t){
   const hardCap=Number(A.taskCapMin)||480;
   const limit=Math.max(30, Math.min(hardCap, planCap>0?planCap:hardCap));
   actual=Math.min(actual, limit);
-  const timed=Math.min(Number(t.timerMin)||0, actual);   // 타이머로 실측된 부분
-  const manual=Math.max(0, actual-timed);                // 손으로 적은 부분
-  const mRate=(A.manualRate!=null)? Number(A.manualRate) : 0.85;
-  return Math.round(timed + manual*mRate);
+  // 타이머(학습 카드 ▶ 타이머 · 포커스 타이머)로 실측된 시간만 인정. 손으로 적은 시간은 기록만 남고 인정 0분
+  const timed=Math.min(Number(t.timerMin)||0, actual);
+  return Math.round(timed);
 }
 // 인정 시간 = 검증시간 × 체크시점 배율 × 충실도 배율
 function creditedMin(t){
@@ -3964,6 +3981,9 @@ function openCompleteModal(id){
           </div></div>
         <div class="fld"><label class="fld-lbl">실제 학습 시간(분)</label>
           <input class="inp" id="cm-min" type="number" value="${t.actualMin||t.plannedMin||0}" oninput="cmPts()">
+          <div style="font-size:11.5px;margin-top:6px;line-height:1.45;color:${(Number(t.timerMin)||0)>0?"#0E7A55":"#A5323A"}">
+            ⏱ 학습시간은 <b>타이머로 잰 시간만</b> 인정돼요 · 지금 실측 <b>${Number(t.timerMin)||0}분</b>${(Number(t.timerMin)||0)>0?"":" — 학습 카드의 ▶ 타이머나 포커스 타이머로 재 주세요"}
+          </div>
           <div class="chip-wrap" style="margin-top:7px">
             ${[["계획만큼",t.plannedMin||0],["+10",-10],["+30",-30]].map(([l,v])=>
               `<button class="pick" onclick="cmTime(${v})">${l}</button>`).join("")}
@@ -3990,7 +4010,8 @@ function cmPts(){
   const hint=document.getElementById("cmHint"); if(!hint) return;
   const t=state.tasksMap[completeTarget]; if(!t) return;
   const minEl=document.getElementById("cm-min");
-  const actual=Number(minEl&&minEl.value)||t.plannedMin||0;
+  const typed=Number(minEl&&minEl.value)||t.plannedMin||0;
+  const actual=Math.min(Number(t.timerMin)||0, typed);   // 타이머 실측만 인정
   const cr=creditFor(t.date);
   const mk=(rp)=>Math.round(actual*cr.rate*((planPoints(t)+rp)/20));
   const nowMin=mk(full?REVIEW_PTS.full:REVIEW_PTS.bare), bestMin=mk(REVIEW_PTS.full);
@@ -4340,7 +4361,7 @@ function drawSettings(){
                 <option value="auto" ${A.autoTimeTarget===false?"":"selected"}>등교/자율일에 맞춰 자동</option>
                 <option value="fixed" ${A.autoTimeTarget===false?"selected":""}>위 값으로 고정</option>
               </select></div>
-            <div><label class="fld-lbl">주간 목표 학습일수(일)</label><input class="inp" type="number" value="${A.daysTarget!=null?A.daysTarget:6}" onchange="saveCrit('daysTarget',this.value)"></div>
+            <div><label class="fld-lbl">주간 목표 학습일수(일)</label><input class="inp" type="number" value="${A.daysTarget!=null?A.daysTarget:5}" onchange="saveCrit('daysTarget',this.value)"></div>
             <div><label class="fld-lbl">복습 목표(회/주)</label><input class="inp" type="number" value="${A.reviewTarget}" onchange="saveCrit('reviewTarget',this.value)"></div>
             <div><label class="fld-lbl">이행률 가중치(%)</label><input class="inp" type="number" value="${A.wCompletion}" onchange="saveCrit('wCompletion',this.value)"></div>
             <div><label class="fld-lbl">학습시간 가중치(%)</label><input class="inp" type="number" value="${A.wTime!=null?A.wTime:25}" onchange="saveCrit('wTime',this.value)"></div>
@@ -4350,30 +4371,31 @@ function drawSettings(){
           </div>
           <div class="section-lbl" style="margin-top:18px">난이도 조절 (상한 도달 억제)</div>
           <div class="crit-grid">
-            <div><label class="fld-lbl">난이도 커브 (1~2.5)</label><input class="inp" type="number" step="0.1" value="${A.curve!=null?A.curve:1.6}" onchange="saveCrit('curve',this.value)"></div>
-            <div><label class="fld-lbl">최소 학습시간(분)</label><input class="inp" type="number" value="${A.minMin!=null?A.minMin:300}" onchange="saveCrit('minMin',this.value)"></div>
-            <div><label class="fld-lbl">최소 학습일수(일)</label><input class="inp" type="number" value="${A.minDays!=null?A.minDays:4}" onchange="saveCrit('minDays',this.value)"></div>
+            <div><label class="fld-lbl">난이도 커브 (1~2.5)</label><input class="inp" type="number" step="0.1" value="${A.curve!=null?A.curve:1.15}" onchange="saveCrit('curve',this.value)"></div>
+            <div><label class="fld-lbl">최소 학습시간(분)</label><input class="inp" type="number" value="${A.minMin!=null?A.minMin:180}" onchange="saveCrit('minMin',this.value)"></div>
+            <div><label class="fld-lbl">최소 학습일수(일)</label><input class="inp" type="number" value="${A.minDays!=null?A.minDays:3}" onchange="saveCrit('minDays',this.value)"></div>
           </div>
           <div class="section-lbl" style="margin-top:18px">학습시간 검증 · 초과 보상</div>
           <div class="crit-grid">
-            <div><label class="fld-lbl">수기 입력 인정률(%)</label><input class="inp" type="number" value="${Math.round((A.manualRate!=null?A.manualRate:0.85)*100)}" onchange="saveCrit('manualRate',(Number(this.value)||85)/100)"></div>
+            <div><label class="fld-lbl">주간 목표 = 하루 목표 합계의(%)</label><input class="inp" type="number" value="${Math.round((A.timeTargetRate!=null?A.timeTargetRate:0.6)*100)}" onchange="saveCrit('timeTargetRate',Math.max(10,Number(this.value)||60)/100)"></div>
             <div><label class="fld-lbl">1건당 인정 상한(분)</label><input class="inp" type="number" value="${A.taskCapMin!=null?A.taskCapMin:480}" onchange="saveCrit('taskCapMin',this.value)"></div>
             <div><label class="fld-lbl">계획시간의 N배까지 인정</label><input class="inp" type="number" step="0.5" value="${A.planMulti!=null?A.planMulti:3}" onchange="saveCrit('planMulti',this.value)"></div>
-            <div><label class="fld-lbl">초과 학습 보너스(원/시간)</label><input class="inp" type="number" value="${A.bonusPerHour!=null?A.bonusPerHour:500}" onchange="saveCrit('bonusPerHour',this.value)"></div>
-            <div><label class="fld-lbl">보너스 최대(원)</label><input class="inp" type="number" value="${A.bonusMax!=null?A.bonusMax:5000}" onchange="saveCrit('bonusMax',this.value)"></div>
+            <div><label class="fld-lbl">초과 학습 보너스(원/시간)</label><input class="inp" type="number" value="${A.bonusPerHour!=null?A.bonusPerHour:1000}" onchange="saveCrit('bonusPerHour',this.value)"></div>
+            <div><label class="fld-lbl">보너스 최대(원)</label><input class="inp" type="number" value="${A.bonusMax!=null?A.bonusMax:8000}" onchange="saveCrit('bonusMax',this.value)"></div>
           </div>
           <div style="font-size:12px;color:#64748B;margin-top:10px;line-height:1.5;background:#F8FAFC;border-radius:9px;padding:11px">
             <b>학습시간을 통제하는 방법</b><br>
-            · <b>학습 타이머</b>: 학습 카드의 <b>▶ 타이머</b>로 재면 <b>실측 100%</b> 인정, 손으로 적은 시간은 <b>${Math.round((A.manualRate!=null?A.manualRate:0.85)*100)}%</b>만 인정<br>
+            · <b>타이머 실측만 인정</b>: 학습 카드의 <b>▶ 타이머</b>나 <b>포커스 타이머</b>로 잰 시간만 학습시간으로 인정 (손으로 적은 시간은 기록만 남고 0분)<br>
+            · <b>대신 관대하게</b>: 주간 목표는 하루 목표 합계의 <b>${Math.round((A.timeTargetRate!=null?A.timeTargetRate:0.6)*100)}%</b>, 최소 요건 미달 감액도 완만하게<br>
             · <b>이상치 차단</b>: 1건당 계획시간의 ${A.planMulti||3}배·최대 ${A.taskCapMin||480}분까지만 인정<br>
-            · <b>초과 학습 보너스</b>: 주간 목표를 넘긴 시간에 대해 <b>1시간당 ${(A.bonusPerHour!=null?A.bonusPerHour:500).toLocaleString()}원</b>씩 상한과 <b>별도</b> 지급 (최대 ${(A.bonusMax!=null?A.bonusMax:5000).toLocaleString()}원)
+            · <b>초과 학습 보너스</b>: 주간 목표를 넘긴 시간에 대해 <b>1시간당 ${(A.bonusPerHour!=null?A.bonusPerHour:1000).toLocaleString()}원</b>씩 상한과 <b>별도</b> 지급 (최대 ${(A.bonusMax!=null?A.bonusMax:8000).toLocaleString()}원)
           </div>
           <div style="font-size:11.5px;color:#94A3B8;margin-top:8px">가중치 합계 ${A.wCompletion+A.wScore+A.wReview+(A.wTime!=null?A.wTime:25)+(A.wDays!=null?A.wDays:15)}% · 계산 시 자동 정규화됩니다. ${state.viewingChild?`(<b>${esc(state.ownerName)}</b> 기준)`:""}</div>
           <div style="font-size:12px;color:#64748B;margin-top:10px;line-height:1.5;background:#F8FAFC;border-radius:9px;padding:11px"><b>상한이 쉽게 나오지 않게 하는 장치</b><br>
             · <b>학습량 차등</b>: 이행률은 <b>계획 시간 가중</b>(10분짜리와 3시간짜리를 구분), 시간 지표는 목표 초과 시 <b>최대 125%</b>까지 인정<br>
             · <b>난이도 커브</b>: 달성도를 제곱 보정해 상위 구간(90%↑)일수록 만점이 어려움<br>
-            · <b>학습일수 지표</b>: 하루 몰아치기로는 만점 불가 (주 ${A.daysTarget||6}일 목표)<br>
-            · <b>최소 요건</b>: 주 ${A.minMin||300}분 / ${A.minDays||4}일 미만이면 <b>부족한 만큼 비례 감액</b>(적게 할수록 크게 깎임)<br>
+            · <b>학습일수 지표</b>: 하루 몰아치기로는 만점 불가 (주 ${A.daysTarget||5}일 목표)<br>
+            · <b>최소 요건</b>: 주 ${A.minMin||180}분 / ${A.minDays||3}일 미만이면 <b>부족한 만큼 완만하게 감액</b><br>
             · 목표 학습시간이 만점 기준입니다(현재 주 ${Math.round((A.timeTargetMin||900)/60)}시간).<br>
             정산 주간은 <b>일~토(토요일 18시 마감)</b> 기준이며 상한을 넘지 않습니다.</div>
 
@@ -4572,12 +4594,12 @@ function computeAllowance(tasks, days, crit, extData){
   // 주간 목표시간: 그 주의 등교일/자율학습일 구성에 맞춰 자동 산출(설정에서 고정도 가능)
   const timeTarget=(crit.autoTimeTarget===false)
     ? (Number(crit.timeTargetMin)||900)
-    : days.reduce((a,ds)=>a+dayTypeGoal(ds),0) || (Number(crit.timeTargetMin)||900);
+    : Math.round((days.reduce((a,ds)=>a+dayTypeGoal(ds),0) || (Number(crit.timeTargetMin)||900)) * (crit.timeTargetRate!=null? Number(crit.timeTargetRate) : 0.6));
   const ratio=timeTarget>0? weekMin/timeTarget : 0;
   const timeRate = ratio<=1? ratio : Math.min(1.25, 1+Math.log2(ratio)*0.25);
   // 학습일수(꾸준함): 하루 몰아치기 방지
   const studyDays=new Set(wk.filter(t=>t.done).map(t=>t.date)).size;
-  const daysTarget=Number(crit.daysTarget)||6;
+  const daysTarget=Number(crit.daysTarget)||5;
   const dayRate=Math.min(1, studyDays/daysTarget);
   // 가중치 정규화 (문제풀이 기록이 없으면 해당 가중치 제외 후 재분배)
   const parts=[
@@ -4596,11 +4618,11 @@ function computeAllowance(tasks, days, crit, extData){
   const caps=[];
   const minMin=Number(crit.minMin)||0, minDays=Number(crit.minDays)||0;
   if(minMin>0 && weekMin<minMin){
-    achievement=Math.min(achievement, 0.5*(weekMin/minMin));
+    achievement=Math.min(achievement, 0.6*(weekMin/minMin));
     caps.push(`학습시간 ${minMin}분 미만 → 비례 감액`);
   }
   if(minDays>0 && studyDays<minDays){
-    achievement=Math.min(achievement, 0.7*(studyDays/minDays));
+    achievement=Math.min(achievement, 0.85*(studyDays/minDays));
     caps.push(`학습일 ${minDays}일 미만 → 비례 감액`);
   }
   // 부스터(시험 대비) 기간이면 상한·지급액을 배율만큼 상향
@@ -4624,7 +4646,7 @@ async function fetchWeekTasks(uid,days){
 async function fetchAllowanceCrit(uid){
   const d=await db.collection("planner").doc(uid).collection("meta").doc("settings").get();
   const base=defaultSettings().allowance;
-  return Object.assign(base, (d.exists&&d.data().allowance)||{});
+  return Object.assign(base, migrateAllowance((d.exists&&d.data().allowance)||{}).a);
 }
 async function fetchPayout(uid,weekId){
   const d=await db.collection("planner").doc(uid).collection("payouts").doc(weekId).get();
