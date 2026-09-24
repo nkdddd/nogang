@@ -1252,7 +1252,6 @@ function cloudPush(){
   try{
     const sum=buildShareSummary();
     appRef().set(Object.assign({},S,{summary:sum,updated:Date.now()}));
-    if(S.shareCode) fbDB.collection('shares').doc(S.shareCode).set(sum);
   }catch(e){}
 }
 function save(){
@@ -1982,10 +1981,9 @@ function viewSettings(){
         <button class="tog" id="logout" style="color:var(--bad)">로그아웃</button></div>
     </div>
     <div class="card sharecode-card">
-      <div class="t">👨‍👩‍👧 학부모 대시보드 연결</div>
-      <div class="s">플래너에서 가족 연결을 하면 부모님이 플래너로 진도를 바로 보실 수 있어요. 로그인 없이 보시려면 아래 코드를 '자녀 진도 보기'에 입력하세요.</div>
-      <div class="sharecode" id="sharecode">${(S.shareCode||(S.shareCode=genCode()))}</div>
-      <button class="tog" id="copycode">코드 복사</button>
+      <div class="t">👨‍👩‍👧 가족 연결</div>
+      <div class="s">플래너의 ⋯ 메뉴 → 가족 연결에서 부모님 이메일로 신청하거나 받은 신청을 승인하세요. 연결되면 부모님이 플래너에서 진도를 바로 보실 수 있어요.</div>
+      <button class="tog" id="famopen" style="margin-top:10px">👨‍👩‍👧 가족 연결 열기</button>
     </div>`:`<div class="card"><div class="set-row"><div><div class="t">저장 모드</div><div class="s">이 기기에만 저장(로컬 모드) · 로그인하면 학부모 연결이 켜져요</div></div></div></div>`}
     <div class="card">
       <div class="set-row"><div><div class="t">하루 목표</div><div class="s">하루에 학습할 문장 수</div></div>
@@ -2004,7 +2002,7 @@ function viewSettings(){
   v.querySelector('#goal').onclick=e=>{const g=e.target.dataset.g;if(g){S.goal=+g;save();go('settings');}};
   v.querySelector('#adv').onclick=()=>{S.adv=!S.adv;save();go('settings');toast(S.adv?'심화 모드 켜짐':'심화 모드 꺼짐');};
   const lo=v.querySelector('#logout'); if(lo)lo.onclick=()=>{ try{ if(_cloudT){clearTimeout(_cloudT);} if(CLOUD&&UID&&fbDB){cloudPush();} }catch(e){} fbAuth.signOut(); };
-  const cc=v.querySelector('#copycode'); if(cc){ save(); cc.onclick=()=>{ const code=S.shareCode||''; try{ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code);toast('코드를 복사했어요: '+code);} else {toast('코드: '+code);} }catch(e){ toast('코드: '+code); } }; }
+  const fo=v.querySelector('#famopen'); if(fo) fo.onclick=openFamilyInPlanner;
   v.querySelector('#test-spk').onclick=()=>{speak('A strange thing happened to me.');toast('소리가 안 나면 기기 음량/무음 모드를 확인하세요');};
   v.querySelector('#bk').onclick=()=>{
     const blob=new Blob([JSON.stringify(S)],{type:'application/json'});
@@ -2052,66 +2050,10 @@ window.onerror=function(m,src,ln,col,err){showBootError((err&&err.stack)?err.sta
 
 /* ---------- 로그인 화면 ---------- */
 let authMode='login';
-let parentMode=false, parentData=null;
-function renderParentEntry(){
-  const app=$('#app'); const nv=document.querySelector('.nav'); if(nv)nv.remove();
-  app.innerHTML='';
-  const v=el(`<div class="view auth-wrap">
-    <div class="auth-logo"><div class="em">👨‍👩‍👧</div><h1>학부모 <span>진도 보기</span></h1>
-      <p class="auth-sub">자녀 앱 설정에서 만든 6자리 연결 코드를 입력하세요</p></div>
-    <div class="auth-card">
-      <input class="auth-in" id="p-code" placeholder="연결 코드" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;text-align:center;font-weight:800;font-size:20px">
-      <button class="btn" id="p-go">진도 보기</button>
-      <div class="auth-msg" id="p-msg"></div>
-      <button class="auth-switch" id="p-back">← 로그인 화면으로</button>
-    </div></div>`);
-  app.appendChild(v);
-  v.querySelector('#p-back').onclick=()=>{parentMode=false;renderAuth();};
-  v.querySelector('#p-go').onclick=()=>{
-    const code=(v.querySelector('#p-code').value||'').trim().toUpperCase();
-    const msg=v.querySelector('#p-msg');
-    if(code.length<6){msg.textContent='6자리 코드를 정확히 입력하세요.';return;}
-    msg.textContent='불러오는 중…';
-    fbDB.collection('shares').doc(code).get().then(function(doc){
-      if(!doc.exists){msg.textContent='해당 코드의 진도를 찾을 수 없어요.';return;}
-      parentData=doc.data(); renderParentDash();
-    }).catch(function(e){ msg.textContent='오류: '+((e&&e.message)||e); });
-  };
-  return v;
-}
-function renderParentDash(){
-  const app=$('#app'); const nv=document.querySelector('.nav'); if(nv)nv.remove();
-  const d=parentData||{}; app.innerHTML='';
-  const v=el(`<div class="view">
-    <div class="appbar"><h1>👨‍👩‍👧 <span>자녀 진도</span></h1></div>
-    <div class="card hero" style="text-align:center">
-      <div class="eyebrow">${d.name||'학생'}${d.adv?' · 심화 모드':''}</div>
-      <div style="font-size:36px;font-weight:800;color:var(--brand);margin:6px 0">${d.pct||0}%</div>
-      <div class="sub">숙달 ${d.mastered||0} / 전체 ${d.total||0}문장</div>
-    </div>
-    <div class="statgrid">
-      <div class="card"><b>${d.streak||0}</b><small>연속일</small></div>
-      <div class="card"><b>${d.todayCount||0}/${d.goal||0}</b><small>오늘</small></div>
-      <div class="card"><b>${d.weakCount||0}</b><small>약점</small></div>
-    </div>
-    <div class="sect-h"><h2>집중이 필요한 문장</h2></div>
-    <div id="p-weak"></div>
-    <div class="card" style="text-align:center;color:var(--ink-faint);font-size:12px">
-      마지막 업데이트: ${d.updatedAt?new Date(d.updatedAt).toLocaleString('ko-KR'):'-'}</div>
-    <button class="btn ghost" id="p-exit" style="margin:16px 0 40px">다른 코드 보기</button>
-  </div>`);
-  app.appendChild(v);
-  const pw=v.querySelector('#p-weak');
-  const weak=(d.weak||[]);
-  if(!weak.length) pw.appendChild(el(`<div class="card" style="color:var(--ink-soft);font-size:13px;text-align:center">지금은 집중 복습할 문장이 없어요. 잘하고 있어요! 👏</div>`));
-  else weak.slice(0,15).forEach(w=>{
-    const p=POINTS[w.pt];
-    pw.appendChild(el(`<div class="card weak-item" style="cursor:default">
-      <div class="wi-top"><span class="wi-pt">${p?p.book+' '+p.num+'. '+p.title:(w.pt||'')}${w.no?' · 오답 '+w.no+'회':''}</span></div>
-      <div style="font-size:15px;font-weight:600">${w.en}</div><div class="wi-kr">${w.kr}</div></div>`));
-  });
-  v.querySelector('#p-exit').onclick=()=>{parentData=null;renderParentEntry();};
-  return v;
+// 가족 연결은 플래너에서 (상대 이메일로 신청 → 상대가 승인)
+function openFamilyInPlanner(){
+  try{ if(window.parent!==window && typeof parent.drawFamily==="function"){ parent.closeLearnApp(); parent.drawFamily(); return; } }catch(e){}
+  location.href="../index.html#family";
 }
 function renderAuth(){
   const app=$('#app'); const nv=document.querySelector('.nav'); if(nv)nv.remove();
@@ -2127,10 +2069,8 @@ function renderAuth(){
       <button class="btn" id="a-go">${isSignup?'가입하기':'로그인'}</button>
       <div class="auth-msg" id="a-msg"></div>
       <button class="auth-switch" id="a-switch">${isSignup?'이미 계정이 있어요 · 로그인':'계정이 없어요 · 회원가입'}</button>
-      <button class="auth-switch" id="a-parent" style="color:var(--ink-soft);margin-top:12px;border-top:1px solid var(--line);padding-top:14px">👨‍👩‍👧 코드로 자녀 진도 보기 (학부모)</button>
     </div></div>`);
   app.appendChild(v);
-  v.querySelector('#a-parent').onclick=()=>{parentMode=true;renderParentEntry();};
   v.querySelector('#a-switch').onclick=()=>{authMode=isSignup?'login':'signup';renderAuth();};
   v.querySelector('#a-go').onclick=()=>{
     const email=(v.querySelector('#a-email').value||'').trim();

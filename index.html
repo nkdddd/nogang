@@ -457,6 +457,18 @@
     color:var(--ink);font-weight:700;display:flex;align-items:center;justify-content:center;}
   .tb-pill button:active{background:var(--surface);}
   .tb-pill svg{width:20px;height:20px;}
+  #menuBtn{position:relative;}
+  #menuBtn.has-dot::after{content:"";position:absolute;top:6px;right:8px;width:8px;height:8px;border-radius:50%;background:#E5484D;box-shadow:0 0 0 2px var(--surface2);}
+  .badge-dot{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#E5484D;color:#fff;font-size:11px;font-weight:800;vertical-align:1px;margin-left:4px;}
+  .fam-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+  .fam-card .av{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto;}
+  .fam-card .tx{flex:1;min-width:0;}
+  .fam-card .tx b{display:block;font-size:14px;}
+  .fam-card .tx span{display:block;font-size:12px;color:var(--muted2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .fam-btn{border:none;border-radius:999px;padding:8px 13px;font-weight:800;font-size:12.5px;background:var(--ink);color:#fff;white-space:nowrap;}
+  .fam-btn.ghost{background:var(--surface2);color:var(--ink);}
+  .fam-send{display:flex;gap:8px;}
+  .fam-send .inp{flex:1;min-width:0;}
 
   .child-banner{background:var(--accent-soft);border:none;border-radius:14px;margin:0 16px 8px;color:#4B3FA6;}
   .child-banner button{border-color:#DCD6F7;color:var(--accent);border-radius:999px;}
@@ -668,7 +680,7 @@
     <div class="tb-right">
       <button class="tb-who" onclick="openMenu()" title="계정 · 메뉴"><span class="av" id="myAv">나</span><span id="myName">나</span></button>
       <div class="tb-pill">
-        <button title="메뉴" aria-label="메뉴" onclick="openMenu()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>
+        <button title="메뉴" aria-label="메뉴" onclick="openMenu()" id="menuBtn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>
         <button title="학습 추가" aria-label="학습 추가" onclick="openTask(null, addDate())"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
       </div>
     </div>
@@ -700,6 +712,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="assets/family.js"></script>
 
 <script>
 /* ============================================================
@@ -780,7 +793,6 @@ const isSameDay=(a,b)=>fmt(a)===fmt(b);
 const WD=["월","화","수","목","금","토","일"];
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const uid=()=> (crypto.randomUUID? crypto.randomUUID(): String(Date.now())+Math.random());
-const gen6=()=>String(Math.floor(100000+Math.random()*900000));
 const defaultSettings=()=>({
   weeklyGoalMin:600,
   dailyGoalMin:120,
@@ -1095,7 +1107,6 @@ async function editNickname(){
   if(name===cur) return;
   try{
     await db.collection("users").doc(state.user.uid).update({name});
-    if(state.profile.linkCode) await db.collection("codes").doc(state.profile.linkCode).set({uid:state.user.uid, name});
     state.profile.name=name;
     if(!state.viewingChild) state.ownerName=name;
     renderHeader(); drawSettings();
@@ -2100,11 +2111,12 @@ async function deleteAllDocs(collRef){
   }
 }
 async function purgeUserData(uid, linkCode, isParent){
-  for(const s of ["tasks","payouts","weekcaps","meta"]){
+  for(const s of ["tasks","payouts","weekcaps","meta","apps","diary","daygoals","daytypes","certs","coupons"]){
     try{ await deleteAllDocs(db.collection("planner").doc(uid).collection(s)); }catch(e){ console.error("purge",s,e); }
   }
   if(isParent){ try{ await deleteAllDocs(db.collection("links").doc(uid).collection("children")); }catch(e){ console.error(e); } }
   if(linkCode){ try{ await db.collection("codes").doc(linkCode).delete(); }catch(_){} }
+  try{ await deleteAllDocs(db.collection("familyRequests").where("fromUid","==",uid)); }catch(e){ console.error("purge familyRequests", e); }
   try{ await db.collection("planner").doc(uid).delete(); }catch(_){}
   try{ await db.collection("users").doc(uid).delete(); }catch(e){ console.error(e); }
 }
@@ -2153,17 +2165,17 @@ function boot(){
       if(!pdoc.exists){
         const info = pendingSignup || {name:(user.email||"사용자").split("@")[0], role:"child"};
         pendingSignup=null;
-        let code=gen6(), tries=0;
-        while(tries<8){ const s=await db.collection("codes").doc(code).get(); if(!s.exists) break; code=gen6(); tries++; }
-        await db.collection("users").doc(user.uid).set({name:info.name, role:info.role, linkCode:code, createdAt:Date.now()});
-        await db.collection("codes").doc(code).set({uid:user.uid, name:info.name});
+        await db.collection("users").doc(user.uid).set({name:info.name, role:info.role, email:(user.email||"").toLowerCase(), createdAt:Date.now()});
         pdoc=await db.collection("users").doc(user.uid).get();
       }
       state.profile=pdoc.data();
+      if(user.email && state.profile.email!==user.email.toLowerCase()){
+        db.collection("users").doc(user.uid).set({email:user.email.toLowerCase()},{merge:true}).catch(()=>{});
+      }
     }catch(e){
       console.error("프로필 로드/생성 실패", e);
       // 로그인은 되었으나 DB 접근 실패 → 폴백 프로필로 화면은 띄우되 원인을 안내
-      state.profile = state.profile || {name:(user.email||"사용자").split("@")[0], role:(pendingSignup&&pendingSignup.role)||"child", linkCode:"------"};
+      state.profile = state.profile || {name:(user.email||"사용자").split("@")[0], role:(pendingSignup&&pendingSignup.role)||"child"};
       alert("로그인은 되었지만 데이터 연결에 실패했습니다.\n\n"+firestoreDiag(e)+"\n\n원인을 해결한 뒤 새로고침하세요.");
     }
     state.ownerUid=user.uid; state.ownerName=state.profile.name; state.ownerRole=state.profile.role;
@@ -2172,6 +2184,8 @@ function boot(){
     if(weekPhase().phase==="planning"){ state.cursor=activeWeekStart(new Date()); state.tab="plan"; state.view="week"; }
     try{ await loadChildren(); }catch(e){ console.error("자녀 로드 실패", e); }
     showApp(true);
+    checkFamilyRequests();
+    if(location.hash==="#family"){ history.replaceState(null,"",location.pathname); setTimeout(drawFamily,300); }
     renderHeader();
     subscribeCategories();
     subscribeTasks();
@@ -2184,6 +2198,7 @@ function showApp(on){
 async function loadChildren(){
   state.children=[];
   if(state.profile.role!=="parent") return;
+  await Family.syncLinks(db, state.user, state.profile);   // 자녀가 승인한 신청 → 연결
   const snap=await db.collection("links").doc(state.user.uid).collection("children").get();
   const rows=[];
   for(let i=0;i<snap.docs.length;i++){
@@ -2636,17 +2651,120 @@ function openMenu(){
       <span class="av" style="width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">${esc(me.slice(0,1))}</span>
       <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:15px">${esc(me)} ${isParent?"👑":""}</div>
         <div style="font-size:12px;color:#8F8D9B">${isParent?"부모 계정":"학생 계정"} · ${esc((state.user&&state.user.email)||"")}</div></div>
-      ${!isParent&&state.profile.linkCode?`<div style="text-align:right"><div style="font-size:10.5px;color:#8F8D9B">가족 연결 코드</div><b style="letter-spacing:.12em">${esc(state.profile.linkCode)}</b></div>`:""}
     </div>
     ${isParent?`<div class="r-sec">자녀 플래너</div>
       ${state.viewingChild? hubItem("🏠","내 플래너로 돌아가기","", "backToSelf()") : ""}
-      ${kids || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 자녀가 없어요. 자녀 관리에서 자녀 코드를 등록하세요.</div>`}`:""}
+      ${kids || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 자녀가 없어요. 아래 <b>가족 연결</b>에서 자녀의 이메일로 신청하세요.</div>`}`:""}
     <div class="r-sec">관리</div>
+    ${hubItem("👨‍👩‍👧", "가족 연결"+(state.familyPending?` <span class="badge-dot">${state.familyPending}</span>`:""), isParent?"자녀에게 연결 신청 · 받은 신청 승인":"부모님께 연결 신청 · 받은 신청 승인","drawFamily()")}
     ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🐣","내 파트너","파트너 성장 · 쿠폰 · 뱃지","drawManage()")}
     ${hubItem("⚙️","설정","계정 · 목표시간 · 방학 · 과목/교재 · 템플릿","openDrawer('settings')")}
     ${hubItem("🔗","학습앱 인정 시간","천문장 · 영단어 · 문법 환산과 상한","drawExtApps()")}
     ${hubItem("🚪","로그아웃","","closeDrawer();logout()")}
   `);
+}
+
+/* ----- 👨‍👩‍👧 가족 연결: 상대 이메일로 신청 → 상대가 승인 ----- */
+let familyList=null;
+async function checkFamilyRequests(){
+  try{
+    familyList=await Family.listMine(db, state.user);
+    const pend=familyList.received.filter(r=>r.status==="pending").length;
+    state.familyPending=pend;
+    const b=document.getElementById("menuBtn"); if(b) b.classList.toggle("has-dot", pend>0);
+    if(pend) toast(`👨‍👩‍👧 가족 연결 신청이 ${pend}건 있어요 · ⋯ 메뉴에서 확인하세요`,"info");
+  }catch(e){ console.warn("가족 연결 신청 확인", e); }
+}
+function famRoleLabel(role){ return role==="parent"? "부모" : "자녀"; }
+async function drawFamily(){
+  const isParent=state.profile.role==="parent";
+  hubShell("👨‍👩‍👧 가족 연결", `<div class="empty">불러오는 중…</div>`);
+  try{
+    familyList=await Family.listMine(db, state.user);
+    if(isParent){ await Family.syncLinks(db, state.user, state.profile); await loadChildren(); }
+  }catch(e){
+    console.error("가족 연결", e);
+    const root=document.querySelector("#drawerRoot .drawer-body");
+    if(root) root.innerHTML=`<div class="share-note" style="color:#A5323A;background:#FFF5F6">가족 연결 정보를 불러오지 못했어요.<br>${esc(firestoreDiag(e))}</div>`;
+    return;
+  }
+  const L=familyList;
+  state.familyPending=L.received.filter(r=>r.status==="pending").length;
+  const mb=document.getElementById("menuBtn"); if(mb) mb.classList.toggle("has-dot", state.familyPending>0);
+  const card=(name,sub,btns)=>`<div class="fam-card"><div class="av">${esc((name||"?").slice(0,1))}</div>
+    <div class="tx"><b>${esc(name||"")}</b><span>${sub}</span></div>${btns}</div>`;
+
+  const inbox=L.received.filter(r=>r.status==="pending").map(r=>{
+    const same=(r.fromRole==="parent")===isParent;   // 부모-부모, 자녀-자녀는 연결 불가
+    return card(r.fromName||r.fromEmail, `${esc(r.fromEmail)} · ${famRoleLabel(r.fromRole)} 계정${same?" · <b style='color:#E5484D'>같은 유형이라 연결할 수 없어요</b>":""}`,
+      `${same?"":`<button class="fam-btn" onclick="famRespond('${r.id}',true)">승인</button>`}
+       <button class="fam-btn ghost" onclick="famRespond('${r.id}',false)">거절</button>`);
+  }).join("");
+
+  let linked="";
+  if(isParent){
+    linked=state.children.map((ch,i)=>card(ch.name, ch.exists===false?"탈퇴한 계정":"연결됨 · 플래너와 학습앱 기록을 볼 수 있어요",
+      `${ch.exists===false?"":`<button class="fam-btn ghost" onclick="viewChild(state.children[${i}].uid,state.children[${i}].name)">보기</button>`}
+       <button class="fam-btn ghost" onclick="unlinkChild(state.children[${i}].uid).then(drawFamily)">해제</button>`)).join("");
+  }else{
+    linked=Family.parentsOf(L, state.user).map(p=>card(p.name, `${esc(p.email||"")} · 부모님이 내 플래너를 볼 수 있어요`,
+      `<button class="fam-btn ghost" onclick="famLeave('${p.req.id}')">해제</button>`)).join("");
+  }
+
+  const waiting=L.sent.filter(r=>r.status==="pending").map(r=>card(r.toEmail, "승인을 기다리는 중",
+      `<button class="fam-btn ghost" onclick="famCancel('${r.id}')">취소</button>`)).join("");
+  const declined=L.sent.filter(r=>r.status==="declined").slice(0,3).map(r=>card(r.toEmail, "상대가 거절했어요", "")).join("");
+
+  const target=isParent? "자녀" : "부모님";
+  const body=`
+    <div style="font-size:12.5px;color:#6D6B7A;line-height:1.6;margin-bottom:12px">
+      ${target}의 <b>가입 이메일</b>로 연결을 신청하세요. 상대가 플래너에 로그인해 <b>승인</b>하면 연결됩니다.
+      연결되면 부모 계정에서 자녀의 플래너·학습앱 기록을 보고 코멘트를 남길 수 있어요.
+    </div>
+    ${inbox?`<div class="r-sec">받은 신청</div>${inbox}`:""}
+    <div class="r-sec">연결 신청하기</div>
+    <div class="fam-send">
+      <input class="inp" id="famEmail" type="email" placeholder="${target} 이메일 (예: name@email.com)" autocomplete="off">
+      <button class="fam-btn" onclick="famSend()">신청</button>
+    </div>
+    <div id="famMsg" style="font-size:12.5px;margin:6px 2px 0;min-height:18px"></div>
+    <div class="r-sec">연결된 ${isParent?"자녀":"부모님"}</div>
+    ${linked || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 ${isParent?"자녀가":"부모님이"} 없어요.</div>`}
+    ${waiting?`<div class="r-sec">보낸 신청</div>${waiting}`:""}
+    ${declined}
+    <div style="font-size:11.5px;color:#8F8D9B;margin-top:12px;line-height:1.5">내 이메일: <b>${esc((state.user.email||"").toLowerCase())}</b> — 상대에게 이 주소로 신청해 달라고 해도 돼요.</div>`;
+  const root=document.querySelector("#drawerRoot .drawer-body");
+  if(root) root.innerHTML=body;
+}
+async function famSend(){
+  const el=document.getElementById("famEmail"), msg=document.getElementById("famMsg");
+  try{
+    await Family.send(db, state.user, state.profile, el?el.value:"");
+    toast("연결을 신청했어요. 상대가 승인하면 연결돼요","good");
+    drawFamily();
+  }catch(e){
+    if(msg){ msg.style.color="#E5484D"; msg.textContent=e.message&&!e.code? e.message : firestoreDiag(e); }
+  }
+}
+async function famRespond(id, accept){
+  const r=(familyList&&familyList.received||[]).find(x=>x.id===id); if(!r) return;
+  if(accept && !confirm(`${r.fromName||r.fromEmail} 님과 가족으로 연결할까요?\n${state.profile.role==="parent"?"자녀의 플래너·학습앱 기록을 볼 수 있게 됩니다.":"부모님이 내 플래너·학습앱 기록을 볼 수 있게 됩니다."}`)) return;
+  try{
+    await Family.respond(db, state.user, state.profile, r, accept);
+    toast(accept?"가족으로 연결됐어요 👨‍👩‍👧":"신청을 거절했어요", accept?"good":"info");
+    if(accept && state.profile.role==="parent") await loadChildren();
+    drawFamily();
+  }catch(e){ alert("처리하지 못했어요: "+firestoreDiag(e)); }
+}
+async function famCancel(id){
+  const r=(familyList&&familyList.sent||[]).find(x=>x.id===id); if(!r) return;
+  try{ await Family.cancel(db, r); drawFamily(); }catch(e){ alert("취소하지 못했어요: "+firestoreDiag(e)); }
+}
+async function famLeave(id){
+  const all=familyList? [...familyList.sent, ...familyList.received] : [];
+  const r=all.find(x=>x.id===id); if(!r) return;
+  if(!confirm("이 부모님과의 연결을 해제할까요?\n부모님이 더 이상 내 플래너를 볼 수 없게 됩니다.")) return;
+  try{ await Family.leave(db, r); toast("연결을 해제했어요","info"); drawFamily(); }catch(e){ alert("해제하지 못했어요: "+firestoreDiag(e)); }
 }
 
 /* ----- ✨ 빠른 계획: 적어 두면 학습 계획으로 정리 ----- */
@@ -3527,14 +3645,14 @@ function drawSettings(){
     const items=state.children.map(ch=>`
       <div class="child-item" style="${ch.exists===false?"opacity:.6":""}">
         <div class="av" style="background:${ch.color}">${esc((ch.name||"").slice(0,1))}</div>
-        <div><div style="font-weight:700">${esc(ch.name)}${ch.exists===false?' <span style="font-size:11px;color:#E5484D">(탈퇴한 계정)</span>':""}</div><div style="font-size:11.5px;color:#94A3B8">코드 ${esc(ch.code||"")}</div></div>
-        ${ch.exists===false?"":`<button class="open" onclick="viewChild('${ch.uid}','${esc(ch.name)}')">플래너 열기</button>`}
+        <div><div style="font-weight:700">${esc(ch.name)}${ch.exists===false?' <span style="font-size:11px;color:#E5484D">(탈퇴한 계정)</span>':""}</div><div style="font-size:11.5px;color:#94A3B8">가족 연결됨</div></div>
+        ${ch.exists===false?"":`<button class="open" onclick="viewChild(state.children[${state.children.indexOf(ch)}].uid,state.children[${state.children.indexOf(ch)}].name)">플래너 열기</button>`}
         <button class="icon-btn sm" onclick="unlinkChild('${ch.uid}')" style="margin-left:6px">🗑️</button>
       </div>`).join("");
     childrenBlock=`
       <div class="section-lbl" style="margin-top:22px">🧑‍🏫 자녀 계정 관리</div>
-      ${items||`<div style="font-size:13px;color:#94A3B8;margin-bottom:8px">아직 등록된 자녀가 없어요. 자녀의 6자리 코드를 등록하세요.</div>`}
-      <button class="add-line" onclick="addChildCode()">+ 자녀 코드 등록</button>`;
+      ${items||`<div style="font-size:13px;color:#94A3B8;margin-bottom:8px">아직 연결된 자녀가 없어요. 자녀의 가입 이메일로 연결을 신청하세요.</div>`}
+      <button class="add-line" onclick="drawFamily()">👨‍👩‍👧 자녀 연결 신청 · 승인</button>`;
   }
   document.getElementById("drawerRoot").innerHTML=`
     <div class="overlay" onclick="if(event.target===this)closeDrawer()">
@@ -3546,11 +3664,11 @@ function drawSettings(){
       </div>
       <div class="drawer-body">
         ${drawerTab==='settings-main'? `
-          <div class="code-box">
-            <div class="lbl">나의 연결 코드 (가족에게 공유)</div>
-            <div class="code">${esc(state.profile.linkCode||"------")}</div>
-            <button onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(state.profile.linkCode||"")}');this.textContent='복사됨 ✓'">코드 복사</button>
-          </div>
+          <button class="hub-item" onclick="drawFamily()">
+            <span class="hub-emo">👨‍👩‍👧</span>
+            <span class="hub-txt"><b>가족 연결</b><span>상대의 가입 이메일로 신청하고, 상대가 승인하면 연결돼요</span></span>
+            <span class="hub-arr">›</span>
+          </button>
           ${childrenBlock}
           <div class="section-lbl" style="margin-top:22px">🐣 스타팅 파트너 (속성 선택)</div>
           <div class="mon-pick">
@@ -3641,7 +3759,7 @@ function drawSettings(){
             · 목표 학습시간이 만점 기준입니다(현재 주 ${Math.round((A.timeTargetMin||900)/60)}시간).<br>
             정산 주간은 <b>월~일(일요일 18시 마감)</b> 기준이며 상한을 넘지 않습니다.</div>
 
-          <div class="share-note">👨‍👩‍👧 부모 계정에서 자녀의 <b>6자리 코드</b>를 등록하면, 자녀의 플래너를 열어 진행 상황을 보고 코멘트를 남길 수 있습니다. 모든 변경은 기기 간 실시간으로 동기화됩니다.</div>
+          <div class="share-note">👨‍👩‍👧 <b>가족 연결</b>에서 상대의 이메일로 신청하고 상대가 승인하면, 부모 계정에서 자녀의 플래너·학습앱 기록을 보고 코멘트를 남길 수 있습니다. 모든 변경은 기기 간 실시간으로 동기화됩니다.</div>
           <div class="section-lbl" style="margin-top:22px">계정 관리</div>
           <div class="list-item">
             <span style="flex:1">닉네임 · <b>${esc(state.profile.name||"")}</b>${state.profile.role==="parent"?" 👑":""}</span>
@@ -3717,22 +3835,10 @@ async function delCat(kind,id){
   await saveCategories({...state.categories,[kind]:(state.categories[kind]||[]).filter(x=>x.id!==id)}); drawSettings();
 }
 
-/* ----- 자녀 코드 등록 ----- */
-async function addChildCode(){
-  const code=(prompt("자녀의 6자리 연결 코드를 입력하세요")||"").trim();
-  if(!/^\d{6}$/.test(code)) return alert("6자리 숫자를 입력해 주세요.");
-  const snap=await db.collection("codes").doc(code).get();
-  if(!snap.exists) return alert("존재하지 않는 코드입니다.");
-  const {uid:childUid,name}=snap.data();
-  if(childUid===state.user.uid) return alert("본인 코드는 등록할 수 없습니다.");
-  if(state.children.some(c=>c.uid===childUid)) return alert("이미 등록된 자녀입니다.");
-  await db.collection("links").doc(state.user.uid).collection("children").doc(childUid).set({name,code,addedAt:Date.now()});
-  await loadChildren(); drawSettings();
-}
 async function unlinkChild(childUid){
   if(!confirm("이 자녀 등록을 해제할까요?\n(자녀 계정·데이터는 삭제되지 않고, 내 목록에서만 제거됩니다)")) return;
   try{
-    await db.collection("links").doc(state.user.uid).collection("children").doc(childUid).delete();
+    await Family.unlink(db, state.user, childUid);
   }catch(e){ console.error("unlinkChild", e); alert("삭제에 실패했어요: "+firestoreDiag(e)); return; }
   state.children = state.children.filter(c=>c.uid!==childUid); // 화면 즉시 반영
   drawSettings();

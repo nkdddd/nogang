@@ -9,6 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="../assets/family.js"></script>
 <script>/* 통합 플래너 안(iframe)에서 열렸는지 표시 */if(window.self!==window.top)document.documentElement.classList.add('in-planner');</script>
 
 <style>
@@ -854,11 +855,10 @@ function renderSettings(){
   let roleHtml = (FB_ON&&USER&&ROLE) ? `<div class="set-group"><div class="set-row"><div><div class="lab">역할</div>
     <div class="desc">${ROLE==="parent"?"학부모 계정 · 자녀 학습량 확인":"학생 계정 · 단어 학습"}</div></div>
     <div class="codebox" style="font-size:14px;letter-spacing:0">${ROLE==="parent"?"👨‍👩‍👧 학부모":"🎒 학생"}</div></div></div>` : "";
-  // 학생: 내 연결 코드
-  let codeHtml = (ROLE==="student"&&MYCODE) ? `<div class="set-group">
-    <div class="set-row"><div><div class="lab">내 연결 코드</div><div class="desc">플래너와 같은 코드예요. 부모님이 이 코드를 등록하면 플래너·앱에서 학습량을 보실 수 있어요</div></div>
-      <div class="codebox" id="mycode">${esc(MYCODE)}</div></div>
-    <button class="linkbtn" id="copycode">📋 코드 복사</button>
+  // 학생: 가족 연결 안내 (코드 대신 이메일 신청 → 승인)
+  let codeHtml = (ROLE==="student") ? `<div class="set-group">
+    <div class="set-row"><div><div class="lab">가족 연결</div><div class="desc">플래너의 ⋯ 메뉴 → 가족 연결에서 부모님 이메일로 신청하거나, 부모님이 보낸 신청을 승인하세요. 연결되면 부모님이 학습량을 보실 수 있어요</div></div></div>
+    <button class="linkbtn" id="famopen">👨‍👩‍👧 가족 연결 열기</button>
     <button class="linkbtn" id="synccode">🔄 지금 동기화</button></div>` : "";
   // 학부모: 자녀 연결
   let parentHtml = (ROLE==="parent") ? `<div class="set-group">
@@ -888,7 +888,7 @@ function renderSettings(){
   <div style="text-align:center;color:var(--ink-faint);font-size:11.5px;font-weight:600;padding:8px 16px 0;line-height:1.7">
     중학 영단어 1800 + 기본 스타트 800 · 어근 ${ROOTS.length}개<br>${FB_ON?"로그인 계정으로 모든 기기에서 진도가 동기화됩니다.":"Firebase 설정 시 회원관리·클라우드 동기화가 켜집니다."}</div>`;
 
-  if($("#copycode"))$("#copycode").onclick=()=>{ try{navigator.clipboard.writeText(MYCODE);}catch(e){} toast("코드를 복사했어요: "+MYCODE); };
+  if($("#famopen"))$("#famopen").onclick=openFamilyInPlanner;
   if($("#synccode"))$("#synccode").onclick=()=>pushLinkMirror({notify:true});
   if(ROLE==="student") pushLinkMirror();
   if($("#add-child2"))$("#add-child2").onclick=promptAddChild;
@@ -915,7 +915,7 @@ function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileRe
   r.readAsText(f);}
 
 /* ===================== v3: ROLE · PARENT · TTS · SENTENCES ===================== */
-let ROLE=null, MYCODE=null, CHILDREN=[], PENDING_ROLE=null, _mirrorWarned=false;
+let ROLE=null, CHILDREN=[], PENDING_ROLE=null, _mirrorWarned=false;
 let GEMINI_KEY = (function(){try{return localStorage.getItem("gemini_key")||"";}catch(e){return "";}})();
 let GEMINI_MODEL = (function(){try{return localStorage.getItem("gemini_model")||"gemini-2.5-flash";}catch(e){return "gemini-2.5-flash";}})();
 let _genErr="";
@@ -932,7 +932,6 @@ async function routeAfterLogin(){
   }
   if(ROLE==="student"){
     await pullCloud();
-    MYCODE = (data&&/^\d{6}$/.test(data.linkCode||""))? data.linkCode : null;
     buildNav("student"); syncBar(); show("home");
   } else {
     await loadChildren();
@@ -948,6 +947,7 @@ async function setRole(role){
 // 자녀 목록 = 플래너의 가족 연결 (links/{부모uid}/children)
 async function loadChildren(){
   CHILDREN=[];
+  try{ await Family.syncLinks(db, USER, {role:"parent"}); }catch(e){}
   try{ const snap=await db.collection("links").doc(USER.uid).collection("children").get();
     CHILDREN=snap.docs.map(d=>({code:d.id, uid:d.id, name:(d.data().name||"학생")})); }catch(e){ console.warn(e); }
 }
@@ -982,7 +982,7 @@ function renderRolePicker(){
 function renderParent(){
   let html=`<div class="phead"><h2>자녀 학습 현황</h2><button class="btn small" id="add-child">+ 자녀 연결</button></div>`;
   if(!CHILDREN.length){
-    html+=`<div class="empty-parent">아직 연결된 자녀가 없어요.<br><b>+ 자녀 연결</b>을 눌러,<br>자녀 앱 설정의 <b>연결 코드</b>를 입력하세요.</div>`;
+    html+=`<div class="empty-parent">아직 연결된 자녀가 없어요.<br><b>+ 자녀 연결</b>을 눌러 자녀의 가입 이메일로 신청하고,<br>자녀가 승인하면 여기에 나타나요.</div>`;
   } else {
     html+=`<div id="child-list">${CHILDREN.map(ch=>`<div class="child-card" id="cc-${esc(ch.code)}"><div class="cc-load">${esc(ch.name||ch.code)} · 불러오는 중…</div></div>`).join("")}</div>
       <div style="text-align:center;margin-top:4px"><button class="btn gray small" id="refresh-all">↻ 새로고침</button></div>`;
@@ -995,7 +995,7 @@ function renderParent(){
 async function refreshChild(ch){
   const box=$("#cc-"+ch.code); if(!box)return;
   let d=null; try{const doc=await appRef(ch.uid).get(); if(doc.exists)d=Object.assign({name:ch.name},doc.data());}catch(e){}
-  if(!d||!d.summary){ box.innerHTML=`<div class="cc-top"><div class="cc-name">${esc(ch.name||"학생")}</div><button class="cc-x" data-code="${esc(ch.code)}">⋯</button></div><div class="cc-foot">아직 학습 데이터가 없어요 · 코드 ${esc(ch.code)}</div>`;
+  if(!d||!d.summary){ box.innerHTML=`<div class="cc-top"><div class="cc-name">${esc(ch.name||"학생")}</div><button class="cc-x" data-code="${esc(ch.code)}">⋯</button></div><div class="cc-foot">아직 학습 데이터가 없어요</div>`;
     box.querySelector(".cc-x").onclick=()=>{if(confirm("연결을 해제할까요?"))removeChild(ch.code);}; return; }
   const s=d.summary;
   const bars=(s.log7||[]).map(x=>{const tot=(x.n||0)+(x.r||0),h=Math.min(tot,60)/60*100;
@@ -1012,20 +1012,14 @@ async function refreshChild(ch){
     <div class="cc-foot">최근 7일 학습량 · 마지막 학습 ${esc(s.lastActive||"-")} · 누적 ${s.points||0}P</div>`;
   box.querySelector(".cc-x").onclick=()=>{if(confirm(esc(d.name||"이 자녀")+" 연결을 해제할까요?"))removeChild(ch.code);};
 }
-// 플래너와 같은 6자리 숫자 연결 코드 (codes/{code} → 자녀 uid)
-function promptAddChild(){ const code=prompt("자녀의 6자리 연결 코드를 입력하세요 (플래너 → 기록 → 계정 · 가족 연결에 있어요)"); if(code)addChildByCode(code.trim()); }
-async function addChildByCode(code){
-  if(!/^\d{6}$/.test(code)){toast("연결 코드는 숫자 6자리예요");return;}
-  let d=null; try{const doc=await db.collection("codes").doc(code).get(); if(doc.exists)d=doc.data();}catch(e){}
-  if(!d||!d.uid){toast("코드를 찾을 수 없어요");return;}
-  if(d.uid===USER.uid){toast("본인 코드는 등록할 수 없어요");return;}
-  if(CHILDREN.some(c=>c.uid===d.uid)){toast("이미 연결된 자녀예요");return;}
-  try{await db.collection("links").doc(USER.uid).collection("children").doc(d.uid).set({name:d.name||"학생",code,addedAt:Date.now()});}
-  catch(e){toast("연결 실패 — 잠시 후 다시 시도하세요");return;}
-  await loadChildren(); toast("자녀를 연결했어요"); renderParent();
+// 가족 연결은 플래너에서 (상대 이메일로 신청 → 상대가 승인)
+function openFamilyInPlanner(){
+  try{ if(window.parent!==window && typeof parent.drawFamily==="function"){ parent.closeLearnApp(); parent.drawFamily(); return; } }catch(e){}
+  location.href="../index.html#family";
 }
+function promptAddChild(){ openFamilyInPlanner(); }
 async function removeChild(uid){
-  try{await db.collection("links").doc(USER.uid).collection("children").doc(uid).delete();}catch(e){toast("해제 실패");return;}
+  try{await Family.unlink(db, USER, uid);}catch(e){toast("해제 실패");return;}
   await loadChildren(); renderParent();
 }
 
