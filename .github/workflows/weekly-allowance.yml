@@ -1,0 +1,40 @@
+# 매주 토요일 18시(한국 시간 = 09:00 UTC) 부모에게 자녀별 주간 용돈 정산 알림 (휴대폰 푸시 · 이메일)
+# 필요한 저장소 Secrets: FIREBASE_SERVICE_ACCOUNT (필수), GMAIL_USER · GMAIL_APP_PASSWORD (이메일용)
+name: 주간 용돈 알림
+
+on:
+  schedule:
+    - cron: "0 9 * * 6"
+  workflow_dispatch:
+    inputs:
+      week_id:
+        description: "다시 보낼 주의 토요일 (YYYY-MM-DD, 비우면 가장 최근 마감 주)"
+        required: false
+      force:
+        description: "이미 보낸 주도 다시 보내기 (1)"
+        required: false
+      dry_run:
+        description: "보내지 않고 내용만 확인 (1)"
+        required: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 필요한 패키지 설치
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12 nodemailer@6
+      - name: 알림 보내기
+        run: node tools/weekly-allowance.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          SITE_URL: https://nkdddd.github.io/nogang/
+          WEEK_ID: ${{ github.event.inputs.week_id }}
+          FORCE: ${{ github.event.inputs.force }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}

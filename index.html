@@ -12,6 +12,9 @@
 <meta name="theme-color" content="#F3F2F7">
 <meta name="color-scheme" content="light">
 <script src="assets/device.js"></script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="icon" href="assets/icon-192.png">
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
   :root{
@@ -616,6 +619,18 @@
   .fo-vol{display:flex;align-items:center;gap:8px;margin-top:12px;}
   .fo-vol input{flex:1;accent-color:var(--accent);}
   .fo-hint{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5;}
+  .notice-card{background:linear-gradient(135deg,#FFFBEF,#FFF4DA);border:1.5px solid #F5DFA6;border-radius:20px;padding:14px 16px;margin-bottom:14px;cursor:pointer;}
+  .notice-card .nc-top{display:flex;align-items:center;gap:10px;}
+  .notice-card .nc-emo{font-size:26px;}
+  .notice-card .nc-top b{display:block;font-size:15px;}
+  .notice-card .nc-top span{display:block;font-size:12px;color:#8A6516;}
+  .notice-card .nc-new{background:#E5484D;color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 8px;}
+  .notice-card .nc-rows{display:grid;gap:6px;margin-top:10px;}
+  .notice-card .nc-rows div{display:flex;align-items:baseline;gap:8px;background:rgba(255,255,255,.7);border-radius:12px;padding:8px 12px;font-size:13.5px;}
+  .notice-card .nc-rows b{margin-left:auto;font-size:15px;}
+  .notice-card .nc-rows em{font-style:normal;font-size:11.5px;color:#8F8D9B;}
+  .fo-card .warn{color:#A5323A;} .fo-card .ok{color:#0E7A55;font-weight:700;}
+  .fam-btn[disabled]{opacity:.45;}
   .fo-awake{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:700;color:var(--slate);}
   .fo-awake input{width:18px;height:18px;accent-color:var(--accent);}
   .bnav-pill button .lbl{font-variant-numeric:tabular-nums;white-space:nowrap;}
@@ -826,6 +841,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+<script src="assets/push-config.js"></script>
 <script src="assets/family.js"></script>
 <script src="assets/focus-sounds.js"></script>
 
@@ -888,24 +905,24 @@ const pad=n=>String(n).padStart(2,"0");
 const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const parseD=s=>{const[y,m,dd]=s.split("-").map(Number);return new Date(y,m-1,dd);};
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
-const startOfWeek=d=>addDays(d,-((d.getDay()+6)%7));
-// 학습 주간: 월요일 시작, 일요일 18시 마감. 일 18시 이후엔 다음 주로 전환(계획 모드)
+const startOfWeek=d=>addDays(d,-d.getDay());   // 학습 주간은 일요일 시작
+// 학습 주간: 일요일 시작, 토요일 18시 마감. 토 18시 이후엔 다음 주로 전환(계획 모드)
 function activeWeekStart(now){
   now=now||new Date();
-  const mon=startOfWeek(now);
-  if(now.getDay()===0 && now.getHours()>=18) return addDays(mon,7);
-  return mon;
+  const sun=startOfWeek(now);
+  if(now.getDay()===6 && now.getHours()>=18) return addDays(sun,7);
+  return sun;
 }
 function charWeekDays(now){ const s=activeWeekStart(now); return Array.from({length:7},(_,i)=>fmt(addDays(s,i))); }
 function weekPhase(now){
   now=now||new Date();
-  const planning=(now.getDay()===0 && now.getHours()>=18);
+  const planning=(now.getDay()===6 && now.getHours()>=18);
   const ws=activeWeekStart(now), we=addDays(ws,6);
   return {phase:planning?"planning":"study", weekStart:ws, weekEnd:we,
     label:`${ws.getMonth()+1}.${ws.getDate()}~${we.getMonth()+1}.${we.getDate()}`};
 }
 const isSameDay=(a,b)=>fmt(a)===fmt(b);
-const WD=["월","화","수","목","금","토","일"];
+const WD=["일","월","화","수","목","금","토"];
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const uid=()=> (crypto.randomUUID? crypto.randomUUID(): String(Date.now())+Math.random());
 const defaultSettings=()=>({
@@ -1078,7 +1095,7 @@ function monMessage(stage,toStage){
 function monGainCheck(prev, next){
   if(!(next.done && !(prev&&prev.done))) return;
   const days=charWeekDays();
-  if(!days.includes(next.date)) return; // 이번 주(월~일) 학습만 성장에 반영
+  if(!days.includes(next.date)) return; // 이번 주(일~토) 학습만 성장에 반영
   const uid=state.ownerUid;
   const tot=state.monTotals[uid]; if(!tot || tot.week!==days[0]) return;
   const before=monsterCalc(tot.count,tot.min);
@@ -1307,7 +1324,7 @@ async function drawWeekReport(){
   const targets = isParent && state.children.length
     ? state.children.filter(c=>c.exists!==false).map(c=>({uid:c.uid,name:c.name,color:c.color}))
     : [{uid:state.ownerUid,name:state.ownerName,color:"#6A58E6"}];
-  let body=`<div style="font-size:12.5px;color:#64748B;margin-bottom:12px">${label} · 월요일~일요일 18시 마감 기준</div>`;
+  let body=`<div style="font-size:12.5px;color:#64748B;margin-bottom:12px">${label} · 일요일~토요일 18시 마감 기준</div>`;
   for(const who of targets){
     let tasks=[], cats={subjects:[]}, crit=defaultSettings().allowance;
     try{
@@ -1326,7 +1343,7 @@ async function drawWeekReport(){
 
     const dayBars=w.byDay.map(d=>{
       const h=Math.min(46, Math.round((d.min/Math.max(60,dayTypeGoal(d.ds)))*46));
-      const W="월화수목금토일"[(parseD(d.ds).getDay()+6)%7];
+      const W="일월화수목금토"[parseD(d.ds).getDay()];
       return `<div style="flex:1;text-align:center">
         <div style="height:46px;display:flex;align-items:flex-end;justify-content:center">
           <div style="width:60%;height:${Math.max(3,h)}px;border-radius:4px 4px 0 0;background:${d.min>=dayTypeGoal(d.ds)?"#0E9F6E":d.min>0?"#6A58E6":"#E2E8F0"}"></div>
@@ -1604,7 +1621,7 @@ async function refreshStreakCache(){
 /* ============================================================
  *  ⑦ 주차별 학습 이력 (아카이브)
  * ============================================================ */
-function weekIdOf(ds){ return fmt(startOfWeek(parseD(ds))); }   // 그 주 월요일
+function weekIdOf(ds){ return fmt(startOfWeek(parseD(ds))); }   // 그 주 일요일
 function weekRangeLabel(monday){
   const s=parseD(monday), e=addDays(s,6);
   return `${s.getMonth()+1}.${s.getDate()}~${e.getMonth()+1}.${e.getDate()}`;
@@ -1843,7 +1860,7 @@ function drawArchiveWeek(wid){
       .sort((a,b)=>(a.order||0)-(b.order||0));
     const dnote=(A.diary&&A.diary[ds])||null;
     if(!ts.length && !dnote && state.viewingChild) return "";
-    const W="월화수목금토일"[(parseD(ds).getDay()+6)%7];
+    const W="일월화수목금토"[parseD(ds).getDay()];
     const items=ts.map(t=>{
       const s=subMap[t.subjectId], tb=tbMap[t.textbookId];
       const acc=(Number(t.scoreTotal)>0&&t.score!=="")? Math.round(Number(t.score)/Number(t.scoreTotal)*100):null;
@@ -2295,12 +2312,14 @@ function boot(){
     }
     state.ownerUid=user.uid; state.ownerName=state.profile.name; state.ownerRole=state.profile.role;
     state.viewingChild=false;
-    // 일요일 18시 마감 이후면 다음 주 계획 모드로 시작
+    // 토요일 18시 마감 이후면 다음 주 계획 모드로 시작
     if(weekPhase().phase==="planning"){ state.cursor=activeWeekStart(new Date()); state.tab="plan"; state.view="week"; }
     try{ await loadChildren(); }catch(e){ console.error("자녀 로드 실패", e); }
     showApp(true);
     checkFamilyRequests();
     focusLoad();
+    checkAllowanceNotices();
+    scheduleSnap();
     if(location.hash==="#family"){ history.replaceState(null,"",location.pathname); setTimeout(drawFamily,300); }
     renderHeader();
     subscribeCategories();
@@ -2349,6 +2368,7 @@ function subscribeTasks(){
     .where("date",">=",start).where("date","<=",end)
     .onSnapshot(snap=>{
       state.tasks=snap.docs.map(d=>({id:d.id,...d.data()}));
+      scheduleSnap();
       state.tasksMap={}; state.tasks.forEach(t=>state.tasksMap[t.id]=t);
       render();
     }, err=>console.error("tasks",err));
@@ -2550,7 +2570,7 @@ function periodLabel(){
   const d=state.cursor;
   if(state.view==="month") return `${d.getFullYear()}년 ${d.getMonth()+1}월`;
   if(state.view==="week"){const s=startOfWeek(d),e=addDays(s,6);return `${s.getMonth()+1}.${s.getDate()} – ${e.getMonth()+1}.${e.getDate()}`;}
-  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${WD[(d.getDay()+6)%7]})`;
+  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${WD[d.getDay()]})`;
 }
 function subjById(id){return (state.categories.subjects||[]).find(s=>s.id===id);}
 function tbById(id){return (state.categories.textbooks||[]).find(t=>t.id===id);}
@@ -2724,7 +2744,7 @@ function leaveLearnApp(){
 function closeLearnApp(silent){
   const w=document.getElementById("learnApp"); if(!w) return;
   w.remove(); document.body.classList.remove("lapp-open");
-  if(!silent){ state.extCache=null; render(); }   // 방금 공부한 기록 다시 읽기
+  if(!silent){ state.extCache=null; render(); scheduleSnap(); }   // 방금 공부한 기록 다시 읽기 · 용돈 스냅샷
 }
 Device.onChange(()=>{ if(state.profile) render(); });
 window.addEventListener("popstate", ()=>{ if(document.getElementById("learnApp")) closeLearnApp(); });
@@ -2743,7 +2763,7 @@ function renderRecord(){
       <div class="r-stat"><div class="e">✅</div><b>${tot?tot.count:"–"}</b><span>이번 주 완료</span></div>
       <div class="r-stat"><div class="e">⏱</div><b>${tot? tot.min+extMin : "–"}</b><span>이번 주 학습(분)</span></div>
     </div>`;
-  return `<div class="rec-grid"><div>${stats}
+  return `${isParent? noticeCardsHTML() : ""}<div class="rec-grid"><div>${stats}
     ${renderMonCard()}</div><div>
     <div class="r-sec">학습 현황</div>
     ${hubItem("📊","대시보드","이행률·연속 학습·과목별 시간·성취 뱃지","openDrawer('dash')")}
@@ -2777,6 +2797,7 @@ function openMenu(){
     <div class="r-sec">관리</div>
     ${hubItem("👨‍👩‍👧", "가족 연결"+(state.familyPending?` <span class="badge-dot">${state.familyPending}</span>`:""), isParent?"자녀에게 연결 신청 · 받은 신청 승인":"부모님께 연결 신청 · 받은 신청 승인","drawFamily()")}
     ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🐣","내 파트너","파트너 성장 · 쿠폰 · 뱃지","drawManage()")}
+    ${isParent? hubItem("🔔","용돈 알림","토요일 18시 · 휴대폰 푸시 · 이메일","drawNotify()") : ""}
     ${hubItem("⚙️","설정","계정 · 목표시간 · 방학 · 과목/교재 · 템플릿","openDrawer('settings')")}
     ${hubItem("🔗","학습앱 인정 시간","천문장 · 영단어 · 문법 환산과 상한","drawExtApps()")}
     <div class="r-sec">화면 보기</div>
@@ -3067,6 +3088,200 @@ document.addEventListener("visibilitychange", ()=>{ focusWake(); if(document.vis
 function focusKeepAwake(on){ F.keepAwake=!!on; focusSave(); focusWake(); render(); }
 function focusVol(v){ F.vol=Number(v)/100; FocusSound.setVolume(F.vol); focusSave(); }
 
+/* ============================================================
+ *  💰 토요일 18시 용돈 알림
+ *  - 스냅샷: 학생 플래너가 열려 있을 때(또는 부모가 볼 때) 이번 주 정산 결과를
+ *    planner/{자녀uid}/allowanceSnap/{토요일 날짜} 에 저장합니다. (마감 전까지 계속 갱신)
+ *  - 발송: GitHub Actions(tools/weekly-allowance.mjs)가 매주 토 18시(한국 시간)에
+ *    스냅샷을 모아 부모에게 휴대폰 푸시 · 이메일을 보내고 planner/{부모uid}/notices/{토요일} 에 남깁니다.
+ *  - 앱 안: 부모가 앱을 열면 읽지 않은 정산서를 알려 줍니다. (예약 발송이 설정되지 않았어도 앱이 직접 만듦)
+ * ============================================================ */
+const NOTIFY_DEFAULT={push:true, email:true, emailTo:""};
+// 이번 학습 주간(일~토, 토 18시 마감)의 날짜들
+function snapWeekDays(){ return charWeekDays(); }
+let snapTimer=null;
+function scheduleSnap(){
+  if(!state.user || !state.profile) return;
+  clearTimeout(snapTimer);
+  snapTimer=setTimeout(()=>{
+    // 학생 본인 플래너에서만 자동 갱신 (부모 기기는 스냅샷이 없을 때만 채움 → checkAllowanceNotices)
+    if(state.profile.role!=="parent") saveAllowanceSnap(state.user.uid, state.profile.name).catch(e=>console.warn("용돈 스냅샷",e));
+  }, 4000);
+}
+async function saveAllowanceSnap(uid, name){
+  const days=snapWeekDays(), weekId=days[6];
+  const [tasks, crit, capOv, payout, exd]=await Promise.all([
+    fetchWeekTasks(uid,days), fetchAllowanceCrit(uid), fetchWeekCap(uid,weekId), fetchPayout(uid,weekId), fetchExtData(uid)
+  ]);
+  const cap=capOv!=null? capOv : crit.cap;
+  const r=computeAllowance(tasks, days, crit, exd);
+  const pct=Math.round(r.achievement*100), bonus=Number(r.bonus)||0;
+  const amount=payout? Number(payout.amount)||0 : computePayAmount(cap,pct)+bonus;
+  const snap={weekId, label:weekLabelOf(days), name:name||"", amount, cap, pct, bonus,
+    weekMin:Math.round(r.weekMin||0), extMin:Math.round(r.extMin||0), timeTarget:Math.round(r.timeTarget||0),
+    done:r.done||0, planned:r.planned||0, studyDays:r.studyDays||0, caps:r.caps||[], paid:!!payout, updatedAt:Date.now()};
+  await db.collection("planner").doc(uid).collection("allowanceSnap").doc(weekId).set(snap);
+  return snap;
+}
+// 가장 최근에 마감된 주의 토요일(YYYY-MM-DD) — 지금이 토 18시 이후면 오늘
+function lastClosedSaturday(now){
+  now=now||new Date();
+  const d=new Date(now); d.setHours(0,0,0,0);
+  let back=(d.getDay()+1)%7;                 // 토요일까지 거슬러 올라갈 날 수
+  if(back===0 && now.getHours()<18) back=7;  // 오늘이 토요일인데 아직 18시 전이면 지난주 토요일
+  return fmt(addDays(d,-back));
+}
+// 부모: 자녀들의 스냅샷으로 정산서 만들기
+async function buildAllowanceNotice(weekId){
+  const items=[];
+  for(const ch of state.children){
+    let s=null;
+    try{ const d=await db.collection("planner").doc(ch.uid).collection("allowanceSnap").doc(weekId).get(); if(d.exists) s=d.data(); }catch(_){}
+    items.push({uid:ch.uid, name:ch.name, amount:s? s.amount : null, pct:s? s.pct : null, weekMin:s? s.weekMin : null,
+      done:s? s.done : null, planned:s? s.planned : null, studyDays:s? s.studyDays : null, updatedAt:s? s.updatedAt : null});
+  }
+  const sat=parseD(weekId), sun=addDays(sat,-6);
+  return {type:"allowance", weekId, label:`${sun.getMonth()+1}.${sun.getDate()}~${sat.getMonth()+1}.${sat.getDate()}`,
+    items, total:items.reduce((a,i)=>a+(Number(i.amount)||0),0), createdAt:Date.now(), read:false, source:"app"};
+}
+state.notices=[];
+async function checkAllowanceNotices(){
+  if(!state.profile || state.profile.role!=="parent") return;
+  const ref=db.collection("planner").doc(state.user.uid).collection("notices");
+  try{
+    // 예약 발송이 아직 안 됐으면(또는 설정 전이면) 앱이 직접 정산서를 만듦
+    const wk=lastClosedSaturday();
+    // 이번 주 스냅샷이 아직 없는 자녀는 부모 기기에서 채워 둠 (자녀 기기에서 계산한 값이 있으면 그대로)
+    const cw=snapWeekDays()[6];
+    for(const ch of state.children){
+      db.collection("planner").doc(ch.uid).collection("allowanceSnap").doc(cw).get()
+        .then(d=>{ if(!d.exists) return saveAllowanceSnap(ch.uid, ch.name); }).catch(()=>{});
+    }
+    if(state.children.length){
+      const cur=await ref.doc(wk).get();
+      if(!cur.exists){
+        const nt=await buildAllowanceNotice(wk);
+        if(nt.items.some(i=>i.amount!=null)) await ref.doc(wk).set(nt);   // 그 주 기록이 있을 때만
+      }
+    }
+    const snap=await ref.where("read","==",false).get();
+    state.notices=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.weekId<a.weekId?-1:1);
+  }catch(e){ console.warn("정산 알림 확인", e); }
+  const n=state.notices.length;
+  const b=document.getElementById("menuBtn"); if(b && n) b.classList.add("has-dot");
+  if(n) toast(`💰 ${state.notices[0].label} 용돈 정산서가 도착했어요`,"info");
+  if(state.tab==="stats") render();
+}
+function noticeCardsHTML(){
+  if(!state.notices || !state.notices.length) return "";
+  return state.notices.map(nt=>`<div class="notice-card" onclick="openNotice('${nt.id}')">
+      <div class="nc-top"><span class="nc-emo">💰</span><div style="flex:1;min-width:0"><b>${esc(nt.label)} 용돈 정산서</b>
+        <span>토요일 18시 마감 · ${nt.items.length}명 · 합계 ${wonFmt(nt.total)}</span></div><span class="nc-new">NEW</span></div>
+      <div class="nc-rows">${nt.items.map(i=>`<div><span>${esc(i.name)}</span><b>${i.amount==null?"기록 없음":wonFmt(i.amount)}</b>${i.pct!=null?`<em>달성 ${i.pct}% · ${i.weekMin}분</em>`:""}</div>`).join("")}</div>
+    </div>`).join("");
+}
+async function openNotice(id){
+  const nt=state.notices.find(x=>x.id===id); if(!nt) return;
+  try{ await db.collection("planner").doc(state.user.uid).collection("notices").doc(id).update({read:true, readAt:Date.now()}); }catch(_){}
+  state.notices=state.notices.filter(x=>x.id!==id);
+  if(!state.notices.length && !state.familyPending){ const b=document.getElementById("menuBtn"); if(b) b.classList.remove("has-dot"); }
+  state.cursor=addDays(parseD(nt.weekId),-6);      // 그 주로 이동해 용돈 정산 열기
+  subscribeTasks();
+  openDrawer("allowance");
+}
+
+/* ----- 🔔 알림 설정 (부모) ----- */
+async function loadNotifyPrefs(){
+  try{ const d=await db.collection("planner").doc(state.user.uid).collection("meta").doc("notify").get(); return Object.assign({},NOTIFY_DEFAULT, d.exists? d.data():{}); }
+  catch(_){ return {...NOTIFY_DEFAULT}; }
+}
+async function saveNotifyPrefs(patch){
+  const cur=await loadNotifyPrefs();
+  await db.collection("planner").doc(state.user.uid).collection("meta").doc("notify").set({...cur, ...patch});
+}
+function pushSupported(){ return ("serviceWorker" in navigator) && ("Notification" in window) && typeof firebase!=="undefined" && firebase.messaging && firebase.messaging.isSupported && firebase.messaging.isSupported(); }
+async function pushTokenCount(){
+  try{ const s=await db.collection("planner").doc(state.user.uid).collection("pushTokens").get(); return s.size; }catch(_){ return 0; }
+}
+async function drawNotify(){
+  hubShell("🔔 용돈 알림", `<div class="empty">불러오는 중…</div>`);
+  const [p, nTok]=await Promise.all([loadNotifyPrefs(), pushTokenCount()]);
+  const email=p.emailTo || (state.user.email||"");
+  const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent);
+  const standalone=window.matchMedia && matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  const perm=("Notification" in window)? Notification.permission : "unsupported";
+  const vapidOK=!!(window.PUSH_CONFIG && PUSH_CONFIG.vapidKey);
+  let pushState;
+  if(!vapidOK) pushState=`<span class="warn">관리자 설정이 아직 안 됐어요 (웹 푸시 키 필요)</span>`;
+  else if(isIOS && !standalone) pushState=`<span class="warn">iPhone은 공유 버튼 → <b>홈 화면에 추가</b>로 앱을 설치한 뒤, 설치된 앱에서 켜야 해요</span>`;
+  else if(!pushSupported()) pushState=`<span class="warn">이 브라우저는 푸시 알림을 지원하지 않아요</span>`;
+  else if(perm==="denied") pushState=`<span class="warn">알림이 차단돼 있어요. 브라우저 설정에서 이 사이트 알림을 허용해 주세요</span>`;
+  else if(perm==="granted" && nTok) pushState=`<span class="ok">✅ 이 계정에 등록된 기기 ${nTok}대</span>`;
+  else pushState=`<span>아직 이 기기에서 켜지 않았어요</span>`;
+  const body=`
+    <div style="font-size:12.5px;color:#6D6B7A;line-height:1.6;margin-bottom:12px">
+      매주 <b>토요일 18시</b>(학습 주간 마감)에 자녀별로 이번 주 학습 결과에 따라 책정된 <b>용돈</b>을 알려 드려요.
+      금액은 자녀 플래너가 계산해 둔 값이며, 앱을 열면 정산서도 확인할 수 있어요.
+    </div>
+    <div class="fo-card">
+      <div class="fo-card-h">📱 휴대폰 푸시 <span>앱이 꺼져 있어도 알림</span></div>
+      <div style="font-size:12.5px;line-height:1.55;margin-bottom:10px">${pushState}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="fam-btn" onclick="enablePush()" ${!vapidOK||(isIOS&&!standalone)?"disabled":""}>이 기기에서 켜기</button>
+        ${nTok?`<button class="fam-btn ghost" onclick="disablePush()">이 기기 끄기</button>`:""}
+        <button class="fam-btn ghost" onclick="testLocalNotice()">알림 미리 보기</button>
+      </div>
+      <label class="fo-awake"><input type="checkbox" ${p.push?"checked":""} onchange="saveNotifyPrefs({push:this.checked})"> 토요일 푸시 받기</label>
+    </div>
+    <div class="fo-card">
+      <div class="fo-card-h">✉️ 이메일 <span>정산서를 메일로</span></div>
+      <div class="fam-send"><input class="inp" id="notifyEmail" type="email" value="${esc(email)}" placeholder="받을 이메일">
+        <button class="fam-btn" onclick="saveNotifyPrefs({emailTo:document.getElementById('notifyEmail').value.trim()}).then(()=>toast('저장했어요','good'))">저장</button></div>
+      <label class="fo-awake"><input type="checkbox" ${p.email?"checked":""} onchange="saveNotifyPrefs({email:this.checked})"> 토요일 이메일 받기</label>
+    </div>
+    <div class="fo-hint">푸시·이메일 발송은 사이트 관리자가 GitHub Actions 예약 실행을 설정해야 동작해요 (README 참고). 예약 실행은 몇 분 늦게 도착할 수 있어요.</div>`;
+  const root=document.querySelector("#drawerRoot .drawer-body"); if(root) root.innerHTML=body;
+}
+async function enablePush(){
+  try{
+    if(!pushSupported()) return alert("이 브라우저는 푸시 알림을 지원하지 않아요.");
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted") return alert("알림 권한을 허용해야 푸시를 받을 수 있어요.");
+    const reg=await navigator.serviceWorker.register("firebase-messaging-sw.js");
+    const token=await firebase.messaging().getToken({vapidKey:PUSH_CONFIG.vapidKey, serviceWorkerRegistration:reg});
+    if(!token) throw new Error("토큰을 받지 못했어요");
+    await db.collection("planner").doc(state.user.uid).collection("pushTokens").doc(token)
+      .set({token, ua:navigator.userAgent.slice(0,160), createdAt:Date.now()});
+    try{ localStorage.setItem("push_token", token); }catch(_){}
+    await saveNotifyPrefs({push:true});
+    toast("🔔 이 기기에서 용돈 알림을 받아요","good");
+  }catch(e){ console.error("푸시 등록", e); alert("푸시를 켜지 못했어요: "+(e.message||e)); }
+  drawNotify();
+}
+async function disablePush(){
+  let token=null; try{ token=localStorage.getItem("push_token"); }catch(_){}
+  try{
+    if(token){ await db.collection("planner").doc(state.user.uid).collection("pushTokens").doc(token).delete(); try{ await firebase.messaging().deleteToken(); }catch(_){} }
+    else if(!confirm("이 기기의 등록 정보를 찾지 못했어요. 이 계정의 모든 기기 푸시를 끌까요?")) return;
+    else{ const s=await db.collection("planner").doc(state.user.uid).collection("pushTokens").get(); for(const d of s.docs) await d.ref.delete(); }
+    try{ localStorage.removeItem("push_token"); }catch(_){}
+    toast("푸시를 껐어요","info");
+  }catch(e){ alert("끄지 못했어요: "+(e.message||e)); }
+  drawNotify();
+}
+async function testLocalNotice(){
+  // 이번 주 지금까지 기준으로 다시 계산해 미리 보기
+  const wk=snapWeekDays()[6];
+  for(const ch of state.children){ try{ await saveAllowanceSnap(ch.uid, ch.name); }catch(_){} }
+  const nt=await buildAllowanceNotice(wk);
+  const body=nt.items.map(i=>`${i.name} ${i.amount==null?"기록 없음":wonFmt(i.amount)}`).join(" · ")||"연결된 자녀가 없어요";
+  if(("Notification" in window) && Notification.permission==="granted"){
+    try{ const reg=await navigator.serviceWorker.getRegistration(); if(reg){ reg.showNotification(`💰 ${nt.label} 용돈 (미리 보기)`,{body, icon:"assets/icon-192.png"}); return; } }catch(_){}
+    try{ new Notification(`💰 ${nt.label} 용돈 (미리 보기)`,{body}); return; }catch(_){}
+  }
+  alert(`💰 ${nt.label} 용돈 (미리 보기)\n${body}`);
+}
+
 /* ----- 👨‍👩‍👧 가족 연결: 상대 이메일로 신청 → 상대가 승인 ----- */
 let familyList=null;
 async function checkFamilyRequests(){
@@ -3260,7 +3475,7 @@ function updateWeekBanner(){
     el.innerHTML=`📅 이번 주 학습이 마감됐어요. <b>다음 주(${wp.label})</b> 계획을 세워보세요!
       <button onclick="drawWeekReport()" style="background:#0E9F6E">📋 이번 주 결산</button>
       <button onclick="goPlanNextWeek()">다음 주 계획하기</button>`;
-  } else if(now.getDay()===0){ // 일요일 마감 전
+  } else if(now.getDay()===6){ // 토요일 마감 전
     el.className="week-banner soon";
     el.innerHTML=`⏰ 오늘 <b>18시</b>에 이번 주 학습이 마감돼요. 남은 계획을 마무리해볼까요?`;
   } else {
@@ -3270,7 +3485,7 @@ function updateWeekBanner(){
   if(ex){ const h=examBannerHTML(); ex.innerHTML=h; ex.classList.toggle("hidden", !h); }
 }
 function goPlanNextWeek(){
-  state.cursor=activeWeekStart(new Date()); // 계획 모드면 다음 주 월요일
+  state.cursor=activeWeekStart(new Date()); // 계획 모드면 다음 주 일요일
   state.planView="week"; setTab("plan", true);
 }
 
@@ -3302,7 +3517,7 @@ function renderMonth(){
     </div>`;
   }
   return `<div class="month">
-    <div class="wd-head">${WD.map((w,i)=>`<div style="color:${i===5?"#6A58E6":i===6?"#E5484D":"#64748B"}">${w}</div>`).join("")}</div>
+    <div class="wd-head">${WD.map((w,i)=>`<div style="color:${i===6?"#6A58E6":i===0?"#E5484D":"#64748B"}">${w}</div>`).join("")}</div>
     <div class="mgrid">${cells}</div>
   </div>`;
 }
@@ -3333,7 +3548,7 @@ function renderWeek(){
     cols+=`<div class="wcol ${isT?"today":""}">
       <div class="wcol-head" style="position:relative">
         ${isT&&monMini?`<div style="position:absolute;top:4px;right:5px" title="파트너 몬스터">${monMini}</div>`:""}
-        <div class="wd" style="color:${i===5?"#6A58E6":i===6?"#E5484D":"#64748B"}">${WD[i]}</div>
+        <div class="wd" style="color:${i===6?"#6A58E6":i===0?"#E5484D":"#64748B"}">${WD[i]}</div>
         <div class="num ${isT?"today":""}">${d.getDate()}</div>
         <div style="margin-top:3px;cursor:pointer" title="클릭하면 등교/자율 전환" onclick="toggleDayType('${ds}')">${dayTypeBadge(ds,true)}</div>
         ${ts.length?`<div class="mini">${done}/${ts.length}</div>`:""}
@@ -4160,7 +4375,7 @@ function drawSettings(){
             · <b>학습일수 지표</b>: 하루 몰아치기로는 만점 불가 (주 ${A.daysTarget||6}일 목표)<br>
             · <b>최소 요건</b>: 주 ${A.minMin||300}분 / ${A.minDays||4}일 미만이면 <b>부족한 만큼 비례 감액</b>(적게 할수록 크게 깎임)<br>
             · 목표 학습시간이 만점 기준입니다(현재 주 ${Math.round((A.timeTargetMin||900)/60)}시간).<br>
-            정산 주간은 <b>월~일(일요일 18시 마감)</b> 기준이며 상한을 넘지 않습니다.</div>
+            정산 주간은 <b>일~토(토요일 18시 마감)</b> 기준이며 상한을 넘지 않습니다.</div>
 
           <div class="share-note">👨‍👩‍👧 <b>가족 연결</b>에서 상대의 이메일로 신청하고 상대가 승인하면, 부모 계정에서 자녀의 플래너·학습앱 기록을 보고 코멘트를 남길 수 있습니다. 모든 변경은 기기 간 실시간으로 동기화됩니다.</div>
           <div class="section-lbl" style="margin-top:22px">계정 관리</div>
@@ -4334,7 +4549,7 @@ async function drawDashboard(){
 /* ============================================================
  *  10-b) 용돈 정산 (주 상한 + 이행률·문제점수·복습 종합)
  * ============================================================ */
-// 정산·대결 주간도 캐릭터/계획과 동일하게 월요일 시작(월~일)
+// 정산·대결 주간도 캐릭터/계획과 동일하게 일요일 시작(일~토, 토 18시 마감)
 function allowanceWeekDays(d){ const s=startOfWeek(d||new Date()); return Array.from({length:7},(_,i)=>fmt(addDays(s,i))); }
 function weekLabelOf(days){ const s=parseD(days[0]),e=parseD(days[6]); return `${s.getMonth()+1}.${s.getDate()}~${e.getMonth()+1}.${e.getDate()}`; }
 
@@ -4690,7 +4905,7 @@ async function fetchChildSpeciesLevel(uid){
     ]);
     if(sd.exists && sd.data().monster) species=sd.data().monster.species||"water";
     const all=ts.docs.map(d=>d.data());
-    // 캐릭터 단계는 이번 주(월~일) 성취분 기준
+    // 캐릭터 단계는 이번 주(일~토) 성취분 기준
     let count=0,min=0;
     all.forEach(t=>{ if(days.includes(t.date)){count++;min+=creditedMin(t);} });
     stage=monsterCalc(count,min).stage;
