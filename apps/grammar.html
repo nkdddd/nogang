@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-app="grammar">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -11,8 +11,8 @@
 <script>/* 통합 플래너 안(iframe)에서 열렸는지 표시 */if(window.self!==window.top)document.documentElement.classList.add('in-planner');</script>
 <style>
 :root{
- --ink:#1B2A4A; --ink2:#44557A; --paper:#F7F8FC; --card:#FFFFFF;
- --hl:#FFE34D; --hl-soft:#FFF6C4; --blue:#3E6FE0; --blue-soft:#EAF0FF;
+ --ink:#1C1B24; --ink2:#6D6B7A; --paper:#F3F2F7; --card:#FFFFFF;
+ --hl:#FFE34D; --hl-soft:#FFF6C4; --blue:#6A58E6; --blue-soft:#EFECFD;
  --good:#2FA26B; --good-soft:#E4F5EC; --bad:#E4573D; --bad-soft:#FCEAE6;
  --line:#E4E8F2; --r:14px;
 }
@@ -39,7 +39,7 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 .muted{color:var(--ink2);font-size:12.5px}
 /* nav */
 .nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;max-width:560px;margin:0 auto;z-index:50}
-.nav button{flex:1;padding:9px 0 max(9px,env(safe-area-inset-bottom));font-size:10.5px;color:#9AA4BC;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav button{flex:1;padding:9px 0 max(9px,env(safe-area-inset-bottom));font-size:10.5px;color:#8F8D9B;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px}
 .nav button.on{color:var(--ink)}
 .nav .ic{font-size:19px;line-height:1}
 /* auth */
@@ -167,6 +167,8 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 .lock-note .big{font-size:38px;margin-bottom:10px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../assets/theme.js" defer></script>
 </head>
 <body>
 <div id="app"></div>
@@ -16050,7 +16052,7 @@ function vHome(){
     <div class="card">
       ${[1,2,3].map(lv=>{const d=lvDone(S,lv),tt=lvTotal(lv),pc=Math.round(d/tt*100);
         return `<div class="row" style="margin-bottom:6px${lv===2?';margin-top:12px':''}"><b style="font-size:14px">Level ${lv}</b><span class="muted">${d}/${tt} 유닛</span><span class="grow"></span><b style="font-size:14px">${pc}%</b></div>
-        <div class="prog-line ${lv===2?'yellow':''}" style="${lv===3?'--ink:#3E6FE0':''}"><i style="width:${pc}%"></i></div>`;}).join('')}
+        <div class="prog-line ${lv===2?'yellow':''}" style="${lv===3?'--ink:#6A58E6':''}"><i style="width:${pc}%"></i></div>`;}).join('')}
     </div>
     ${nu?`<button class="btn yellow" id="go-next">▶ 이어서 학습 — Ch.${nu.chId} ${esc(nu.title)}</button>`:`<div class="card" style="text-align:center;font-weight:800">🏆 Level 1 완주! 대단합니다.</div>`}
     <div class="card" style="margin-top:12px"><div class="row"><div><b>🧠 오늘 복습 ${due}장</b><div class="muted" style="margin-top:4px">1일 · 3일 · 7일 · 14일 간격으로 자동 복습</div></div><span class="grow"></span><button class="btn small" id="go-review">복습하기</button></div></div>

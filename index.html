@@ -457,6 +457,18 @@
     color:var(--ink);font-weight:700;display:flex;align-items:center;justify-content:center;}
   .tb-pill button:active{background:var(--surface);}
   .tb-pill svg{width:20px;height:20px;}
+  #menuBtn{position:relative;}
+  #menuBtn.has-dot::after{content:"";position:absolute;top:6px;right:8px;width:8px;height:8px;border-radius:50%;background:#E5484D;box-shadow:0 0 0 2px var(--surface2);}
+  .badge-dot{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#E5484D;color:#fff;font-size:11px;font-weight:800;vertical-align:1px;margin-left:4px;}
+  .fam-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+  .fam-card .av{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto;}
+  .fam-card .tx{flex:1;min-width:0;}
+  .fam-card .tx b{display:block;font-size:14px;}
+  .fam-card .tx span{display:block;font-size:12px;color:var(--muted2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .fam-btn{border:none;border-radius:999px;padding:8px 13px;font-weight:800;font-size:12.5px;background:var(--ink);color:#fff;white-space:nowrap;}
+  .fam-btn.ghost{background:var(--surface2);color:var(--ink);}
+  .fam-send{display:flex;gap:8px;}
+  .fam-send .inp{flex:1;min-width:0;}
 
   .child-banner{background:var(--accent-soft);border:none;border-radius:14px;margin:0 16px 8px;color:#4B3FA6;}
   .child-banner button{border-color:#DCD6F7;color:var(--accent);border-radius:999px;}
@@ -575,6 +587,35 @@
   .hub-item:hover{border-color:#D2CAF8;background:var(--surface);}
   .mon-card{border-color:var(--line);background:linear-gradient(160deg,#FFFDF7,#F4F2FF);}
 
+
+  /* ----- 포커스 타이머 ----- */
+  .fo-wrap{display:flex;flex-direction:column;align-items:center;background:linear-gradient(180deg,#EFECFD,rgba(239,236,253,0) 70%);border-radius:24px;padding:14px 12px 18px;margin-bottom:12px;}
+  .fo-dial{width:min(76vw,280px);aspect-ratio:1;touch-action:none;user-select:none;cursor:pointer;outline:none;}
+  .fo-dial.paused .fo-glass{animation-play-state:paused;}
+  .fo-glass{transform-box:fill-box;transform-origin:50% 50%;animation:foFlip 6s ease-in-out infinite;}
+  @keyframes foFlip{0%,40%{transform:rotate(0)}50%,90%{transform:rotate(180deg)}100%{transform:rotate(360deg)}}
+  .fo-time{font-size:52px;font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums;margin:8px 0 2px;}
+  .fo-sub{font-size:13px;color:var(--muted2);margin:6px 0 2px;text-align:center;}
+  .fo-ctrl{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:center;}
+  .fo-btn{border:none;border-radius:999px;padding:12px 22px;font-weight:800;font-size:14.5px;background:var(--ink);color:#fff;}
+  .fo-btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line);}
+  .fo-presets{display:flex;gap:8px;margin-top:6px;}
+  .fo-presets button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:800;font-size:13px;color:var(--muted2);}
+  .fo-presets button.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .fo-done{text-align:center;padding:26px 6px 8px;}
+  .fo-big-emo{font-size:56px;}
+  .fo-done-t{font-size:24px;font-weight:800;margin-top:6px;}
+  .fo-done-s{font-size:13px;color:var(--muted2);margin-top:4px;line-height:1.5;}
+  .fo-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:12px;}
+  .fo-card-h{font-weight:800;font-size:14px;margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;}
+  .fo-card-h span{font-weight:600;font-size:12px;color:var(--muted2);}
+  .fo-sounds{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  .fo-sounds button{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:11px 8px;font-weight:800;font-size:13.5px;color:var(--ink);}
+  .fo-sounds button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
+  .fo-vol{display:flex;align-items:center;gap:8px;margin-top:12px;}
+  .fo-vol input{flex:1;accent-color:var(--accent);}
+  .fo-hint{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5;}
+  .bnav-pill button .lbl{font-variant-numeric:tabular-nums;white-space:nowrap;}
   /* ----- 아래쪽 메뉴 ----- */
   .bnav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:40;
     display:flex;align-items:center;gap:10px;width:min(560px,calc(100% - 24px));}
@@ -668,7 +709,7 @@
     <div class="tb-right">
       <button class="tb-who" onclick="openMenu()" title="계정 · 메뉴"><span class="av" id="myAv">나</span><span id="myName">나</span></button>
       <div class="tb-pill">
-        <button title="메뉴" aria-label="메뉴" onclick="openMenu()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>
+        <button title="메뉴" aria-label="메뉴" onclick="openMenu()" id="menuBtn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>
         <button title="학습 추가" aria-label="학습 추가" onclick="openTask(null, addDate())"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
       </div>
     </div>
@@ -686,6 +727,7 @@
       <button data-tab="todo" onclick="setTab('todo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12 3 3 5-6"/></svg>할 일</button>
       <button data-tab="plan" onclick="setTab('plan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="4.5" width="17" height="16" rx="3.5"/><path d="M3.5 9h17M8 3v3M16 3v3" stroke-linecap="round"/><text id="tabDate" x="12" y="18.2" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">1</text></svg>일정</button>
       <button data-tab="learn" onclick="setTab('learn')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 6.5C10 5 7.2 4.5 4 4.8v13.4c3.2-.3 6 .2 8 1.8 2-1.6 4.8-2.1 8-1.8V4.8c-3.2-.3-6 .2-8 1.7Z"/><path d="M12 6.5V20"/></svg>학습</button>
+      <button data-tab="timer" onclick="setTab('timer')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3.5a8.5 8.5 0 1 1-8.5 8.5" opacity=".35"/><path d="M12 3.5a8.5 8.5 0 0 0-8.5 8.5"/></svg><span class="lbl">타이머</span></button>
       <button data-tab="stats" onclick="setTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="13" width="4" height="7" rx="1.2"/><rect x="10" y="9" width="4" height="11" rx="1.2"/><rect x="16" y="4" width="4" height="16" rx="1.2"/></svg>기록</button>
     </div>
     <button class="fab" title="빠르게 계획 세우기" aria-label="빠르게 계획 세우기" onclick="openQuick()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 16.5l-1.8-5.2L5 9.5l5.2-1.8zM18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg></button>
@@ -700,6 +742,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="assets/family.js"></script>
+<script src="assets/focus-sounds.js"></script>
 
 <script>
 /* ============================================================
@@ -780,7 +824,6 @@ const isSameDay=(a,b)=>fmt(a)===fmt(b);
 const WD=["월","화","수","목","금","토","일"];
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const uid=()=> (crypto.randomUUID? crypto.randomUUID(): String(Date.now())+Math.random());
-const gen6=()=>String(Math.floor(100000+Math.random()*900000));
 const defaultSettings=()=>({
   weeklyGoalMin:600,
   dailyGoalMin:120,
@@ -1095,7 +1138,6 @@ async function editNickname(){
   if(name===cur) return;
   try{
     await db.collection("users").doc(state.user.uid).update({name});
-    if(state.profile.linkCode) await db.collection("codes").doc(state.profile.linkCode).set({uid:state.user.uid, name});
     state.profile.name=name;
     if(!state.viewingChild) state.ownerName=name;
     renderHeader(); drawSettings();
@@ -2100,11 +2142,12 @@ async function deleteAllDocs(collRef){
   }
 }
 async function purgeUserData(uid, linkCode, isParent){
-  for(const s of ["tasks","payouts","weekcaps","meta"]){
+  for(const s of ["tasks","payouts","weekcaps","meta","apps","diary","daygoals","daytypes","certs","coupons"]){
     try{ await deleteAllDocs(db.collection("planner").doc(uid).collection(s)); }catch(e){ console.error("purge",s,e); }
   }
   if(isParent){ try{ await deleteAllDocs(db.collection("links").doc(uid).collection("children")); }catch(e){ console.error(e); } }
   if(linkCode){ try{ await db.collection("codes").doc(linkCode).delete(); }catch(_){} }
+  try{ await deleteAllDocs(db.collection("familyRequests").where("fromUid","==",uid)); }catch(e){ console.error("purge familyRequests", e); }
   try{ await db.collection("planner").doc(uid).delete(); }catch(_){}
   try{ await db.collection("users").doc(uid).delete(); }catch(e){ console.error(e); }
 }
@@ -2153,17 +2196,17 @@ function boot(){
       if(!pdoc.exists){
         const info = pendingSignup || {name:(user.email||"사용자").split("@")[0], role:"child"};
         pendingSignup=null;
-        let code=gen6(), tries=0;
-        while(tries<8){ const s=await db.collection("codes").doc(code).get(); if(!s.exists) break; code=gen6(); tries++; }
-        await db.collection("users").doc(user.uid).set({name:info.name, role:info.role, linkCode:code, createdAt:Date.now()});
-        await db.collection("codes").doc(code).set({uid:user.uid, name:info.name});
+        await db.collection("users").doc(user.uid).set({name:info.name, role:info.role, email:(user.email||"").toLowerCase(), createdAt:Date.now()});
         pdoc=await db.collection("users").doc(user.uid).get();
       }
       state.profile=pdoc.data();
+      if(user.email && state.profile.email!==user.email.toLowerCase()){
+        db.collection("users").doc(user.uid).set({email:user.email.toLowerCase()},{merge:true}).catch(()=>{});
+      }
     }catch(e){
       console.error("프로필 로드/생성 실패", e);
       // 로그인은 되었으나 DB 접근 실패 → 폴백 프로필로 화면은 띄우되 원인을 안내
-      state.profile = state.profile || {name:(user.email||"사용자").split("@")[0], role:(pendingSignup&&pendingSignup.role)||"child", linkCode:"------"};
+      state.profile = state.profile || {name:(user.email||"사용자").split("@")[0], role:(pendingSignup&&pendingSignup.role)||"child"};
       alert("로그인은 되었지만 데이터 연결에 실패했습니다.\n\n"+firestoreDiag(e)+"\n\n원인을 해결한 뒤 새로고침하세요.");
     }
     state.ownerUid=user.uid; state.ownerName=state.profile.name; state.ownerRole=state.profile.role;
@@ -2172,6 +2215,9 @@ function boot(){
     if(weekPhase().phase==="planning"){ state.cursor=activeWeekStart(new Date()); state.tab="plan"; state.view="week"; }
     try{ await loadChildren(); }catch(e){ console.error("자녀 로드 실패", e); }
     showApp(true);
+    checkFamilyRequests();
+    focusLoad();
+    if(location.hash==="#family"){ history.replaceState(null,"",location.pathname); setTimeout(drawFamily,300); }
     renderHeader();
     subscribeCategories();
     subscribeTasks();
@@ -2184,6 +2230,7 @@ function showApp(on){
 async function loadChildren(){
   state.children=[];
   if(state.profile.role!=="parent") return;
+  await Family.syncLinks(db, state.user, state.profile);   // 자녀가 승인한 신청 → 연결
   const snap=await db.collection("links").doc(state.user.uid).collection("children").get();
   const rows=[];
   for(let i=0;i<snap.docs.length;i++){
@@ -2438,6 +2485,7 @@ function setTab(t, force){
   const prevView=state.view;
   if(t===state.tab && !force){ window.scrollTo({top:0,behavior:"smooth"}); return; }
   state.tab=t;
+  if(t==="timer") focusTasks=null;          // 들어올 때마다 오늘 과제 새로 읽기
   if(t==="todo") state.view="day";
   else if(t==="plan") state.view=state.planView||"week";
   if(state.view!==prevView || force) subscribeTasks(); else render();
@@ -2456,6 +2504,7 @@ function render(){
   document.querySelectorAll(".bnav-pill button").forEach(b=>b.classList.toggle("on", b.dataset.tab===state.tab));
   if(state.tab==="learn"){ head.innerHTML=pageHead("학습", state.viewingChild? `${esc(state.ownerName)} 님의 학습앱` : "천문장 · 영단어 · 문법"); main.innerHTML=renderLearn(); }
   else if(state.tab==="stats"){ head.innerHTML=pageHead("기록", "성장 · 보상 · 리포트"); main.innerHTML=renderRecord(); }
+  else if(state.tab==="timer"){ head.innerHTML=pageHead("포커스", "집중 타이머"); main.innerHTML=renderFocus(); bindFocusDial(); }
   else if(state.tab==="plan"){ head.innerHTML=planHead(); main.innerHTML= state.view==="month"? renderMonth() : renderWeek(); }
   else { head.innerHTML=todoHead(); main.innerHTML=renderDay(); }
   updateMonHead();
@@ -2636,17 +2685,364 @@ function openMenu(){
       <span class="av" style="width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">${esc(me.slice(0,1))}</span>
       <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:15px">${esc(me)} ${isParent?"👑":""}</div>
         <div style="font-size:12px;color:#8F8D9B">${isParent?"부모 계정":"학생 계정"} · ${esc((state.user&&state.user.email)||"")}</div></div>
-      ${!isParent&&state.profile.linkCode?`<div style="text-align:right"><div style="font-size:10.5px;color:#8F8D9B">가족 연결 코드</div><b style="letter-spacing:.12em">${esc(state.profile.linkCode)}</b></div>`:""}
     </div>
     ${isParent?`<div class="r-sec">자녀 플래너</div>
       ${state.viewingChild? hubItem("🏠","내 플래너로 돌아가기","", "backToSelf()") : ""}
-      ${kids || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 자녀가 없어요. 자녀 관리에서 자녀 코드를 등록하세요.</div>`}`:""}
+      ${kids || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 자녀가 없어요. 아래 <b>가족 연결</b>에서 자녀의 이메일로 신청하세요.</div>`}`:""}
     <div class="r-sec">관리</div>
+    ${hubItem("👨‍👩‍👧", "가족 연결"+(state.familyPending?` <span class="badge-dot">${state.familyPending}</span>`:""), isParent?"자녀에게 연결 신청 · 받은 신청 승인":"부모님께 연결 신청 · 받은 신청 승인","drawFamily()")}
     ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🐣","내 파트너","파트너 성장 · 쿠폰 · 뱃지","drawManage()")}
     ${hubItem("⚙️","설정","계정 · 목표시간 · 방학 · 과목/교재 · 템플릿","openDrawer('settings')")}
     ${hubItem("🔗","학습앱 인정 시간","천문장 · 영단어 · 문법 환산과 상한","drawExtApps()")}
     ${hubItem("🚪","로그아웃","","closeDrawer();logout()")}
   `);
+}
+
+/* ============================================================
+ *  ⏱ 포커스 타이머 — 원을 돌려 시간을 맞추고, 필요하면 집중 사운드와 함께
+ *  과제를 고르면 집중한 시간이 그 과제의 '타이머 실측 시간'(100% 인정)으로 기록됩니다.
+ * ============================================================ */
+const FOCUS_KEY="planner_focus_v1";
+let F={setMin:25, mode:"idle", total:0, endAt:0, remaining:0, accSec:0, segAt:0, taskId:"", sound:"", vol:0.6, doneMin:0, doneTask:""};
+let focusTick=null, focusTasks=null, focusToday=null, dialDrag=false;
+function focusSave(){ try{ localStorage.setItem(FOCUS_KEY, JSON.stringify(F)); }catch(_){} }
+function focusLoad(){
+  try{ const o=JSON.parse(localStorage.getItem(FOCUS_KEY)||"null"); if(o) F=Object.assign(F,o); }catch(_){}
+  FocusSound.setVolume(F.vol);
+  // 새로고침 뒤에는 브라우저가 자동 재생을 막으므로, 처음 화면을 누를 때 사운드를 다시 켬
+  if(F.mode==="run" && F.sound) document.addEventListener("pointerdown", ()=>{ if(F.mode==="run" && F.sound) FocusSound.play(F.sound); }, {once:true});
+  if(F.mode==="run" || F.mode==="break"){
+    if(Date.now()>=F.endAt){ F.mode==="run"? focusFinish(true) : focusBreakEnd(true); }
+    else focusStartTick();
+  }
+}
+const mmss=ms=>{ const s=Math.max(0,Math.ceil(ms/1000)); return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`; };
+function focusRemaining(){
+  if(F.mode==="run"||F.mode==="break") return Math.max(0,F.endAt-Date.now());
+  if(F.mode==="pause") return F.remaining;
+  return F.setMin*60000;
+}
+function focusElapsedSec(){ return F.accSec + (F.mode==="run"? (Date.now()-F.segAt)/1000 : 0); }
+function focusStartTick(){
+  if(focusTick) clearInterval(focusTick);
+  focusTick=setInterval(()=>{
+    const rem=focusRemaining();
+    if(rem<=0){ F.mode==="run"? focusFinish() : focusBreakEnd(); return; }
+    const bt=document.getElementById("bigTime"); if(bt) bt.textContent=mmss(rem);
+    const arc=document.getElementById("runArc");
+    if(arc){ const C=2*Math.PI*100; arc.setAttribute("stroke-dasharray", `${C*(F.total? rem/F.total : 0)} ${C}`); }
+    focusNavLabel();
+  },1000);
+  focusNavLabel();
+}
+function focusStopTick(){ if(focusTick){ clearInterval(focusTick); focusTick=null; } focusNavLabel(); }
+function focusNavLabel(){
+  const l=document.querySelector('.bnav-pill [data-tab="timer"] .lbl'); if(!l) return;
+  l.textContent=(F.mode==="run"||F.mode==="break")? mmss(focusRemaining()) : (F.mode==="pause"? "일시정지" : "타이머");
+}
+// 오늘 내 학습 목록 (부모가 자녀를 보고 있어도 타이머는 내 플래너 기준)
+async function loadFocusTasks(){
+  const uid=state.user.uid, today=fmt(new Date());
+  try{
+    const [snap, log]=await Promise.all([
+      db.collection("planner").doc(uid).collection("tasks").where("date","==",today).get(),
+      db.collection("planner").doc(uid).collection("focus").doc(today).get(),
+    ]);
+    focusTasks=snap.docs.map(d=>({id:d.id,...d.data()})).filter(t=>!t.done).sort((a,b)=>(a.order||0)-(b.order||0));
+    focusToday=log.exists? log.data() : {min:0, sessions:0};
+  }catch(e){ console.error("포커스 목록", e); focusTasks=[]; focusToday={min:0,sessions:0}; }
+  if(state.tab==="timer") render();
+}
+function focusTaskLabel(t){
+  const su=(state.viewingChild? null : subjById(t.subjectId));
+  return `${su?su.name+" · ":""}${t.unit||t.method||"학습"} (${t.plannedMin||0}분)`;
+}
+function renderFocus(){
+  if(focusTasks===null){ loadFocusTasks(); }
+  const R=100, C=2*Math.PI*R, m=F.setMin;
+  const task=(focusTasks||[]).find(t=>t.id===F.taskId);
+  const running=F.mode==="run"||F.mode==="pause";
+  const opts=`<option value="">과제 없이 집중하기</option>`+(focusTasks||[]).map(t=>`<option value="${t.id}" ${t.id===F.taskId?"selected":""}>${esc(focusTaskLabel(t))}</option>`).join("");
+  let body="";
+  if(F.mode==="done"){
+    body=`<div class="fo-done">
+      <div class="fo-big-emo">🎉</div>
+      <div class="fo-done-t">${F.doneMin}분 집중 완료!</div>
+      <div class="fo-done-s">${F.doneTask? `‘${esc(F.doneTask)}’에 ${F.doneMin}분이 실측 시간으로 기록됐어요` : "잠깐 쉬었다가 다음 집중을 시작해요"}</div>
+      <div class="fo-ctrl"><button class="fo-btn ghost" onclick="focusBreak(5)">☕ 5분 휴식</button><button class="fo-btn" onclick="focusReset()">다시 집중</button></div>
+    </div>`;
+  }else if(F.mode==="break"){
+    const rem=focusRemaining();
+    body=`<svg class="fo-dial" viewBox="0 0 260 260">
+        <circle cx="130" cy="130" r="${R}" fill="none" stroke="#DDF3E9" stroke-width="22"/>
+        <circle id="runArc" cx="130" cy="130" r="${R}" fill="none" stroke="#0E9F6E" stroke-width="22" stroke-linecap="round" stroke-dasharray="${C*(F.total?rem/F.total:0)} ${C}" transform="rotate(-90 130 130)"/>
+        <text x="130" y="148" text-anchor="middle" font-size="52">☕</text></svg>
+      <div class="fo-time" id="bigTime">${mmss(rem)}</div>
+      <div class="fo-sub">쉬는 시간 · 물 한 잔, 스트레칭</div>
+      <div class="fo-ctrl"><button class="fo-btn ghost" onclick="focusBreakEnd()">휴식 끝내기</button></div>`;
+  }else if(!running){
+    let ticks="";
+    for(let i=0;i<60;i++){ const t=i/60*2*Math.PI, r1=i%5?R-6:R-11;
+      ticks+=`<line x1="${(130+(R-2)*Math.sin(t)).toFixed(1)}" y1="${(130-(R-2)*Math.cos(t)).toFixed(1)}" x2="${(130+r1*Math.sin(t)).toFixed(1)}" y2="${(130-r1*Math.cos(t)).toFixed(1)}" stroke="#1C1B24" stroke-width="${i%5?1:1.6}" opacity="${i<m?.85:.2}"/>`; }
+    const a=m/60*2*Math.PI, kx=130+R*Math.sin(a), ky=130-R*Math.cos(a);
+    body=`<svg class="fo-dial" id="foDial" viewBox="0 0 260 260" role="slider" aria-label="집중 시간(분)" aria-valuemin="1" aria-valuemax="60" aria-valuenow="${m}" tabindex="0">
+        <circle cx="130" cy="130" r="${R}" fill="none" stroke="#E6E1FB" stroke-width="26"/>
+        <circle cx="130" cy="130" r="${R}" fill="none" stroke="#6A58E6" stroke-width="26" stroke-linecap="round" stroke-dasharray="${C*m/60} ${C}" transform="rotate(-90 130 130)"/>
+        ${ticks}
+        <text x="130" y="42" text-anchor="middle" font-size="12" fill="#8F8D9B">60</text><text x="222" y="134" text-anchor="middle" font-size="12" fill="#8F8D9B">15</text>
+        <text x="130" y="226" text-anchor="middle" font-size="12" fill="#8F8D9B">30</text><text x="38" y="134" text-anchor="middle" font-size="12" fill="#8F8D9B">45</text>
+        <text x="130" y="146" text-anchor="middle" font-size="54" font-weight="700" fill="#1C1B24">${m}</text>
+        <text x="130" y="170" text-anchor="middle" font-size="13" fill="#8F8D9B">분</text>
+        <circle cx="${kx.toFixed(1)}" cy="${ky.toFixed(1)}" r="15" fill="#fff" stroke="#6A58E6" stroke-width="3"/>
+      </svg>
+      <div class="fo-presets">${[15,25,50].map(x=>`<button class="${m===x?"on":""}" onclick="focusSetMin(${x})">${x}분</button>`).join("")}</div>
+      <div class="fo-ctrl"><button class="fo-btn" onclick="focusStart()">시작하기 ▶</button></div>
+      <div class="fo-sub">원을 돌리거나 빠른 시간을 눌러 맞추세요</div>`;
+  }else{
+    const rem=focusRemaining();
+    body=`<svg class="fo-dial ${F.mode==="pause"?"paused":""}" viewBox="0 0 260 260">
+        <circle cx="130" cy="130" r="${R}" fill="none" stroke="#E9E8F0" stroke-width="22"/>
+        <circle id="runArc" cx="130" cy="130" r="${R}" fill="none" stroke="#6A58E6" stroke-width="22" stroke-linecap="round" stroke-dasharray="${C*(F.total?rem/F.total:0)} ${C}" transform="rotate(-90 130 130)"/>
+        <circle cx="130" cy="130" r="70" fill="#F4F2FF"/>
+        <text class="fo-glass" x="130" y="152" text-anchor="middle" font-size="58">⏳</text>
+      </svg>
+      <div class="fo-time" id="bigTime">${mmss(rem)}</div>
+      <div class="fo-sub">${task? esc(focusTaskLabel(task)) : "과제 없이 집중 중"}</div>
+      <div class="fo-ctrl">
+        <button class="fo-btn ghost" onclick="focusPlus()">+5분</button>
+        <button class="fo-btn" onclick="focusPause()">${F.mode==="run"?"❚❚ 일시 중지":"▶ 계속"}</button>
+        <button class="fo-btn ghost" onclick="focusEnd()">⏹ 끝</button>
+      </div>`;
+  }
+  const S=FocusSound.TRACKS;
+  const sound=`<div class="fo-card">
+      <div class="fo-card-h">🎧 집중 사운드 <span>${F.sound? esc(S[F.sound].desc) : "필요할 때만 골라 켜세요"}</span></div>
+      <div class="fo-sounds">
+        <button class="${!F.sound?"on":""}" onclick="focusSound('')">🔇 끄기</button>
+        ${Object.entries(S).map(([k,t])=>`<button class="${F.sound===k?"on":""}" onclick="focusSound('${k}')">${t.emo} ${t.name}</button>`).join("")}
+      </div>
+      <div class="fo-vol"><span>🔈</span><input type="range" min="0" max="100" value="${Math.round(F.vol*100)}" oninput="focusVol(this.value)" aria-label="사운드 크기"><span>🔊</span></div>
+      <div class="fo-hint">타이머가 돌아가는 동안 재생돼요. 멈춰 있을 때 고르면 6초 미리 들려 드려요.</div>
+    </div>`;
+  const tsel=(F.mode==="idle")? `<div class="fo-card">
+      <div class="fo-card-h">📌 무엇을 공부하나요? <span>고르면 집중한 시간이 그 과제에 기록돼요</span></div>
+      <select class="inp" onchange="F.taskId=this.value;focusSave()">${opts}</select>
+      ${focusTasks&&!focusTasks.length?`<div class="fo-hint">오늘 남은 과제가 없어요. <a href="#" onclick="setTab('todo');return false">할 일</a>에서 먼저 추가할 수 있어요.</div>`:""}
+    </div>` : "";
+  const td=focusToday||{min:0,sessions:0};
+  return `<div class="fo-wrap">
+      ${body}
+    </div>
+    ${tsel}
+    ${sound}
+    <div class="r-grid" style="grid-template-columns:1fr 1fr;margin-top:12px">
+      <div class="r-stat"><div class="e">⏱</div><b>${td.min||0}</b><span>오늘 집중(분)</span></div>
+      <div class="r-stat"><div class="e">🍅</div><b>${td.sessions||0}</b><span>완료한 집중</span></div>
+    </div>`;
+}
+function bindFocusDial(){
+  const dial=document.getElementById("foDial"); if(!dial) return;
+  const set=e=>{
+    const r=dial.getBoundingClientRect(), x=e.clientX-r.left-r.width/2, y=e.clientY-r.top-r.height/2;
+    let a=Math.atan2(x,-y); if(a<0) a+=2*Math.PI;
+    let v=Math.round(a/(2*Math.PI)*60); if(v===0) v=F.setMin>30?60:1;
+    if(v!==F.setMin){ F.setMin=v; render(); if(navigator.vibrate) try{navigator.vibrate(4);}catch(_){} }
+  };
+  dial.addEventListener("pointerdown",e=>{ dialDrag=true; set(e); });
+  window.onpointermove=e=>{ if(dialDrag) set(e); };
+  window.onpointerup=()=>{ if(dialDrag){ dialDrag=false; focusSave(); } };
+  dial.addEventListener("keydown",e=>{
+    if(e.key==="ArrowUp"||e.key==="ArrowRight"){ focusSetMin(Math.min(60,F.setMin+1)); }
+    if(e.key==="ArrowDown"||e.key==="ArrowLeft"){ focusSetMin(Math.max(1,F.setMin-1)); }
+    setTimeout(()=>{ const d=document.getElementById("foDial"); if(d) d.focus(); },0);
+  });
+}
+function focusSetMin(m){ F.setMin=m; focusSave(); render(); }
+function focusStart(){
+  FocusSound.unlock();
+  // 같은 과제의 기존 타이머가 돌고 있으면 먼저 저장
+  if(state.timer && F.taskId && state.timer.taskId===F.taskId) stopTimer(true);
+  F.total=F.setMin*60000; F.endAt=Date.now()+F.total; F.accSec=0; F.segAt=Date.now(); F.mode="run";
+  focusSave(); focusStartTick();
+  if(F.sound) FocusSound.play(F.sound);
+  toast("⏱ 집중 시작! 끝나면 알려 드릴게요","good");
+  render();
+}
+function focusPause(){
+  if(F.mode==="run"){
+    F.accSec+=(Date.now()-F.segAt)/1000; F.remaining=Math.max(0,F.endAt-Date.now()); F.mode="pause";
+    focusStopTick(); FocusSound.stop();
+  }else if(F.mode==="pause"){
+    F.endAt=Date.now()+F.remaining; F.segAt=Date.now(); F.mode="run";
+    focusStartTick(); if(F.sound) FocusSound.play(F.sound);
+  }
+  focusSave(); render();
+}
+function focusPlus(){
+  if(F.mode==="run") F.endAt+=5*60000; else if(F.mode==="pause") F.remaining+=5*60000;
+  F.total+=5*60000; focusSave(); render();
+}
+async function focusRecord(sec, natural){
+  const min=Math.round(sec/60);
+  const uid=state.user.uid, today=fmt(new Date());
+  const task=(focusTasks||[]).find(t=>t.id===F.taskId);
+  F.doneMin=min; F.doneTask=task? focusTaskLabel(task) : "";
+  if(min<1) return;
+  try{
+    const ref=db.collection("planner").doc(uid).collection("focus").doc(today);
+    const d=await ref.get(), cur=d.exists? d.data() : {min:0,sessions:0};
+    focusToday={min:(Number(cur.min)||0)+min, sessions:(Number(cur.sessions)||0)+(natural?1:0)};
+    await ref.set(focusToday);
+  }catch(e){ console.error("포커스 기록", e); }
+  if(task){
+    try{
+      const tref=db.collection("planner").doc(uid).collection("tasks").doc(task.id);
+      const td=await tref.get(); if(!td.exists) return;
+      const t=td.data(), timerMin=(Number(t.timerMin)||0)+min, actualMin=Math.max(Number(t.actualMin)||0, timerMin);
+      if(state.ownerUid===uid && state.tasksMap[task.id]) await saveTask({...state.tasksMap[task.id], timerMin, actualMin});
+      else await tref.update({timerMin, actualMin});
+      task.timerMin=timerMin; task.actualMin=actualMin;
+    }catch(e){ console.error("과제 시간 기록", e); }
+  }
+}
+async function focusFinish(silent){
+  // 끝까지 집중한 시간 (새로고침 뒤 늦게 확인해도 종료 시각까지만 계산)
+  const used=F.mode==="run"? F.accSec+(Math.min(Date.now(),F.endAt)-F.segAt)/1000 : F.accSec;
+  focusStopTick(); FocusSound.stop();
+  F.mode="done"; focusSave(); focusNavLabel();
+  await focusRecord(Math.min(used, F.total/1000), true);
+  focusSave();
+  if(!silent){ FocusSound.chime(); toast(`🎉 ${F.doneMin}분 집중 완료!`,"cheer"); if(navigator.vibrate) try{navigator.vibrate([200,100,200]);}catch(_){} }
+  if(state.tab==="timer") render();
+}
+async function focusEnd(){
+  const used=focusElapsedSec();
+  if(!confirm(`지금까지 ${Math.round(used/60)}분 집중했어요. 여기서 끝낼까요?`)) return;
+  focusStopTick(); FocusSound.stop();
+  F.mode="done"; focusSave(); focusNavLabel();
+  await focusRecord(used, false);
+  focusSave(); render();
+}
+function focusBreak(min){
+  F.total=min*60000; F.endAt=Date.now()+F.total; F.mode="break";
+  focusSave(); focusStartTick(); render();
+}
+function focusBreakEnd(silent){
+  focusStopTick(); F.mode="idle"; focusSave(); focusNavLabel();
+  if(!silent){ FocusSound.chime(); toast("☕ 휴식 끝! 다시 집중해 볼까요?","info"); }
+  if(state.tab==="timer") render();
+}
+function focusReset(){ F.mode="idle"; F.accSec=0; focusSave(); render(); }
+function focusSound(k){
+  F.sound=k; focusSave();
+  if(!k) FocusSound.stop();
+  else if(F.mode==="run") FocusSound.play(k);
+  else FocusSound.preview(k, 6);
+  render();
+}
+function focusVol(v){ F.vol=Number(v)/100; FocusSound.setVolume(F.vol); focusSave(); }
+
+/* ----- 👨‍👩‍👧 가족 연결: 상대 이메일로 신청 → 상대가 승인 ----- */
+let familyList=null;
+async function checkFamilyRequests(){
+  try{
+    familyList=await Family.listMine(db, state.user);
+    const pend=familyList.received.filter(r=>r.status==="pending").length;
+    state.familyPending=pend;
+    const b=document.getElementById("menuBtn"); if(b) b.classList.toggle("has-dot", pend>0);
+    if(pend) toast(`👨‍👩‍👧 가족 연결 신청이 ${pend}건 있어요 · ⋯ 메뉴에서 확인하세요`,"info");
+  }catch(e){ console.warn("가족 연결 신청 확인", e); }
+}
+function famRoleLabel(role){ return role==="parent"? "부모" : "자녀"; }
+async function drawFamily(){
+  const isParent=state.profile.role==="parent";
+  hubShell("👨‍👩‍👧 가족 연결", `<div class="empty">불러오는 중…</div>`);
+  try{
+    familyList=await Family.listMine(db, state.user);
+    if(isParent){ await Family.syncLinks(db, state.user, state.profile); await loadChildren(); }
+  }catch(e){
+    console.error("가족 연결", e);
+    const root=document.querySelector("#drawerRoot .drawer-body");
+    if(root) root.innerHTML=`<div class="share-note" style="color:#A5323A;background:#FFF5F6">가족 연결 정보를 불러오지 못했어요.<br>${esc(firestoreDiag(e))}</div>`;
+    return;
+  }
+  const L=familyList;
+  state.familyPending=L.received.filter(r=>r.status==="pending").length;
+  const mb=document.getElementById("menuBtn"); if(mb) mb.classList.toggle("has-dot", state.familyPending>0);
+  const card=(name,sub,btns)=>`<div class="fam-card"><div class="av">${esc((name||"?").slice(0,1))}</div>
+    <div class="tx"><b>${esc(name||"")}</b><span>${sub}</span></div>${btns}</div>`;
+
+  const inbox=L.received.filter(r=>r.status==="pending").map(r=>{
+    const same=(r.fromRole==="parent")===isParent;   // 부모-부모, 자녀-자녀는 연결 불가
+    return card(r.fromName||r.fromEmail, `${esc(r.fromEmail)} · ${famRoleLabel(r.fromRole)} 계정${same?" · <b style='color:#E5484D'>같은 유형이라 연결할 수 없어요</b>":""}`,
+      `${same?"":`<button class="fam-btn" onclick="famRespond('${r.id}',true)">승인</button>`}
+       <button class="fam-btn ghost" onclick="famRespond('${r.id}',false)">거절</button>`);
+  }).join("");
+
+  let linked="";
+  if(isParent){
+    linked=state.children.map((ch,i)=>card(ch.name, ch.exists===false?"탈퇴한 계정":"연결됨 · 플래너와 학습앱 기록을 볼 수 있어요",
+      `${ch.exists===false?"":`<button class="fam-btn ghost" onclick="viewChild(state.children[${i}].uid,state.children[${i}].name)">보기</button>`}
+       <button class="fam-btn ghost" onclick="unlinkChild(state.children[${i}].uid).then(drawFamily)">해제</button>`)).join("");
+  }else{
+    linked=Family.parentsOf(L, state.user).map(p=>card(p.name, `${esc(p.email||"")} · 부모님이 내 플래너를 볼 수 있어요`,
+      `<button class="fam-btn ghost" onclick="famLeave('${p.req.id}')">해제</button>`)).join("");
+  }
+
+  const waiting=L.sent.filter(r=>r.status==="pending").map(r=>card(r.toEmail, "승인을 기다리는 중",
+      `<button class="fam-btn ghost" onclick="famCancel('${r.id}')">취소</button>`)).join("");
+  const declined=L.sent.filter(r=>r.status==="declined").slice(0,3).map(r=>card(r.toEmail, "상대가 거절했어요", "")).join("");
+
+  const target=isParent? "자녀" : "부모님";
+  const body=`
+    <div style="font-size:12.5px;color:#6D6B7A;line-height:1.6;margin-bottom:12px">
+      ${target}의 <b>가입 이메일</b>로 연결을 신청하세요. 상대가 플래너에 로그인해 <b>승인</b>하면 연결됩니다.
+      연결되면 부모 계정에서 자녀의 플래너·학습앱 기록을 보고 코멘트를 남길 수 있어요.
+    </div>
+    ${inbox?`<div class="r-sec">받은 신청</div>${inbox}`:""}
+    <div class="r-sec">연결 신청하기</div>
+    <div class="fam-send">
+      <input class="inp" id="famEmail" type="email" placeholder="${target} 이메일 (예: name@email.com)" autocomplete="off">
+      <button class="fam-btn" onclick="famSend()">신청</button>
+    </div>
+    <div id="famMsg" style="font-size:12.5px;margin:6px 2px 0;min-height:18px"></div>
+    <div class="r-sec">연결된 ${isParent?"자녀":"부모님"}</div>
+    ${linked || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 ${isParent?"자녀가":"부모님이"} 없어요.</div>`}
+    ${waiting?`<div class="r-sec">보낸 신청</div>${waiting}`:""}
+    ${declined}
+    <div style="font-size:11.5px;color:#8F8D9B;margin-top:12px;line-height:1.5">내 이메일: <b>${esc((state.user.email||"").toLowerCase())}</b> — 상대에게 이 주소로 신청해 달라고 해도 돼요.</div>`;
+  const root=document.querySelector("#drawerRoot .drawer-body");
+  if(root) root.innerHTML=body;
+}
+async function famSend(){
+  const el=document.getElementById("famEmail"), msg=document.getElementById("famMsg");
+  try{
+    await Family.send(db, state.user, state.profile, el?el.value:"");
+    toast("연결을 신청했어요. 상대가 승인하면 연결돼요","good");
+    drawFamily();
+  }catch(e){
+    if(msg){ msg.style.color="#E5484D"; msg.textContent=e.message&&!e.code? e.message : firestoreDiag(e); }
+  }
+}
+async function famRespond(id, accept){
+  const r=(familyList&&familyList.received||[]).find(x=>x.id===id); if(!r) return;
+  if(accept && !confirm(`${r.fromName||r.fromEmail} 님과 가족으로 연결할까요?\n${state.profile.role==="parent"?"자녀의 플래너·학습앱 기록을 볼 수 있게 됩니다.":"부모님이 내 플래너·학습앱 기록을 볼 수 있게 됩니다."}`)) return;
+  try{
+    await Family.respond(db, state.user, state.profile, r, accept);
+    toast(accept?"가족으로 연결됐어요 👨‍👩‍👧":"신청을 거절했어요", accept?"good":"info");
+    if(accept && state.profile.role==="parent") await loadChildren();
+    drawFamily();
+  }catch(e){ alert("처리하지 못했어요: "+firestoreDiag(e)); }
+}
+async function famCancel(id){
+  const r=(familyList&&familyList.sent||[]).find(x=>x.id===id); if(!r) return;
+  try{ await Family.cancel(db, r); drawFamily(); }catch(e){ alert("취소하지 못했어요: "+firestoreDiag(e)); }
+}
+async function famLeave(id){
+  const all=familyList? [...familyList.sent, ...familyList.received] : [];
+  const r=all.find(x=>x.id===id); if(!r) return;
+  if(!confirm("이 부모님과의 연결을 해제할까요?\n부모님이 더 이상 내 플래너를 볼 수 없게 됩니다.")) return;
+  try{ await Family.leave(db, r); toast("연결을 해제했어요","info"); drawFamily(); }catch(e){ alert("해제하지 못했어요: "+firestoreDiag(e)); }
 }
 
 /* ----- ✨ 빠른 계획: 적어 두면 학습 계획으로 정리 ----- */
@@ -3527,14 +3923,14 @@ function drawSettings(){
     const items=state.children.map(ch=>`
       <div class="child-item" style="${ch.exists===false?"opacity:.6":""}">
         <div class="av" style="background:${ch.color}">${esc((ch.name||"").slice(0,1))}</div>
-        <div><div style="font-weight:700">${esc(ch.name)}${ch.exists===false?' <span style="font-size:11px;color:#E5484D">(탈퇴한 계정)</span>':""}</div><div style="font-size:11.5px;color:#94A3B8">코드 ${esc(ch.code||"")}</div></div>
-        ${ch.exists===false?"":`<button class="open" onclick="viewChild('${ch.uid}','${esc(ch.name)}')">플래너 열기</button>`}
+        <div><div style="font-weight:700">${esc(ch.name)}${ch.exists===false?' <span style="font-size:11px;color:#E5484D">(탈퇴한 계정)</span>':""}</div><div style="font-size:11.5px;color:#94A3B8">가족 연결됨</div></div>
+        ${ch.exists===false?"":`<button class="open" onclick="viewChild(state.children[${state.children.indexOf(ch)}].uid,state.children[${state.children.indexOf(ch)}].name)">플래너 열기</button>`}
         <button class="icon-btn sm" onclick="unlinkChild('${ch.uid}')" style="margin-left:6px">🗑️</button>
       </div>`).join("");
     childrenBlock=`
       <div class="section-lbl" style="margin-top:22px">🧑‍🏫 자녀 계정 관리</div>
-      ${items||`<div style="font-size:13px;color:#94A3B8;margin-bottom:8px">아직 등록된 자녀가 없어요. 자녀의 6자리 코드를 등록하세요.</div>`}
-      <button class="add-line" onclick="addChildCode()">+ 자녀 코드 등록</button>`;
+      ${items||`<div style="font-size:13px;color:#94A3B8;margin-bottom:8px">아직 연결된 자녀가 없어요. 자녀의 가입 이메일로 연결을 신청하세요.</div>`}
+      <button class="add-line" onclick="drawFamily()">👨‍👩‍👧 자녀 연결 신청 · 승인</button>`;
   }
   document.getElementById("drawerRoot").innerHTML=`
     <div class="overlay" onclick="if(event.target===this)closeDrawer()">
@@ -3546,11 +3942,11 @@ function drawSettings(){
       </div>
       <div class="drawer-body">
         ${drawerTab==='settings-main'? `
-          <div class="code-box">
-            <div class="lbl">나의 연결 코드 (가족에게 공유)</div>
-            <div class="code">${esc(state.profile.linkCode||"------")}</div>
-            <button onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(state.profile.linkCode||"")}');this.textContent='복사됨 ✓'">코드 복사</button>
-          </div>
+          <button class="hub-item" onclick="drawFamily()">
+            <span class="hub-emo">👨‍👩‍👧</span>
+            <span class="hub-txt"><b>가족 연결</b><span>상대의 가입 이메일로 신청하고, 상대가 승인하면 연결돼요</span></span>
+            <span class="hub-arr">›</span>
+          </button>
           ${childrenBlock}
           <div class="section-lbl" style="margin-top:22px">🐣 스타팅 파트너 (속성 선택)</div>
           <div class="mon-pick">
@@ -3641,7 +4037,7 @@ function drawSettings(){
             · 목표 학습시간이 만점 기준입니다(현재 주 ${Math.round((A.timeTargetMin||900)/60)}시간).<br>
             정산 주간은 <b>월~일(일요일 18시 마감)</b> 기준이며 상한을 넘지 않습니다.</div>
 
-          <div class="share-note">👨‍👩‍👧 부모 계정에서 자녀의 <b>6자리 코드</b>를 등록하면, 자녀의 플래너를 열어 진행 상황을 보고 코멘트를 남길 수 있습니다. 모든 변경은 기기 간 실시간으로 동기화됩니다.</div>
+          <div class="share-note">👨‍👩‍👧 <b>가족 연결</b>에서 상대의 이메일로 신청하고 상대가 승인하면, 부모 계정에서 자녀의 플래너·학습앱 기록을 보고 코멘트를 남길 수 있습니다. 모든 변경은 기기 간 실시간으로 동기화됩니다.</div>
           <div class="section-lbl" style="margin-top:22px">계정 관리</div>
           <div class="list-item">
             <span style="flex:1">닉네임 · <b>${esc(state.profile.name||"")}</b>${state.profile.role==="parent"?" 👑":""}</span>
@@ -3717,22 +4113,10 @@ async function delCat(kind,id){
   await saveCategories({...state.categories,[kind]:(state.categories[kind]||[]).filter(x=>x.id!==id)}); drawSettings();
 }
 
-/* ----- 자녀 코드 등록 ----- */
-async function addChildCode(){
-  const code=(prompt("자녀의 6자리 연결 코드를 입력하세요")||"").trim();
-  if(!/^\d{6}$/.test(code)) return alert("6자리 숫자를 입력해 주세요.");
-  const snap=await db.collection("codes").doc(code).get();
-  if(!snap.exists) return alert("존재하지 않는 코드입니다.");
-  const {uid:childUid,name}=snap.data();
-  if(childUid===state.user.uid) return alert("본인 코드는 등록할 수 없습니다.");
-  if(state.children.some(c=>c.uid===childUid)) return alert("이미 등록된 자녀입니다.");
-  await db.collection("links").doc(state.user.uid).collection("children").doc(childUid).set({name,code,addedAt:Date.now()});
-  await loadChildren(); drawSettings();
-}
 async function unlinkChild(childUid){
   if(!confirm("이 자녀 등록을 해제할까요?\n(자녀 계정·데이터는 삭제되지 않고, 내 목록에서만 제거됩니다)")) return;
   try{
-    await db.collection("links").doc(state.user.uid).collection("children").doc(childUid).delete();
+    await Family.unlink(db, state.user, childUid);
   }catch(e){ console.error("unlinkChild", e); alert("삭제에 실패했어요: "+firestoreDiag(e)); return; }
   state.children = state.children.filter(c=>c.uid!==childUid); // 화면 즉시 반영
   drawSettings();
@@ -4274,6 +4658,7 @@ function fmtClock(min){
 }
 function startTimer(id){
   const t=state.tasksMap[id]; if(!t) return;
+  if(typeof F!=="undefined" && (F.mode==="run"||F.mode==="pause") && F.taskId===id){ toast("⏱ 포커스 타이머가 이 과제를 재고 있어요","info"); setTab("timer"); return; }
   if(state.timer && state.timer.taskId!==id){
     if(!confirm("다른 학습의 타이머가 켜져 있어요.\n그 시간을 저장하고 새로 시작할까요?")) return;
     stopTimer(true);
