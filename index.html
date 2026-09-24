@@ -901,6 +901,7 @@ try {
   if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
     firebase.initializeApp(firebaseConfig);
     auth = firebase.auth();
+    auth.languageCode = "ko";   // 재설정 메일 등 인증 메일을 한국어로
     db = firebase.firestore();
     db.enablePersistence({ synchronizeTabs: true }).catch(()=>{}); // 오프라인 캐시
     CONFIGURED = true;
@@ -1231,7 +1232,11 @@ async function resetPassword(){
   try{
     await auth.sendPasswordResetEmail(email);
     showAuthErr("");
-    alert(email+" 로 비밀번호 재설정 메일을 보냈습니다.\n메일함(스팸함 포함)의 링크에서 새 비밀번호를 설정한 뒤 다시 로그인하세요.");
+    alert(email+" 로 비밀번호 재설정 요청을 보냈습니다.\n\n"
+      +"· 보낸 사람: noreply@splan-5512.firebaseapp.com (제목: 비밀번호 재설정)\n"
+      +"· 몇 분 안에 오지 않으면 스팸함 · 프로모션함 · 전체메일함을 확인하세요.\n"
+      +"· 보안상 가입되지 않은 주소여도 '보냈다'고 표시되고 메일은 오지 않아요. 가입한 주소와 한 글자라도 다르면 메일이 가지 않습니다.\n"
+      +"  → 로그인된 기기가 있으면 설정 → 계정 관리에서 가입 이메일을 확인하고 '재설정 메일'을 누르면 정확한 주소로 보내져요.");
   }catch(e){ console.error("reset error", e); showAuthErr(authMessage(e.code)); }
 }
 function showAuthErr(msg){
@@ -2270,7 +2275,7 @@ async function sendResetMail(){
   if(!confirm(`${email} 로 비밀번호 재설정 메일을 보낼까요?`)) return;
   try{
     await auth.sendPasswordResetEmail(email);
-    alert(email+" 로 재설정 메일을 보냈습니다.\n메일함(스팸함 포함)의 링크에서 새 비밀번호를 설정하세요.");
+    alert(email+" 로 재설정 메일을 보냈습니다.\n보낸 사람 noreply@splan-5512.firebaseapp.com · 몇 분 안에 오지 않으면 스팸함 · 프로모션함을 확인하세요.\n메일의 링크에서 새 비밀번호를 설정한 뒤 다른 기기에서도 그 비밀번호로 로그인하세요.");
   }catch(e){ console.error(e); alert("메일 발송 실패: "+authMessage(e.code)); }
 }
 async function sendResetMailTo(){
