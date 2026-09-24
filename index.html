@@ -165,6 +165,12 @@
     font-family:var(--sans);font-weight:800;font-size:14px;cursor:pointer;margin-top:8px}
   .qz-restart:hover{background:#946623}
 
+  /* planner embed */
+  #planner{padding-top:12px}
+  .pl-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;font-size:12px;color:var(--muted)}
+  .pl-bar a{color:var(--navy);font-weight:700;text-decoration:none;white-space:nowrap}
+  #plFrame{display:block;width:100%;border:0;border-radius:14px;background:#000;height:640px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+
   footer{text-align:center;color:var(--muted);font-size:11px;margin-top:26px;font-family:var(--mono)}
 </style>
 </head>
@@ -184,6 +190,7 @@
       <button class="tab" data-p="quiz">✅ 암기 테스트</button>
       <button class="tab" data-p="write">✍️ 답안작성·함정</button>
       <button class="tab" data-p="fix">🎯 오답 보강</button>
+      <button class="tab" data-p="planner">🗓️ 플래너</button>
     </nav>
   </div>
 </header>
@@ -1118,16 +1125,34 @@
   </div>
 </section>
 
+<!-- ============ 플래너 ============ -->
+<section class="panel" id="planner">
+  <div class="pl-bar"><span>할 일·오늘 일정·포커스 타이머·기록 — 데이터는 이 기기 브라우저에 저장됩니다.</span><a href="planner.html" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div>
+  <iframe id="plFrame" title="하루틀 플래너" loading="lazy"></iframe>
+</section>
+
 <footer>1~7회 모범답안·채점기준 + 7회 사건기록 풀이 통합 · 법령·판례는 시험 시점 최신본 재확인</footer>
 </div>
 
 <script>
 /* ---------- Tabs ---------- */
+/* ---------- Planner (planner.html 임베드) ---------- */
+function fitPlanner(){
+  const f=document.getElementById('plFrame'),h=document.querySelector('header').offsetHeight;
+  f.style.height=Math.max(520,window.innerHeight-h-60)+'px';
+}
+function openPlanner(){
+  const f=document.getElementById('plFrame');
+  if(!f.src)f.src='planner.html';
+  fitPlanner();
+}
+window.addEventListener('resize',()=>{if(document.getElementById('planner').classList.contains('on'))fitPlanner()});
 const nav=document.getElementById('nav');
 nav.addEventListener('click',e=>{
   const b=e.target.closest('.tab'); if(!b)return;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id===b.dataset.p));
+  if(b.dataset.p==='planner')openPlanner();
   window.scrollTo({top:0,behavior:'smooth'});
 });
 
@@ -1304,6 +1329,7 @@ async function saveBest(pct){
     return best;
   }catch(_){return null;}
 }
+if(location.hash==='#planner'){const b=document.querySelector('.tab[data-p="planner"]');b&&b.click();}
 </script>
 </body>
 </html>
