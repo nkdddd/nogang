@@ -1135,7 +1135,6 @@
 </div>
 
 <script>
-/* ---------- Tabs ---------- */
 /* ---------- Planner (planner.html 임베드) ---------- */
 function fitPlanner(){
   const f=document.getElementById('plFrame'),h=document.querySelector('header').offsetHeight;
@@ -1147,6 +1146,8 @@ function openPlanner(){
   fitPlanner();
 }
 window.addEventListener('resize',()=>{if(document.getElementById('planner').classList.contains('on'))fitPlanner()});
+
+/* ---------- Tabs ---------- */
 const nav=document.getElementById('nav');
 nav.addEventListener('click',e=>{
   const b=e.target.closest('.tab'); if(!b)return;
