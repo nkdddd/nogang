@@ -88,3 +88,11 @@ html[data-app] .nav .ic svg{width:22px;height:22px;}
 html[data-app="sentence"] body, html[data-app="words"] body{padding-bottom:calc(104px + env(safe-area-inset-bottom));}
 html[data-app="grammar"] #app{padding-bottom:calc(104px + env(safe-area-inset-bottom));}
 html[data-app] .toast{bottom:calc(92px + env(safe-area-inset-bottom));}
+
+/* ---------- PC 레이아웃 (assets/device.js 가 html[data-device] 설정) ---------- */
+html[data-device="pc"][data-app="sentence"] body,
+html[data-device="pc"][data-app="words"] body{max-width:760px;}
+html[data-device="pc"][data-app="grammar"] #app{max-width:760px;}
+html[data-device="pc"][data-app="grammar"] .nav{max-width:none;}
+html[data-device="pc"][data-app] .appbar{padding-top:22px;}
+html[data-device="pc"][data-app] .nav button:hover{background:var(--ui-bg);color:var(--ui-ink);}

@@ -11,6 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#F3F2F7">
 <meta name="color-scheme" content="light">
+<script src="assets/device.js"></script>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
   :root{
@@ -661,6 +662,86 @@
   .q-row .q-t{flex:1;min-width:0;font-size:13.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .q-row .q-m{font-size:12px;color:var(--muted2);white-space:nowrap;}
   .q-row input[type=number]{width:62px;border:1px solid var(--line);border-radius:10px;padding:6px;font-size:13.5px;}
+
+  /* =====================================================================
+   *  PC 레이아웃 (html[data-device="pc"]) — assets/device.js 가 판별
+   *  왼쪽 사이드바 메뉴 + 넓은 여러 칸 화면. 모바일은 위의 기본 레이아웃 그대로.
+   * ===================================================================== */
+  .side-brand,.fab-t{display:none;}
+  html[data-device="pc"] body{--side:248px;}
+  html[data-device="pc"] #app{max-width:none;margin:0 0 0 var(--side);padding:0 32px 48px;}
+  html[data-device="pc"] #app>*:not(.bnav){max-width:1200px;margin-left:auto;margin-right:auto;}
+  html[data-device="pc"] .topbar{padding:18px 0 12px;background:rgba(243,242,247,.92);}
+  html[data-device="pc"] .child-banner,html[data-device="pc"] .week-banner{margin:0 auto 10px;}
+  html[data-device="pc"] #examBanner>div{margin-left:0!important;margin-right:0!important;}
+  html[data-device="pc"] .page-h{padding:6px 0 14px;}
+  html[data-device="pc"] .page-h h2{font-size:36px;}
+  html[data-device="pc"] main{padding:0 0 24px;}
+  html[data-device="pc"] .seg{margin:0 0 16px;max-width:360px;}
+  html[data-device="pc"] .wstrip{padding:0 0 16px;gap:8px;}
+  html[data-device="pc"] .wday{padding:10px 0 8px;}
+
+  /* 사이드바 메뉴 */
+  html[data-device="pc"] .bnav{left:0;top:0;bottom:0;transform:none;width:var(--side);max-width:none;height:100vh;
+    flex-direction:column;align-items:stretch;gap:14px;padding:22px 16px;background:var(--surface);border-right:1px solid var(--line);}
+  html[data-device="pc"] .side-brand{display:flex;align-items:center;gap:10px;padding:2px 6px 14px;border-bottom:1px solid var(--line2);}
+  html[data-device="pc"] .side-logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#8F80FF,#6A58E6 55%,#5646D0);display:flex;align-items:center;justify-content:center;font-size:19px;flex:0 0 auto;}
+  html[data-device="pc"] .side-brand b{display:block;font-size:15px;letter-spacing:-.02em;}
+  html[data-device="pc"] .side-brand span{display:block;font-size:11.5px;color:var(--muted);}
+  html[data-device="pc"] .bnav-pill{flex:0 0 auto;flex-direction:column;gap:4px;padding:0;background:transparent;border:none;box-shadow:none;border-radius:0;}
+  html[data-device="pc"] .bnav-pill button{flex:0 0 auto;height:46px;flex-direction:row;justify-content:flex-start;gap:12px;padding:0 14px;border-radius:14px;font-size:14.5px;font-weight:700;}
+  html[data-device="pc"] .bnav-pill button:hover{background:var(--bg);color:var(--ink);}
+  html[data-device="pc"] .bnav-pill button.on{background:var(--accent-soft);color:var(--accent);}
+  html[data-device="pc"] .fab{width:100%;height:48px;border-radius:14px;gap:8px;font-weight:800;font-size:14.5px;box-shadow:0 6px 16px rgba(106,88,230,.3);}
+  html[data-device="pc"] .fab svg{width:20px;height:20px;}
+  html[data-device="pc"] .fab-t{display:inline;}
+  html[data-device="pc"] .toast-wrap{left:var(--side);bottom:28px;}
+
+  /* 할 일: 목록(왼쪽) + 요약 카드(오른쪽 고정) */
+  html[data-device="pc"] .day{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start;}
+  html[data-device="pc"] .day-list{grid-column:1;grid-row:1;}
+  html[data-device="pc"] .day-side{grid-column:2;grid-row:1;order:0;position:sticky;top:84px;grid-template-columns:1fr;max-height:calc(100vh - 100px);overflow:auto;padding-bottom:4px;}
+
+  /* 일정: 주간 7칸 */
+  html[data-device="pc"] .week{grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;}
+  html[data-device="pc"] .wcol{flex-direction:column;min-height:420px;}
+  html[data-device="pc"] .wcol-head{width:auto;flex:0 0 auto;border-right:none;border-bottom:1px solid var(--line2);padding:10px 4px 8px;}
+  html[data-device="pc"] .wcol-body{padding:8px;}
+  html[data-device="pc"] .wcard .tt{white-space:normal;}
+  html[data-device="pc"] .mgrid{grid-auto-rows:minmax(112px,auto);}
+  html[data-device="pc"] .mcell{min-height:112px;padding:8px;}
+  html[data-device="pc"] .cell-add{display:block;}
+
+  /* 학습: 앱 카드 3칸 */
+  html[data-device="pc"] .l-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start;}
+  html[data-device="pc"] .l-grid .lcard{margin-bottom:0;}
+  html[data-device="pc"] .l-hero{margin-bottom:18px;}
+  html[data-device="pc"] .lnote{margin-top:16px;}
+
+  /* 타이머: 다이얼(왼쪽) + 과제·사운드(오른쪽) */
+  html[data-device="pc"] .fo-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:start;}
+  html[data-device="pc"] .fo-grid .fo-wrap{margin-bottom:0;padding:28px 16px 32px;}
+  html[data-device="pc"] .fo-dial{width:320px;}
+
+  /* 기록: 요약·파트너(왼쪽) + 메뉴(오른쪽) */
+  html[data-device="pc"] .rec-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start;}
+  html[data-device="pc"] .rec-grid .r-sec:first-child{margin-top:0;}
+
+  /* 시트 → 오른쪽 패널 / 가운데 창 */
+  html[data-device="pc"] .overlay{align-items:stretch;}
+  html[data-device="pc"] .drawer,html[data-device="pc"] .drawer.wide{margin:0 0 0 auto;width:520px;max-width:92vw;height:100vh;max-height:none;border-radius:24px 0 0 24px;animation:panelIn .2s ease;}
+  html[data-device="pc"] .modal{margin:auto;max-width:560px;border-radius:24px;animation:none;}
+  @keyframes panelIn{from{transform:translateX(24px);opacity:.6}to{transform:none;opacity:1}}
+
+  /* 작은 PC(노트북) 화면: 사이드바·요약 칸을 좁게 */
+  @media (max-width:1200px){
+    html[data-device="pc"] body{--side:216px;}
+    html[data-device="pc"] #app{padding:0 22px 40px;}
+    html[data-device="pc"] .day{grid-template-columns:minmax(0,1fr) 290px;gap:16px;}
+    html[data-device="pc"] .l-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
+  /* 학습앱 전체 화면: 사이드바는 그대로 두고 오른쪽에 */
+  html[data-device="pc"] .lapp{left:var(--side);border-left:1px solid var(--line);}
 </style>
 </head>
 <body>
@@ -723,6 +804,7 @@
   <main id="main"></main>
 
   <nav class="bnav" aria-label="주 메뉴">
+    <div class="side-brand"><span class="side-logo">🎓</span><div><b>우리집 학습플래너</b><span>계획 · 실천 · 점검</span></div></div>
     <div class="bnav-pill">
       <button data-tab="todo" onclick="setTab('todo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12 3 3 5-6"/></svg>할 일</button>
       <button data-tab="plan" onclick="setTab('plan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="4.5" width="17" height="16" rx="3.5"/><path d="M3.5 9h17M8 3v3M16 3v3" stroke-linecap="round"/><text id="tabDate" x="12" y="18.2" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">1</text></svg>일정</button>
@@ -730,7 +812,7 @@
       <button data-tab="timer" onclick="setTab('timer')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3.5a8.5 8.5 0 1 1-8.5 8.5" opacity=".35"/><path d="M12 3.5a8.5 8.5 0 0 0-8.5 8.5"/></svg><span class="lbl">타이머</span></button>
       <button data-tab="stats" onclick="setTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="13" width="4" height="7" rx="1.2"/><rect x="10" y="9" width="4" height="11" rx="1.2"/><rect x="16" y="4" width="4" height="16" rx="1.2"/></svg>기록</button>
     </div>
-    <button class="fab" title="빠르게 계획 세우기" aria-label="빠르게 계획 세우기" onclick="openQuick()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 16.5l-1.8-5.2L5 9.5l5.2-1.8zM18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg></button>
+    <button class="fab" title="빠르게 계획 세우기" aria-label="빠르게 계획 세우기" onclick="openQuick()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 16.5l-1.8-5.2L5 9.5l5.2-1.8zM18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg><span class="fab-t">빠른 계획</span></button>
   </nav>
 </div>
 
@@ -2582,7 +2664,7 @@ function renderLearn(){
     <div class="per">${Object.keys(EXT_APPS).map(k=>`<span>${EXT_APPS[k].emo} ${EXT_APPS[k].short} ${cr.per[k]||0}분</span>`).join("")}</div>
   </div>`;
   const cards=Object.keys(EXT_APPS).map(k=>learnCard(k, d[k], cr.per[k]||0)).join("");
-  return `${hero}${cards}
+  return `${hero}<div class="l-grid">${cards}</div>
     <div class="lnote">📌 세 앱은 플래너와 <b>같은 계정</b>으로 기록이 저장돼요. 공부한 양은 날짜별로 학습시간에 더해지고
       (앱별 하루 ${c.dailyCapPerApp}분까지), 이번 주 용돈 정산의 학습시간에도 반영됩니다.
       ${state.profile.role==="parent"||!state.viewingChild?`<a href="#" onclick="drawExtApps();return false" style="color:var(--accent);font-weight:800;text-decoration:none">인정 시간 설정 ›</a>`:""}
@@ -2642,6 +2724,7 @@ function closeLearnApp(silent){
   w.remove(); document.body.classList.remove("lapp-open");
   if(!silent){ state.extCache=null; render(); }   // 방금 공부한 기록 다시 읽기
 }
+Device.onChange(()=>{ if(state.profile) render(); });
 window.addEventListener("popstate", ()=>{ if(document.getElementById("learnApp")) closeLearnApp(); });
 
 /* ----- 기록 탭 ----- */
@@ -2658,8 +2741,8 @@ function renderRecord(){
       <div class="r-stat"><div class="e">✅</div><b>${tot?tot.count:"–"}</b><span>이번 주 완료</span></div>
       <div class="r-stat"><div class="e">⏱</div><b>${tot? tot.min+extMin : "–"}</b><span>이번 주 학습(분)</span></div>
     </div>`;
-  return `${stats}
-    ${renderMonCard()}
+  return `<div class="rec-grid"><div>${stats}
+    ${renderMonCard()}</div><div>
     <div class="r-sec">학습 현황</div>
     ${hubItem("📊","대시보드","이행률·연속 학습·과목별 시간·성취 뱃지","openDrawer('dash')")}
     ${hubItem("📋","주간 마감 리포트","이번 주 요약 · 부족한 과목 점검","drawWeekReport()")}
@@ -2669,7 +2752,7 @@ function renderRecord(){
     ${hubItem("💰","용돈 정산","이번 주 달성도와 지급액 확인","openDrawer('allowance')")}
     ${hubItem("🎟️","보상 쿠폰","시간 이용권 · 게임방 충전권","drawCoupons()")}
     ${isParent? hubItem("🏆","주간 학습 대결","자녀 순위와 챔피언 인증카드","drawBattle()") : ""}
-    ${hubItem("🚀","부스터 모드","시험 D-day · 목표시간 상향 · 용돈 배율","drawBooster()")}`;
+    ${hubItem("🚀","부스터 모드","시험 D-day · 목표시간 상향 · 용돈 배율","drawBooster()")}</div></div>`;
 }
 
 /* ----- ⋯ 메뉴 ----- */
@@ -2694,6 +2777,11 @@ function openMenu(){
     ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🐣","내 파트너","파트너 성장 · 쿠폰 · 뱃지","drawManage()")}
     ${hubItem("⚙️","설정","계정 · 목표시간 · 방학 · 과목/교재 · 템플릿","openDrawer('settings')")}
     ${hubItem("🔗","학습앱 인정 시간","천문장 · 영단어 · 문법 환산과 상한","drawExtApps()")}
+    <div class="r-sec">화면 보기</div>
+    <div class="seg" style="margin:0 0 10px">
+      ${[["auto","자동"],["pc","PC"],["mobile","모바일"]].map(([k,l])=>`<button class="${Device.pref()===k?"on":""}" onclick="Device.set('${k}');openMenu()">${l}</button>`).join("")}
+    </div>
+    <div style="font-size:11.5px;color:#8F8D9B;margin:-4px 2px 12px">자동: 화면 크기와 마우스 사용 여부로 PC·모바일을 골라요. 지금은 <b>${Device.get()==="pc"?"PC":"모바일"}</b> 화면이에요.</div>
     ${hubItem("🚪","로그아웃","","closeDrawer();logout()")}
   `);
 }
@@ -2830,15 +2918,18 @@ function renderFocus(){
       ${focusTasks&&!focusTasks.length?`<div class="fo-hint">오늘 남은 과제가 없어요. <a href="#" onclick="setTab('todo');return false">할 일</a>에서 먼저 추가할 수 있어요.</div>`:""}
     </div>` : "";
   const td=focusToday||{min:0,sessions:0};
-  return `<div class="fo-wrap">
+  return `<div class="fo-grid">
+    <div class="fo-wrap">
       ${body}
     </div>
+    <div>
     ${tsel}
     ${sound}
     <div class="r-grid" style="grid-template-columns:1fr 1fr;margin-top:12px">
       <div class="r-stat"><div class="e">⏱</div><b>${td.min||0}</b><span>오늘 집중(분)</span></div>
       <div class="r-stat"><div class="e">🍅</div><b>${td.sessions||0}</b><span>완료한 집중</span></div>
-    </div>`;
+    </div>
+    </div></div>`;
 }
 function bindFocusDial(){
   const dial=document.getElementById("foDial"); if(!dial) return;
