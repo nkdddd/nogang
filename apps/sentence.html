@@ -1501,6 +1501,9 @@ function endSession(){
 }
 function gradeCard(n,correct){
   const c=S.cards[n];c.seen++;
+  // 통합 DB: 날짜별(현지 날짜) 맞힘/틀림 — 플래너가 정답률 보너스를 계산
+  { const d=new Date(), k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(!S.dayStat)S.dayStat={}; const st=S.dayStat[k]||(S.dayStat[k]={ok:0,no:0}); if(correct)st.ok++; else st.no++; }
   if(correct){c.ok++;c.box=Math.min(c.box+1,5);S.pts+=10; if(c.box>=3)c.weak=false;}
   else{c.no++;c.box=Math.max(c.box-1,0);S.pts+=2; c.weak=true;}
   c.due=Date.now()+INTERVALS[c.box]*DAY;
