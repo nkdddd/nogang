@@ -58,25 +58,10 @@ giUsers/{uid}, giFriendRequests 그래머 인사이드 친구 랭킹용 공개 �
 
 예전 6자리 코드(`codes/`)로 연결된 가족은 그대로 유지됩니다. 새로 만드는 계정에는 코드가 생기지 않습니다.
 
-### 필요한 Firestore 보안 규칙 (기존 규칙에 추가)
+### Firebase 설정 (프로젝트 `splan-5512` 그대로 사용)
 
-```
-match /familyRequests/{id} {
-  allow create: if request.auth != null && request.resource.data.fromUid == request.auth.uid;
-  allow read, update: if request.auth != null && (
-       resource.data.fromUid == request.auth.uid
-    || resource.data.toEmail == request.auth.token.email.lower());
-  allow delete: if request.auth != null && resource.data.fromUid == request.auth.uid;
-}
-// 부모가 자녀 연결을 만들 때: 승인된 신청이 있어야만 허용하도록 강화하는 예 (rules_version = '2')
-function acceptedLink(parent, child, rid) {
-  let r = get(/databases/$(database)/documents/familyRequests/$(rid)).data;
-  return r.status == "accepted"
-    && ((r.fromUid == parent && r.toUid == child) || (r.fromUid == child && r.toUid == parent));
-}
-match /links/{parent}/children/{child} {
-  allow read, delete: if request.auth != null && request.auth.uid == parent;
-  allow create, update: if request.auth != null && request.auth.uid == parent
-    && acceptedLink(parent, child, request.resource.data.requestId);
-}
-```
+1. **Authentication → 설정 → 승인된 도메인**에 `nkdddd.github.io` 추가 (없으면 사이트에서 로그인이 막힘)
+2. **Authentication → 로그인 방법**에서 이메일/비밀번호가 사용 설정인지 확인
+3. **Firestore Database → 규칙**: 지금 규칙을 백업한 뒤 저장소의 [`firestore.rules`](firestore.rules) 내용을 통째로 붙여넣고 게시
+   - 본인 · 연결된 부모만 `planner/{uid}/**`와 프로필을 읽고 쓸 수 있습니다.
+   - 가족 연결은 승인된 신청이 있어야만 만들어집니다.

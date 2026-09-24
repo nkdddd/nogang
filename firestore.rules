@@ -1,0 +1,76 @@
+rules_version = '2';
+// 우리집 학습플래너 (플래너 · 천문장 · MD영단어 · 그래머 인사이드) — Firebase 프로젝트 splan-5512
+// Firebase 콘솔 → Firestore Database → 규칙 탭에 통째로 붙여넣고 '게시'하세요.
+// (바꾸기 전에 지금 규칙을 복사해 백업해 두세요.)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isMe(uid) { return signedIn() && request.auth.uid == uid; }
+    // 가족 연결된 부모인가: links/{부모uid}/children/{자녀uid} 가 있으면 부모
+    function isParentOf(uid) {
+      return signedIn() && exists(/databases/$(database)/documents/links/$(request.auth.uid)/children/$(uid));
+    }
+    function myEmail() { return request.auth.token.email.lower(); }
+
+    // 프로필 {name, role, email} — 본인, 연결된 부모만
+    match /users/{uid} {
+      allow read: if isMe(uid) || isParentOf(uid);
+      allow write: if isMe(uid);
+    }
+
+    // 플래너 · 학습앱 기록 전체 (tasks, meta, diary, apps/*, focus, payouts …)
+    // 부모는 연결된 자녀의 기록을 보고, 코멘트 · 용돈 지급 · 쿠폰 발급 등을 기록합니다.
+    match /planner/{uid}/{document=**} {
+      allow read, write: if isMe(uid) || isParentOf(uid);
+    }
+
+    // 가족 연결 신청 (이메일로 신청 → 받은 사람이 승인)
+    match /familyRequests/{id} {
+      allow create: if signedIn() && request.resource.data.fromUid == request.auth.uid
+                    && request.resource.data.status == "pending";
+      allow read: if signedIn() && (resource.data.fromUid == request.auth.uid || resource.data.toEmail == myEmail());
+      // 보낸 사람은 취소·해제, 받은 사람은 승인·거절 (받은 사람은 toUid에 자기 uid만 넣을 수 있음)
+      allow update: if signedIn()
+                    && (resource.data.fromUid == request.auth.uid
+                        || (resource.data.toEmail == myEmail() && request.resource.data.toUid == request.auth.uid))
+                    && request.resource.data.fromUid == resource.data.fromUid
+                    && request.resource.data.toEmail == resource.data.toEmail;
+      allow delete: if signedIn() && resource.data.fromUid == request.auth.uid;
+    }
+
+    // 부모-자녀 연결: 부모 본인만, 새로 만들 때는 승인된 신청이 있어야 함
+    function acceptedLink(parent, child, rid) {
+      let r = get(/databases/$(database)/documents/familyRequests/$(rid)).data;
+      return r.status == "accepted"
+        && ((r.fromUid == parent && r.toUid == child) || (r.fromUid == child && r.toUid == parent));
+    }
+    match /links/{parent}/children/{child} {
+      allow read, delete: if isMe(parent);
+      allow create, update: if isMe(parent) && request.resource.data.requestId is string
+                            && acceptedLink(parent, child, request.resource.data.requestId);
+    }
+
+    // 예전 6자리 코드 (더 이상 만들지 않음) — 탈퇴할 때 본인 코드 삭제만
+    match /codes/{code} {
+      allow read: if signedIn();
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // MD영단어 예문 캐시 (모든 사용자 공용)
+    match /sentences/{id} {
+      allow read, write: if signedIn();
+    }
+
+    // 그래머 인사이드 친구 랭킹
+    match /giUsers/{uid} {
+      allow read: if signedIn();
+      allow write: if isMe(uid);
+    }
+    match /giFriendRequests/{id} {
+      allow create: if signedIn() && request.resource.data.fromUid == request.auth.uid;
+      allow read: if signedIn() && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
+      allow update: if signedIn() && resource.data.toUid == request.auth.uid;
+    }
+  }
+}
