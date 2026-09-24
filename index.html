@@ -786,6 +786,9 @@
   }
   /* 학습앱 전체 화면: 사이드바는 그대로 두고 오른쪽에 */
   html[data-device="pc"] .lapp{left:var(--side);border-left:1px solid var(--line);}
+.pw-wrap{position:relative}.pw-wrap .inp{padding-right:44px}
+.pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;font-size:17px;cursor:pointer;padding:6px;opacity:.7}
+.pw-warn{margin-top:6px;font-size:12px;color:#C2410C;background:#FFF7ED;border-radius:8px;padding:7px 9px;line-height:1.45}
 </style>
 </head>
 <body>
@@ -802,8 +805,12 @@
     </div>
     <div id="authErr" class="auth-err hidden"></div>
 
-    <div class="fld"><label>이메일</label><input id="email" class="inp" type="email" placeholder="example@email.com" autocomplete="email"></div>
-    <div class="fld"><label>비밀번호</label><input id="pw" class="inp" type="password" placeholder="6자 이상" autocomplete="current-password"></div>
+    <div class="fld"><label>이메일</label><input id="email" class="inp" type="email" placeholder="example@email.com" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <div class="fld"><label>비밀번호</label>
+      <div class="pw-wrap"><input id="pw" class="inp" type="password" placeholder="6자 이상" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" oninput="pwCheck()" onkeyup="pwCheck(event)">
+        <button type="button" class="pw-eye" onclick="togglePwShow()" aria-label="비밀번호 보기">👁</button></div>
+      <div id="pwWarn" class="pw-warn hidden"></div></div>
+    <div id="pw2Row" class="fld hidden"><label>비밀번호 확인</label><input id="pw2" class="inp" type="password" placeholder="한 번 더 입력" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
 
     <div id="signupExtra" class="hidden">
       <div class="fld"><label>이름</label><input id="name" class="inp" type="text" placeholder="표시될 이름"></div>
@@ -1199,7 +1206,22 @@ function toggleAuthMode(){
   document.getElementById("switchLink").textContent = signup?"로그인":"회원가입";
   document.getElementById("pw").autocomplete = signup?"new-password":"current-password";
   document.getElementById("resetRow").classList.toggle("hidden", signup);
+  document.getElementById("pw2Row").classList.toggle("hidden", !signup);
+  document.getElementById("pw2").value="";
   showAuthErr("");
+}
+// 비밀번호 보기 · 한글/Caps Lock 경고 — 가입 때 잘못 친 비밀번호로 다른 기기에서 로그인 못 하는 일 방지
+function togglePwShow(){
+  const show=document.getElementById("pw").type==="password";
+  ["pw","pw2"].forEach(id=>{ document.getElementById(id).type=show?"text":"password"; });
+}
+function pwCheck(ev){
+  const v=document.getElementById("pw").value, w=document.getElementById("pwWarn");
+  const msg=[];
+  if(/[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(v)) msg.push("한글이 입력됐어요. 한/영 키를 눌러 영문으로 바꿔 주세요.");
+  if(/^\s|\s$/.test(v)) msg.push("비밀번호 앞뒤에 빈칸이 있어요.");
+  if(ev && ev.getModifierState && ev.getModifierState("CapsLock")) msg.push("Caps Lock이 켜져 있어요 (대문자로 입력돼요).");
+  w.textContent=msg.join(" "); w.classList.toggle("hidden", !msg.length);
 }
 async function resetPassword(){
   if(!CONFIGURED){ showAuthErr("먼저 Firebase 설정을 입력해 주세요."); return; }
@@ -1221,8 +1243,10 @@ function authMessage(code){
   const m={
     "auth/invalid-email":"이메일 형식이 올바르지 않습니다.",
     "auth/user-not-found":"등록되지 않은 이메일입니다.",
-    "auth/wrong-password":"비밀번호가 올바르지 않습니다.",
-    "auth/invalid-credential":"이메일 또는 비밀번호가 올바르지 않습니다.",
+    "auth/wrong-password":"비밀번호가 올바르지 않습니다. 기억나지 않으면 아래 '비밀번호를 잊으셨나요?'로 새로 정하세요.",
+    "auth/invalid-credential":"이메일 또는 비밀번호가 올바르지 않습니다. 👁 버튼으로 입력한 비밀번호를 확인해 보고, 기억나지 않으면 아래 '비밀번호를 잊으셨나요?'로 새로 정하세요.",
+    "x/hangul-pw":"비밀번호에 한글이 들어갔어요. 한/영 키로 영문으로 바꿔 다시 입력해 주세요.",
+    "x/pw-mismatch":"비밀번호와 비밀번호 확인이 달라요. 다시 입력해 주세요.",
     "auth/email-already-in-use":"이미 사용 중인 이메일입니다.",
     "auth/weak-password":"비밀번호는 6자 이상이어야 합니다.",
     "auth/too-many-requests":"잠시 후 다시 시도해 주세요.",
@@ -1252,7 +1276,9 @@ async function submitAuth(){
   const btn=document.getElementById("authBtn"); btn.disabled=true;
   showAuthErr("");
   try{
+    if(/[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(pw)) throw {code:"x/hangul-pw"};
     if(authMode==="signup"){
+      if(pw!==document.getElementById("pw2").value) throw {code:"x/pw-mismatch"};
       const name=document.getElementById("name").value.trim()||"사용자";
       // 프로필/코드 생성은 로그인 상태 핸들러에서 안전하게 처리
       pendingSignup={name, role:pendingRole};
