@@ -13,6 +13,8 @@
 | `assets/theme.css`, `assets/theme.js` | 공용 디자인 — 세 학습앱의 색·글꼴·카드·아래쪽 메뉴를 플래너와 같게 |
 | `assets/family.js` | 공용 가족 연결 (이메일 신청 → 승인) |
 | `assets/device.js` | 사용 환경(PC · 모바일) 판별 → `<html data-device>` 설정, 네 화면 공용 |
+| `assets/push-config.js` · `firebase-messaging-sw.js` · `manifest.webmanifest` | 휴대폰 푸시(웹 푸시 키) · 푸시 수신 서비스 워커 · 홈 화면 설치 정보 |
+| `tools/weekly-allowance.mjs` · `.github/workflows/weekly-allowance.yml` | 매주 토 18시 부모에게 용돈 알림 (GitHub Actions) |
 | `assets/focus-sounds.js` | 포커스 타이머용 집중 사운드 (브라우저에서 직접 생성 · 음원 파일 없음) |
 
 학습 탭에서 앱을 누르면 플래너 위에 전체 화면으로 열립니다. 같은 사이트·같은 Firebase 프로젝트라 **한 번 로그인하면 네 화면 모두 같은 계정**으로 동작합니다. 각 앱 파일은 단독으로 열어도 됩니다.
@@ -31,6 +33,10 @@ planner/{uid}/
   apps/sentence                 천문장 학습 상태 + summary + dayLog{날짜: 문장 수}
   apps/words                    MD영단어 state(날짜별 log 포함) + summary
   focus/{날짜}                   포커스 타이머 기록 {min, sessions}
+  allowanceSnap/{토요일}         그 주 용돈 계산 결과 (학생 플래너가 마감 전까지 갱신)
+  notices/{토요일}               (부모) 용돈 정산서 · 읽음 여부
+  pushTokens/{토큰}              (부모) 푸시 받을 기기
+  meta/notify                    (부모) 알림 설정 {push, email, emailTo}
   apps/grammar                  그래머 인사이드 상태 + summary + dayLog{날짜: {sec, answered, correct, cards}}
 
 giUsers/{uid}, giFriendRequests 그래머 인사이드 친구 랭킹용 공개 요약
@@ -47,6 +53,27 @@ giUsers/{uid}, giFriendRequests 그래머 인사이드 친구 랭킹용 공개 �
 - PC 화면: 왼쪽 사이드바 메뉴, 할 일 목록 + 오른쪽 요약, 주간 일정 7칸, 학습앱 카드 3칸, 타이머·기록 2칸, 설정·메뉴는 오른쪽 패널.
 - 모바일 화면: 아래쪽 떠 있는 메뉴와 한 줄 레이아웃.
 - 직접 고르기: ⋯ 메뉴 → **화면 보기**(자동 · PC · 모바일). 학습앱에도 같이 적용됩니다.
+
+## 💰 토요일 18시 용돈 알림
+
+- 학습 주간은 **일요일 ~ 토요일 18시 마감**. 토 18시 이후는 다음 주 계획 시간입니다.
+- 학생 플래너가 열려 있을 때(학습 기록·학습앱·타이머가 바뀔 때마다) 이번 주 용돈을 계산해 `allowanceSnap`에 저장합니다.
+  (학생 기기에서 한 번도 계산되지 않은 주는 부모 기기가 대신 계산)
+- **매주 토 18시(한국 시간)** GitHub Actions가 스냅샷을 모아 부모에게 📱 휴대폰 푸시와 ✉️ 이메일을 보내고, 앱 안 정산서를 남깁니다.
+  부모가 앱을 열면 **기록** 탭 맨 위에 정산서가 뜨고, 누르면 그 주 용돈 정산 화면이 열립니다.
+- 부모: ⋯ 메뉴 → **🔔 용돈 알림**에서 이 기기 푸시 켜기 · 받을 이메일 · 받기 여부를 정합니다.
+
+### 알림 설정 (관리자, 한 번만)
+
+1. **예약 실행 권한**: Firebase 콘솔 → 프로젝트 설정 → 서비스 계정 → **새 비공개 키 생성** → 받은 JSON 전체를
+   GitHub 저장소 → Settings → Secrets and variables → Actions → New repository secret → 이름 `FIREBASE_SERVICE_ACCOUNT` 로 저장
+2. **휴대폰 푸시**: Firebase 콘솔 → 프로젝트 설정 → 클라우드 메시징 → 웹 구성 → 웹 푸시 인증서 → **키 쌍 생성** →
+   나온 공개 키를 `assets/push-config.js`의 `vapidKey`에 넣기 (공개 키라 올려도 안전)
+   - iPhone은 Safari 공유 버튼 → **홈 화면에 추가**로 설치한 앱에서만 푸시를 받을 수 있습니다 (iOS 16.4 이상).
+3. **이메일**: 보낼 Gmail 계정에서 2단계 인증을 켜고 **앱 비밀번호**를 만든 뒤, Secrets에 `GMAIL_USER`(주소) · `GMAIL_APP_PASSWORD` 저장
+4. 확인: GitHub → Actions → **주간 용돈 알림** → Run workflow (`dry_run`=1 이면 보내지 않고 내용만 확인)
+
+GitHub의 예약 실행은 붐비는 시간에 몇 분~수십 분 늦을 수 있습니다.
 
 ## ⏱ 포커스 타이머
 
