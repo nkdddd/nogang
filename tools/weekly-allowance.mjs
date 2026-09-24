@@ -28,6 +28,7 @@ function labelOf(weekId) {
 export function messageFor(items, label) {
   const hm = m => { m = Math.round(Number(m) || 0); return m >= 60 ? `${Math.floor(m / 60)}시간${m % 60 ? " " + (m % 60) + "분" : ""}` : `${m}분`; };
   const lines = items.map(i => i.amount == null ? `${i.name}: 이번 주 기록 없음`
+    : i.timePay != null ? `${i.name}: ${won(i.amount)} (시간 ${won(i.timePay)} + 앱 ${won(i.appBonus)} + 모의고사 ${won(i.mockBonus)})`
     : i.payMin != null ? `${i.name}: ${won(i.amount)} (타이머 ${hm(i.payMin)} × 1시간 ${won(i.rate)})`
     : `${i.name}: ${won(i.amount)} (${i.weekMin}분)`);
   const total = items.reduce((a, i) => a + (Number(i.amount) || 0), 0);
@@ -42,7 +43,8 @@ export function emailHTML(parentName, items, label, siteUrl) {
       <td style="padding:10px 12px;border-bottom:1px solid #eee;font-weight:700">${esc(i.name)}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;font-weight:800;font-size:16px">${i.amount == null ? "기록 없음" : won(i.amount)}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #eee;color:#6D6B7A;font-size:12.5px">${i.amount == null ? "이번 주 플래너 기록이 없어요" :
-        (i.payMin != null ? `타이머 ${i.payMin}분 × 1시간당 ${won(i.rate)}${i.extMin ? ` (학습앱 ${i.extMin}분 포함)` : ""}` : `학습 ${i.weekMin}분`)
+        (i.timePay != null ? `⏱ 타이머 ${i.payMin}분 × ${won(i.rate)} = ${won(i.timePay)}${i.boost ? " (시험기간)" : ""}<br>📚 학습앱 정답률 ${i.appAcc == null ? "–" : Math.round(i.appAcc * 100) + "%"} +${won(i.appBonus)} · 📝 모의고사 ${i.mockAcc == null ? "미입력" : Math.round(i.mockAcc * 100) + "%"} +${won(i.mockBonus)}<br>`
+          : i.payMin != null ? `타이머 ${i.payMin}분 × 1시간당 ${won(i.rate)}${i.extMin ? ` (학습앱 ${i.extMin}분 포함)` : ""}` : `학습 ${i.weekMin}분`)
         + ` · 완료 ${i.done}/${i.planned} · 학습일 ${i.studyDays}일${i.paid ? " · 지급 완료" : ""}`}</td></tr>`).join("");
   const total = items.reduce((a, i) => a + (Number(i.amount) || 0), 0);
   return `<div style="font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;max-width:560px;margin:0 auto;color:#1C1B24">
@@ -52,7 +54,7 @@ export function emailHTML(parentName, items, label, siteUrl) {
     </div>
     <p style="margin:16px 4px 8px">${esc(parentName || "부모")}님, 자녀들의 이번 주 학습 결과에 따라 책정된 용돈이에요.</p>
     <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #eee;border-radius:12px">${rows}</table>
-    <p style="margin:16px 4px;font-size:13px;color:#6D6B7A">용돈 = 타이머로 공부한 시간 × 부모님이 정한 1시간당 금액 (하루·주간 최대까지)이에요.
+    <p style="margin:16px 4px;font-size:13px;color:#6D6B7A">주간 용돈 = 타이머로 공부한 시간 × 1시간당 금액(평소 최대 1만 원 · 시험기간 2만 원) + 학습앱 정답률 보너스 + 주간 모의고사 보너스예요.
       플래너 → 기록 → 용돈 정산에서 금액을 고친 뒤 지급할 수 있어요.</p>
     <a href="${esc(siteUrl)}" style="display:inline-block;background:#1C1B24;color:#fff;text-decoration:none;border-radius:999px;padding:12px 20px;font-weight:800">플래너에서 정산하기 ›</a>
   </div>`;
@@ -81,6 +83,8 @@ export async function run({ db, messaging, auth, mailer, env = {}, log = console
       const s = snap.exists ? snap.data() : null;
       items.push({ uid: cid, name, amount: s ? s.amount : null, pct: s ? s.pct : null, weekMin: s ? s.weekMin : null, extMin: s ? s.extMin : 0,
         payMin: s && s.payMin != null ? s.payMin : null, rate: s ? s.rate : null,
+        timePay: s && s.timePay != null ? s.timePay : null, appBonus: s ? s.appBonus || 0 : 0, mockBonus: s ? s.mockBonus || 0 : 0,
+        appAcc: s && s.appAcc != null ? s.appAcc : null, mockAcc: s && s.mockAcc != null ? s.mockAcc : null, boost: s ? !!s.boost : false,
         done: s ? s.done : null, planned: s ? s.planned : null, studyDays: s ? s.studyDays : null, paid: s ? !!s.paid : false, updatedAt: s ? s.updatedAt : null });
     }
     const msg = messageFor(items, label);

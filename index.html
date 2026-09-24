@@ -625,6 +625,21 @@
   .pb-total{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-top:1px dashed var(--line);margin-top:6px;padding-top:8px;font-size:13px;}
   .pb-total>b{font-size:18px;color:#0E7A55;}
   .pb-ref{font-size:11.5px;color:var(--muted);margin:0 2px 8px;line-height:1.5;}
+  .pb-head{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:13.5px;margin-bottom:4px;}
+  .pb-head span{font-size:11.5px;color:var(--muted2);font-weight:600;}
+  .pb-sub{font-size:11.5px;color:var(--muted2);margin:2px 0 4px;line-height:1.5;}
+  .pb-sub.warn{color:#A5323A;}
+  .pb-total em{font-style:normal;font-size:11px;color:#8A6516;}
+  .pb-formula{font-size:12.5px;color:var(--slate);text-align:right;margin:10px 2px 0;font-weight:700;}
+  .mock-det{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:10px 12px;margin:0 0 8px;}
+  .mock-det summary{cursor:pointer;font-weight:800;font-size:13px;}
+  .mock-range{display:grid;gap:6px;margin-top:8px;}
+  .mock-range div{display:flex;gap:8px;font-size:12.5px;line-height:1.5;}
+  .mock-range b{flex:0 0 auto;min-width:44px;}
+  .mock-range span{color:var(--muted2);}
+  .mock-entry{background:var(--bg);border-radius:14px;padding:10px 12px;margin-top:8px;}
+  .me-row{display:flex;align-items:center;gap:6px;}
+  .me-row .inp{flex:1;min-width:0;padding:8px 10px;}
   .pb-note{font-size:11.5px;color:#8A6516;margin:6px 2px 0;}
   .amt-inp{font-size:20px;font-weight:800;color:#0E7A55;padding:6px 10px;margin-top:3px;}
   .pay-terms{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -1364,7 +1379,7 @@ async function drawWeekReport(){
       tasks=ts.docs.map(d=>d.data());
       if(cd.exists) cats=cd.data();
       if(sd.exists && sd.data().allowance) crit={...crit, ...sd.data().allowance};
-      crit={...crit, ...payTermsOf(crit, await fetchPayTerms(who.uid))};
+      crit={...crit, exams:(sd.exists&&sd.data().exams)||[], ...payTermsOf(crit, await fetchPayTerms(who.uid))};
     }catch(e){ console.error(e); }
     const w=weeklySummary(tasks, days, cats, crit);
     const pct=Math.round(w.r.achievement*100);
@@ -1976,6 +1991,7 @@ function extNormalize(kind, d){
   const today=fmt(new Date()), days={};
   if(kind==="sentence"){
     Object.entries(d.dayLog||{}).forEach(([ds,n])=>{ days[ds]={n:num(n)}; });
+    Object.entries(d.dayStat||{}).forEach(([ds,x])=>{ days[ds]={...(days[ds]||{n:0}), ok:num(x&&x.ok), no:num(x&&x.no)}; });
     if(d.todayDate && num(d.todayCount)) days[d.todayDate]={n:Math.max(num(d.todayCount),(days[d.todayDate]||{}).n||0)};
     const s=d.summary||{};
     return {days, sum:{today:(days[today]||{}).n||0, goal:num(d.goal||s.goal)||8, streak:num(d.streak),
@@ -2131,13 +2147,13 @@ async function drawBooster(){
         <div style="font-weight:800;font-size:16px;color:#A5323A;margin-top:2px">${esc(e.name||"시험")} ${examDday(e)>0?`D-${examDday(e)}`:"D-DAY!"}</div>
         <div style="font-size:12.5px;color:#8A6516;margin-top:6px;line-height:1.6">
           부스터 모드 작동 중 · 일일 목표 <b>+${e.boost||150}분</b><br>
-          이 기간 용돈 포인트 <b style="color:#A5323A">×${(Number(e.rate)||1.5)}배</b> 지급
+          이 기간 <b style="color:#A5323A">시간 용돈 최대 ${wonFmt(payTermsOf(null,state.payTermsRaw).boostCap)}</b> (1시간당 금액은 그대로)
         </div>
       </div>`
     : `<div style="background:#F8FAFC;border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;margin-bottom:14px;color:#64748B">
         <div style="font-size:28px">🎯</div>
         <div style="font-weight:800;font-size:14.5px;margin-top:4px">지금은 평상 모드예요</div>
-        <div style="font-size:12.5px;margin-top:5px;line-height:1.55">시험 날짜를 등록하면 그 기간 동안<br>목표시간이 올라가고 <b>용돈 포인트가 1.5배</b>가 됩니다.</div>
+        <div style="font-size:12.5px;margin-top:5px;line-height:1.55">시험 날짜를 등록하면 그 기간 동안<br>목표시간이 올라가고 <b>시간 용돈 상한이 2만 원</b>으로 오릅니다.</div>
       </div>`;
   document.getElementById("drawerRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeDrawer()"><div class="drawer wide">
     <div class="drawer-head"><h3>🚀 부스터 모드</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
@@ -2151,7 +2167,6 @@ async function drawBooster(){
         <div><label class="fld-lbl">시험 날짜</label><input class="inp" type="date" id="examDate" min="${today}"></div>
         <div><label class="fld-lbl">대비 시작 (D-)</label><input class="inp" type="number" id="examPrep" value="14"></div>
         <div><label class="fld-lbl">일일 목표 상향(분)</label><input class="inp" type="number" id="examBoost" value="150"></div>
-        <div><label class="fld-lbl">용돈 배율</label><input class="inp" type="number" step="0.1" id="examRate" value="1.5"></div>
       </div>
       <button class="add-btn" style="width:100%;margin-top:10px" onclick="addExam()">🚀 부스터 기간 추가</button>
       <div style="font-size:12px;color:#64748B;margin-top:12px;line-height:1.6;background:#F8FAFC;border-radius:9px;padding:11px">
@@ -2807,7 +2822,7 @@ function renderRecord(){
     ${hubItem("💰","용돈 정산","이번 주 달성도와 지급액 확인","openDrawer('allowance')")}
     ${hubItem("🎟️","보상 쿠폰","시간 이용권 · 게임방 충전권","drawCoupons()")}
     ${isParent? hubItem("🏆","주간 학습 대결","자녀 순위와 챔피언 인증카드","drawBattle()") : ""}
-    ${hubItem("🚀","부스터 모드","시험 D-day · 목표시간 상향 · 용돈 배율","drawBooster()")}</div></div>`;
+    ${hubItem("🚀","부스터 모드","시험 D-day · 목표시간 상향 · 시간 용돈 상한 2만 원","drawBooster()")}</div></div>`;
 }
 
 /* ----- ⋯ 메뉴 ----- */
@@ -3146,14 +3161,16 @@ async function saveAllowanceSnap(uid, name){
   const [tasks, crit, capOv, payout, exd]=await Promise.all([
     fetchWeekTasks(uid,days), fetchAllowanceCrit(uid), fetchWeekCap(uid,weekId), fetchPayout(uid,weekId), fetchExtData(uid)
   ]);
-  const cap=capOv!=null? capOv : crit.cap;
+  const cap=capOv!=null? capOv : null;
   const r=computeAllowance(tasks, days, crit, exd);
   const pct=Math.round(r.achievement*100), bonus=0;
   const amount=payout? Number(payout.amount)||0 : payAmount(r, cap);
   const snap={weekId, label:weekLabelOf(days), name:name||"", amount, cap, pct, bonus,
     weekMin:Math.round(r.weekMin||0), extMin:Math.round(r.extMin||0), timeTarget:Math.round(r.timeTarget||0),
     done:r.done||0, planned:r.planned||0, studyDays:r.studyDays||0, caps:r.caps||[], paid:!!payout, updatedAt:Date.now(),
-    payMin:r.payMin||0, rate:r.rate||0, earned:r.earned||0, timerMin:r.timerMin||0, focusMin:r.focusMin||0};
+    payMin:r.payMin||0, rate:r.rate||0, earned:r.earned||0, timerMin:r.timerMin||0, focusMin:r.focusMin||0,
+    timePay:payAmount(r,cap)-r.appBonus-r.mockBonus, appBonus:r.appBonus, mockBonus:r.mockBonus,
+    appAcc:r.appAcc.acc, appAnswered:r.appAcc.total, mockAcc:r.mockAcc, boost:r.boost};
   await db.collection("planner").doc(uid).collection("allowanceSnap").doc(weekId).set(snap);
   return snap;
 }
@@ -3939,7 +3956,7 @@ function creditFor(dateStr, now){
   return {rate:0, label:`${d}일 지나 체크 불가`, ok:false};
 }
 /* ----- 학습시간 검증: 타이머 실측만 100% 인정 (수기 입력은 인정 안 함) · 이상치 차단 ----- */
-function allowCrit(){ const a=(state.settings&&state.settings.allowance)||defaultSettings().allowance; return {...a, ...payTermsOf(a, state.payTermsRaw)}; }
+function allowCrit(){ const a=(state.settings&&state.settings.allowance)||defaultSettings().allowance; return {...a, exams:examList(), ...payTermsOf(a, state.payTermsRaw)}; }
 function verifiedMin(t){
   const A=allowCrit();
   let actual=Number(t.actualMin)||0;
@@ -4293,32 +4310,44 @@ function openDrawer(kind){
 function closeDrawer(){ document.getElementById("drawerRoot").innerHTML=""; }
 
 function payTermsBlockHTML(){
-  const A=state.settings.allowance||{}, P=payTermsOf(A, state.payTermsRaw);
+  const P=payTermsOf(null, state.payTermsRaw);
   const canEdit=state.profile.role==="parent" && state.viewingChild;
-  if(!canEdit){
-    return `<div class="pay-terms">
+  const summary=`<div class="pay-terms">
         <div><span>⏱ 타이머 1시간당</span><b>${wonFmt(P.hourlyRate)}</b></div>
-        <div><span>하루 최대 인정</span><b>${hmFmt(P.dailyMaxMin)}</b></div>
-        <div><span>주간 최대</span><b>${wonFmt(P.cap)}</b></div>
-        <div><span>학습앱 시간</span><b>${P.includeApps?"포함":"제외"}</b></div>
-      </div>
+        <div><span>시간 용돈 최대 (평소 / 시험기간)</span><b>${wonFmt(P.cap)} / ${wonFmt(P.boostCap)}</b></div>
+        <div><span>📚 학습앱 정답률 보너스</span><b>최대 ${wonFmt(P.appBonusMax)}</b></div>
+        <div><span>📝 모의고사 보너스</span><b>최대 ${wonFmt(P.mockBonusMax)}</b></div>
+      </div>`;
+  if(!canEdit){
+    return `${summary}
       <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">${state.profile.role==="parent"
         ? "자녀 플래너를 연 상태(⋯ 메뉴 → 자녀 이름)에서 바꾸거나, 기록 → 용돈 정산에서 자녀별로 바꿀 수 있어요."
-        : "용돈 기준은 <b>부모님 계정</b>에서만 정할 수 있어요. 타이머를 켜고 공부한 시간만 용돈이 돼요."}</div>`;
+        : `용돈 기준은 <b>부모님 계정</b>에서만 정할 수 있어요. 타이머를 켜고 공부한 시간, 학습앱 정답률(${Math.round(P.accFloor*100)}%↑부터), 주간 모의고사 점수로 정해져요.`}</div>`;
   }
   const uid=state.ownerUid;
-  return `<div class="crit-grid">
-      <div><label class="fld-lbl">⏱ 타이머 1시간당 금액(원)</label><input class="inp" type="number" step="100" min="0" value="${P.hourlyRate}" onchange="savePayTerms('${uid}',{hourlyRate:Math.max(0,Number(this.value)||0)}).then(ok=>ok&&toast('저장했어요','good'))"></div>
-      <div><label class="fld-lbl">주간 최대(원, 0 = 제한 없음)</label><input class="inp" type="number" step="1000" min="0" value="${P.cap}" onchange="savePayTerms('${uid}',{cap:Math.max(0,Number(this.value)||0)}).then(ok=>ok&&toast('저장했어요','good'))"></div>
-      <div><label class="fld-lbl">하루 최대 인정(분, 0 = 제한 없음)</label><input class="inp" type="number" step="30" min="0" value="${P.dailyMaxMin}" onchange="savePayTerms('${uid}',{dailyMaxMin:Math.max(0,Number(this.value)||0)}).then(ok=>ok&&toast('저장했어요','good'))"></div>
-      <div><label class="fld-lbl">학습앱 시간</label>
+  const inp=(label,key,val,step,conv)=>`<div><label class="fld-lbl">${label}</label><input class="inp" type="number" step="${step}" min="0" value="${val}"
+      onchange="savePayTerms('${uid}',{${key}:${conv||"Math.max(0,Number(this.value)||0)"}}).then(ok=>ok&&toast('저장했어요','good'))"></div>`;
+  return `${summary}
+    <div class="crit-grid" style="margin-top:10px">
+      ${inp("⏱ 타이머 1시간당 금액(원)","hourlyRate",P.hourlyRate,100)}
+      ${inp("시간 용돈 최대 · 평소(원)","cap",P.cap,1000)}
+      ${inp("시간 용돈 최대 · 시험기간(원)","boostCap",P.boostCap,1000)}
+      ${inp("하루 최대 인정(분, 0=제한 없음)","dailyMaxMin",P.dailyMaxMin,30)}
+      ${inp("📚 학습앱 정답률 보너스 최대(원)","appBonusMax",P.appBonusMax,500)}
+      ${inp("📝 모의고사 보너스 최대(원)","mockBonusMax",P.mockBonusMax,500)}
+      ${inp("보너스 0원 기준 정답률(%)","accFloor",Math.round(P.accFloor*100),5,"Math.min(0.99,Math.max(0,Number(this.value)||0)/100)")}
+      ${inp("보너스 최대 기준 정답률(%)","accFull",Math.round(P.accFull*100),5,"Math.min(1,Math.max(0.01,Number(this.value)||0)/100)")}
+      ${inp("학습앱 보너스 최소 문제 수(주)","appMinAnswers",P.appMinAnswers,5)}
+      <div><label class="fld-lbl">학습앱 공부 시간</label>
         <select class="inp" onchange="savePayTerms('${uid}',{includeApps:this.value==='on'}).then(ok=>ok&&toast('저장했어요','good'))">
-          <option value="on" ${P.includeApps?"selected":""}>용돈에 포함</option><option value="off" ${P.includeApps?"":"selected"}>제외</option></select></div>
+          <option value="on" ${P.includeApps?"selected":""}>시간 용돈에 포함</option><option value="off" ${P.includeApps?"":"selected"}>제외</option></select></div>
     </div>
     <div style="font-size:12px;color:#64748B;margin-top:10px;line-height:1.55;background:#F8FAFC;border-radius:9px;padding:11px">
-      <b>용돈 = 타이머로 공부한 시간 × 1시간당 금액</b> (하루 최대·주간 최대까지)<br>
-      예) 1시간당 ${wonFmt(P.hourlyRate)}이면 하루 1시간씩 5일 → <b>${wonFmt(Math.round(5*P.hourlyRate/10)*10)}</b><br>
-      · 손으로 적은 시간은 인정되지 않아요 · 시험 대비 부스터 기간엔 배율이 곱해져요<br>
+      <b>주간 용돈 = ⏱ 시간 용돈 + 📚 학습앱 보너스 + 📝 모의고사 보너스</b><br>
+      · 시간 용돈 = 타이머로 공부한 시간 × ${wonFmt(P.hourlyRate)} (평소 최대 ${wonFmt(P.cap)}, 🚀 시험기간 최대 ${wonFmt(P.boostCap)} — 1시간당 금액은 같아서 더 오래 공부해야 채워요)<br>
+      · 정답률 보너스: ${Math.round(P.accFloor*100)}% 이하 0원 → ${Math.round(P.accFull*100)}% 이상 최대, 그 사이는 비례<br>
+      · 학습앱 정답률은 영단어 · 그래머 인사이드 · 천문장이 직접 채점한 기록 (주 ${P.appMinAnswers}문제 이상)<br>
+      · 모의고사는 기록 → 용돈 정산에 나오는 <b>이번 주 공부 범위</b>로 시험을 보고 점수를 입력해 주세요<br>
       · 이 기준은 부모 계정만 바꿀 수 있어요 (자녀 화면에는 보기만)
     </div>`;
 }
@@ -4395,7 +4424,7 @@ function drawSettings(){
 
           <div class="section-lbl" style="margin-top:22px">🚀 부스터 모드 (시험 D-day)</div>
           <button class="ghost-btn" style="width:100%;padding:11px" onclick="closeDrawer();drawBooster()">🚀 부스터 모드 열기</button>
-          <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">시험 기간을 등록하면 목표시간이 올라가고 <b>용돈이 1.5배</b>로 지급됩니다. <b>기록</b> 탭에서도 열 수 있어요.</div>
+          <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">시험 기간을 등록하면 목표시간이 올라가고 <b>시간 용돈 상한이 2만 원</b>으로 오릅니다(더 오래 공부해야 채워져요). <b>기록</b> 탭에서도 열 수 있어요.</div>
 
 
           <div class="section-lbl" style="margin-top:22px">💰 용돈 기준 (부모님이 정해요)</div>
@@ -4578,16 +4607,17 @@ function allowanceWeekDays(d){ const s=startOfWeek(d||new Date()); return Array.
 function weekLabelOf(days){ const s=parseD(days[0]),e=parseD(days[6]); return `${s.getMonth()+1}.${s.getDate()}~${e.getMonth()+1}.${e.getDate()}`; }
 
 /* ============================================================
- *  💰 용돈 = 타이머로 공부한 시간 × 시간당 금액 (부모가 정함)
- *  - 과제 타이머(▶ 타이머 · 포커스 타이머에서 과제 선택) + 과제 없이 쓴 포커스 타이머 + 학습앱(부모가 포함 선택 시)
- *  - 하루 최대 인정 시간, 주간 상한까지 · 부스터(시험 대비) 기간이면 배율 적용
- *  - 계획 이행 · 학습일 · 복습은 참고 지표로만 보여 주고 금액에는 넣지 않음
+ *  💰 주간 용돈 = ⏱ 시간 용돈 + 📚 학습앱 정답률 보너스 + 📝 모의고사 정답률 보너스
+ *  - 시간 용돈: 타이머로 공부한 시간 × 1시간당 금액 (평소 최대 1만 원, 시험기간(부스터) 최대 2만 원)
+ *    → 1시간당 금액은 그대로라 시험기간 상한을 채우려면 공부 시간이 두 배 필요
+ *  - 학습앱 보너스: 영단어 · 그래머 인사이드 · 천문장이 직접 채점한 그 주 정답률 (최대 5천 원)
+ *  - 모의고사 보너스: 그 주 공부한 일반과목 범위로 본 모의고사 점수를 부모가 입력 (최대 5천 원)
+ *  - 정답률 → 보너스: 60% 이하 0원, 95% 이상 최대, 그 사이 비례 (100원 단위)
  *  - 기준은 payTerms/{자녀uid} 에 저장 → 보안 규칙상 연결된 부모만 바꿀 수 있음
  * ============================================================ */
-const PAY_DEFAULT={hourlyRate:1000, cap:20000, dailyMaxMin:240, includeApps:true};
-function payTermsOf(allowance, pt){
-  return {...PAY_DEFAULT, cap:(allowance&&allowance.cap!=null)? Number(allowance.cap) : PAY_DEFAULT.cap, ...(pt||{})};
-}
+const PAY_DEFAULT={hourlyRate:1000, cap:10000, boostCap:20000, dailyMaxMin:240, includeApps:true,
+  appBonusMax:5000, mockBonusMax:5000, accFloor:0.6, accFull:0.95, appMinAnswers:30, mocks:{}};
+function payTermsOf(allowance, pt){ return {...PAY_DEFAULT, ...(pt||{})}; }
 async function fetchPayTerms(uid){
   try{ const d=await db.collection("payTerms").doc(uid).get(); return d.exists? d.data() : null; }
   catch(e){ console.warn("용돈 기준 읽기", e); return null; }
@@ -4604,6 +4634,29 @@ async function savePayTerms(uid, patch){
     return false;
   }
 }
+// 정답률 → 보너스 (floor 이하 0, full 이상 최대, 사이는 비례)
+function accBonus(acc, max, floor, full){
+  if(acc==null || !(max>0)) return 0;
+  const k=Math.max(0, Math.min(1, (acc-floor)/Math.max(0.01, full-floor)));
+  return Math.round(max*k/100)*100;
+}
+// 세 학습앱이 채점한 그 주 정답 수
+function appAccuracy(days, X){
+  const per={sentence:{c:0,t:0}, vocab:{c:0,t:0}, grammar:{c:0,t:0}};
+  days.forEach(ds=>{
+    const s=X.sentence&&X.sentence.days[ds]; if(s){ per.sentence.c+=num(s.ok); per.sentence.t+=num(s.ok)+num(s.no); }
+    const v=X.vocab&&X.vocab.days[ds];       if(v){ per.vocab.c+=num(v.correct); per.vocab.t+=num(v.total); }
+    const g=X.grammar&&X.grammar.days[ds];   if(g){ per.grammar.c+=num(g.correct); per.grammar.t+=num(g.answered); }
+  });
+  const c=per.sentence.c+per.vocab.c+per.grammar.c, t=per.sentence.t+per.vocab.t+per.grammar.t;
+  return {correct:c, total:t, acc:t? c/t : null, per};
+}
+// 시험기간(부스터) 주인가 — 계산 대상 자녀의 시험 목록 기준
+function isBoostWeek(days, exams){
+  const list=Array.isArray(exams)? exams : examList();
+  return (days||[]).some(ds=>list.some(e=>{ if(!e||!e.date) return false;
+    const start=fmt(addDays(parseD(e.date), -(Number(e.prepDays)||14))); return ds>=start && ds<=e.date; }));
+}
 function computeAllowance(tasks, days, crit, exd){
   const wk=tasks.filter(t=>days.includes(t.date));
   const planned=wk.length, done=wk.filter(t=>t.done).length;
@@ -4614,33 +4667,46 @@ function computeAllowance(tasks, days, crit, exd){
   const scoreRate = scored.length? scored.reduce((a,t)=>a+Number(t.score)/Number(t.scoreTotal),0)/scored.length : null;
   const reviews=wk.filter(t=>t.done && t.method==="복습").length;
   const studyDays=new Set(wk.filter(t=>t.done).map(t=>t.date)).size;
-  // 날짜별 타이머 시간
+  const T={...PAY_DEFAULT, ...crit};
   const X=exd || extData();
+  // ⏱ 시간 용돈
   const focusFree=(X && X.focusFree) || {};
-  const rate=Math.max(0, Number(crit.hourlyRate)||0);
-  const dayMax=Math.max(0, Number(crit.dailyMaxMin)||0);
+  const rate=Math.max(0, Number(T.hourlyRate)||0), dayMax=Math.max(0, Number(T.dailyMaxMin)||0);
   const byDay=days.map(ds=>{
     const timer=wk.filter(t=>t.date===ds).reduce((a,t)=>a+verifiedMin(t),0);   // 과제 타이머 실측 (손으로 적은 시간 제외)
     const focus=Math.round(Number(focusFree[ds])||0);                          // 과제 없이 쓴 포커스 타이머
-    const app=(crit.includeApps!==false)? extCreditedOn(ds, X).total : 0;       // 학습앱이 잰 시간
+    const app=(T.includeApps!==false)? extCreditedOn(ds, X).total : 0;          // 학습앱이 잰 시간
     const raw=timer+focus+app, paid=dayMax>0? Math.min(raw, dayMax) : raw;
     return {ds, timer, focus, app, raw, paid};
   });
   const sum=k=>byDay.reduce((a,d)=>a+d[k],0);
   const timerMin=sum("timer"), focusMin=sum("focus"), appMin=sum("app"), rawMin=sum("raw"), payMin=sum("paid");
-  const boostRate=(typeof examBoostRateFor==="function")? examBoostRateFor(days) : 1;
-  const earned=Math.round(payMin/60*rate*boostRate/10)*10;                      // 10원 단위
-  const cap=Math.max(0, Number(crit.cap)||0), effCap=cap>0? Math.round(cap*boostRate/100)*100 : 0;
-  const amount=effCap>0? Math.min(effCap, earned) : earned;
+  const boost=isBoostWeek(days, T.exams);
+  const timeCap=Math.max(0, Number(boost? T.boostCap : T.cap)||0);
+  const earned=Math.round(payMin/60*rate/10)*10;                                 // 10원 단위
+  const timePay=timeCap>0? Math.min(timeCap, earned) : earned;
+  // 📚 학습앱 정답률 보너스
+  const acc=appAccuracy(days, X);
+  const appOk=acc.total>=(Number(T.appMinAnswers)||0);
+  const appBonus=appOk? accBonus(acc.acc, Number(T.appBonusMax)||0, Number(T.accFloor), Number(T.accFull)) : 0;
+  // 📝 모의고사 정답률 보너스 (부모가 입력)
+  const mock=(T.mocks||{})[days[6]]||null;
+  const mockAcc=mock && Number(mock.total)>0? Math.min(1, Number(mock.correct)/Number(mock.total)) : null;
+  const mockBonus=accBonus(mockAcc, Number(T.mockBonusMax)||0, Number(T.accFloor), Number(T.accFull));
+  const amount=timePay+appBonus+mockBonus;
   return {planned, done, completion, scoreRate, scoredCount:scored.length, reviews, studyDays, daysTarget:Number(crit.daysTarget)||5,
     weekMin:rawMin, timerMin, focusMin, appMin, extMin:appMin, payMin, overDayMin:rawMin-payMin, byDay,
-    rate, dayMax, includeApps:crit.includeApps!==false, boostRate, earned, effCap, amount, total:amount, bonus:0, overMin:0, timeTarget:0,
-    achievement: effCap>0? amount/effCap : (amount>0? 1 : 0), caps:[]};
+    rate, dayMax, includeApps:T.includeApps!==false, boost, timeCap, earned, timePay,
+    appAcc:acc, appOk, appMinAnswers:Number(T.appMinAnswers)||0, appBonus, appBonusMax:Number(T.appBonusMax)||0,
+    mock, mockAcc, mockBonus, mockBonusMax:Number(T.mockBonusMax)||0, accFloor:Number(T.accFloor), accFull:Number(T.accFull),
+    amount, total:amount, bonus:appBonus+mockBonus, overMin:0, timeTarget:0, boostRate:1, effCap:timeCap,
+    achievement: (timeCap+ (Number(T.appBonusMax)||0) + (Number(T.mockBonusMax)||0))>0? amount/(timeCap+(Number(T.appBonusMax)||0)+(Number(T.mockBonusMax)||0)) : 0, caps:[]};
 }
-// 이번 주 상한만 따로 바꾼 경우의 지급액
+// 이번 주 시간 상한만 따로 바꾼 경우 (cap이 없으면 평소/시험기간 기본 상한)
 function payAmount(r, cap){
-  const effCap=(Number(cap)||0)>0? Math.round(Number(cap)*(r.boostRate||1)/100)*100 : 0;
-  return effCap>0? Math.min(effCap, r.earned) : r.earned;
+  const c=(cap!=null && cap!=="")? Math.max(0, Number(cap)||0) : r.timeCap;
+  const timePay=c>0? Math.min(c, r.earned) : r.earned;
+  return timePay+r.appBonus+r.mockBonus;
 }
 async function fetchWeekTasks(uid,days){
   const snap=await db.collection("planner").doc(uid).collection("tasks")
@@ -4651,7 +4717,7 @@ async function fetchAllowanceCrit(uid){
   const d=await db.collection("planner").doc(uid).collection("meta").doc("settings").get();
   const base=defaultSettings().allowance;
   const a=Object.assign(base, migrateAllowance((d.exists&&d.data().allowance)||{}).a);
-  return {...a, ...payTermsOf(a, await fetchPayTerms(uid))};
+  return {...a, exams:(d.exists&&d.data().exams)||[], ...payTermsOf(a, await fetchPayTerms(uid))};
 }
 async function fetchPayout(uid,weekId){
   const d=await db.collection("planner").doc(uid).collection("payouts").doc(weekId).get();
@@ -4675,38 +4741,116 @@ function metricBar(label,pct,color,weight){
     <div class="metric-track"><div class="metric-fill" style="width:${w}%;background:${color}"></div></div>
   </div>`;
 }
+function pctTxt(a){ return a==null? "–" : Math.round(a*100)+"%"; }
 function allowanceMetricsHTML(r,crit){
   const row=(emo,label,val,cls)=>`<div class="pb-row ${cls||""}"><span>${emo} ${label}</span><b>${val}</b></div>`;
+  const A=r.appAcc, P=A.per;
+  const appParts=[["📘 천문장",P.sentence],["🔤 영단어",P.vocab],["📗 문법",P.grammar]].filter(([,x])=>x.t>0)
+    .map(([n,x])=>`${n} ${x.c}/${x.t}`).join(" · ");
   return `<div class="pay-break">
+      <div class="pb-head">⏱ 시간 용돈 <span>${r.boost?"🚀 시험기간 · ":""}최대 ${wonFmt(r.timeCap)}</span></div>
       ${row("⏱","과제 타이머",hmFmt(r.timerMin))}
       ${r.focusMin>0? row("🎯","포커스 타이머 (과제 없이)",hmFmt(r.focusMin)) : ""}
-      ${r.includeApps? row("📚","학습앱",hmFmt(r.appMin)) : ""}
+      ${r.includeApps? row("📚","학습앱 공부 시간",hmFmt(r.appMin)) : ""}
       ${r.overDayMin>0? row("✂️",`하루 최대 ${hmFmt(r.dayMax)} 넘은 시간 제외`,"−"+hmFmt(r.overDayMin),"minus") : ""}
-      <div class="pb-total"><span>인정 <b>${hmFmt(r.payMin)}</b> × 1시간당 <b>${wonFmt(r.rate)}</b>${r.boostRate>1?` × 🚀${r.boostRate}`:""}</span><b>${wonFmt(r.earned)}</b></div>
+      <div class="pb-total"><span>인정 <b>${hmFmt(r.payMin)}</b> × 1시간당 <b>${wonFmt(r.rate)}</b>${r.earned>r.timePay?` <em>(계산 ${wonFmt(r.earned)} → 상한)</em>`:""}</span><b>${wonFmt(r.timePay)}</b></div>
     </div>
-    <div class="pb-ref">참고 (금액에는 넣지 않아요) · 계획 완료 ${r.done}/${r.planned} · 학습일 ${r.studyDays}일 · 복습 ${r.reviews}회${r.scoreRate!=null?` · 정답률 ${Math.round(r.scoreRate*100)}%`:""}</div>`;
+    <div class="pay-break">
+      <div class="pb-head">📚 학습앱 정답률 보너스 <span>최대 ${wonFmt(r.appBonusMax)}</span></div>
+      ${A.total? row("🎯",`정답률 ${pctTxt(A.acc)} (${A.correct}/${A.total}문제)`, "") : row("🎯","이번 주 학습앱에서 푼 문제가 없어요","")}
+      ${appParts? `<div class="pb-sub">${appParts}</div>` : ""}
+      ${A.total && !r.appOk? `<div class="pb-sub warn">주 ${r.appMinAnswers}문제 이상 풀어야 보너스가 나와요 (지금 ${A.total}문제)</div>` : ""}
+      <div class="pb-total"><span>${Math.round(r.accFloor*100)}% 이하 0원 · ${Math.round(r.accFull*100)}% 이상 최대</span><b>+${wonFmt(r.appBonus)}</b></div>
+    </div>
+    <div class="pay-break">
+      <div class="pb-head">📝 주간 모의고사 보너스 <span>최대 ${wonFmt(r.mockBonusMax)}</span></div>
+      ${r.mock? row("✅",`${r.mock.correct}/${r.mock.total} 맞음 · 정답률 ${pctTxt(r.mockAcc)}`,"") : row("⏳","아직 점수가 없어요 — 부모님이 입력해요","")}
+      <div class="pb-total"><span>이번 주 공부한 범위로 시험</span><b>+${wonFmt(r.mockBonus)}</b></div>
+    </div>
+    <div class="pb-ref">참고 (금액에는 넣지 않아요) · 계획 완료 ${r.done}/${r.planned} · 학습일 ${r.studyDays}일 · 복습 ${r.reviews}회</div>`;
+}
+function mockRangeHTML(tasks, days){
+  const wk=tasks.filter(t=>days.includes(t.date) && t.done);
+  if(!wk.length) return `<div class="pb-sub">이번 주 완료한 학습이 아직 없어요.</div>`;
+  const by={};
+  wk.forEach(t=>{ const su=subjById(t.subjectId), tb=tbById(t.textbookId), key=su?su.name:"기타";
+    (by[key]=by[key]||new Set()).add([tb?tb.name:"", t.unit||t.method||""].filter(Boolean).join(" · ")); });
+  return `<div class="mock-range">${Object.entries(by).map(([k,set])=>`<div><b>${esc(k)}</b><span>${[...set].filter(Boolean).map(esc).join(" / ")||"범위 기록 없음"}</span></div>`).join("")}</div>`;
+}
+function mockEntryHTML(uid, r, weekId){
+  const m=r.mock||{};
+  return `<div class="mock-entry">
+      <label class="fld-lbl">📝 모의고사 점수 입력 (부모)</label>
+      <div class="me-row">
+        <input class="inp" id="mockC-${uid}" type="number" min="0" placeholder="맞은 수" value="${m.correct!=null?m.correct:""}">
+        <span>/</span>
+        <input class="inp" id="mockT-${uid}" type="number" min="1" placeholder="전체 문제" value="${m.total!=null?m.total:""}">
+        <button class="fam-btn" onclick="saveMock('${uid}','${weekId}')">저장</button>
+      </div>
+    </div>`;
+}
+async function saveMock(uid, weekId){
+  const c=Number((document.getElementById("mockC-"+uid)||{}).value), t=Number((document.getElementById("mockT-"+uid)||{}).value);
+  if(!(t>0) || !(c>=0) || c>t) return alert("맞은 수와 전체 문제 수를 확인해 주세요.");
+  const cur=(await fetchPayTerms(uid))||{};
+  const mocks={...(cur.mocks||{}), [weekId]:{correct:c, total:t, at:Date.now()}};
+  if(await savePayTerms(uid, {mocks})){
+    toast(`📝 모의고사 ${c}/${t} 저장했어요`,"good");
+    const ch=state.children.find(x=>x.uid===uid);
+    saveAllowanceSnap(uid, ch? ch.name : state.ownerName).catch(()=>{});   // 토요일 알림 금액도 갱신
+    drawAllowance();
+  }
+}
+function allowanceMetricsHTML(r,crit){
+  const row=(emo,label,val,cls)=>`<div class="pb-row ${cls||""}"><span>${emo} ${label}</span><b>${val}</b></div>`;
+  const A=r.appAcc, P=A.per;
+  const appParts=[["📘 천문장",P.sentence],["🔤 영단어",P.vocab],["📗 문법",P.grammar]].filter(([,x])=>x.t>0)
+    .map(([n,x])=>`${n} ${x.c}/${x.t}`).join(" · ");
+  return `<div class="pay-break">
+      <div class="pb-head">⏱ 시간 용돈 <span>${r.boost?"🚀 시험기간 · ":""}최대 ${wonFmt(r.timeCap)}</span></div>
+      ${row("⏱","과제 타이머",hmFmt(r.timerMin))}
+      ${r.focusMin>0? row("🎯","포커스 타이머 (과제 없이)",hmFmt(r.focusMin)) : ""}
+      ${r.includeApps? row("📚","학습앱 공부 시간",hmFmt(r.appMin)) : ""}
+      ${r.overDayMin>0? row("✂️",`하루 최대 ${hmFmt(r.dayMax)} 넘은 시간 제외`,"−"+hmFmt(r.overDayMin),"minus") : ""}
+      <div class="pb-total"><span>인정 <b>${hmFmt(r.payMin)}</b> × 1시간당 <b>${wonFmt(r.rate)}</b>${r.earned>r.timePay?` <em>(계산 ${wonFmt(r.earned)} → 상한)</em>`:""}</span><b>${wonFmt(r.timePay)}</b></div>
+    </div>
+    <div class="pay-break">
+      <div class="pb-head">📚 학습앱 정답률 보너스 <span>최대 ${wonFmt(r.appBonusMax)}</span></div>
+      ${A.total? row("🎯",`정답률 ${pctTxt(A.acc)} (${A.correct}/${A.total}문제)`, "") : row("🎯","이번 주 학습앱에서 푼 문제가 없어요","")}
+      ${appParts? `<div class="pb-sub">${appParts}</div>` : ""}
+      ${A.total && !r.appOk? `<div class="pb-sub warn">주 ${r.appMinAnswers}문제 이상 풀어야 보너스가 나와요 (지금 ${A.total}문제)</div>` : ""}
+      <div class="pb-total"><span>${Math.round(r.accFloor*100)}% 이하 0원 · ${Math.round(r.accFull*100)}% 이상 최대</span><b>+${wonFmt(r.appBonus)}</b></div>
+    </div>
+    <div class="pay-break">
+      <div class="pb-head">📝 주간 모의고사 보너스 <span>최대 ${wonFmt(r.mockBonusMax)}</span></div>
+      ${r.mock? row("✅",`${r.mock.correct}/${r.mock.total} 맞음 · 정답률 ${pctTxt(r.mockAcc)}`,"") : row("⏳","아직 점수가 없어요 — 부모님이 입력해요","")}
+      <div class="pb-total"><span>이번 주 공부한 범위로 시험</span><b>+${wonFmt(r.mockBonus)}</b></div>
+    </div>
+    <div class="pb-ref">참고 (금액에는 넣지 않아요) · 계획 완료 ${r.done}/${r.planned} · 학습일 ${r.studyDays}일 · 복습 ${r.reviews}회</div>`;
 }
 // 지급 컨트롤: 주간 상한(부모 설정) + 상한 대비 지급률(%)
 function payControlsHTML(uid, r, cap, payout, editable){
   if(payout){
     return `<div class="allow-total">
-      <div><div style="font-size:11.5px;color:#94A3B8">${payout.rate!=null?`1시간당 ${wonFmt(payout.rate)} · `:""}${payout.payMin!=null?`인정 ${hmFmt(payout.payMin)}`:(payout.percent!=null?`지급률 ${payout.percent}%`:"")}</div><div class="a">${wonFmt(payout.amount)}</div></div>
+      <div><div style="font-size:11.5px;color:#94A3B8">${payout.timePay!=null?`시간 ${wonFmt(payout.timePay)} + 앱 ${wonFmt(payout.appBonus||0)} + 모의고사 ${wonFmt(payout.mockBonus||0)}`:(payout.rate!=null?`1시간당 ${wonFmt(payout.rate)}`:"")}</div><div class="a">${wonFmt(payout.amount)}</div></div>
       <span class="paid-badge">✓ 지급완료</span></div>`;
   }
+  const shownCap=(cap!=null && cap!=="")? cap : r.timeCap;
   const amount=payAmount(r, cap);
   if(allowCache[uid]) allowCache[uid].payAmt=amount;
-  const capped=amount<r.earned;
-  const note=capped? `<div class="pb-note">주간 상한 ${wonFmt(amount)}에 맞췄어요 (계산 금액 ${wonFmt(r.earned)})</div>` : "";
+  const formula=`<div class="pb-formula">시간 ${wonFmt(Math.min(shownCap||Infinity, r.earned))} + 학습앱 ${wonFmt(r.appBonus)} + 모의고사 ${wonFmt(r.mockBonus)}</div>`;
   if(!editable){
-    return `<div class="allow-total">
-      <div><div style="font-size:11.5px;color:#94A3B8">예상 용돈 · 1시간당 ${wonFmt(r.rate)} · 주간 최대 ${wonFmt(cap)}</div><div class="a">${wonFmt(amount)}</div></div>
-      <span style="font-size:12px;color:#94A3B8">부모님이 지급</span></div>${note}`;
+    return `${formula}<div class="allow-total">
+      <div><div style="font-size:11.5px;color:#94A3B8">이번 주 예상 용돈</div><div class="a">${wonFmt(amount)}</div></div>
+      <span style="font-size:12px;color:#94A3B8">부모님이 지급</span></div>`;
   }
   return `
     <div class="pay-ctrl">
       <div><label class="fld-lbl">1시간당 금액(원)</label><input class="inp" type="number" step="100" min="0" value="${r.rate}" onchange="onRateChange('${uid}',this.value)"></div>
-      <div><label class="fld-lbl">이번 주 상한(원)</label><input class="inp" type="number" step="1000" min="0" value="${cap}" onchange="onCapChange('${uid}',this.value)"></div>
-    </div>${note}
+      <div><label class="fld-lbl">이번 주 시간 상한(원)</label><input class="inp" type="number" step="1000" min="0" value="${shownCap}" onchange="onCapChange('${uid}',this.value)"></div>
+    </div>
+    ${mockEntryHTML(uid, r, allowCache[uid]? allowCache[uid].weekId : "")}
+    ${formula}
     <div class="allow-total">
       <div style="flex:1;min-width:0"><div style="font-size:11.5px;color:#94A3B8">지급액 (직접 고칠 수 있어요)</div>
         <input class="inp amt-inp" id="amt-${uid}" type="number" step="100" min="0" value="${amount}" oninput="onAmtChange('${uid}')"></div>
@@ -4743,20 +4887,21 @@ async function drawAllowance(){
       const [tasks,crit,payout,capOv,exd]=await Promise.all([
         fetchWeekTasks(ch.uid,days), fetchAllowanceCrit(ch.uid), fetchPayout(ch.uid,weekId), fetchWeekCap(ch.uid,weekId), fetchExtData(ch.uid)
       ]);
-      const cap = capOv!=null? capOv : crit.cap;
       const r=computeAllowance(tasks,days,crit,exd);
+      const cap = capOv!=null? capOv : null;
       allowCache[ch.uid]={r,crit,cap,weekId,label,name:ch.name};
       sum += payout? payout.amount : payAmount(r, cap);
       cards+=`<div class="allow-card">
         <div class="name"><span class="av" style="background:${ch.color}">${esc((ch.name||"").slice(0,1))}</span>${esc(ch.name)}
-          <span style="margin-left:auto;font-size:11.5px;color:#94A3B8;font-weight:600">인정 ${hmFmt(r.payMin)} · 1시간당 ${wonFmt(r.rate)}</span></div>
+          <span style="margin-left:auto;font-size:11.5px;color:#94A3B8;font-weight:600">${r.boost?"🚀 시험기간 · ":""}예상 ${wonFmt(payAmount(r,cap))}</span></div>
         ${allowanceMetricsHTML(r,crit)}
+        <details class="mock-det"><summary>📝 이번 주 모의고사 범위 (완료한 학습)</summary>${mockRangeHTML(tasks, days)}</details>
         ${payControlsHTML(ch.uid, r, cap, payout, true)}
       </div>`;
     }
     body=`<div class="allow-hero"><div class="wk">${label} · 이번 주 정산</div><div class="amt">${wonFmt(sum)}</div><div class="cap">자녀 ${state.children.length}명 합계</div></div>
       ${cards}
-      <div class="share-note">📌 용돈 = <b>타이머로 공부한 시간 × 1시간당 금액</b>이에요. 자녀별 <b>1시간당 금액</b>과 <b>이번 주 상한</b>을 여기서 바로 바꿀 수 있고, 지급액도 직접 고친 뒤 지급할 수 있어요.</div>`;
+      <div class="share-note">📌 주간 용돈 = <b>⏱ 타이머 공부 시간 × 1시간당 금액</b>(평소 최대 1만 원 · 시험기간 2만 원) + <b>📚 학습앱 정답률 보너스</b> + <b>📝 모의고사 보너스</b>. 모의고사는 위 “이번 주 범위”로 시험을 본 뒤 점수를 입력하세요.</div>`;
   } else {
     // 단일 대상(내 플래너 또는 특정 자녀 열람 중)
     const uid=state.ownerUid;
@@ -4764,16 +4909,17 @@ async function drawAllowance(){
       fetchWeekTasks(uid,days), fetchPayout(uid,weekId), fetchWeekCap(uid,weekId),
       db.collection("planner").doc(uid).collection("payouts").get(), ensureExt()
     ]);
-    const crit=allowCrit();
-    const cap = capOv!=null? capOv : crit.cap;
+    const crit={...allowCrit(), ...payTermsOf(null, await fetchPayTerms(uid))};
     const r=computeAllowance(tasks,days,crit);
+    const cap = capOv!=null? capOv : null;
     allowCache[uid]={r,crit,cap,weekId,label,name:state.ownerName};
     const canPay = isParent && state.viewingChild; // 부모가 자녀를 열람 중일 때만 지급
     const shownAmt = payout? payout.amount : payAmount(r, cap);
     const hist=histSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.paidAt||0)-(a.paidAt||0)).slice(0,8);
-    body=`<div class="allow-hero"><div class="wk">${label} · ${esc(state.ownerName)}</div><div class="amt">${wonFmt(shownAmt)}</div><div class="cap">타이머 ${hmFmt(r.payMin)} × 1시간당 ${wonFmt(r.rate)} · 이번 주 상한 ${wonFmt(cap)}</div></div>
+    body=`<div class="allow-hero"><div class="wk">${label} · ${esc(state.ownerName)}</div><div class="amt">${wonFmt(shownAmt)}</div><div class="cap">⏱ ${wonFmt(payAmount(r,cap)-r.appBonus-r.mockBonus)} + 📚 ${wonFmt(r.appBonus)} + 📝 ${wonFmt(r.mockBonus)}${r.boost?" · 🚀 시험기간":""}</div></div>
       <div class="allow-card">
         ${allowanceMetricsHTML(r,crit)}
+        <details class="mock-det"><summary>📝 이번 주 모의고사 범위 (완료한 학습)</summary>${mockRangeHTML(tasks, days)}</details>
         ${payControlsHTML(uid, r, cap, payout, canPay)}
       </div>
       ${hist.length?`<div class="dash-section">지급 내역</div>${hist.map(h=>`<div class="pay-hist"><span>${esc(h.weekLabel||h.id)}${h.rate!=null?` · ${hmFmt(h.payMin||0)} × ${wonFmt(h.rate)}`:(h.percent!=null?` · ${h.percent}%`:"")}</span><b style="color:#0E9F6E">${wonFmt(h.amount)}</b></div>`).join("")}`:""}`;
@@ -4784,12 +4930,13 @@ async function drawAllowance(){
 async function payAllowanceUI(uid){
   const c=allowCache[uid]; if(!c) return;
   const r=c.r, amount=c.payAmt!=null? c.payAmt : payAmount(r, c.cap);
-  if(!confirm(`${c.name} · ${c.label}\n인정 ${hmFmt(r.payMin)} × 1시간당 ${wonFmt(r.rate)} = ${wonFmt(r.earned)}`
-      +(amount!==r.earned? `\n→ 지급액 ${wonFmt(amount)}` : "")
-      +`\n\n지급 처리할까요?`)) return;
-  await saveWeekCap(uid, c.weekId, c.cap);
+  const timePay=payAmount(r, c.cap)-r.appBonus-r.mockBonus;
+  if(!confirm(`${c.name} · ${c.label}\n⏱ 시간 ${hmFmt(r.payMin)} × ${wonFmt(r.rate)} → ${wonFmt(timePay)}\n📚 학습앱 정답률 ${pctTxt(r.appAcc.acc)} → +${wonFmt(r.appBonus)}\n📝 모의고사 ${pctTxt(r.mockAcc)} → +${wonFmt(r.mockBonus)}`
+      +`\n\n지급액 ${wonFmt(amount)}\n\n지급 처리할까요?`)) return;
+  if(c.cap!=null) await saveWeekCap(uid, c.weekId, c.cap);
   await db.collection("planner").doc(uid).collection("payouts").doc(c.weekId).set({
-    amount, earned:r.earned, cap:c.cap, rate:r.rate, payMin:r.payMin, weekLabel:c.label, paidAt:Date.now(),
+    amount, timePay, appBonus:r.appBonus, mockBonus:r.mockBonus, earned:r.earned, cap:c.cap!=null?c.cap:r.timeCap, rate:r.rate, payMin:r.payMin,
+    appAcc:r.appAcc.acc, mockAcc:r.mockAcc, weekLabel:c.label, paidAt:Date.now(),
     breakdown:{timerMin:r.timerMin, focusMin:r.focusMin, appMin:r.appMin, overDayMin:r.overDayMin, done:r.done, planned:r.planned, studyDays:r.studyDays}
   });
   drawAllowance();
