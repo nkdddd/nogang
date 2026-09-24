@@ -1,3 +1,3 @@
 /* 웹 푸시 설정 — Firebase 콘솔 → 프로젝트 설정 → 클라우드 메시징 → 웹 구성 → 웹 푸시 인증서 → '키 쌍 생성'
    에서 만든 '키 쌍'(공개 키) 값을 아래 vapidKey 에 넣으세요. 공개 키라 저장소에 올려도 안전합니다. */
-window.PUSH_CONFIG={ vapidKey:"" };
+window.PUSH_CONFIG={ vapidKey:"BNaN0RzQjBjwH4KW-OdM6lwktowxzGpETH4w7IQeoivTPtfhA9SVIvbJAZ8u3neu5q_Dt_grLqVE8hIQr499Ltw" };
