@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-app="sentence">
 <head>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6453117184750039"
      crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#4F46E5">
+<meta name="theme-color" content="#F3F2F7">
 <title>천문장 단문장 트레이너</title>
 <!-- Firebase (compat) — 설정값을 넣으면 클라우드 저장, 안 넣으면 자동 로컬 모드 -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -14,8 +14,8 @@
 <script>/* 통합 플래너 안(iframe)에서 열렸는지 표시 */if(window.self!==window.top)document.documentElement.classList.add('in-planner');</script>
 <style>
 :root{
-  --bg:#EDEFF6; --paper:#FFFFFF; --ink:#1B2140; --ink-soft:#5E6485; --ink-faint:#9AA0BC;
-  --line:#E3E6F0; --brand:#4F46E5; --brand-deep:#3730A3; --brand-soft:#EEEDFE;
+  --bg:#F3F2F7; --paper:#FFFFFF; --ink:#1C1B24; --ink-soft:#5E6485; --ink-faint:#9AA0BC;
+  --line:#E3E6F0; --brand:#6A58E6; --brand-deep:#5646D0; --brand-soft:#EFECFD;
   --flame:#F59E0B; --flame-soft:#FEF3DD; --good:#0FA678; --good-soft:#E3F6EF;
   --bad:#E5484D; --bad-soft:#FCEBEC; --gold:#D9A406;
   --r:18px; --r-sm:12px;
@@ -316,6 +316,8 @@ input,select{font-family:inherit;font-size:16px}
   .view,.appbar{max-width:820px}
 }
 </style>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../assets/theme.js" defer></script>
 </head>
 <body>
 <div id="app"></div>
@@ -2040,7 +2042,7 @@ function drawNav(){
 if('speechSynthesis' in window)speechSynthesis.onvoiceschanged=()=>{};
 function showBootError(msg){
   try{var a=document.getElementById('app')||document.body;
-    a.innerHTML='<div style="padding:24px;font-family:sans-serif;color:#1B2140;line-height:1.7">'
+    a.innerHTML='<div style="padding:24px;font-family:sans-serif;color:#1C1B24;line-height:1.7">'
       +'<h3 style="color:#DC2626">앱을 여는 중 문제가 발생했어요</h3>'
       +'<p style="font-size:13px;color:#5E6485">아래 메시지를 캡처해 보내주시면 정확히 고치겠습니다.</p>'
       +'<pre style="white-space:pre-wrap;font-size:12px;background:#F3F4F6;padding:12px;border-radius:8px">'+String(msg)+'</pre></div>';

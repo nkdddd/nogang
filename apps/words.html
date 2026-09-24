@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-app="words">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -14,8 +14,8 @@
 
 <style>
 :root{
-  --bg:#EDEFF6; --paper:#FFFFFF; --ink:#1B2140; --ink-soft:#5E6485; --ink-faint:#9AA0BC;
-  --line:#E3E6F0; --brand:#4F46E5; --brand-deep:#3730A3; --brand-soft:#EEEDFE;
+  --bg:#F3F2F7; --paper:#FFFFFF; --ink:#1C1B24; --ink-soft:#5E6485; --ink-faint:#9AA0BC;
+  --line:#E3E6F0; --brand:#6A58E6; --brand-deep:#5646D0; --brand-soft:#EFECFD;
   --flame:#F59E0B; --flame-soft:#FEF3DD; --good:#0FA678; --good-soft:#E3F6EF;
   --bad:#E5484D; --bad-soft:#FCEBEC; --gold:#D9A406; --root:#1F9E73; --root-soft:#E3F6EF;
   --r:18px; --r-sm:12px; --shadow:0 1px 2px rgba(27,33,64,.05),0 8px 24px rgba(27,33,64,.07);
@@ -57,7 +57,7 @@ input{font-family:inherit}
 .auth-toggle b{color:var(--brand);cursor:pointer}
 
 .btn{display:block;width:100%;background:var(--brand);color:#fff;font-weight:800;font-size:16px;padding:16px;
-  border-radius:14px;text-align:center;box-shadow:0 6px 16px rgba(79,70,229,.32);transition:transform .12s}
+  border-radius:14px;text-align:center;box-shadow:0 6px 16px rgba(106,88,230,.32);transition:transform .12s}
 .btn:active{transform:scale(.97)}
 .btn.ghost{background:var(--paper);color:var(--brand);border:1.5px solid var(--brand);box-shadow:none}
 .btn.good{background:var(--good);box-shadow:0 6px 16px rgba(15,166,120,.3)}
@@ -65,7 +65,7 @@ input{font-family:inherit}
 .btn[disabled]{opacity:.5;pointer-events:none}
 
 /* ---- Home hero ---- */
-.hero{background:linear-gradient(155deg,#4F46E5,#6D28D9 70%,#7C3AED);color:#fff;border-radius:24px;
+.hero{background:linear-gradient(155deg,#6A58E6,#6A58E6 70%,#5646D0);color:#fff;border-radius:24px;
   padding:22px 22px 20px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
 .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;
   background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%)}
@@ -99,7 +99,7 @@ input{font-family:inherit}
 .cal .hd.sun{color:#E5484D}.cal .hd.sat{color:#3B6FE5}
 .cal .d{height:32px;border-radius:8px;background:#EDEEF4;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink-faint)}
 .cal .d.blank{background:transparent}
-.cal .d.lv1{background:#C9C7F5;color:#3730A3}.cal .d.lv2{background:#9990EE;color:#fff}.cal .d.lv3{background:var(--brand);color:#fff}
+.cal .d.lv1{background:#C9C7F5;color:#5646D0}.cal .d.lv2{background:#9990EE;color:#fff}.cal .d.lv3{background:var(--brand);color:#fff}
 .cal .d.today{outline:2px solid var(--flame);outline-offset:1px}
 .mastery .row{display:flex;align-items:center;gap:10px;margin-bottom:9px}.mastery .row:last-child{margin-bottom:0}
 .mastery .lbl{font-size:12px;font-weight:700;width:62px;color:var(--ink-soft);flex-shrink:0}
@@ -276,6 +276,8 @@ input{font-family:inherit}
 .gemini-in:focus{border-color:var(--brand)}
 :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 </style>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../assets/theme.js" defer></script>
 </head>
 <body>
 
@@ -1169,7 +1171,7 @@ async function fillStudyExample(id){
 
 /* ===================== CONFETTI ===================== */
 function confetti(){if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches)return;
-  const colors=["#4F46E5","#F59E0B","#0FA678","#EC4899","#A5B4FC"];
+  const colors=["#6A58E6","#F59E0B","#0FA678","#EC4899","#A5B4FC"];
   for(let i=0;i<40;i++){const c=el("div","confetti");c.style.left=Math.random()*100+"%";c.style.background=colors[i%colors.length];
     c.style.transform="rotate("+Math.random()*360+"deg)";document.body.appendChild(c);
     const dur=1200+Math.random()*1000,x=(Math.random()-.5)*200;

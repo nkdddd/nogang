@@ -1,0 +1,90 @@
+/* =====================================================================
+ *  공용 디자인 — 플래너(하루틀 UI)와 세 학습앱을 같은 모양으로
+ *  각 앱의 원래 스타일 뒤에 불러와 색·글꼴·모서리·아래쪽 메뉴를 덮어씁니다.
+ *  <html data-app="sentence|words|grammar"> 로 앱을 구분합니다.
+ * ===================================================================== */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+
+:root{
+  --ui-bg:#F3F2F7; --ui-surface:#FFFFFF; --ui-surface2:#E9E8F0; --ui-line:#E4E2EC;
+  --ui-ink:#1C1B24; --ui-muted:#8F8D9B; --ui-muted2:#6D6B7A;
+  --ui-accent:#6A58E6; --ui-accent-2:#8F80FF; --ui-accent-deep:#5646D0; --ui-accent-soft:#EFECFD;
+  --ui-good:#0E9F6E; --ui-bad:#E5484D;
+  --ui-hero:linear-gradient(135deg,#8F80FF,#6A58E6 60%,#5646D0);
+  --ui-shadow:0 10px 30px rgba(20,16,50,.10);
+  --ui-font:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  color-scheme:light;
+}
+
+/* ---------- 앱별 변수 → 공용 팔레트 ---------- */
+html[data-app="sentence"], html[data-app="words"]{
+  --bg:var(--ui-bg); --paper:var(--ui-surface); --ink:var(--ui-ink); --ink-soft:var(--ui-muted2); --ink-faint:var(--ui-muted);
+  --line:var(--ui-line); --brand:var(--ui-accent); --brand-deep:var(--ui-accent-deep); --brand-soft:var(--ui-accent-soft);
+  --good:var(--ui-good); --bad:var(--ui-bad);
+  --r:20px; --r-sm:14px;
+  --shadow:0 1px 2px rgba(20,16,50,.04); --shadow-lg:var(--ui-shadow);
+  --font:var(--ui-font);
+}
+html[data-app="grammar"]{
+  --ink:var(--ui-ink); --ink2:var(--ui-muted2); --paper:var(--ui-bg); --card:var(--ui-surface);
+  --blue:var(--ui-accent); --blue-soft:var(--ui-accent-soft); --line:var(--ui-line);
+  --good:var(--ui-good); --bad:var(--ui-bad);
+  --r:20px;
+}
+
+/* ---------- 기본 ---------- */
+html[data-app] body{font-family:var(--ui-font);background:var(--ui-bg);color:var(--ui-ink);}
+html[data-app] input, html[data-app] textarea, html[data-app] select, html[data-app] button{font-family:inherit;}
+
+/* 머리글: 플래너처럼 굵고 큰 제목 */
+html[data-app] .appbar{padding:16px 16px 6px;gap:10px;}
+html[data-app] .appbar h1{font-size:18px;letter-spacing:-.02em;min-width:0;}
+html[data-app="grammar"] .top{padding:18px 16px 8px;}
+html[data-app="grammar"] .top h1{font-size:24px;letter-spacing:-.02em;}
+html[data-app] .chip, html[data-app] .pts-chip{border:none;background:var(--ui-surface);box-shadow:0 1px 2px rgba(20,16,50,.06);}
+
+/* 카드: 테두리 한 줄 + 둥근 모서리 */
+html[data-app] .card{border:1px solid var(--ui-line);border-radius:20px;box-shadow:none;}
+
+/* 강조 카드(히어로): 플래너의 보라 그라디언트 */
+html[data-app="words"] .hero, html[data-app="grammar"] .hero{background:var(--ui-hero);color:#fff;border-radius:22px;box-shadow:0 10px 26px rgba(106,88,230,.28);}
+
+/* 주 버튼: 진한 잉크색 알약, 보조 버튼: 흰 바탕 + 선 */
+html[data-app] .btn{background:var(--ui-ink);color:#fff;border-radius:14px;box-shadow:none;}
+html[data-app] .btn.ghost{background:var(--ui-surface);color:var(--ui-ink);border:1px solid var(--ui-line);}
+html[data-app] .btn.gray{background:var(--ui-surface2);color:var(--ui-muted2);border:none;}
+html[data-app] .btn.good{background:var(--ui-good);}
+html[data-app="grammar"] .btn.yellow{background:var(--ui-accent);color:#fff;}
+html[data-app] .btn.small, html[data-app] .btn.sm{border-radius:999px;white-space:nowrap;}
+
+/* 선택 버튼 · 세그먼트 */
+html[data-app] .seg{background:var(--ui-surface2);border-radius:999px;}
+html[data-app] .seg button{border-radius:999px;}
+html[data-app] .seg button.on{background:var(--ui-surface);color:var(--ui-ink);}
+html[data-app="grammar"] .ltabs button.on{background:var(--ui-ink);border-color:var(--ui-ink);}
+html[data-app="grammar"] .prog-line i{background:var(--ui-accent);}
+html[data-app="grammar"] .chap-no{background:var(--ui-accent-soft);color:var(--ui-accent);}
+
+/* 알림(토스트) */
+html[data-app] .toast{background:var(--ui-ink);border-radius:999px;}
+
+/* ---------- 아래쪽 메뉴: 플래너와 같은 떠 있는 알약 ---------- */
+html[data-app] .nav{
+  position:fixed;left:50%;right:auto;transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom));width:min(560px,calc(100% - 24px));max-width:none;margin:0;
+  display:flex;gap:0;padding:6px;background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:999px;
+  box-shadow:var(--ui-shadow);-webkit-backdrop-filter:none;backdrop-filter:none;z-index:50;
+}
+html[data-app] .nav button{
+  flex:1;height:50px;min-width:0;padding:0;border-radius:999px;background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  color:var(--ui-muted2);font-size:10.5px;font-weight:700;
+}
+html[data-app] .nav button span:not(.ic){font-size:10.5px;}
+html[data-app] .nav button.on{background:var(--ui-surface2);color:var(--ui-ink);}
+html[data-app] .nav .ic{font-size:19px;line-height:1;display:flex;}
+html[data-app] .nav .ic svg{width:22px;height:22px;}
+/* 떠 있는 메뉴에 내용이 가리지 않게 */
+html[data-app="sentence"] body, html[data-app="words"] body{padding-bottom:calc(104px + env(safe-area-inset-bottom));}
+html[data-app="grammar"] #app{padding-bottom:calc(104px + env(safe-area-inset-bottom));}
+html[data-app] .toast{bottom:calc(92px + env(safe-area-inset-bottom));}

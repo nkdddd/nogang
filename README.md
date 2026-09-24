@@ -10,15 +10,17 @@
 | `apps/sentence.html` | 천문장 트레이너 (문장방 · 문법방) |
 | `apps/words.html` | MD 중학영단어 1800 (단어장 · 어근) |
 | `apps/grammar.html` | 그래머 인사이드 트레이너 (레벨 1~3) |
+| `assets/theme.css`, `assets/theme.js` | 공용 디자인 — 세 학습앱의 색·글꼴·카드·아래쪽 메뉴를 플래너와 같게 |
+| `assets/family.js` | 공용 가족 연결 (이메일 신청 → 승인) |
 
 학습 탭에서 앱을 누르면 플래너 위에 전체 화면으로 열립니다. 같은 사이트·같은 Firebase 프로젝트라 **한 번 로그인하면 네 화면 모두 같은 계정**으로 동작합니다. 각 앱 파일은 단독으로 열어도 됩니다.
 
 ## 통합 데이터베이스 (Firebase 프로젝트 `splan-5512`)
 
 ```
-users/{uid}                     프로필 {name, role: parent|child, linkCode}  ← 네 앱 공용
-codes/{6자리}                   가족 연결 코드 → {uid, name}
-links/{부모uid}/children/{uid}  부모-자녀 연결                               ← 네 앱 공용
+users/{uid}                     프로필 {name, role: parent|child, email}      ← 네 앱 공용
+familyRequests/{id}             가족 연결 신청 {fromUid, fromName, fromEmail, fromRole, toEmail, toUid, toName, status}
+links/{부모uid}/children/{uid}  부모-자녀 연결 {name, requestId, addedAt}     ← 네 앱 공용
 
 planner/{uid}/
   tasks/{id}                    학습 계획·실행 기록
@@ -28,7 +30,6 @@ planner/{uid}/
   apps/words                    MD영단어 state(날짜별 log 포함) + summary
   apps/grammar                  그래머 인사이드 상태 + summary + dayLog{날짜: {sec, answered, correct, cards}}
 
-shares/{코드}                   천문장 공유 요약 (앱 안의 공유 코드 기능)
 giUsers/{uid}, giFriendRequests 그래머 인사이드 친구 랭킹용 공개 요약
 ```
 
@@ -36,3 +37,36 @@ giUsers/{uid}, giFriendRequests 그래머 인사이드 친구 랭킹용 공개 �
   (문장 1개 1.5분, 신규 단어 1분·복습 0.5분, 문법 집중 1분 = 1분 · 앱별 하루 30분, 합계 60분 상한 — ⋯ 메뉴 → 학습앱 인정 시간에서 조정).
 - 인정 시간은 할 일 화면·학습 탭·이번 주 용돈 정산의 학습시간에 더해집니다. 부모가 자녀를 보고 있으면 그 자녀의 기록으로 계산합니다.
 - Firestore 보안 규칙은 부모 계정이 연결된 자녀의 `planner/{자녀uid}/**`(특히 `apps/*`)를 읽을 수 있어야 합니다.
+
+## 가족 연결 (코드 없이 신청 → 승인)
+
+1. 플래너 ⋯ 메뉴 → **가족 연결**에서 상대의 **가입 이메일**로 신청합니다. 부모 → 자녀, 자녀 → 부모 어느 쪽이든 됩니다.
+2. 상대가 플래너에 로그인하면 메뉴에 빨간 점이 뜨고, **가족 연결**에서 승인 또는 거절합니다.
+3. 승인되면 부모 쪽에 `links/{부모uid}/children/{자녀uid}`가 만들어져 자녀의 플래너·학습앱 기록을 볼 수 있습니다.
+   (자녀가 승인한 경우 부모가 다음에 접속할 때 연결이 만들어집니다.)
+4. 해제: 부모는 연결 목록에서 바로 해제, 자녀가 해제하면 부모가 다음에 접속할 때 정리됩니다.
+
+예전 6자리 코드(`codes/`)로 연결된 가족은 그대로 유지됩니다. 새로 만드는 계정에는 코드가 생기지 않습니다.
+
+### 필요한 Firestore 보안 규칙 (기존 규칙에 추가)
+
+```
+match /familyRequests/{id} {
+  allow create: if request.auth != null && request.resource.data.fromUid == request.auth.uid;
+  allow read, update: if request.auth != null && (
+       resource.data.fromUid == request.auth.uid
+    || resource.data.toEmail == request.auth.token.email.lower());
+  allow delete: if request.auth != null && resource.data.fromUid == request.auth.uid;
+}
+// 부모가 자녀 연결을 만들 때: 승인된 신청이 있어야만 허용하도록 강화하는 예 (rules_version = '2')
+function acceptedLink(parent, child, rid) {
+  let r = get(/databases/$(database)/documents/familyRequests/$(rid)).data;
+  return r.status == "accepted"
+    && ((r.fromUid == parent && r.toUid == child) || (r.fromUid == child && r.toUid == parent));
+}
+match /links/{parent}/children/{child} {
+  allow read, delete: if request.auth != null && request.auth.uid == parent;
+  allow create, update: if request.auth != null && request.auth.uid == parent
+    && acceptedLink(parent, child, request.resource.data.requestId);
+}
+```
