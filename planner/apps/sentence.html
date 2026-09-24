@@ -11,7 +11,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="/unified-learning-core.js" data-app="sentence"></script>
+<script>/* 통합 플래너 안(iframe)에서 열렸는지 표시 */if(window.self!==window.top)document.documentElement.classList.add('in-planner');</script>
 <style>
 :root{
   --bg:#EDEFF6; --paper:#FFFFFF; --ink:#1B2140; --ink-soft:#5E6485; --ink-faint:#9AA0BC;
@@ -1256,6 +1256,8 @@ function cloudPush(){
   }catch(e){}
 }
 function save(){
+  // 통합 DB: 날짜별 학습 문장 수 기록 (플래너가 학습시간으로 인정)
+  if(S.todayDate&&S.todayCount){ if(!S.dayLog)S.dayLog={}; S.dayLog[S.todayDate]=S.todayCount; }
   try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
   if(CLOUD&&UID&&fbDB){
     clearTimeout(_cloudT);
@@ -1266,6 +1268,7 @@ function save(){
 const LEGACY_KEYS=['cards','pts','streak','lastDay','doneDays','goal','todayCount','todayDate','adv','shareCode'];
 function backfillCards(st){
   if(!st.cards)st.cards={};
+  if(!Array.isArray(st.doneDays))st.doneDays=[];
   SENTENCES.forEach(function(s){ if(!st.cards[s.n]) st.cards[s.n]={box:0,due:0,seen:0,ok:0,no:0,star:false}; });
   return st;
 }

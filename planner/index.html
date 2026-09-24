@@ -9,12 +9,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="학습플래너">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#3E63DD">
+<meta name="theme-color" content="#F3F2F7">
+<meta name="color-scheme" content="light">
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
   :root{
     --ink:#1E2A4A; --bg:#F5F6F8; --surface:#fff; --line:#E8EBF0; --line2:#EDF0F5;
-    --blue:#3E63DD; --green:#0E9F6E; --amber:#F5A524; --red:#E5484D; --purple:#8E4EC6;
+    --blue:#6A58E6; --green:#0E9F6E; --amber:#F5A524; --red:#E5484D; --purple:#8E4EC6;
     --muted:#94A3B8; --muted2:#64748B; --slate:#475569;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -30,7 +31,7 @@
   /* ===== AUTH ===== */
   #auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
   .auth-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:30px 26px;width:100%;max-width:390px;box-shadow:0 10px 40px rgba(30,42,74,.08);}
-  .auth-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#3E63DD,#8E4EC6);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;}
+  .auth-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#6A58E6,#8E4EC6);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;}
   .auth-title{font-size:21px;font-weight:800;text-align:center;letter-spacing:-.02em;}
   .auth-sub{font-size:12.5px;color:var(--muted);text-align:center;margin-top:4px;margin-bottom:22px;}
   .fld{margin-bottom:12px;}
@@ -39,7 +40,7 @@
   .inp:focus{border-color:var(--blue);}
   .role-pick{display:flex;gap:8px;}
   .role-pick button{flex:1;padding:11px;border:1.5px solid #E2E8F0;border-radius:10px;background:#fff;font-weight:700;font-size:14px;color:var(--slate);}
-  .role-pick button.on{border-color:var(--blue);background:#EEF2FF;color:var(--blue);}
+  .role-pick button.on{border-color:var(--blue);background:#EFECFD;color:var(--blue);}
   .btn-primary{width:100%;padding:13px;border:none;border-radius:11px;background:var(--blue);color:#fff;font-weight:800;font-size:15px;margin-top:6px;}
   .btn-primary:disabled{opacity:.5;}
   .auth-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--muted2);}
@@ -50,7 +51,7 @@
   /* ===== HEADER ===== */
   header{display:flex;align-items:center;gap:12px;padding:11px 16px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;position:relative;}
   .brand{display:flex;align-items:center;gap:9px;}
-  .brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3E63DD,#8E4EC6);display:flex;align-items:center;justify-content:center;font-size:17px;}
+  .brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#6A58E6,#8E4EC6);display:flex;align-items:center;justify-content:center;font-size:17px;}
   .brand h1{font-size:16px;font-weight:800;letter-spacing:-.02em;}
   .brand p{font-size:11px;color:var(--muted);}
   .who{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
@@ -118,7 +119,7 @@
   .goal-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px;}
   .goal-top{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--slate);margin-bottom:8px;}
   .bar-track{height:9px;background:#EDF0F5;border-radius:999px;overflow:hidden;}
-  .bar-fill{height:100%;background:linear-gradient(90deg,#3E63DD,#0E9F6E);border-radius:999px;transition:width .4s;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,#6A58E6,#0E9F6E);border-radius:999px;transition:width .4s;}
   .goal-num{font-size:12px;color:var(--muted2);margin-top:6px;text-align:right;}
 
   .day-list{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;}
@@ -150,7 +151,7 @@
     box-shadow:inset 0 0 0 1px rgba(229,72,77,.25);}
   .stamp b{font-size:14px;font-weight:900;letter-spacing:-.5px;line-height:1.1;}
   .stamp i{font-size:8.5px;font-style:normal;font-weight:800;letter-spacing:.5px;opacity:.85;}
-  .stamp.blue{border-color:#3E63DD;color:#3E63DD;box-shadow:inset 0 0 0 1px rgba(62,99,221,.25);}
+  .stamp.blue{border-color:#6A58E6;color:#6A58E6;box-shadow:inset 0 0 0 1px rgba(62,99,221,.25);}
   .stamp.gold{border-color:#B8891F;color:#B8891F;box-shadow:inset 0 0 0 1px rgba(184,137,31,.25);}
   @keyframes stampIn{0%{transform:rotate(-14deg) scale(2.4);opacity:0}
     60%{transform:rotate(-14deg) scale(.92);opacity:1}100%{transform:rotate(-14deg) scale(1);opacity:.92}}
@@ -174,7 +175,7 @@
   .subj-tag{color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:7px;}
   .tb-tag{font-size:11.5px;color:var(--slate);background:#F1F4F8;padding:3px 8px;border-radius:7px;font-weight:600;}
   .unit-tag{font-size:11.5px;color:var(--purple);background:#F5EEFC;padding:3px 8px;border-radius:7px;font-weight:600;}
-  .method-tag{font-size:11.5px;color:#334155;background:#EEF2FF;padding:3px 8px;border-radius:7px;font-weight:600;}
+  .method-tag{font-size:11.5px;color:#334155;background:#EFECFD;padding:3px 8px;border-radius:7px;font-weight:600;}
   .time-tag{font-size:11.5px;color:var(--muted2);background:#F8FAFC;padding:3px 8px;border-radius:7px;}
   .planned-note{font-size:13px;color:var(--slate);margin-top:8px;}
   .exec-row{display:flex;gap:10px;margin-top:11px;flex-wrap:wrap;}
@@ -201,7 +202,7 @@
   .pick{padding:7px 12px;border-radius:9px;border:1px solid #E2E8F0;background:#fff;font-size:13px;font-weight:700;color:var(--slate);}
   .pick.on{background:var(--ink);color:#fff;border-color:var(--ink);}
   .textarea{width:100%;padding:9px 11px;border:1px solid #E2E8F0;border-radius:9px;font-size:14px;resize:vertical;outline:none;}
-  .next-btn{padding:9px 12px;border-radius:9px;border:1px solid var(--blue);background:#EEF2FF;color:var(--blue);font-size:12.5px;font-weight:700;white-space:nowrap;}
+  .next-btn{padding:9px 12px;border-radius:9px;border:1px solid var(--blue);background:#EFECFD;color:var(--blue);font-size:12.5px;font-weight:700;white-space:nowrap;}
   .ghost-btn{padding:9px 16px;border-radius:10px;border:1px solid #E2E8F0;background:#fff;color:var(--slate);font-weight:700;font-size:13.5px;}
   .danger-btn{display:flex;align-items:center;gap:5px;padding:9px 14px;border-radius:10px;border:1px solid #FADADD;background:#FFF5F6;color:var(--red);font-weight:700;font-size:13px;}
 
@@ -216,14 +217,14 @@
   .list-item{display:flex;align-items:center;gap:10px;background:#fff;border-radius:10px;padding:11px 13px;margin-bottom:8px;font-size:14px;font-weight:600;}
   .add-line{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;border:1px dashed #CBD5E1;border-radius:10px;background:#fff;color:var(--blue);font-weight:700;font-size:13.5px;margin-top:4px;}
   .section-lbl{font-size:12px;font-weight:800;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.03em;}
-  .code-box{background:linear-gradient(135deg,#3E63DD,#8E4EC6);border-radius:14px;padding:18px;color:#fff;text-align:center;margin-bottom:18px;}
+  .code-box{background:linear-gradient(135deg,#6A58E6,#8E4EC6);border-radius:14px;padding:18px;color:#fff;text-align:center;margin-bottom:18px;}
   .code-box .lbl{font-size:12px;opacity:.85;}
   .code-box .code{font-size:32px;font-weight:800;letter-spacing:.15em;margin:6px 0;font-variant-numeric:tabular-nums;}
   .code-box button{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 14px;font-weight:700;font-size:12.5px;}
-  .share-note{display:flex;gap:8px;align-items:flex-start;background:#EEF2FF;border-radius:10px;padding:12px;font-size:12.5px;color:var(--slate);margin-top:18px;line-height:1.5;}
+  .share-note{display:flex;gap:8px;align-items:flex-start;background:#EFECFD;border-radius:10px;padding:12px;font-size:12.5px;color:var(--slate);margin-top:18px;line-height:1.5;}
   .child-item{display:flex;align-items:center;gap:11px;background:#fff;border-radius:11px;padding:12px 13px;margin-bottom:9px;}
   .child-item .av{width:34px;height:34px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
-  .child-item .open{margin-left:auto;border:1px solid var(--blue);background:#EEF2FF;color:var(--blue);border-radius:8px;padding:6px 12px;font-weight:700;font-size:12.5px;}
+  .child-item .open{margin-left:auto;border:1px solid var(--blue);background:#EFECFD;color:var(--blue);border-radius:8px;padding:6px 12px;font-weight:700;font-size:12.5px;}
 
   /* dashboard */
   .dash-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;}
@@ -243,7 +244,7 @@
   .subj-bar-num{font-size:12px;color:var(--muted2);font-weight:700;min-width:44px;text-align:right;}
 
   /* 용돈 */
-  .allow-hero{background:linear-gradient(135deg,#0E9F6E,#3E63DD);border-radius:16px;padding:20px;color:#fff;text-align:center;margin-bottom:14px;}
+  .allow-hero{background:linear-gradient(135deg,#0E9F6E,#6A58E6);border-radius:16px;padding:20px;color:#fff;text-align:center;margin-bottom:14px;}
   .allow-hero .wk{font-size:12px;opacity:.9;}
   .allow-hero .amt{font-size:38px;font-weight:800;margin:4px 0;letter-spacing:-.02em;}
   .allow-hero .cap{font-size:12px;opacity:.85;}
@@ -271,20 +272,20 @@
 
   /* 학습 카드 제목·기록 버튼 */
   .task-title{font-size:15px;font-weight:800;color:#1E2A4A;margin:6px 0 2px;cursor:pointer;line-height:1.35;}
-  .task-title:hover{color:#3E63DD;}
-  .rec-btn{width:100%;margin:8px 0 2px;border:1.5px solid #D6DEF5;background:#F7F9FF;color:#3E63DD;
+  .task-title:hover{color:#6A58E6;}
+  .rec-btn{width:100%;margin:8px 0 2px;border:1.5px solid #DCD6F7;background:#F7F6FE;color:#6A58E6;
     border-radius:10px;padding:9px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;}
-  .rec-btn:hover{background:#EEF2FF;}
+  .rec-btn:hover{background:#EFECFD;}
 
   /* 오늘 할 일 추가 버튼 */
-  .add-task-btn{width:100%;border:2px dashed #C7D2FE;background:#FAFBFF;color:#3E63DD;border-radius:14px;
+  .add-task-btn{width:100%;border:2px dashed #D2CAF8;background:#FAF9FF;color:#6A58E6;border-radius:14px;
     padding:16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:4px;transition:.15s;}
-  .add-task-btn:hover{background:#EEF2FF;border-color:#93A9F5;}
+  .add-task-btn:hover{background:#EFECFD;border-color:#A89BF3;}
 
   /* 메뉴 허브 */
   .hub-item{display:flex;align-items:center;gap:12px;width:100%;background:#fff;border:1px solid var(--line);
     border-radius:12px;padding:14px 15px;margin-bottom:9px;cursor:pointer;text-align:left;font-family:inherit;transition:.15s;}
-  .hub-item:hover{border-color:#C7D2FE;background:#FAFBFF;}
+  .hub-item:hover{border-color:#D2CAF8;background:#FAF9FF;}
   .hub-emo{font-size:22px;width:26px;text-align:center;flex-shrink:0;}
   .hub-txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
   .hub-txt b{font-size:14px;font-weight:800;color:#1E2A4A;}
@@ -292,7 +293,7 @@
   .hub-arr{color:#CBD5E1;font-size:20px;flex-shrink:0;}
 
   /* 학습 타이머 */
-  .timer-btn{border:1.5px solid #D6DEF5;background:#F7F9FF;color:#3E63DD;border-radius:9px;padding:6px 11px;font-weight:800;font-size:12px;cursor:pointer;}
+  .timer-btn{border:1.5px solid #DCD6F7;background:#F7F6FE;color:#6A58E6;border-radius:9px;padding:6px 11px;font-weight:800;font-size:12px;cursor:pointer;}
   .timer-btn.on{border-color:#E5484D;background:#FFF5F6;color:#E5484D;animation:tmrPulse 1.6s ease-in-out infinite;}
   @keyframes tmrPulse{0%,100%{opacity:1}50%{opacity:.6}}
   .verify-tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;}
@@ -326,9 +327,9 @@
 
   /* 주간 마감/계획 배너 */
   .week-banner{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;font-weight:600;line-height:1.4;flex-wrap:wrap;}
-  .week-banner.plan{background:#EEF2FF;border-bottom:1px solid #D9E1FF;color:#2D3561;}
+  .week-banner.plan{background:#EFECFD;border-bottom:1px solid #DED8FB;color:#35296E;}
   .week-banner.soon{background:#FFF7E8;border-bottom:1px solid #F5DFA6;color:#8A6516;}
-  .week-banner button{margin-left:auto;border:none;border-radius:9px;padding:7px 13px;font-weight:800;font-size:12.5px;color:#fff;background:#3E63DD;}
+  .week-banner button{margin-left:auto;border:none;border-radius:9px;padding:7px 13px;font-weight:800;font-size:12.5px;color:#fff;background:#6A58E6;}
 
   /* 주간 대결 · 챔피언 인증카드 */
   .rank-row{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:9px;}
@@ -358,9 +359,9 @@
   .mon-card svg{animation:monBob 2.4s ease-in-out infinite;}
 
   /* 동기부여 */
-  .cheer{display:flex;gap:11px;align-items:flex-start;background:linear-gradient(135deg,#EEF2FF,#F3EEFF);border:1px solid #E4E9FF;border-radius:13px;padding:13px 15px;margin-bottom:13px;}
+  .cheer{display:flex;gap:11px;align-items:flex-start;background:linear-gradient(135deg,#EFECFD,#F3EEFF);border:1px solid #E6E1FB;border-radius:13px;padding:13px 15px;margin-bottom:13px;}
   .cheer .emo{font-size:26px;line-height:1;}
-  .cheer .msg{font-weight:800;font-size:14.5px;color:#2D3561;}
+  .cheer .msg{font-weight:800;font-size:14.5px;color:#35296E;}
   .cheer .tip{font-size:12px;color:#6B7280;margin-top:3px;line-height:1.5;}
   .rollover-btn{border:1px solid #E2E8F0;background:#fff;color:#64748B;border-radius:9px;padding:8px 12px;font-weight:700;font-size:12.5px;}
   .quick-praise{border:1px solid #E4CDF7;background:#FBF7FF;color:#8E4EC6;border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:700;}
@@ -371,7 +372,7 @@
   .badge .b-name{font-size:10.5px;font-weight:700;color:var(--slate);line-height:1.25;}
   .toast-wrap{position:fixed;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:8px;z-index:80;pointer-events:none;}
   .toast{background:#1E2A4A;color:#fff;padding:11px 18px;border-radius:12px;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.22);max-width:90%;animation:toastIn .22s ease;}
-  .toast.good{background:#0E9F6E;} .toast.info{background:#3E63DD;} .toast.cheer{background:linear-gradient(135deg,#8E4EC6,#3E63DD);}
+  .toast.good{background:#0E9F6E;} .toast.info{background:#6A58E6;} .toast.cheer{background:linear-gradient(135deg,#8E4EC6,#6A58E6);}
   @keyframes toastIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
 
   @media(max-width:720px){
@@ -413,6 +414,212 @@
     .who-chip{max-width:78px;}
     #monHead{display:none !important;}
   }
+
+  /* =====================================================================
+   *  하루틀 UI 셸 — 아래쪽 메뉴(할 일 · 일정 · 학습 · 기록) + ✨ 빠른 계획
+   *  (위의 기존 스타일을 덮어씁니다)
+   * ===================================================================== */
+  :root{
+    --bg:#F3F2F7; --surface:#fff; --surface2:#E9E8F0; --line:#E4E2EC; --line2:#EDEBF3;
+    --ink:#1C1B24; --muted:#8F8D9B; --muted2:#6D6B7A; --slate:#4A4858;
+    --blue:#6A58E6; --accent:#6A58E6; --accent-2:#8F80FF; --accent-soft:#EFECFD;
+    --shadow:0 10px 30px rgba(20,16,50,.10);
+    --r:18px;
+  }
+  html{color-scheme:light;}
+  body{background:var(--bg);color:var(--ink);padding-bottom:0;}
+  #app{max-width:760px;margin:0 auto;padding-bottom:calc(110px + env(safe-area-inset-bottom));}
+  body.lapp-open{overflow:hidden;}
+
+  /* ----- 로그인 ----- */
+  #auth{background:var(--bg);}
+  .auth-card{border-radius:24px;border:none;box-shadow:var(--shadow);}
+  .auth-logo,.code-box{background:linear-gradient(135deg,#8F80FF,#6A58E6 55%,#5646D0);}
+  .inp,.textarea{border-color:var(--line);border-radius:12px;}
+  .btn-primary{border-radius:14px;background:var(--ink);}
+
+  /* ----- 상단 바 ----- */
+  .topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;
+    padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:rgba(243,242,247,.9);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+  .tb-chips{display:flex;gap:12px;align-items:center;font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;}
+  .tb-chips span{display:flex;align-items:center;gap:4px;white-space:nowrap;}
+  .tb-mon{display:flex;align-items:center;}
+  .tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0;}
+  .tb-who{display:flex;align-items:center;gap:6px;border:none;background:var(--surface);border-radius:999px;
+    padding:4px 12px 4px 4px;font-weight:800;font-size:13px;color:var(--slate);max-width:150px;min-width:0;
+    box-shadow:0 1px 2px rgba(20,16,50,.06);}
+  .tb-who .av{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;font-size:12.5px;}
+  .tb-who span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tb-pill{display:flex;align-items:center;background:var(--surface2);border-radius:999px;padding:3px;}
+  .tb-pill button{width:42px;height:36px;border:none;background:transparent;border-radius:999px;font-size:19px;
+    color:var(--ink);font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .tb-pill button:active{background:var(--surface);}
+  .tb-pill svg{width:20px;height:20px;}
+
+  .child-banner{background:var(--accent-soft);border:none;border-radius:14px;margin:0 16px 8px;color:#4B3FA6;}
+  .child-banner button{border-color:#DCD6F7;color:var(--accent);border-radius:999px;}
+  .week-banner{border-radius:14px;margin:0 16px 8px;border:none!important;}
+  .share-note{display:block;}
+  .week-banner button{border-radius:999px;}
+  #examBanner>div{margin-left:16px!important;margin-right:16px!important;border-radius:14px!important;}
+
+  /* ----- 페이지 머리 ----- */
+  .page-h{display:flex;align-items:flex-end;gap:10px;padding:6px 16px 10px;flex-wrap:wrap;}
+  .page-h h2{font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;}
+  .page-h .h-sub{font-size:13px;color:var(--muted2);font-weight:600;margin-bottom:5px;}
+  .h-nav{margin-left:auto;display:flex;align-items:center;gap:2px;color:var(--muted2);font-size:14px;font-weight:600;margin-bottom:4px;}
+  .h-nav button{border:none;background:transparent;width:32px;height:32px;border-radius:50%;font-size:19px;color:var(--muted2);}
+  .h-nav button:active{background:var(--surface2);}
+  .h-nav .today-chip{width:auto;height:30px;padding:0 12px;border-radius:999px;background:var(--surface);font-size:12.5px;font-weight:800;color:var(--accent);margin-right:4px;}
+  .seg{display:flex;background:var(--surface2);border-radius:999px;padding:3px;margin:0 16px 12px;}
+  .seg button{flex:1;border:none;background:transparent;border-radius:999px;padding:8px 0;font-weight:800;font-size:13px;color:var(--muted2);}
+  .seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(20,16,50,.08);}
+
+  /* 주간 날짜 줄 */
+  .wstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 12px 12px;}
+  .wday{border:none;background:transparent;border-radius:16px;padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted2);}
+  .wday .w{font-size:11.5px;font-weight:600;}
+  .wday .n{font-size:22px;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.25;}
+  .wday .r{font-size:10px;font-weight:800;color:var(--muted);min-height:14px;}
+  .wday.sun .w{color:#E5484D;} .wday.sat .w{color:var(--accent);}
+  .wday.today .n{color:var(--accent);font-weight:800;}
+  .wday.on{background:var(--surface2);}
+  .wday.on .n{font-weight:800;}
+  .wday.full .r{color:var(--green);}
+
+  main{padding:0 16px 24px;}
+
+  /* ----- 할 일(일간) — 한 줄 레이아웃 ----- */
+  .day{display:flex;flex-direction:column;gap:12px;}
+  .day-side{position:static;order:2;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .day-side>*{min-width:0;}
+  .day-side .mon-card,.day-side .goal-card:first-of-type{grid-column:1/-1;}
+  .day-side .mini-row{grid-column:1/-1;}
+  .day-list{background:transparent;border:none;padding:0;}
+  /* 하루틀처럼 할 일 목록을 맨 위로, 응원·다이어리 같은 안내 카드는 그 아래로 */
+  .day-list{display:flex;flex-direction:column;}
+  .day>*,.day-list>*{min-width:0;max-width:100%;}
+  .day-list>.dl-head{order:-3;}
+  .day-list>.task,.day-list>.empty{order:-2;}
+  .day-list>.add-task-btn{order:-1;margin:0 0 16px;}
+  .dl-head h2{font-size:18px;}
+  .sum-card,.goal-card,.mini-stat,.mon-card,.vs-card,.cheer,.day-list .task{border-radius:var(--r);}
+  .sum-card,.goal-card,.mini-stat,.vs-card{border:1px solid var(--line);}
+  .task{background:var(--surface);border:1px solid var(--line);}
+  .cheer{background:var(--surface);border:1px solid var(--line);}
+  .add-task-btn{border-radius:var(--r);border:1.5px dashed #CFCDD9;background:transparent;color:var(--muted2);}
+  .add-task-btn:hover{background:var(--surface);border-color:var(--accent);color:var(--accent);}
+  .bar-fill{background:linear-gradient(90deg,#8F80FF,#6A58E6);}
+  .add-btn{border-radius:12px;}
+  .rollover-btn,.ghost-btn,.pick,.icon-btn{border-color:var(--line);}
+  .pick.on{background:var(--ink);border-color:var(--ink);}
+  @media(max-width:520px){ .day-side{grid-template-columns:1fr;} }
+
+  /* ----- 일정(주간·월간) ----- */
+  .week{grid-template-columns:1fr;gap:10px;}
+  .wcol{min-height:auto;border-radius:var(--r);flex-direction:row;}
+  .wcol.today{background:#F7F6FE;border-color:#DCD6F7;}
+  .wcol-head{width:64px;flex:0 0 64px;border-bottom:none;border-right:1px solid var(--line2);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .wcol-body{padding:8px;}
+  .wcard{border-radius:12px;background:var(--bg);}
+  .wadd{border-radius:12px;margin-top:2px;}
+  .month{border-radius:var(--r);}
+  .mcell{min-height:74px;}
+  .mgrid{grid-auto-rows:minmax(74px,auto);}
+  .daynum.today{background:var(--accent);}
+
+  /* ----- 학습 탭 ----- */
+  .l-hero{background:linear-gradient(135deg,#8F80FF,#6A58E6 60%,#5646D0);color:#fff;border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 10px 26px rgba(106,88,230,.28);}
+  .l-hero .t{font-size:13px;opacity:.9;font-weight:700;}
+  .l-hero .v{font-size:34px;font-weight:800;letter-spacing:-.02em;margin:2px 0 8px;}
+  .l-hero .v small{font-size:15px;opacity:.85;font-weight:700;}
+  .l-hero .bar{height:8px;background:rgba(255,255,255,.25);border-radius:999px;overflow:hidden;}
+  .l-hero .bar>div{height:100%;background:#fff;border-radius:999px;}
+  .l-hero .per{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:12px;font-weight:700;opacity:.92;}
+  .lcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:12px;}
+  .lcard-top{display:flex;align-items:center;gap:12px;}
+  .lcard-ic{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 auto;}
+  .lcard-name{font-size:16.5px;font-weight:800;letter-spacing:-.01em;}
+  .lcard-sub{font-size:12.5px;color:var(--muted2);margin-top:1px;}
+  .lcard-min{margin-left:auto;font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:#EAF7F1;color:#0E7A55;white-space:nowrap;}
+  .lcard-min.zero{background:var(--bg);color:var(--muted);}
+  .lstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 12px;}
+  .lstat{background:var(--bg);border-radius:14px;padding:10px 8px;text-align:center;}
+  .lstat b{display:block;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .lstat span{font-size:11px;color:var(--muted2);font-weight:600;}
+  .lprog{height:8px;background:var(--bg);border-radius:999px;overflow:hidden;}
+  .lprog>div{height:100%;border-radius:999px;}
+  .lprog-l{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted2);margin-top:6px;font-weight:600;}
+  .lgo{width:100%;margin-top:12px;border:none;border-radius:14px;padding:13px;font-weight:800;font-size:14.5px;background:var(--ink);color:#fff;}
+  .lgo:active{transform:scale(.99);}
+  .lnote{font-size:12px;color:var(--muted2);line-height:1.55;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:4px;}
+
+  /* 학습앱 전체 화면 */
+  .lapp{position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column;}
+  .lapp-h{display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:var(--surface);border-bottom:1px solid var(--line);}
+  .lapp-h b{font-size:15px;font-weight:800;}
+  .lapp-back{border:none;background:var(--surface2);border-radius:999px;padding:8px 14px;font-weight:800;font-size:13.5px;color:var(--ink);}
+  .lapp-h .sp{flex:1;}
+  .lapp iframe{flex:1;width:100%;border:0;background:#fff;}
+
+  /* ----- 기록 탭 ----- */
+  .r-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+  .r-stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 10px;text-align:center;}
+  .r-stat .e{font-size:22px;}
+  .r-stat b{display:block;font-size:22px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;}
+  .r-stat span{font-size:11.5px;color:var(--muted2);font-weight:600;}
+  .r-sec{font-size:13px;font-weight:800;color:var(--muted2);margin:18px 2px 10px;}
+  .hub-item{border-radius:var(--r);border-color:var(--line);padding:15px;}
+  .hub-item:hover{border-color:#D2CAF8;background:var(--surface);}
+  .mon-card{border-color:var(--line);background:linear-gradient(160deg,#FFFDF7,#F4F2FF);}
+
+  /* ----- 아래쪽 메뉴 ----- */
+  .bnav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:40;
+    display:flex;align-items:center;gap:10px;width:min(560px,calc(100% - 24px));}
+  .bnav-pill{flex:1;display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px;box-shadow:var(--shadow);}
+  .bnav-pill button{flex:1;height:50px;border:none;background:transparent;border-radius:999px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:2px;color:var(--muted2);font-size:10.5px;font-weight:700;}
+  .bnav-pill button svg{width:22px;height:22px;}
+  .bnav-pill button.on{background:var(--surface2);color:var(--ink);}
+  .fab{width:62px;height:62px;border-radius:50%;border:none;flex:0 0 auto;color:#fff;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 30% 25%,#A597FF,#6A58E6 60%,#5646D0);box-shadow:0 8px 22px rgba(106,88,230,.45);}
+  .fab svg{width:26px;height:26px;}
+  .fab:active{transform:scale(.96);}
+  .toast-wrap{bottom:calc(92px + env(safe-area-inset-bottom));}
+  .toast{border-radius:999px;background:var(--ink);}
+  .toast.good{background:#0E9F6E;} .toast.info{background:var(--accent);}
+
+  /* ----- 시트(드로어·모달) ----- */
+  .overlay{background:rgba(20,16,40,.38);z-index:60;}
+  .drawer,.drawer.wide{max-width:600px;height:auto;max-height:92vh;margin:auto auto 0;border-radius:24px 24px 0 0;background:var(--bg);box-shadow:0 -10px 40px rgba(20,16,50,.18);animation:sheetUp .22s ease;}
+  .drawer-head{background:transparent;border-bottom:none;padding:16px 18px 6px;}
+  .drawer-head h3{font-size:19px;}
+  .drawer-body{padding:10px 16px calc(22px + env(safe-area-inset-bottom));}
+  .tab-row{background:transparent;}
+  .list-item,.child-item{border-radius:14px;}
+  .modal{border-radius:24px;}
+  @media(max-width:600px){
+    .overlay{align-items:flex-end;}
+    .modal{margin:auto 0 0;max-width:none;border-radius:24px 24px 0 0;max-height:94vh;animation:sheetUp .22s ease;}
+  }
+  @keyframes sheetUp{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+
+  /* 빠른 계획(✨) */
+  .q-orb{width:84px;height:84px;border-radius:50%;margin:6px auto 12px;background:radial-gradient(circle at 32% 28%,#fff 0 6%,#A597FF 22%,#6A58E6 60%,#4B3CC4);
+    box-shadow:0 12px 30px rgba(106,88,230,.35);display:flex;align-items:center;justify-content:center;color:#fff;}
+  .q-orb svg{width:34px;height:34px;}
+  .q-lead{text-align:center;font-size:15.5px;font-weight:700;line-height:1.55;}
+  .q-ex{text-align:center;font-size:12.5px;color:var(--muted2);margin:6px 0 14px;line-height:1.5;}
+  .q-box{display:flex;gap:8px;align-items:flex-end;background:var(--surface);border-radius:20px;padding:8px 8px 8px 14px;box-shadow:var(--shadow);}
+  .q-box textarea{flex:1;border:none;outline:none;resize:none;font-size:15px;min-height:46px;max-height:160px;padding:6px 0;background:transparent;}
+  .q-box button{border:none;border-radius:999px;background:var(--ink);color:#fff;font-weight:800;padding:12px 16px;font-size:14px;white-space:nowrap;}
+  .q-row{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 12px;margin-top:8px;}
+  .q-row select{border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:13.5px;background:#fff;max-width:112px;}
+  .q-row .q-t{flex:1;min-width:0;font-size:13.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .q-row .q-m{font-size:12px;color:var(--muted2);white-space:nowrap;}
+  .q-row input[type=number]{width:62px;border:1px solid var(--line);border-radius:10px;padding:6px;font-size:13.5px;}
 </style>
 </head>
 <body>
@@ -444,7 +651,7 @@
 
     <button id="authBtn" class="btn-primary" onclick="submitAuth()">로그인</button>
     <div id="resetRow" style="text-align:center;margin-top:11px">
-      <a href="#" onclick="resetPassword();return false;" style="display:inline-block;color:#3E63DD;font-size:13px;font-weight:700;text-decoration:none;border:1px solid #D6DEF5;background:#F7F9FF;border-radius:9px;padding:8px 14px">🔑 비밀번호를 잊으셨나요?</a>
+      <a href="#" onclick="resetPassword();return false;" style="display:inline-block;color:#6A58E6;font-size:13px;font-weight:700;text-decoration:none;border:1px solid #DCD6F7;background:#F7F6FE;border-radius:9px;padding:8px 14px">🔑 비밀번호를 잊으셨나요?</a>
     </div>
     <div class="auth-switch">
       <span id="switchTxt">아직 계정이 없으신가요?</span>
@@ -453,43 +660,36 @@
   </div>
 </div>
 
-<!-- ============ APP ============ -->
+<!-- ============ APP (하루틀 UI) ============ -->
 <div id="app" class="hidden">
-  <header>
-    <div class="brand">
-      <div class="logo">🎓</div>
-      <div><h1>우리집 학습플래너</h1><p id="brandSub">계획 대비 이행 점검</p></div>
+  <div class="topbar">
+    <div class="tb-chips"><span id="tbStreak" title="연속 학습일">🔥 0</span><span id="tbDone" title="오늘 완료한 학습">✅ 0</span></div>
+    <span id="monHead" class="tb-mon" title="파트너 몬스터"></span>
+    <div class="tb-right">
+      <button class="tb-who" onclick="openMenu()" title="계정 · 메뉴"><span class="av" id="myAv">나</span><span id="myName">나</span></button>
+      <div class="tb-pill">
+        <button title="메뉴" aria-label="메뉴" onclick="openMenu()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>
+        <button title="학습 추가" aria-label="학습 추가" onclick="openTask(null, addDate())"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
     </div>
-    <div class="who">
-      <span id="monHead" style="display:flex;align-items:center" title="파트너 몬스터"></span>
-      <div class="who-chip"><span class="av" id="myAv">나</span><span id="myName">나</span></div>
-      <button class="icon-btn" title="부스터 모드" onclick="drawBooster()">🚀</button>
-      <button class="icon-btn" title="학습 현황" onclick="drawStatus()">📊</button>
-      <button class="icon-btn" title="보상" onclick="drawRewards()">💰</button>
-      <button class="icon-btn" id="manageBtn" title="자녀 관리" onclick="drawManage()">📈</button>
-      <button class="icon-btn" title="설정" onclick="openDrawer('settings')">⚙️</button>
-    </div>
-  </header>
+  </div>
 
   <div id="childBanner" class="child-banner hidden"></div>
   <div id="weekBanner" class="week-banner hidden"></div>
   <div id="examBanner" class="hidden"></div>
 
-  <div class="toolbar">
-    <div class="navg">
-      <button class="icon-btn sm" onclick="nav(-1)">‹</button>
-      <button class="today-btn" onclick="goToday()">오늘</button>
-      <button class="icon-btn sm" onclick="nav(1)">›</button>
-      <span class="period" id="period"></span>
-    </div>
-    <div class="vtoggle">
-      <button data-v="month" onclick="setView('month')">월간</button>
-      <button data-v="week" onclick="setView('week')">주간</button>
-      <button data-v="day" class="on" onclick="setView('day')">일간</button>
-    </div>
-  </div>
-
+  <div id="pageHead"></div>
   <main id="main"></main>
+
+  <nav class="bnav" aria-label="주 메뉴">
+    <div class="bnav-pill">
+      <button data-tab="todo" onclick="setTab('todo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12 3 3 5-6"/></svg>할 일</button>
+      <button data-tab="plan" onclick="setTab('plan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="4.5" width="17" height="16" rx="3.5"/><path d="M3.5 9h17M8 3v3M16 3v3" stroke-linecap="round"/><text id="tabDate" x="12" y="18.2" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">1</text></svg>일정</button>
+      <button data-tab="learn" onclick="setTab('learn')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 6.5C10 5 7.2 4.5 4 4.8v13.4c3.2-.3 6 .2 8 1.8 2-1.6 4.8-2.1 8-1.8V4.8c-3.2-.3-6 .2-8 1.7Z"/><path d="M12 6.5V20"/></svg>학습</button>
+      <button data-tab="stats" onclick="setTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="13" width="4" height="7" rx="1.2"/><rect x="10" y="9" width="4" height="11" rx="1.2"/><rect x="16" y="4" width="4" height="16" rx="1.2"/></svg>기록</button>
+    </div>
+    <button class="fab" title="빠르게 계획 세우기" aria-label="빠르게 계획 세우기" onclick="openQuick()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 16.5l-1.8-5.2L5 9.5l5.2-1.8zM18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg></button>
+  </nav>
 </div>
 
 <div id="modalRoot"></div>
@@ -531,7 +731,7 @@ try {
 /* ============================================================
  *  2) 상수 / 유틸
  * ============================================================ */
-const SUBJECT_PALETTE = ["#E5484D","#3E63DD","#8E4EC6","#0E9F6E","#F5A524","#8B5E34","#0EA5E9","#DB2777"];
+const SUBJECT_PALETTE = ["#E5484D","#6A58E6","#8E4EC6","#0E9F6E","#F5A524","#8B5E34","#0EA5E9","#DB2777"];
 const DEFAULT_METHODS = [
   {id:"m1",name:"인강",icon:"📺",track:true},
   {id:"m2",name:"복습",icon:"🔁",track:false},
@@ -737,11 +937,12 @@ function monImgSrc(species,stage){ return `${MON_IMG_BASE}${MON_ROW[species]||"a
 // (기본 SVG는 3형태이므로 10단계를 3구간으로 매핑해 폴백)
 function svgStageOf(stage){ return stage<=2?0 : stage<=6?1 : 2; }
 function monArt(species,stage,size){
-  const svg=monsterSVG(species,svgStageOf(stage|0),size).replace(/"/g,"&quot;");
+  // 인라인 onerror 안에 들어가므로 줄바꿈·따옴표를 정리 (줄바꿈이 있으면 스크립트 오류로 이미지가 깨짐)
+  const svg=monsterSVG(species,svgStageOf(stage|0),size).replace(/\s*\n\s*/g," ").replace(/'/g,"\\'").replace(/"/g,"&quot;");
   const src=monImgSrc(species,stage);
   return `<img src="${src}" width="${size}" height="${size}" alt="${MONSTERS[species]?MONSTERS[species].name:""}"
     style="object-fit:contain;display:inline-block;vertical-align:middle"
-    onerror="this.onerror=null;this.outerHTML='${svg}'">`;
+    onerror="this.onerror=null;if(this.parentNode)this.outerHTML='${svg}'">`;
 }
 function monMessage(stage,toStage){
   if(stage>=MON_MAX_STAGE) return `최종 ${MON_MAX_STAGE+1}단계 달성! 이번 주 최고예요 🏆`;
@@ -778,7 +979,8 @@ const state = {
   ownerUid:null, ownerName:"", ownerRole:"child", // 현재 보고 있는 플래너의 주인
   viewingChild:false,
   children:[],           // 부모가 등록한 자녀 [{uid,name,code,color}]
-  view:"day", cursor:new Date(),
+  tab:"todo",            // 하단 메뉴: todo | plan | learn | stats
+  view:"day", planView:"week", cursor:new Date(),
   categories:seedCategories(),
   settings:defaultSettings(),
   tasks:[], tasksMap:{},
@@ -937,8 +1139,8 @@ async function acceptReviews(taskId){
 function reviewSuggestHTML(t){
   const plans=reviewPlanFor(t);
   const chips=plans.map(p=>`<span class="unit-tag">${p.gap}일 후 ${p.date.slice(5)} · ${p.plannedMin}분</span>`).join(" ");
-  return `<div style="background:#F7F9FF;border:1px solid #D6DEF5;border-radius:10px;padding:11px 13px;margin-top:12px">
-    <div style="font-size:12.5px;font-weight:800;color:#3E4C8A;margin-bottom:5px">🔁 복습하면 오래 기억돼요</div>
+  return `<div style="background:#F7F6FE;border:1px solid #DCD6F7;border-radius:10px;padding:11px 13px;margin-top:12px">
+    <div style="font-size:12.5px;font-weight:800;color:#4B3FA6;margin-bottom:5px">🔁 복습하면 오래 기억돼요</div>
     <div style="font-size:11.5px;color:#64748B;line-height:1.5;margin-bottom:7px">
       배운 내용은 1일·3일·7일 후 짧게 다시 보면 훨씬 오래 남아요. 복습 계획을 자동으로 만들까요?</div>
     <div class="tags" style="margin-bottom:9px">${chips}</div>
@@ -978,7 +1180,7 @@ async function drawWeekReport(){
   const isParent=state.profile.role==="parent";
   const targets = isParent && state.children.length
     ? state.children.filter(c=>c.exists!==false).map(c=>({uid:c.uid,name:c.name,color:c.color}))
-    : [{uid:state.ownerUid,name:state.ownerName,color:"#3E63DD"}];
+    : [{uid:state.ownerUid,name:state.ownerName,color:"#6A58E6"}];
   let body=`<div style="font-size:12.5px;color:#64748B;margin-bottom:12px">${label} · 월요일~일요일 18시 마감 기준</div>`;
   for(const who of targets){
     let tasks=[], cats={subjects:[]}, crit=defaultSettings().allowance;
@@ -1001,7 +1203,7 @@ async function drawWeekReport(){
       const W="월화수목금토일"[(parseD(d.ds).getDay()+6)%7];
       return `<div style="flex:1;text-align:center">
         <div style="height:46px;display:flex;align-items:flex-end;justify-content:center">
-          <div style="width:60%;height:${Math.max(3,h)}px;border-radius:4px 4px 0 0;background:${d.min>=dayTypeGoal(d.ds)?"#0E9F6E":d.min>0?"#3E63DD":"#E2E8F0"}"></div>
+          <div style="width:60%;height:${Math.max(3,h)}px;border-radius:4px 4px 0 0;background:${d.min>=dayTypeGoal(d.ds)?"#0E9F6E":d.min>0?"#6A58E6":"#E2E8F0"}"></div>
         </div>
         <div style="font-size:10.5px;color:${d.type==="free"?"#8A6516":"#94A3B8"};margin-top:3px">${W}</div>
         <div style="font-size:9.5px;color:#CBD5E1">${d.min||""}</div>
@@ -1028,7 +1230,7 @@ async function drawWeekReport(){
       : `<div style="background:#F3FBF7;border:1px solid #BFE8D6;border-radius:9px;padding:10px 12px;font-size:12.5px;color:#0E7A55">✅ 계획한 과목을 고르게 잘 해냈어요!</div>`;
 
     body+=`<div class="allow-card">
-      <div class="name"><span class="av" style="background:${who.color||"#3E63DD"}">${esc((who.name||"").slice(0,1))}</span>${esc(who.name)}
+      <div class="name"><span class="av" style="background:${who.color||"#6A58E6"}">${esc((who.name||"").slice(0,1))}</span>${esc(who.name)}
         <span style="margin-left:auto;font-size:12px;color:#94A3B8">달성도 <b style="color:#1E2A4A;font-size:14px">${pct}%</b></span></div>
       <div class="dash-cards" style="grid-template-columns:repeat(4,1fr)">
         <div class="dash-stat"><div class="l">학습시간</div><div class="big" style="font-size:16px">${hmFmt(w.r.weekMin)}</div><div class="l">목표 ${hmFmt(w.goalMin)} · ${goalPct}%</div></div>
@@ -1440,7 +1642,7 @@ async function drawArchive(targetUid, targetName){
     return `<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
         <b style="font-size:13.5px">${w.label}</b>
-        ${i===0?`<span class="verify-tag" style="background:#EEF2FF;color:#3E4C8A;border:1px solid #D9E1FF">이번 주</span>`:""}
+        ${i===0?`<span class="verify-tag" style="background:#EFECFD;color:#4B3FA6;border:1px solid #DED8FB">이번 주</span>`:""}
         ${w.wid===best.wid&&weeks.length>1?`<span class="verify-tag" style="background:#FFF7E8;color:#8A6516;border:1px solid #F5DFA6">🏅 최고 기록</span>`:""}
         <span style="margin-left:auto;font-size:12.5px;color:#64748B"><b style="color:#1E2A4A">${hmFmt(w.min)}</b> · ${w.done}/${w.planned} (${ip}%) · ${w.dayCount}일</span>
       </div>
@@ -1463,7 +1665,7 @@ async function drawArchive(targetUid, targetName){
     return `<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
         <b style="font-size:14px">${m.label}</b>
-        ${i===0?`<span class="verify-tag" style="background:#EEF2FF;color:#3E4C8A;border:1px solid #D9E1FF">이번 달</span>`:""}
+        ${i===0?`<span class="verify-tag" style="background:#EFECFD;color:#4B3FA6;border:1px solid #DED8FB">이번 달</span>`:""}
         <span style="margin-left:auto;font-size:12.5px;color:#64748B"><b style="color:#1E2A4A">${hmFmt(m.min)}</b> · ${m.done}/${m.planned} (${ip}%)</span>
       </div>
       <div style="height:8px;background:#EDF0F5;border-radius:999px;overflow:hidden;margin-bottom:8px">
@@ -1577,187 +1779,161 @@ function drawArchiveWeek(wid){
  *  - 학습량을 분(分)으로 환산해 플래너 학습시간·용돈에 반영
  *  - 편법 방지: 앱별/전체 일일 인정 상한, 학습일수·복기 점수에는 미반영
  * ============================================================ */
+/* ------------------------------------------------------------
+ *  학습앱 통합 (천문장 · MD영단어 · 그래머 인사이드)
+ *  통합 DB: 세 앱 모두 플래너와 같은 계정으로 planner/{uid}/apps/{doc}에 기록을 저장합니다.
+ *  플래너는 연결 코드 없이 그 문서를 바로 읽어 날짜별 학습시간으로 인정합니다.
+ * ------------------------------------------------------------ */
 const EXT_APPS={
-  sentence:{ id:"sentence", name:"천문장 트레이너", emo:"📘", col:"shares",
-    desc:"문장 학습 1개 = 1.5분" },
-  vocab:{ id:"vocab", name:"MD 중학영단어", emo:"🔤", col:"links",
-    desc:"신규 단어 1개 = 1분, 복습 1개 = 0.5분" },
+  sentence:{ id:"sentence", doc:"sentence", name:"천문장 트레이너", short:"천문장", emo:"📘", page:"apps/sentence.html",
+    color:"#3E6FE0", soft:"#EAF0FF", desc:"문장 학습 1개 = 1.5분" },
+  vocab:{ id:"vocab", doc:"words", name:"MD 중학영단어", short:"영단어", emo:"🔤", page:"apps/words.html",
+    color:"#0E9F6E", soft:"#E4F5EC", desc:"신규 단어 1개 = 1분, 복습 1개 = 0.5분" },
+  grammar:{ id:"grammar", doc:"grammar", name:"그래머 인사이드", short:"문법", emo:"📗", page:"apps/grammar.html",
+    color:"#E0A100", soft:"#FFF6C4", desc:"앱이 잰 집중 학습 1분 = 1분" },
 };
 function extConf(){
-  const d={ enabled:true, minPerSentence:1.5, minPerNewWord:1, minPerRevWord:0.5,
-            dailyCapPerApp:30, dailyCapTotal:45, countInAllowance:true };
+  const d={ enabled:true, minPerSentence:1.5, minPerNewWord:1, minPerRevWord:0.5, grammarRate:1,
+            dailyCapPerApp:30, dailyCapTotal:60, countInAllowance:true };
   return {...d, ...(state.settings.extApps||{})};
 }
-function extLinks(){ return state.settings.extLinks||{}; }   // {sentence:"코드", vocab:"코드"}
-// 오늘 학습량 → 인정 분
-function extMinutesToday(kind, summary){
-  const c=extConf();
-  if(!summary) return 0;
-  let min=0;
+const num=v=>Number(v)||0;
+// 앱 문서 → {sum:화면 요약, days:{'YYYY-MM-DD':{…}}}
+function extNormalize(kind, d){
+  if(!d) return null;
+  const today=fmt(new Date()), days={};
   if(kind==="sentence"){
-    min=(Number(summary.todayCount)||0)*c.minPerSentence;
-  }else{
-    const t=summary.today||{};
-    min=(Number(t.new)||0)*c.minPerNewWord + (Number(t.rev)||0)*c.minPerRevWord;
+    Object.entries(d.dayLog||{}).forEach(([ds,n])=>{ days[ds]={n:num(n)}; });
+    if(d.todayDate && num(d.todayCount)) days[d.todayDate]={n:Math.max(num(d.todayCount),(days[d.todayDate]||{}).n||0)};
+    const s=d.summary||{};
+    return {days, sum:{today:(days[today]||{}).n||0, goal:num(d.goal||s.goal)||8, streak:num(d.streak),
+      mastered:num(s.mastered), total:num(s.total), pct:num(s.pct), weak:num(s.weakCount), pts:num(d.pts), updated:num(d.updated)}};
   }
-  return Math.min(Math.round(min), c.dailyCapPerApp);   // 앱별 일일 상한
-}
-async function fetchExtSummary(kind, code){
-  if(!code) return null;
-  try{
-    const doc=await db.collection(EXT_APPS[kind].col).doc(String(code).trim()).get();
-    if(!doc.exists) return null;
-    const d=doc.data()||{};
-    // 천문장은 문서 자체가 요약, MD영단어는 summary 필드에 요약
-    return kind==="sentence"? d : (d.summary? {...d.summary, name:d.name} : null);
-  }catch(e){ console.error("ext fetch", e); return null; }
-}
-async function loadExtAll(){
-  const L=extLinks(), out={};
-  for(const k of Object.keys(EXT_APPS)){
-    out[k]= L[k]? await fetchExtSummary(k, L[k]) : null;
+  if(kind==="vocab"){
+    const st=d.state||{}, s=d.summary||{};
+    Object.entries(st.log||{}).forEach(([ds,l])=>{ days[ds]={new:num(l&&l.new), rev:num(l&&l.rev), correct:num(l&&l.correct), total:num(l&&l.total)}; });
+    const t=days[today]||{};
+    return {days, sum:{todayNew:t.new||0, todayRev:t.rev||0, streak:num(st.streak||s.streak), mastered:num(s.mastered), intro:num(s.intro),
+      points:num(st.points||s.points), newPerDay:num(st.settings&&st.settings.newPerDay)||20, total:1800, updated:num(d.updated)}};
   }
-  state.extCache={at:Date.now(), data:out};
+  // grammar
+  Object.entries(d.dayLog||{}).forEach(([ds,l])=>{ days[ds]={sec:num(l&&l.sec), answered:num(l&&l.answered), correct:num(l&&l.correct), cards:num(l&&l.cards)}; });
+  const x=d.daily;
+  if(x && x.date) days[x.date]={sec:num(x.activeSec), answered:num(x.answered), correct:num(x.correct), cards:num(x.cards)};
+  const s=d.summary||{}, t=days[today]||{};
+  return {days, sum:{todayMin:Math.round((t.sec||0)/60), answered:t.answered||0, correct:t.correct||0, cards:t.cards||0,
+    done:num(s.done), total:num(s.total), pts:num(d.pts), streak:num(d.streak), updated:num(d.updatedAt)}};
+}
+// 한 앱의 하루 인정 시간(분) — 앱별 일일 상한 적용
+function extDayMin(kind, day){
+  if(!day) return 0;
+  const c=extConf(); let m=0;
+  if(kind==="sentence") m=num(day.n)*c.minPerSentence;
+  else if(kind==="vocab") m=num(day.new)*c.minPerNewWord + num(day.rev)*c.minPerRevWord;
+  else m=num(day.sec)/60*c.grammarRate;
+  return Math.min(Math.round(m), c.dailyCapPerApp);
+}
+// uid 학생의 세 앱 기록을 읽어 정리 (캐시 없이)
+async function fetchExtData(uid){
+  const out={};
+  await Promise.all(Object.keys(EXT_APPS).map(async k=>{
+    try{
+      const doc=await db.collection("planner").doc(uid).collection("apps").doc(EXT_APPS[k].doc).get();
+      out[k]=doc.exists? extNormalize(k, doc.data()) : null;
+    }catch(e){ console.error("학습앱 기록", k, e); out[k]=null; }
+  }));
   return out;
 }
-// 주간 인정 시간: MD영단어는 7일 로그로 일별 계산, 천문장은 요약뿐이라 오늘분만 반영
-function extWeekMin(days){
-  const c=extConf();
-  if(!c.enabled || !c.countInAllowance) return 0;
-  const d=(state.extCache&&state.extCache.data)||{};
-  const today=fmt(new Date());
-  let total=0;
-  // MD영단어: log7 = [{d:'MM-DD', n:신규, r:복습}]
-  const v=d.vocab;
-  if(v && Array.isArray(v.log7)){
-    const yr=today.slice(0,4);
-    v.log7.forEach(l=>{
-      const ds=`${yr}-${l.d}`;
-      if(!days.includes(ds)) return;
-      const m=(Number(l.n)||0)*c.minPerNewWord + (Number(l.r)||0)*c.minPerRevWord;
-      total+=Math.min(Math.round(m), c.dailyCapPerApp);
-    });
-  }
-  // 천문장: 오늘 학습량만 확인 가능(과거 일별 기록 미제공)
-  const sen=d.sentence;
-  if(sen && days.includes(today)){
-    total+=Math.min(Math.round((Number(sen.todayCount)||0)*c.minPerSentence), c.dailyCapPerApp);
-  }
-  // 전체 상한: 하루 상한 × 해당 주 일수
-  return Math.min(total, c.dailyCapTotal*days.length);
+// 지금 보고 있는 플래너 주인의 기록 (state.extCache)
+async function loadExtAll(){
+  const uid=state.ownerUid;
+  const data=await fetchExtData(uid);
+  if(uid===state.ownerUid) state.extCache={uid, at:Date.now(), data};
+  return data;
 }
-// 오늘 외부앱에서 인정되는 총 학습시간(전체 상한 적용)
-function extCreditedToday(){
-  const c=extConf();
-  if(!c.enabled) return {total:0, per:{}};
-  const d=(state.extCache&&state.extCache.data)||{};
-  const per={};
+async function ensureExt(){
+  if(state.extCache && state.extCache.uid===state.ownerUid) return state.extCache.data;
+  return loadExtAll();
+}
+function extData(){ return (state.extCache && state.extCache.uid===state.ownerUid)? state.extCache.data : {}; }
+// 하루 인정 시간: 앱별 상한 → 전체 상한
+function extCreditedOn(ds, data){
+  const c=extConf(), d=data||extData(), per={};
+  if(!c.enabled) return {total:0, per, raw:0};
   let sum=0;
-  Object.keys(EXT_APPS).forEach(k=>{
-    const m=extMinutesToday(k, d[k]);
-    per[k]=m; sum+=m;
-  });
+  Object.keys(EXT_APPS).forEach(k=>{ const m=extDayMin(k, d[k]&&d[k].days[ds]); per[k]=m; sum+=m; });
   return {total:Math.min(sum, c.dailyCapTotal), per, raw:sum};
 }
-async function saveExtLink(kind, code){
-  const L={...extLinks()};
-  code=(code||"").trim();
-  if(code) L[kind]=code; else delete L[kind];
-  await saveSettings({...state.settings, extLinks:L});
-  state.extCache=null;
-  await loadExtAll();
-  drawExtApps();
-  toast(code?`${EXT_APPS[kind].name} 연결됐어요`:`${EXT_APPS[kind].name} 연결 해제`,"good");
+function extCreditedToday(){ return extCreditedOn(fmt(new Date())); }
+// 주간 인정 시간(용돈 학습시간 지표에 가산)
+function extWeekMin(days, data){
+  const c=extConf();
+  if(!c.enabled || !c.countInAllowance) return 0;
+  return (days||[]).reduce((a,ds)=>a+extCreditedOn(ds, data).total, 0);
 }
 async function saveExtConf(key, val){
   const c={...extConf(), [key]: (typeof val==="boolean"? val : Number(val))};
   await saveSettings({...state.settings, extApps:c});
   drawExtApps(); render();
 }
+// 설정: 인정 시간 환산·상한
 async function drawExtApps(){
-  document.getElementById("drawerRoot").innerHTML=`<div class="overlay"><div class="drawer wide">
-    <div class="drawer-head"><button class="icon-btn sm" onclick="openDrawer('settings')" title="설정으로">←</button><h3 style="flex:1">🔗 학습앱 연동</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
+  document.getElementById("drawerRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeDrawer()"><div class="drawer wide">
+    <div class="drawer-head"><button class="icon-btn sm" onclick="openDrawer('settings')" title="설정으로">←</button><h3 style="flex:1">🔗 학습앱 인정 시간</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
     <div class="drawer-body"><div class="empty">불러오는 중…</div></div></div></div>`;
-  const data=await loadExtAll();
-  const c=extConf(), L=extLinks(), cr=extCreditedToday();
-
-  const cards=Object.keys(EXT_APPS).map(k=>{
-    const A=EXT_APPS[k], s=data[k], code=L[k]||"";
-    const min=cr.per[k]||0;
-    let stat="";
-    if(s){
-      stat = k==="sentence"
-        ? `<div style="font-size:12px;color:#64748B;line-height:1.6">
-             오늘 학습 <b>${s.todayCount||0}문장</b> · 연속 <b>${s.streak||0}일</b><br>
-             마스터 <b>${s.mastered||0}/${s.total||0}</b> (${s.pct||0}%) · 포인트 ${(s.pts||0).toLocaleString()}
-             ${s.weakCount?`<br>취약 문장 <b>${s.weakCount}개</b>`:""}</div>`
-        : `<div style="font-size:12px;color:#64748B;line-height:1.6">
-             오늘 신규 <b>${(s.today&&s.today.new)||0}개</b> · 복습 <b>${(s.today&&s.today.rev)||0}개</b> · 연속 <b>${s.streak||0}일</b><br>
-             마스터 <b>${s.mastered||0}</b>/학습 ${s.intro||0}개 · 포인트 ${(s.points||0).toLocaleString()}</div>`;
-    }else if(code){
-      stat=`<div style="font-size:12px;color:#E5484D">코드를 찾을 수 없어요. 코드를 다시 확인해 주세요.</div>`;
-    }else{
-      stat=`<div style="font-size:12px;color:#94A3B8">아직 연결되지 않았어요.</div>`;
-    }
-    return `<div class="coupon" style="border-style:solid;border-color:${s?"#BFE8D6":"#E2E8F0"};background:${s?"#F7FDFA":"#fff"};align-items:flex-start">
-      <div class="cp-emo">${A.emo}</div>
-      <div style="min-width:0;flex:1">
-        <div class="cp-name">${A.name} ${s&&min>0?`<span class="verify-tag" style="background:#EAF7F1;color:#0E9F6E;border:1px solid #BFE8D6">오늘 +${min}분</span>`:""}</div>
-        <div class="cp-cond" style="margin-bottom:6px">${A.desc}</div>
-        ${stat}
-        <div style="display:flex;gap:6px;margin-top:8px">
-          <input class="inp" id="ext-${k}" value="${esc(code)}" placeholder="연결 코드" style="flex:1;padding:7px 10px;font-size:12.5px">
-          <button class="ghost-btn" style="padding:7px 12px;font-size:12px" onclick="saveExtLink('${k}',document.getElementById('ext-${k}').value)">저장</button>
-        </div>
-      </div>
+  await ensureExt();
+  const c=extConf(), cr=extCreditedToday(), d=extData();
+  const rows=Object.keys(EXT_APPS).map(k=>{
+    const A=EXT_APPS[k], has=!!d[k];
+    return `<div class="list-item" style="gap:12px">
+      <span class="lcard-ic" style="width:38px;height:38px;font-size:19px;background:${A.soft}">${A.emo}</span>
+      <div style="flex:1;min-width:0"><div style="font-weight:800">${A.name}</div>
+        <div style="font-size:12px;color:#8F8D9B;font-weight:600">${has? A.desc : "아직 학습 기록이 없어요"}</div></div>
+      <span class="lcard-min ${cr.per[k]?"":"zero"}">오늘 +${cr.per[k]||0}분</span>
     </div>`;
   }).join("");
-
   const body=`
-    <div style="font-size:12.5px;color:#64748B;line-height:1.55;margin-bottom:12px">
-      다른 학습앱에서 공부한 내용을 플래너에 반영합니다. 각 앱의 <b>연결 코드</b>를 입력하세요.<br>
-      <span style="color:#94A3B8">천문장: 설정 → 공유 코드 / MD영단어: 설정 → 연결 코드(6자리)</span>
+    <div style="font-size:12.5px;color:#6D6B7A;line-height:1.55;margin-bottom:12px">
+      세 학습앱은 플래너와 <b>같은 계정·같은 데이터베이스</b>를 씁니다. 따로 연결 코드를 넣을 필요 없이,
+      앱에서 공부한 양이 날짜별로 플래너 학습시간에 더해집니다.
     </div>
-    ${cards}
-    <div style="background:#F3FBF7;border:1px solid #BFE8D6;border-radius:10px;padding:11px 13px;margin:12px 0;font-size:12.5px;color:#0E7A55">
-      ✅ <b>오늘 외부앱 인정 시간: ${cr.total}분</b>${cr.raw>cr.total?` <span style="color:#8A6516">(원래 ${cr.raw}분 → 일일 상한 ${c.dailyCapTotal}분 적용)</span>`:""}
+    ${rows}
+    <div style="background:#F3FBF7;border:1px solid #BFE8D6;border-radius:14px;padding:11px 13px;margin:12px 0;font-size:12.5px;color:#0E7A55">
+      ✅ <b>오늘 학습앱 인정 시간: ${cr.total}분</b>${cr.raw>cr.total?` <span style="color:#8A6516">(원래 ${cr.raw}분 → 일일 상한 ${c.dailyCapTotal}분 적용)</span>`:""}
     </div>
     <div class="dash-section">환산·상한 설정</div>
     <div class="crit-grid">
       <div><label class="fld-lbl">문장 1개당(분)</label><input class="inp" type="number" step="0.5" value="${c.minPerSentence}" onchange="saveExtConf('minPerSentence',this.value)"></div>
       <div><label class="fld-lbl">신규 단어 1개당(분)</label><input class="inp" type="number" step="0.5" value="${c.minPerNewWord}" onchange="saveExtConf('minPerNewWord',this.value)"></div>
       <div><label class="fld-lbl">복습 단어 1개당(분)</label><input class="inp" type="number" step="0.5" value="${c.minPerRevWord}" onchange="saveExtConf('minPerRevWord',this.value)"></div>
+      <div><label class="fld-lbl">문법 집중 1분당(분)</label><input class="inp" type="number" step="0.1" value="${c.grammarRate}" onchange="saveExtConf('grammarRate',this.value)"></div>
       <div><label class="fld-lbl">앱별 일일 상한(분)</label><input class="inp" type="number" value="${c.dailyCapPerApp}" onchange="saveExtConf('dailyCapPerApp',this.value)"></div>
       <div><label class="fld-lbl">전체 일일 상한(분)</label><input class="inp" type="number" value="${c.dailyCapTotal}" onchange="saveExtConf('dailyCapTotal',this.value)"></div>
     </div>
-    <div style="font-size:12px;color:#64748B;margin-top:10px;line-height:1.55;background:#F8FAFC;border-radius:9px;padding:11px">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:700;color:#4A4858">
+      <input type="checkbox" ${c.countInAllowance?"checked":""} onchange="saveExtConf('countInAllowance',this.checked)"> 용돈 정산의 주간 학습시간에 포함
+    </label>
+    <div style="font-size:12px;color:#6D6B7A;margin-top:10px;line-height:1.55;background:#fff;border-radius:12px;padding:11px">
       <b>편법 방지 장치</b><br>
-      · 앱별 하루 <b>${c.dailyCapPerApp}분</b>, 두 앱 합쳐 하루 <b>${c.dailyCapTotal}분</b>까지만 인정<br>
-      · 외부앱 학습은 <b>학습일수·복기 점수·이행률에는 반영되지 않음</b> — 플래너 본체 학습이 여전히 필요<br>
+      · 앱별 하루 <b>${c.dailyCapPerApp}분</b>, 세 앱 합쳐 하루 <b>${c.dailyCapTotal}분</b>까지만 인정<br>
+      · 그래머 인사이드는 5분 넘게 조작이 없으면 시간 측정을 멈춥니다<br>
+      · 학습앱 시간은 <b>학습일수·복기 점수·이행률에는 반영되지 않음</b> — 플래너 계획 학습이 여전히 필요<br>
       · 캐릭터 XP·주간 대결 포인트에는 반영되지 않고, <b>주간 학습시간(용돈)</b>에만 더해집니다
     </div>`;
   const root=document.querySelector("#drawerRoot .drawer-body");
   if(root) root.innerHTML=body;
 }
-// 일간 화면용 요약 배너
+// 할 일 화면용 요약 배너
 function extTodayHTML(){
   const c=extConf();
   if(!c.enabled) return "";
-  const L=extLinks();
-  if(!L.sentence && !L.vocab) return "";
-  if(!state.extCache){ loadExtAll().then(()=>{ if(state.view==="day") render(); }); return ""; }
+  if(!state.extCache || state.extCache.uid!==state.ownerUid){ loadExtAll().then(()=>{ if(state.tab==="todo") render(); }); return ""; }
   const cr=extCreditedToday();
   if(cr.total<=0) return "";
-  const d=state.extCache.data||{};
-  const parts=[];
-  if(cr.per.sentence>0) parts.push(`📘 천문장 ${(d.sentence&&d.sentence.todayCount)||0}문장`);
-  if(cr.per.vocab>0){
-    const t=(d.vocab&&d.vocab.today)||{};
-    parts.push(`🔤 영단어 신규 ${t.new||0} · 복습 ${t.rev||0}`);
-  }
-  return `<div style="background:#F7FDFA;border:1px solid #BFE8D6;border-radius:10px;padding:10px 13px;margin-bottom:11px;font-size:12.5px;color:#0E7A55;line-height:1.5">
-    🔗 <b>오늘 학습앱에서 +${cr.total}분</b> 인정됐어요
-    <span style="color:#64748B">· ${parts.join(" / ")}</span>
+  const parts=Object.keys(EXT_APPS).filter(k=>cr.per[k]>0).map(k=>`${EXT_APPS[k].emo} ${EXT_APPS[k].short} ${cr.per[k]}분`);
+  return `<div style="background:#F7FDFA;border:1px solid #BFE8D6;border-radius:14px;padding:10px 13px;margin-bottom:11px;font-size:12.5px;color:#0E7A55;line-height:1.5;cursor:pointer" onclick="setTab('learn')">
+    📚 <b>오늘 학습앱에서 +${cr.total}분</b> 인정됐어요
+    <span style="color:#6D6B7A">· ${parts.join(" / ")}</span>
   </div>`;
 }
 
@@ -1993,7 +2169,7 @@ function boot(){
     state.ownerUid=user.uid; state.ownerName=state.profile.name; state.ownerRole=state.profile.role;
     state.viewingChild=false;
     // 일요일 18시 마감 이후면 다음 주 계획 모드로 시작
-    if(weekPhase().phase==="planning"){ state.cursor=activeWeekStart(new Date()); state.view="week"; }
+    if(weekPhase().phase==="planning"){ state.cursor=activeWeekStart(new Date()); state.tab="plan"; state.view="week"; }
     try{ await loadChildren(); }catch(e){ console.error("자녀 로드 실패", e); }
     showApp(true);
     renderHeader();
@@ -2030,7 +2206,9 @@ function rangeFor(){
     s=startOfWeek(first); e=addDays(s,41);
   }else if(state.view==="week"){
     s=startOfWeek(state.cursor); e=addDays(s,6);
-  }else{ s=addDays(state.cursor,-1); e=addDays(state.cursor,1); }
+  }else{ // 할 일 탭: 주간 날짜 줄 + 어제 비교까지 한 번에 받아 둠
+    const ws=startOfWeek(state.cursor); s=addDays(ws,-1); e=addDays(ws,6);
+  }
   return {start:fmt(s), end:fmt(e)};
 }
 function subscribeTasks(){
@@ -2178,19 +2356,24 @@ function dayTypeBadge(ds,small){
     : "font-size:11px;padding:2px 7px;border-radius:999px;font-weight:800;";
   return free
     ? `<span style="${st}background:#FFF4DA;color:#8A6516;border:1px solid #F5DFA6">🏖 자율</span>`
-    : `<span style="${st}background:#EEF2FF;color:#3E4C8A;border:1px solid #D9E1FF">🏫 등교</span>`;
+    : `<span style="${st}background:#EFECFD;color:#4B3FA6;border:1px solid #DED8FB">🏫 등교</span>`;
 }
 
 /* ============================================================
  *  7) 자녀 플래너 열람 / 복귀
  * ============================================================ */
+function resetOwnerCaches(){
+  state.weakCache=null; state.streakCache=null; state.dayDiary=undefined; state.extCache=null;
+  state.dayGoals={}; state.dayTypes={};
+}
 async function viewChild(childUid,name){
   state.ownerUid=childUid; state.ownerName=name; state.ownerRole="child"; state.viewingChild=true;
-  closeDrawer();
+  resetOwnerCaches(); closeDrawer();
   renderHeader(); subscribeCategories(); subscribeTasks();
 }
 function backToSelf(){
   state.ownerUid=state.user.uid; state.ownerName=state.profile.name; state.ownerRole=state.profile.role; state.viewingChild=false;
+  resetOwnerCaches(); closeDrawer();
   renderHeader(); subscribeCategories(); subscribeTasks();
 }
 
@@ -2208,36 +2391,28 @@ function updateMonHead(){
   elh.title=`${M.name} Lv.${c.level} · 이번 주 ${c.xp}XP`;
 }
 function renderHeader(){
-  const initial=(state.profile.name||"나").slice(0,1);
-  document.getElementById("myAv").textContent=initial;
-  document.getElementById("myName").textContent=state.profile.name + (state.profile.role==="parent"?" 👑":"");
-  const mb=document.getElementById("manageBtn");
-  if(mb){
-    const isP=state.profile.role==="parent";
-    mb.textContent = isP? "📈" : "🐣";
-    mb.title = isP? "자녀 관리" : "내 파트너";
-  }
+  const me=state.profile.name||"나";
+  const shown=state.viewingChild? (state.ownerName||"자녀") : me;
+  document.getElementById("myAv").textContent=shown.slice(0,1);
+  document.getElementById("myName").textContent=state.viewingChild? shown : me+(state.profile.role==="parent"?" 👑":"");
   const banner=document.getElementById("childBanner");
   if(state.viewingChild){
     banner.classList.remove("hidden");
-    banner.innerHTML=`👀 <b>${esc(state.ownerName)}</b> 님의 플래너를 보고 있습니다 (코멘트·확인 가능)
-      <button onclick="backToSelf()">내 플래너로</button>`;
-    document.getElementById("brandSub").textContent="자녀 학습 점검";
+    banner.innerHTML=`<span>👀 <b>${esc(state.ownerName)}</b> 님의 플래너를 보고 있어요 (코멘트·확인 가능)</span>
+      <button onclick="backToSelf()" style="white-space:nowrap">내 플래너로</button>`;
   }else{
     banner.classList.add("hidden");
-    document.getElementById("brandSub").textContent="계획 대비 이행 점검";
   }
+  const td=document.getElementById("tabDate"); if(td) td.textContent=new Date().getDate();
 }
 function nav(dir){
   if(state.view==="month") state.cursor=new Date(state.cursor.getFullYear(),state.cursor.getMonth()+dir,1);
-  else if(state.view==="week") state.cursor=addDays(state.cursor,7*dir);
-  else state.cursor=addDays(state.cursor,dir);
+  else state.cursor=addDays(state.cursor,7*dir);   // 주간 보기 · 할 일(주간 날짜 줄)은 한 주씩
   subscribeTasks();
 }
 function goToday(){ state.cursor=new Date(); subscribeTasks(); }
 function setView(v){
-  state.view=v;
-  document.querySelectorAll(".vtoggle button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  state.view=v; state.planView=v;
   subscribeTasks();
 }
 function periodLabel(){
@@ -2255,15 +2430,307 @@ function tasksOn(dateStr){
     .sort((a,b)=>((a.done?1:0)-(b.done?1:0)) || ((a.order||0)-(b.order||0)));
 }
 
+/* ============================================================
+ *  하루틀 UI — 아래쪽 메뉴(할 일 · 일정 · 학습 · 기록) + ✨ 빠른 계획
+ * ============================================================ */
+const WD_FULL=["일요일","월요일","화요일","수요일","목요일","금요일","토요일"];
+function setTab(t, force){
+  const prevView=state.view;
+  if(t===state.tab && !force){ window.scrollTo({top:0,behavior:"smooth"}); return; }
+  state.tab=t;
+  if(t==="todo") state.view="day";
+  else if(t==="plan") state.view=state.planView||"week";
+  if(state.view!==prevView || force) subscribeTasks(); else render();
+  window.scrollTo(0,0);
+}
+// 새 학습을 넣을 기본 날짜: 할 일 탭에서는 고른 날, 그 외에는 오늘
+function addDate(){ return state.tab==="todo"? fmt(state.cursor) : fmt(new Date()); }
+function selectDay(ds){
+  const same=fmt(startOfWeek(parseD(ds)))===fmt(startOfWeek(state.cursor));
+  state.cursor=parseD(ds);
+  if(same) render(); else subscribeTasks();
+}
 function render(){
-  document.getElementById("period").textContent=periodLabel();
-  const main=document.getElementById("main");
-  if(state.view==="month") main.innerHTML=renderMonth();
-  else if(state.view==="week") main.innerHTML=renderWeek();
-  else main.innerHTML=renderDay();
+  if(!state.profile) return;
+  const main=document.getElementById("main"), head=document.getElementById("pageHead");
+  document.querySelectorAll(".bnav-pill button").forEach(b=>b.classList.toggle("on", b.dataset.tab===state.tab));
+  if(state.tab==="learn"){ head.innerHTML=pageHead("학습", state.viewingChild? `${esc(state.ownerName)} 님의 학습앱` : "천문장 · 영단어 · 문법"); main.innerHTML=renderLearn(); }
+  else if(state.tab==="stats"){ head.innerHTML=pageHead("기록", "성장 · 보상 · 리포트"); main.innerHTML=renderRecord(); }
+  else if(state.tab==="plan"){ head.innerHTML=planHead(); main.innerHTML= state.view==="month"? renderMonth() : renderWeek(); }
+  else { head.innerHTML=todoHead(); main.innerHTML=renderDay(); }
   updateMonHead();
+  updateTopChips();
   updateWeekBanner();
 }
+function pageHead(title, sub){
+  return `<div class="page-h"><div><div class="h-sub">${sub||""}</div><h2>${title}</h2></div></div>`;
+}
+function todoHead(){
+  const d=state.cursor, ds=fmt(d), today=fmt(new Date());
+  const ws=startOfWeek(d);
+  let strip="";
+  for(let i=0;i<7;i++){
+    const x=addDays(ws,i), xs=fmt(x), ts=state.tasks.filter(t=>t.date===xs), done=ts.filter(t=>t.done).length;
+    const cls=["wday", xs===ds?"on":"", xs===today?"today":"", x.getDay()===0?"sun":"", x.getDay()===6?"sat":"", ts.length&&done===ts.length?"full":""].join(" ");
+    strip+=`<button class="${cls}" onclick="selectDay('${xs}')"><span class="w">${WD[i]}</span><span class="n">${x.getDate()}</span><span class="r">${ts.length? (done===ts.length?"✓ ":"")+`${done}/${ts.length}` : ""}</span></button>`;
+  }
+  const sub = ds===today? "오늘" : `${d.getMonth()+1}월 ${d.getDate()}일`;
+  return `<div class="page-h">
+      <div><div class="h-sub">${sub}</div><h2>${WD_FULL[d.getDay()]}</h2></div>
+      <div class="h-nav">
+        ${(ds!==today)?`<button class="today-chip" onclick="goToday()">오늘</button>`:""}
+        <button onclick="nav(-1)" aria-label="지난주">‹</button>
+        <span>${ws.getFullYear()}년 ${ws.getMonth()+1}월</span>
+        <button onclick="nav(1)" aria-label="다음 주">›</button>
+      </div>
+    </div>
+    <div class="wstrip">${strip}</div>`;
+}
+function planHead(){
+  const isCur = state.view==="month"
+    ? (state.cursor.getFullYear()===new Date().getFullYear() && state.cursor.getMonth()===new Date().getMonth())
+    : fmt(startOfWeek(state.cursor))===fmt(startOfWeek(new Date()));
+  return `<div class="page-h">
+      <div><div class="h-sub">${state.view==="month"?"월간 계획":"주간 계획"}</div><h2>일정</h2></div>
+      <div class="h-nav">
+        ${isCur?"":`<button class="today-chip" onclick="goToday()">오늘</button>`}
+        <button onclick="nav(-1)" aria-label="이전">‹</button>
+        <span>${periodLabel()}</span>
+        <button onclick="nav(1)" aria-label="다음">›</button>
+      </div>
+    </div>
+    <div class="seg">
+      <button class="${state.view==="week"?"on":""}" onclick="setView('week')">주간</button>
+      <button class="${state.view==="month"?"on":""}" onclick="setView('month')">월간</button>
+    </div>`;
+}
+function updateTopChips(){
+  const today=fmt(new Date());
+  if(state.streakCache===null && !state._streakLoading){
+    state._streakLoading=true;
+    refreshStreakCache().then(()=>{ state._streakLoading=false; updateTopChips(); });
+  }
+  const s=state.streakCache;
+  const st=document.getElementById("tbStreak"); if(st) st.textContent="🔥 "+(s? s.streak : 0);
+  // 오늘이 조회 범위에 있을 때만 새로 셈 (아니면 마지막 값 유지)
+  const {start,end}=rangeFor();
+  if(today>=start && today<=end) state._todayDone=state.tasks.filter(t=>t.date===today && t.done).length;
+  const dn=document.getElementById("tbDone"); if(dn) dn.textContent="✅ "+(state._todayDone||0);
+}
+
+/* ----- 학습 탭 ----- */
+function renderLearn(){
+  if(!state.extCache || state.extCache.uid!==state.ownerUid){
+    loadExtAll().then(()=>{ if(state.tab==="learn") render(); });
+    return `<div class="empty">학습 기록을 불러오는 중…</div>`;
+  }
+  const c=extConf(), cr=extCreditedToday(), d=extData();
+  const pct=c.dailyCapTotal? Math.min(100, Math.round(cr.total/c.dailyCapTotal*100)) : 0;
+  const hero=`<div class="l-hero">
+    <div class="t">오늘 학습앱 인정 시간</div>
+    <div class="v">${cr.total}분 <small>/ 하루 최대 ${c.dailyCapTotal}분</small></div>
+    <div class="bar"><div style="width:${pct}%"></div></div>
+    <div class="per">${Object.keys(EXT_APPS).map(k=>`<span>${EXT_APPS[k].emo} ${EXT_APPS[k].short} ${cr.per[k]||0}분</span>`).join("")}</div>
+  </div>`;
+  const cards=Object.keys(EXT_APPS).map(k=>learnCard(k, d[k], cr.per[k]||0)).join("");
+  return `${hero}${cards}
+    <div class="lnote">📌 세 앱은 플래너와 <b>같은 계정</b>으로 기록이 저장돼요. 공부한 양은 날짜별로 학습시간에 더해지고
+      (앱별 하루 ${c.dailyCapPerApp}분까지), 이번 주 용돈 정산의 학습시간에도 반영됩니다.
+      ${state.profile.role==="parent"||!state.viewingChild?`<a href="#" onclick="drawExtApps();return false" style="color:var(--accent);font-weight:800;text-decoration:none">인정 시간 설정 ›</a>`:""}
+    </div>`;
+}
+function learnCard(k, x, min){
+  const A=EXT_APPS[k], s=x&&x.sum;
+  let sub, stats, prog;
+  if(k==="sentence"){
+    sub=s? `연속 ${s.streak}일 · 포인트 ${s.pts.toLocaleString()}` : "문장 성분 분석 · 5형식 · 문법 포인트";
+    stats=s? [[`${s.today}/${s.goal}`,"오늘 문장"],[s.mastered,"마스터"],[s.weak,"취약 문장"]] : null;
+    prog=s&&s.total? {pct:Math.round(s.mastered/s.total*100), l:`마스터 ${s.mastered} / ${s.total}문장`} : null;
+  }else if(k==="vocab"){
+    sub=s? `연속 ${s.streak}일 · 포인트 ${s.points.toLocaleString()}` : "하루 단어 · 어근 · 복습 카드";
+    stats=s? [[s.todayNew,"오늘 신규"],[s.todayRev,"오늘 복습"],[s.mastered,"마스터"]] : null;
+    prog=s&&s.intro? {pct:Math.round(s.mastered/Math.max(1,s.intro)*100), l:`학습한 ${s.intro}단어 중 ${s.mastered}개 마스터`} : null;
+  }else{
+    sub=s? `연속 ${s.streak}일 · ${s.pts.toLocaleString()} XP` : "레벨 1~3 유닛 · 개념 카드 · 퀴즈";
+    stats=s? [[`${s.todayMin}분`,"오늘 집중"],[s.answered? Math.round(s.correct/s.answered*100)+"%" : "–","오늘 정답률"],[`${s.done}`,"완료 유닛"]] : null;
+    prog=s&&s.total? {pct:Math.round(s.done/s.total*100), l:`유닛 ${s.done} / ${s.total} 완료`} : null;
+  }
+  const go = state.viewingChild
+    ? ""
+    : `<button class="lgo" onclick="openLearnApp('${k}')">${s?"이어서 학습하기":"시작하기"} ›</button>`;
+  return `<div class="lcard">
+    <div class="lcard-top">
+      <span class="lcard-ic" style="background:${A.soft}">${A.emo}</span>
+      <div style="min-width:0"><div class="lcard-name">${A.name}</div><div class="lcard-sub">${sub}</div></div>
+      <span class="lcard-min ${min?"":"zero"}">오늘 +${min}분</span>
+    </div>
+    ${stats?`<div class="lstats">${stats.map(([v,l])=>`<div class="lstat"><b>${v}</b><span>${l}</span></div>`).join("")}</div>`:`<div style="font-size:12.5px;color:#8F8D9B;margin:12px 0 2px">${state.viewingChild?"아직 학습 기록이 없어요.":"아직 기록이 없어요. 첫 학습을 시작해 보세요!"}</div>`}
+    ${prog?`<div class="lprog"><div style="width:${prog.pct}%;background:${A.color}"></div></div><div class="lprog-l"><span>${prog.l}</span><span>${prog.pct}%</span></div>`:""}
+    ${go}
+  </div>`;
+}
+// 학습앱을 전체 화면으로 열기 (같은 계정으로 자동 로그인)
+function openLearnApp(k){
+  const A=EXT_APPS[k]; if(!A) return;
+  closeLearnApp(true);
+  const w=document.createElement("div");
+  w.className="lapp"; w.id="learnApp";
+  w.innerHTML=`<div class="lapp-h">
+      <button class="lapp-back" onclick="leaveLearnApp()">‹ 플래너</button>
+      <span class="sp"></span><b>${A.emo} ${A.name}</b><span class="sp"></span>
+      <span style="width:84px"></span>
+    </div>
+    <iframe src="${A.page}" title="${A.name}"></iframe>`;
+  document.body.appendChild(w);
+  document.body.classList.add("lapp-open");
+  try{ history.pushState({lapp:k}, ""); }catch(_){}
+}
+function leaveLearnApp(){
+  if(history.state && history.state.lapp) history.back(); else closeLearnApp();
+}
+function closeLearnApp(silent){
+  const w=document.getElementById("learnApp"); if(!w) return;
+  w.remove(); document.body.classList.remove("lapp-open");
+  if(!silent){ state.extCache=null; render(); }   // 방금 공부한 기록 다시 읽기
+}
+window.addEventListener("popstate", ()=>{ if(document.getElementById("learnApp")) closeLearnApp(); });
+
+/* ----- 기록 탭 ----- */
+function renderRecord(){
+  const isParent=state.profile.role==="parent";
+  const tot=monReady();
+  if(!tot) loadMonTotals().then(()=>{ if(state.tab==="stats") render(); });
+  if(!state.extCache || state.extCache.uid!==state.ownerUid) loadExtAll().then(()=>{ if(state.tab==="stats") render(); });
+  const wkDays=charWeekDays();
+  const extMin=extWeekMin(wkDays);
+  const s=state.streakCache;
+  const stats=`<div class="r-grid">
+      <div class="r-stat"><div class="e">🔥</div><b>${s?s.streak:0}</b><span>연속 학습일</span></div>
+      <div class="r-stat"><div class="e">✅</div><b>${tot?tot.count:"–"}</b><span>이번 주 완료</span></div>
+      <div class="r-stat"><div class="e">⏱</div><b>${tot? tot.min+extMin : "–"}</b><span>이번 주 학습(분)</span></div>
+    </div>`;
+  return `${stats}
+    ${renderMonCard()}
+    <div class="r-sec">학습 현황</div>
+    ${hubItem("📊","대시보드","이행률·연속 학습·과목별 시간·성취 뱃지","openDrawer('dash')")}
+    ${hubItem("📋","주간 마감 리포트","이번 주 요약 · 부족한 과목 점검","drawWeekReport()")}
+    ${hubItem("📚", isParent?"학습 다이어리 (자녀별)":"학습 다이어리","주간·월간 기록과 복기 내용 되돌아보기","drawArchive()")}
+    ${isParent? hubItem("📈","자녀 학습 리포트","일·주·월 평균 학습시간과 과목·단원","drawReport()") : ""}
+    <div class="r-sec">보상</div>
+    ${hubItem("💰","용돈 정산","이번 주 달성도와 지급액 확인","openDrawer('allowance')")}
+    ${hubItem("🎟️","보상 쿠폰","시간 이용권 · 게임방 충전권","drawCoupons()")}
+    ${isParent? hubItem("🏆","주간 학습 대결","자녀 순위와 챔피언 인증카드","drawBattle()") : ""}
+    ${hubItem("🚀","부스터 모드","시험 D-day · 목표시간 상향 · 용돈 배율","drawBooster()")}`;
+}
+
+/* ----- ⋯ 메뉴 ----- */
+function openMenu(){
+  const isParent=state.profile.role==="parent";
+  const me=state.profile.name||"나";
+  const kids=isParent? state.children.map((ch,i)=>
+      `<button class="hub-item" onclick="viewChild(state.children[${i}].uid,state.children[${i}].name)">
+        <span class="hub-emo"><span style="display:inline-flex;width:28px;height:28px;border-radius:50%;background:${ch.color};color:#fff;font-size:13px;font-weight:800;align-items:center;justify-content:center">${esc((ch.name||"?").slice(0,1))}</span></span>
+        <span class="hub-txt"><b>${esc(ch.name)}${state.viewingChild&&state.ownerUid===ch.uid?" · 보는 중":""}</b><span>플래너·학습앱 기록 보기</span></span><span class="hub-arr">›</span></button>`).join("") : "";
+  hubShell("메뉴", `
+    <div class="list-item" style="gap:12px;padding:14px">
+      <span class="av" style="width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">${esc(me.slice(0,1))}</span>
+      <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:15px">${esc(me)} ${isParent?"👑":""}</div>
+        <div style="font-size:12px;color:#8F8D9B">${isParent?"부모 계정":"학생 계정"} · ${esc((state.user&&state.user.email)||"")}</div></div>
+      ${!isParent&&state.profile.linkCode?`<div style="text-align:right"><div style="font-size:10.5px;color:#8F8D9B">가족 연결 코드</div><b style="letter-spacing:.12em">${esc(state.profile.linkCode)}</b></div>`:""}
+    </div>
+    ${isParent?`<div class="r-sec">자녀 플래너</div>
+      ${state.viewingChild? hubItem("🏠","내 플래너로 돌아가기","", "backToSelf()") : ""}
+      ${kids || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 자녀가 없어요. 자녀 관리에서 자녀 코드를 등록하세요.</div>`}`:""}
+    <div class="r-sec">관리</div>
+    ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🐣","내 파트너","파트너 성장 · 쿠폰 · 뱃지","drawManage()")}
+    ${hubItem("⚙️","설정","계정 · 목표시간 · 방학 · 과목/교재 · 템플릿","openDrawer('settings')")}
+    ${hubItem("🔗","학습앱 인정 시간","천문장 · 영단어 · 문법 환산과 상한","drawExtApps()")}
+    ${hubItem("🚪","로그아웃","","closeDrawer();logout()")}
+  `);
+}
+
+/* ----- ✨ 빠른 계획: 적어 두면 학습 계획으로 정리 ----- */
+let quickItems=[];
+function openQuick(){
+  quickItems=[];
+  const ex=(state.categories.textbooks||[])[0];
+  hubShell("✨ 빠른 계획", `
+    <div class="q-orb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 16.5l-1.8-5.2L5 9.5l5.2-1.8z"/></svg></div>
+    <div class="q-lead">여기에 공부할 것을 적어 두세요.<br>제가 학습 계획으로 정리해 드릴게요.</div>
+    <div class="q-ex">예: ${esc(ex?ex.name:"개념원리")} 3단원 40분, 영어 단어 20분, 국어 문제풀이 1시간</div>
+    <div class="q-box">
+      <textarea id="qText" rows="2" placeholder="오늘의 계획은 무엇인가요?"></textarea>
+      <button onclick="quickParse()">정리하기</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin:10px 2px 0;font-size:12.5px;color:#6D6B7A">
+      날짜 <input class="inp" type="date" id="qDate" value="${addDate()}" style="width:auto;padding:6px 10px;font-size:13px">
+      <span style="margin-left:auto">과목·교재·학습방법·시간(분/시간)을 알아서 찾아요</span>
+    </div>
+    <div id="qList"></div>
+  `);
+  setTimeout(()=>{ const t=document.getElementById("qText"); if(t) t.focus(); }, 50);
+}
+function parseQuick(text){
+  const subs=state.categories.subjects||[], tbs=state.categories.textbooks||[], ms=state.categories.methods||[];
+  const ALIAS=[["단어","영어"],["영단어","영어"],["문법","영어"],["독해","영어"],["문장","영어"],["연산","수학"],["한국사","한국사"],["역사","한국사"]];
+  return String(text||"").split(/\n|,|;|·|\s그리고\s/).map(x=>x.trim()).filter(Boolean).map(chunk=>{
+    let min=30, rest=chunk;
+    const h=chunk.match(/(\d+(?:\.\d+)?)\s*시간(?:\s*(\d+)\s*분)?/), m=chunk.match(/(\d+)\s*분/);
+    if(h){ min=Math.round(parseFloat(h[1])*60+(h[2]?Number(h[2]):0)); rest=rest.replace(h[0]," "); }
+    else if(m){ min=Number(m[1]); rest=rest.replace(m[0]," "); }
+    const tb=[...tbs].sort((a,b)=>b.name.length-a.name.length).find(t=>t.name && chunk.includes(t.name));
+    if(tb) rest=rest.replace(tb.name," ");
+    let su=tb? subs.find(x=>x.id===tb.subjectId) : null;
+    if(!su){ su=[...subs].sort((a,b)=>b.name.length-a.name.length).find(x=>chunk.includes(x.name)) || null; }
+    if(su) rest=rest.replace(su.name," ");
+    if(!su){ const al=ALIAS.find(([w])=>chunk.includes(w)); if(al) su=subs.find(x=>x.name===al[1])||null; }
+    const me=ms.find(x=>chunk.includes(x.name));
+    if(me) rest=rest.replace(me.name," ");
+    const unit=rest.replace(/\s+/g," ").replace(/^[\s,.·-]+|[\s,.·-]+$/g,"").trim();
+    return {subjectId:su?su.id:"", textbookId:tb?tb.id:"", method:me?me.name:"", plannedMin:Math.max(5,min||30), unit, src:chunk};
+  });
+}
+function quickParse(){
+  const t=document.getElementById("qText");
+  quickItems=parseQuick(t?t.value:"");
+  drawQuickList();
+}
+function drawQuickList(){
+  const box=document.getElementById("qList"); if(!box) return;
+  if(!quickItems.length){ box.innerHTML=`<div style="text-align:center;color:#8F8D9B;font-size:13px;margin-top:14px">정리할 내용을 먼저 적어 주세요.</div>`; return; }
+  const subs=state.categories.subjects||[];
+  const rows=quickItems.map((q,i)=>{
+    const opts=`<option value="">과목 선택</option>`+subs.map(s=>`<option value="${s.id}" ${s.id===q.subjectId?"selected":""}>${esc(s.name)}</option>`).join("");
+    const tb=tbById(q.textbookId), su=subjById(q.subjectId);
+    const label=[tb?tb.name:"", q.unit, q.method].filter(Boolean).join(" · ") || q.src;
+    return `<div class="q-row" style="${su?`border-left:4px solid ${su.color}`:"border-left:4px solid #E5484D"}">
+      <select onchange="quickItems[${i}].subjectId=this.value;quickItems[${i}].textbookId='';drawQuickList()">${opts}</select>
+      <span class="q-t" title="${esc(q.src)}">${esc(label)}</span>
+      <input type="number" value="${q.plannedMin}" min="5" step="5" onchange="quickItems[${i}].plannedMin=Number(this.value)||30"><span class="q-m">분</span>
+      <button class="icon-btn sm" onclick="quickItems.splice(${i},1);drawQuickList()" title="빼기">✕</button>
+    </div>`;
+  }).join("");
+  const miss=quickItems.filter(q=>!q.subjectId).length;
+  box.innerHTML=`<div class="r-sec" style="margin-top:16px">정리된 계획 ${quickItems.length}개</div>${rows}
+    ${miss?`<div style="font-size:12px;color:#E5484D;margin:8px 2px 0">과목을 찾지 못한 항목이 ${miss}개 있어요. 과목을 골라 주세요.</div>`:""}
+    <button class="lgo" onclick="quickSave()">✔ ${quickItems.length}개 계획에 추가</button>`;
+}
+async function quickSave(){
+  if(!quickItems.length) return;
+  if(quickItems.some(q=>!q.subjectId)){ alert("과목을 선택하지 않은 항목이 있어요."); return; }
+  const date=(document.getElementById("qDate")||{}).value || addDate();
+  let n=0;
+  for(const q of quickItems){
+    await saveTask({id:uid(), date, subjectId:q.subjectId, textbookId:q.textbookId||"", unit:q.unit||"",
+      method:q.method||"", episode:"", plannedMin:q.plannedMin||30, plannedNote:"", done:false, actualMin:0,
+      understood:"", rating:0, parentComment:"", score:"", scoreTotal:"", order:Date.now()+n});
+    n++;
+  }
+  closeDrawer();
+  toast(`✨ ${n}개 계획을 추가했어요`,"good");
+  if(state.tab!=="todo" || fmt(state.cursor)!==date){ state.cursor=parseD(date); setTab("todo", true); }
+}
+
 function updateWeekBanner(){
   const el=document.getElementById("weekBanner"); if(!el) return;
   const now=new Date(), wp=weekPhase(now);
@@ -2283,7 +2750,7 @@ function updateWeekBanner(){
 }
 function goPlanNextWeek(){
   state.cursor=activeWeekStart(new Date()); // 계획 모드면 다음 주 월요일
-  setView("week");
+  state.planView="week"; setTab("plan", true);
 }
 
 /* ----- 월간 ----- */
@@ -2300,7 +2767,7 @@ function renderMonth(){
     const ts=tasksOn(ds), done=ts.filter(t=>t.done).length;
     const rate=ts.length?Math.round(done/ts.length*100):0;
     const rc=rate===100?"#0E9F6E":rate>=50?"#F5A524":"#94A3B8";
-    const dowColor=d.getDay()===0?"#E5484D":d.getDay()===6?"#3E63DD":"#334155";
+    const dowColor=d.getDay()===0?"#E5484D":d.getDay()===6?"#6A58E6":"#334155";
     let dots="";
     ts.slice(0,8).forEach(t=>{const s=subjById(t.subjectId);dots+=`<span class="dot" style="background:${s?s.color:"#CBD5E1"};opacity:${t.done?1:.35}"></span>`;});
     cells+=`<div class="mcell ${inMonth?"":"out"}" onclick="pickDay('${ds}')">
@@ -2314,11 +2781,11 @@ function renderMonth(){
     </div>`;
   }
   return `<div class="month">
-    <div class="wd-head">${WD.map((w,i)=>`<div style="color:${i===5?"#3E63DD":i===6?"#E5484D":"#64748B"}">${w}</div>`).join("")}</div>
+    <div class="wd-head">${WD.map((w,i)=>`<div style="color:${i===5?"#6A58E6":i===6?"#E5484D":"#64748B"}">${w}</div>`).join("")}</div>
     <div class="mgrid">${cells}</div>
   </div>`;
 }
-function pickDay(ds){ state.cursor=parseD(ds); setView("day"); }
+function pickDay(ds){ state.cursor=parseD(ds); setTab("todo"); }
 
 /* ----- 주간 ----- */
 function renderWeek(){
@@ -2345,7 +2812,7 @@ function renderWeek(){
     cols+=`<div class="wcol ${isT?"today":""}">
       <div class="wcol-head" style="position:relative">
         ${isT&&monMini?`<div style="position:absolute;top:4px;right:5px" title="파트너 몬스터">${monMini}</div>`:""}
-        <div class="wd" style="color:${i===5?"#3E63DD":i===6?"#E5484D":"#64748B"}">${WD[i]}</div>
+        <div class="wd" style="color:${i===5?"#6A58E6":i===6?"#E5484D":"#64748B"}">${WD[i]}</div>
         <div class="num ${isT?"today":""}">${d.getDate()}</div>
         <div style="margin-top:3px;cursor:pointer" title="클릭하면 등교/자율 전환" onclick="toggleDayType('${ds}')">${dayTypeBadge(ds,true)}</div>
         ${ts.length?`<div class="mini">${done}/${ts.length}</div>`:""}
@@ -2444,7 +2911,7 @@ function vsYesterdayHTML(ds){
   }else if(diff>0){
     verdict=`<div class="vs-verdict" style="background:#EAF7F1;color:#0E7A55">🔥 어제보다 <b>${diff}분 더</b> 했어요! 오늘의 내가 이겼습니다</div>`;
   }else if(diff===0 && o.min>0){
-    verdict=`<div class="vs-verdict" style="background:#EEF2FF;color:#3E4C8A">🤝 어제와 똑같이 <b>${o.min}분</b> — 꾸준함이 최고예요</div>`;
+    verdict=`<div class="vs-verdict" style="background:#EFECFD;color:#4B3FA6">🤝 어제와 똑같이 <b>${o.min}분</b> — 꾸준함이 최고예요</div>`;
   }else{
     verdict=`<div class="vs-verdict" style="background:#FFF7E8;color:#8A6516">어제보다 <b>${-diff}분</b> 적어요. ${-diff}분만 더 하면 어제의 나를 넘어요!</div>`;
   }
@@ -2504,14 +2971,14 @@ function renderDay(){
   return `<div class="day">
     <aside class="day-side">
       ${renderMonCard()}
-      <div class="goal-card" style="border:1.5px solid ${dDone?"#0E9F6E":"#D6DEF5"};background:${dDone?"#F3FBF7":"#F7F9FF"}">
+      <div class="goal-card" style="border:1.5px solid ${dDone?"#0E9F6E":"#DCD6F7"};background:${dDone?"#F3FBF7":"#F7F6FE"}">
         <div class="goal-top" style="justify-content:space-between">
           <span>⏰ 오늘 목표시간 ${dDone?"· 달성! 🎉":""}</span>
           <button class="icon-btn sm" style="width:26px;height:26px" onclick="promptDayGoal('${ds}')" title="목표 수정">✏️</button>
         </div>
         <div style="display:flex;gap:5px;margin:0 0 8px">
           <button onclick="setDayType('${ds}','school')" style="flex:1;padding:6px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;
-            border:1.5px solid ${dType==="school"?"#3E63DD":"#E2E8F0"};background:${dType==="school"?"#EEF2FF":"#fff"};color:${dType==="school"?"#3E4C8A":"#94A3B8"}">🏫 등교일</button>
+            border:1.5px solid ${dType==="school"?"#6A58E6":"#E2E8F0"};background:${dType==="school"?"#EFECFD":"#fff"};color:${dType==="school"?"#4B3FA6":"#94A3B8"}">🏫 등교일</button>
           <button onclick="setDayType('${ds}','free')" style="flex:1;padding:6px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;
             border:1.5px solid ${dType==="free"?"#F5A524":"#E2E8F0"};background:${dType==="free"?"#FFF7E8":"#fff"};color:${dType==="free"?"#8A6516":"#94A3B8"}">🏖 자율학습일</button>
         </div>
@@ -2597,7 +3064,7 @@ function renderTaskRow(t){
         : `<span class="time-tag" style="color:#0E7A55;background:#F3FBF7;border:1px solid #BFE8D6">🧠 복기 10/10</span>`)
     : "";
   const reviewGapTag = t.reviewGap
-    ? `<span class="time-tag" style="color:#3E4C8A;background:#EEF2FF;border:1px solid #D9E1FF">🔁 ${t.reviewGap}일 후 복습</span>` : "";
+    ? `<span class="time-tag" style="color:#4B3FA6;background:#EFECFD;border:1px solid #DED8FB">🔁 ${t.reviewGap}일 후 복습</span>` : "";
   const _act=Number(t.actualMin)||0, _tim=Number(t.timerMin)||0;
   const verifyTag = _act<=0? ""
     : (_tim>=_act
@@ -2650,9 +3117,9 @@ function renderTaskRow(t){
               ${timerBtnHTML(t)}
               <input class="exec-min" type="number" value="${t.actualMin||""}" placeholder="${t.plannedMin||0}"
                 onchange="updateExec('${t.id}','actualMin',this.value)">
-              <button class="quick-praise" style="border-color:#D6DEF5;background:#F7F9FF;color:#3E63DD" onclick="bumpTime('${t.id}',${t.plannedMin||0},true)">계획만큼</button>
-              <button class="quick-praise" style="border-color:#D6DEF5;background:#F7F9FF;color:#3E63DD" onclick="bumpTime('${t.id}',10)">+10</button>
-              <button class="quick-praise" style="border-color:#D6DEF5;background:#F7F9FF;color:#3E63DD" onclick="bumpTime('${t.id}',30)">+30</button>
+              <button class="quick-praise" style="border-color:#DCD6F7;background:#F7F6FE;color:#6A58E6" onclick="bumpTime('${t.id}',${t.plannedMin||0},true)">계획만큼</button>
+              <button class="quick-praise" style="border-color:#DCD6F7;background:#F7F6FE;color:#6A58E6" onclick="bumpTime('${t.id}',10)">+10</button>
+              <button class="quick-praise" style="border-color:#DCD6F7;background:#F7F6FE;color:#6A58E6" onclick="bumpTime('${t.id}',30)">+30</button>
             </div>
           </div>
           ${scoreExec}
@@ -3120,12 +3587,12 @@ function drawSettings(){
           <div style="font-size:11.5px;color:#94A3B8;margin-top:6px">자주 쓰는 계획을 저장해 두면, 계획 창 맨 위에서 한 번에 불러올 수 있어요.</div>
 
           <div class="section-lbl" style="margin-top:22px">🔗 학습앱 연동</div>
-          <button class="ghost-btn" style="width:100%;padding:11px" onclick="drawExtApps()">🔗 천문장 · MD영단어 연동 설정</button>
-          <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">다른 학습앱에서 공부한 내용을 플래너 학습시간에 반영합니다.</div>
+          <button class="ghost-btn" style="width:100%;padding:11px" onclick="drawExtApps()">🔗 학습앱 인정 시간 설정</button>
+          <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">천문장 · MD영단어 · 그래머 인사이드에서 공부한 시간을 플래너 학습시간에 반영합니다. 같은 계정이라 따로 연결할 필요가 없어요.</div>
 
           <div class="section-lbl" style="margin-top:22px">🚀 부스터 모드 (시험 D-day)</div>
           <button class="ghost-btn" style="width:100%;padding:11px" onclick="closeDrawer();drawBooster()">🚀 부스터 모드 열기</button>
-          <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">시험 기간을 등록하면 목표시간이 올라가고 <b>용돈이 1.5배</b>로 지급됩니다. 상단 <b>🚀</b> 버튼으로도 열 수 있어요.</div>
+          <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">시험 기간을 등록하면 목표시간이 올라가고 <b>용돈이 1.5배</b>로 지급됩니다. <b>기록</b> 탭에서도 열 수 있어요.</div>
 
 
           <div class="section-lbl" style="margin-top:22px">💰 용돈 지급 기준</div>
@@ -3362,7 +3829,7 @@ async function drawDashboard(){
 function allowanceWeekDays(d){ const s=startOfWeek(d||new Date()); return Array.from({length:7},(_,i)=>fmt(addDays(s,i))); }
 function weekLabelOf(days){ const s=parseD(days[0]),e=parseD(days[6]); return `${s.getMonth()+1}.${s.getDate()}~${e.getMonth()+1}.${e.getDate()}`; }
 
-function computeAllowance(tasks, days, crit){
+function computeAllowance(tasks, days, crit, extData){
   const wk=tasks.filter(t=>days.includes(t.date));
   const planned=wk.length, done=wk.filter(t=>t.done).length;
   // 이행률: 계획 '시간' 가중 — 10시간짜리를 해낸 것과 10분짜리를 해낸 것을 구분
@@ -3375,8 +3842,8 @@ function computeAllowance(tasks, days, crit){
   const reviewRate = crit.reviewTarget? Math.min(1,reviews/crit.reviewTarget) : 0;
   // 학습시간: 목표까지는 비례, 목표를 넘기면 체감 보너스(최대 1.25) — 더 오래 하면 더 인정
   let weekMin=wk.filter(t=>t.done).reduce((a,t)=>a+creditedMin(t),0);
-  // 외부 학습앱(천문장·MD영단어) 인정 시간 — 학습시간 지표에만 가산
-  const extMin=(typeof extWeekMin==="function")? extWeekMin(days) : 0;
+  // 학습앱(천문장·MD영단어·그래머 인사이드) 인정 시간 — 학습시간 지표에만 가산
+  const extMin=(typeof extWeekMin==="function")? extWeekMin(days, extData) : 0;
   weekMin+=extMin;
   // 주간 목표시간: 그 주의 등교일/자율학습일 구성에 맞춰 자동 산출(설정에서 고정도 가능)
   const timeTarget=(crit.autoTimeTarget===false)
@@ -3469,7 +3936,7 @@ function allowanceMetricsHTML(r,crit){
   const scoreTxt = r.scoreRate==null? "기록 없음" : Math.round(r.scoreRate*100)+"%";
   const warn = (r.caps&&r.caps.length)? `<div style="font-size:11.5px;color:#E5484D;background:#FFF5F6;border:1px solid #FADADD;border-radius:8px;padding:7px 10px;margin-bottom:9px">⚠️ ${r.caps.join(" · ")}</div>` : "";
   return `${warn}
-    ${metricBar("계획 이행률", compPct, "#3E63DD", crit.wCompletion)}
+    ${metricBar("계획 이행률", compPct, "#6A58E6", crit.wCompletion)}
     ${metricBar(`학습시간 (${hmFmt(r.weekMin)}/${hmFmt(r.timeTarget)})${r.extMin>0?` <span style="color:#0E9F6E">🔗+${r.extMin}분</span>`:""}`, timePct, "#8E4EC6", crit.wTime!=null?crit.wTime:25)}
     ${metricBar(`학습일수 (${r.studyDays}/${r.daysTarget}일)`, dayPct, "#0EA5E9", crit.wDays!=null?crit.wDays:15)}
     ${metricBar("문제풀이 정답률"+(r.scoreRate==null?"":` (${r.scoredCount}회)`), r.scoreRate==null?"기록 없음":scoreTxt, "#F5A524", crit.wScore)}
@@ -3538,11 +4005,11 @@ async function drawAllowance(){
   if(overview){
     let cards=""; let sum=0;
     for(const ch of state.children){
-      const [tasks,crit,payout,capOv]=await Promise.all([
-        fetchWeekTasks(ch.uid,days), fetchAllowanceCrit(ch.uid), fetchPayout(ch.uid,weekId), fetchWeekCap(ch.uid,weekId)
+      const [tasks,crit,payout,capOv,exd]=await Promise.all([
+        fetchWeekTasks(ch.uid,days), fetchAllowanceCrit(ch.uid), fetchPayout(ch.uid,weekId), fetchWeekCap(ch.uid,weekId), fetchExtData(ch.uid)
       ]);
       const cap = capOv!=null? capOv : crit.cap;
-      const r=computeAllowance(tasks,days,crit);
+      const r=computeAllowance(tasks,days,crit,exd);
       allowCache[ch.uid]={r,crit,cap,weekId,label,name:ch.name,payPct:Math.round(r.achievement*100)};
       sum += payout? payout.amount : (computePayAmount(cap, Math.round(r.achievement*100))+(Number(r.bonus)||0));
       cards+=`<div class="allow-card">
@@ -3560,7 +4027,7 @@ async function drawAllowance(){
     const uid=state.ownerUid;
     const [tasks,payout,capOv,histSnap]=await Promise.all([
       fetchWeekTasks(uid,days), fetchPayout(uid,weekId), fetchWeekCap(uid,weekId),
-      db.collection("planner").doc(uid).collection("payouts").get()
+      db.collection("planner").doc(uid).collection("payouts").get(), ensureExt()
     ]);
     const crit=state.settings.allowance||defaultSettings().allowance;
     const cap = capOv!=null? capOv : crit.cap;

@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>그래머 인사이드 트레이너</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>/* 통합 플래너 안(iframe)에서 열렸는지 표시 */if(window.self!==window.top)document.documentElement.classList.add('in-planner');</script>
 <style>
 :root{
  --ink:#1B2A4A; --ink2:#44557A; --paper:#F7F8FC; --card:#FFFFFF;
@@ -15878,6 +15879,8 @@ function bindImport(){
 function loadLocal(){ try{ const r=localStorage.getItem(lsKey()); return r?JSON.parse(r):null; }catch(e){ return null; } }
 function saveState(now){
   if(!U||!S) return;
+  // 통합 DB: 날짜별 학습 기록 (플래너가 집중 시간을 학습시간으로 인정)
+  const dl=S.daily; if(dl&&dl.date){ if(!S.dayLog||typeof S.dayLog!=='object') S.dayLog={}; S.dayLog[dl.date]={sec:dl.activeSec||0, answered:dl.answered||0, correct:dl.correct||0, cards:dl.cards||0}; }
   localStorage.setItem(lsKey(), JSON.stringify(S));
   if(LOCAL) return;
   clearTimeout(saveTimer);
