@@ -51,6 +51,12 @@ service cloud.firestore {
                             && acceptedLink(parent, child, request.resource.data.requestId);
     }
 
+    // 💰 용돈 기준 (1시간당 금액 · 주간/하루 최대 · 학습앱 포함): 자녀는 보기만, 연결된 부모만 바꿀 수 있음
+    match /payTerms/{child} {
+      allow read: if isMe(child) || isParentOf(child);
+      allow write: if isParentOf(child);
+    }
+
     // 예전 6자리 코드 (더 이상 만들지 않음) — 탈퇴할 때 본인 코드 삭제만
     match /codes/{code} {
       allow read: if signedIn();
