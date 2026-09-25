@@ -3987,7 +3987,7 @@ function creditFor(dateStr, now){
   return {rate:0, label:`${d}일 지나 체크 불가`, ok:false};
 }
 /* ----- 학습시간 검증: 기록한 시간 인정 (타이머로 잰 시간은 용돈 +10%) · 이상치 차단 ----- */
-function allowCrit(){ const a=(state.settings&&state.settings.allowance)||defaultSettings().allowance; return {...a, exams:examList(), ...payTermsOf(a, state.payTermsRaw)}; }
+function allowCrit(){ const a=(state.settings&&state.settings.allowance)||defaultSettings().allowance; return {...a, exams:examList(), vacations:(state.settings&&state.settings.vacations)||[], dayTypes:state.dayTypes||{}, ...payTermsOf(a, state.payTermsRaw)}; }
 function verifiedMin(t){
   const A=allowCrit();
   let actual=Number(t.actualMin)||0;
@@ -4366,7 +4366,8 @@ function payTermsBlockHTML(){
       ${inp("⏱ 타이머 보너스(%)","timerBonusRate",Math.round(P.timerBonusRate*100),5,"Math.min(1,Math.max(0,Number(this.value)||0)/100)")}
       ${inp("시간 용돈 최대 · 평소(원)","cap",P.cap,1000)}
       ${inp("시간 용돈 최대 · 시험기간(원)","boostCap",P.boostCap,1000)}
-      ${inp("하루 최대 인정(분, 0=제한 없음)","dailyMaxMin",P.dailyMaxMin,30)}
+      ${inp("🏫 등교일 하루 최대 인정(분, 0=제한 없음)","dailyMaxMin",P.dailyMaxMin,30)}
+      ${inp("🏖 자율학습일 하루 최대 인정(분, 0=제한 없음)","dailyMaxFreeMin",P.dailyMaxFreeMin,30)}
       ${inp("📚 학습앱 정답률 보너스 최대(원)","appBonusMax",P.appBonusMax,500)}
       ${inp("📝 모의고사 보너스 최대(원)","mockBonusMax",P.mockBonusMax,500)}
       ${inp("보너스 0원 기준 정답률(%)","accFloor",Math.round(P.accFloor*100),5,"Math.min(0.99,Math.max(0,Number(this.value)||0)/100)")}
@@ -4651,7 +4652,7 @@ function weekLabelOf(days){ const s=parseD(days[0]),e=parseD(days[6]); return `$
  *  - 정답률 → 보너스: 60% 이하 0원, 95% 이상 최대, 그 사이 비례 (100원 단위)
  *  - 기준은 payTerms/{자녀uid} 에 저장 → 보안 규칙상 연결된 부모만 바꿀 수 있음
  * ============================================================ */
-const PAY_DEFAULT={hourlyRate:1000, timerBonusRate:0.1, cap:10000, boostCap:20000, dailyMaxMin:240, includeApps:true,
+const PAY_DEFAULT={hourlyRate:1000, timerBonusRate:0.1, cap:10000, boostCap:20000, dailyMaxMin:240, dailyMaxFreeMin:480, includeApps:true,
   appBonusMax:5000, mockBonusMax:5000, accFloor:0.6, accFull:0.95, appMinAnswers:30, mocks:{}};
 function payTermsOf(allowance, pt){ return {...PAY_DEFAULT, ...(pt||{})}; }
 async function fetchPayTerms(uid){
@@ -4693,6 +4694,14 @@ function isBoostWeek(days, exams){
   return (days||[]).some(ds=>list.some(e=>{ if(!e||!e.date) return false;
     const start=fmt(addDays(parseD(e.date), -(Number(e.prepDays)||14))); return ds>=start && ds<=e.date; }));
 }
+// 용돈 계산용 등교일/자율학습일 판정 — 계산 대상 자녀의 설정(방학 · 날짜별 지정) 기준
+function payDayType(ds, T){
+  const ov=T.dayTypes && T.dayTypes[ds];
+  if(ov==="school"||ov==="free") return ov;
+  for(const v of (T.vacations||[])){ if(v && v.from && v.to && ds>=v.from && ds<=v.to) return "free"; }
+  const dow=parseD(ds).getDay();
+  return (dow===0||dow===6)? "free" : "school";
+}
 function computeAllowance(tasks, days, crit, exd){
   const wk=tasks.filter(t=>days.includes(t.date));
   const planned=wk.length, done=wk.filter(t=>t.done).length;
@@ -4707,16 +4716,19 @@ function computeAllowance(tasks, days, crit, exd){
   const X=exd || extData();
   // ⏱ 시간 용돈
   const focusFree=(X && X.focusFree) || {};
-  const rate=Math.max(0, Number(T.hourlyRate)||0), dayMax=Math.max(0, Number(T.dailyMaxMin)||0);
+  const rate=Math.max(0, Number(T.hourlyRate)||0);
+  const dayMaxSchool=Math.max(0, Number(T.dailyMaxMin)||0), dayMaxFree=Math.max(0, Number(T.dailyMaxFreeMin)||0);
+  const dayMax=dayMaxSchool;
   const byDay=days.map(ds=>{
+    const type=payDayType(ds, T), cap=type==="free"? dayMaxFree : dayMaxSchool;  // 등교일 / 자율학습일(주말·방학) 하루 최대
     const dt=wk.filter(t=>t.date===ds);
     const task=dt.reduce((a,t)=>a+verifiedMin(t),0);                            // 과제에 기록한 시간 (직접 적은 시간 포함)
     const taskTimed=dt.reduce((a,t)=>a+timedMin(t),0);                         // 그중 타이머로 잰 시간
     const focus=Math.round(Number(focusFree[ds])||0);                          // 과제 없이 쓴 포커스 타이머
     const app=(T.includeApps!==false)? extCreditedOn(ds, X).total : 0;          // 학습앱이 잰 시간
-    const raw=task+focus+app, paid=dayMax>0? Math.min(raw, dayMax) : raw;
+    const raw=task+focus+app, paid=cap>0? Math.min(raw, cap) : raw;
     const timedPaid=Math.min(taskTimed+focus, paid);                           // 인정 시간 중 타이머 몫
-    return {ds, task, timer:taskTimed, focus, app, raw, paid, timedPaid};
+    return {ds, type, cap, task, timer:taskTimed, focus, app, raw, paid, timedPaid};
   });
   const sum=k=>byDay.reduce((a,d)=>a+d[k],0);
   const taskMin=sum("task"), timerMin=sum("timer"), focusMin=sum("focus"), appMin=sum("app"), rawMin=sum("raw"), payMin=sum("paid"), timedPaidMin=sum("timedPaid");
@@ -4738,7 +4750,7 @@ function computeAllowance(tasks, days, crit, exd){
   const amount=timePay+appBonus+mockBonus;
   return {planned, done, completion, scoreRate, scoredCount:scored.length, reviews, studyDays, daysTarget:Number(crit.daysTarget)||5,
     weekMin:rawMin, taskMin, timerMin, focusMin, appMin, timedPaidMin, timedShare, timerBonusRate, basePay, timerBonus, extMin:appMin, payMin, overDayMin:rawMin-payMin, byDay,
-    rate, dayMax, includeApps:T.includeApps!==false, boost, timeCap, earned, timePay,
+    rate, dayMax, dayMaxSchool, dayMaxFree, includeApps:T.includeApps!==false, boost, timeCap, earned, timePay,
     appAcc:acc, appOk, appMinAnswers:Number(T.appMinAnswers)||0, appBonus, appBonusMax:Number(T.appBonusMax)||0,
     mock, mockAcc, mockBonus, mockBonusMax:Number(T.mockBonusMax)||0, accFloor:Number(T.accFloor), accFull:Number(T.accFull),
     amount, total:amount, bonus:appBonus+mockBonus, overMin:0, timeTarget:0, boostRate:1, effCap:timeCap,
@@ -4760,7 +4772,9 @@ async function fetchAllowanceCrit(uid){
   const d=await db.collection("planner").doc(uid).collection("meta").doc("settings").get();
   const base=defaultSettings().allowance;
   const a=Object.assign(base, migrateAllowance((d.exists&&d.data().allowance)||{}).a);
-  return {...a, exams:(d.exists&&d.data().exams)||[], ...payTermsOf(a, await fetchPayTerms(uid))};
+  const dayTypes={};
+  try{ (await db.collection("planner").doc(uid).collection("daytypes").get()).docs.forEach(x=>{ dayTypes[x.id]=x.data().type||null; }); }catch(e){}
+  return {...a, exams:(d.exists&&d.data().exams)||[], vacations:(d.exists&&d.data().vacations)||[], dayTypes, ...payTermsOf(a, await fetchPayTerms(uid))};
 }
 async function fetchPayout(uid,weekId){
   const d=await db.collection("planner").doc(uid).collection("payouts").doc(weekId).get();
@@ -4795,7 +4809,7 @@ function allowanceMetricsHTML(r,crit){
       ${row("📝","과제 공부 시간",hmFmt(r.taskMin)+(r.timerMin>0?` <em>(⏱ ${hmFmt(r.timerMin)})</em>`:""))}
       ${r.focusMin>0? row("🎯","포커스 타이머 (과제 없이)",hmFmt(r.focusMin)) : ""}
       ${r.includeApps? row("📚","학습앱 공부 시간",hmFmt(r.appMin)) : ""}
-      ${r.overDayMin>0? row("✂️",`하루 최대 ${hmFmt(r.dayMax)} 넘은 시간 제외`,"−"+hmFmt(r.overDayMin),"minus") : ""}
+      ${r.overDayMin>0? row("✂️",`하루 최대(등교일 ${hmFmt(r.dayMaxSchool)} · 자율학습일 ${hmFmt(r.dayMaxFree)}) 넘은 시간 제외`,"−"+hmFmt(r.overDayMin),"minus") : ""}
       <div class="pb-total"><span>인정 <b>${hmFmt(r.payMin)}</b> × 1시간당 <b>${wonFmt(r.rate)}</b>${r.earned>r.basePay?` <em>(계산 ${wonFmt(r.earned)} → 상한)</em>`:""}</span><b>${wonFmt(r.basePay)}</b></div>
       <div class="pb-total"><span>⏱ 타이머 보너스 <em>(${hmFmt(r.timedPaidMin)} · +${Math.round(r.timerBonusRate*100)}%)</em></span><b>+${wonFmt(r.timerBonus)}</b></div>
     </div>
@@ -4926,6 +4940,7 @@ async function drawAllowance(){
       fetchWeekTasks(uid,days), fetchPayout(uid,weekId), fetchWeekCap(uid,weekId),
       db.collection("planner").doc(uid).collection("payouts").get(), ensureExt()
     ]);
+    await loadDayTypes(days);
     const crit={...allowCrit(), ...payTermsOf(null, await fetchPayTerms(uid))};
     const r=computeAllowance(tasks,days,crit);
     const cap = capOv!=null? capOv : null;
