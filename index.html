@@ -879,6 +879,7 @@
 <script src="assets/push-config.js"></script>
 <script src="assets/family.js"></script>
 <script src="assets/focus-sounds.js"></script>
+<script src="assets/cards.js"></script>
 
 <script>
 /* ============================================================
@@ -2242,6 +2243,7 @@ function drawRewards(){
     <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">용돈과 쿠폰, 주간 대결을 관리합니다.</div>
     ${hubItem("💰","용돈 정산","이번 주 달성도와 지급액 확인","openDrawer('allowance')")}
     ${isParent? hubItem("🏆","주간 학습 대결","자녀 순위와 챔피언 인증카드","drawBattle()") : ""}
+    ${hubItem("🎴", isParent?"카드 관리":"카드 뽑기 · 대결", isParent?"카드 링크 등록 · 자녀에게 카드/뽑기권 지급":"공부로 뽑기권 · 카드 모으기 · 형제 대결","drawCards()")}
     ${hubItem("🎟️","보상 쿠폰","시간 이용권 · 게임방 충전권","drawCoupons()")}
   `);
 }
@@ -2254,6 +2256,7 @@ function drawManage(){
       ${hubItem("📈","자녀 학습 리포트","일·주·월 평균 학습시간과 과목·단원","drawReport()")}
       ${hubItem("📚","자녀 학습 다이어리","자녀별 주간·월간 기록 열람","drawArchive()")}
       ${hubItem("🏆","주간 학습 대결","순위 확인 및 챔피언 인증","drawBattle()")}
+      ${hubItem("🎴","카드 관리","카드 링크 등록 · 자녀에게 카드/뽑기권 지급","drawCards()")}
       ${hubItem("👨‍👩‍👦","자녀 계정 관리","자녀 코드 등록 · 연결 해제","openDrawer('settings')")}
     `);
   }else{
@@ -2261,6 +2264,7 @@ function drawManage(){
       <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">파트너 성장과 나의 기록을 확인합니다.</div>
       ${renderMonCard()}
       <div style="margin-top:12px">
+        ${hubItem("🎴","카드 뽑기 · 대결","공부로 뽑기권 · 카드 모으기 · 형제 대결","drawCards()")}
         ${hubItem("🎟️","보상 쿠폰","단계별 이용권 · 내 쿠폰함","drawCoupons()")}
         ${hubItem("🏅","성취 뱃지","연속 학습·완벽한 하루 기록","openDrawer('dash')")}
       </div>
@@ -2851,6 +2855,7 @@ function renderRecord(){
     ${isParent? hubItem("📈","자녀 학습 리포트","일·주·월 평균 학습시간과 과목·단원","drawReport()") : ""}
     <div class="r-sec">보상</div>
     ${hubItem("💰","용돈 정산","이번 주 달성도와 지급액 확인","openDrawer('allowance')")}
+    ${hubItem("🎴", isParent?"카드 관리":"카드 뽑기 · 대결", isParent?"카드 링크 등록 · 자녀에게 지급":"공부로 뽑기권 · 카드 모으기 · 대결","drawCards()")}
     ${hubItem("🎟️","보상 쿠폰","시간 이용권 · 게임방 충전권","drawCoupons()")}
     ${isParent? hubItem("🏆","주간 학습 대결","자녀 순위와 챔피언 인증카드","drawBattle()") : ""}
     ${hubItem("🚀","부스터 모드","시험 D-day · 목표시간 상향 · 시간 용돈 상한 2만 원","drawBooster()")}</div></div>`;

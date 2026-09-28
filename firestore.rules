@@ -57,6 +57,23 @@ service cloud.firestore {
       allow write: if isParentOf(child);
     }
 
+    // 🎴 가족 카드: cardHub/{부모uid} — 부모 본인 + 그 부모와 연결된 자녀
+    function isFamilyOf(p) {
+      return isMe(p) || (signedIn() && exists(/databases/$(database)/documents/links/$(p)/children/$(request.auth.uid)));
+    }
+    match /cardHub/{p}/pool/{id} {          // 카드풀(카드 링크): 부모만 등록 · 가족은 보기
+      allow read: if isFamilyOf(p);
+      allow write: if isMe(p);
+    }
+    match /cardHub/{p}/decks/{child} {      // 대결용 덱: 자녀 본인이 공개 · 가족은 보기
+      allow read: if isFamilyOf(p);
+      allow write: if isMe(p) || (isMe(child) && isFamilyOf(p));
+    }
+    match /cardHub/{p}/battles/{id} {       // 대결 기록
+      allow read, create: if isFamilyOf(p);
+      allow delete: if isMe(p);
+    }
+
     // 예전 6자리 코드 (더 이상 만들지 않음) — 탈퇴할 때 본인 코드 삭제만
     match /codes/{code} {
       allow read: if signedIn();
