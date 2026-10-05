@@ -360,7 +360,10 @@
   .mon-pick button.on{border-color:#F5A524;background:#FFFBEF;}
   .mon-pick .pk-name{font-size:11.5px;font-weight:700;color:#475569;margin-top:4px;}
   @keyframes monBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
-  .mon-card svg{animation:monBob 2.4s ease-in-out infinite;}
+  .tier-card{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;text-align:left;background:var(--surface,#fff);border-color:var(--line,#E4E4EA);}
+  .tier-card .mon-xp,.tier-card .mon-msg{grid-column:1/-1;}
+  .tier-card .mon-msg{background:#F6F6FA;color:#64748B;}
+  .tier-card .mon-xp>div{background:linear-gradient(90deg,#8F80FF,#6A58E6);}
 
   /* 동기부여 */
   .cheer{display:flex;gap:11px;align-items:flex-start;background:linear-gradient(135deg,#EFECFD,#F3EEFF);border:1px solid #E6E1FB;border-radius:13px;padding:13px 15px;margin-bottom:13px;}
@@ -448,7 +451,17 @@
     -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
   .tb-chips{display:flex;gap:12px;align-items:center;font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;}
   .tb-chips span{display:flex;align-items:center;gap:4px;white-space:nowrap;}
-  .tb-mon{display:flex;align-items:center;}
+  .tb-mon{display:none;}
+  .paybar{flex:1;min-width:0;text-align:left;border:1px solid var(--line,#E4E4EA);background:var(--surface,#fff);border-radius:14px;padding:7px 11px 6px;cursor:pointer;font:inherit;color:inherit;}
+  .paybar .pb-top{display:flex;align-items:baseline;gap:7px;white-space:nowrap;min-width:0}
+  .paybar .pb-amt{font-size:18px;font-weight:900;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .paybar .pb-today{font-size:12px;font-weight:700;color:#64748B;overflow:hidden;text-overflow:ellipsis}
+  .paybar .pb-today.up{color:#0E9F6E}.paybar .pb-today.down{color:#E5484D}
+  .paybar .pb-dl{margin-left:auto;font-size:11px;font-weight:700;color:#94A3B8;padding-left:4px}
+  .paybar .pb-track{display:flex;height:5px;border-radius:99px;background:#EDEDF3;overflow:hidden;margin-top:5px}
+  .paybar .pb-track i{display:block;height:100%}
+  .paybar .pb-lbl{display:flex;gap:9px;font-size:11px;color:#64748B;margin-top:4px;white-space:nowrap;overflow:hidden}
+  @media(max-width:520px){ .tb-who span:last-child{display:none;} .tb-who{padding:4px;} .paybar .pb-lbl{display:none;} }
   .tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0;}
   .tb-who{display:flex;align-items:center;gap:6px;border:none;background:var(--surface);border-radius:999px;
     padding:4px 12px 4px 4px;font-weight:800;font-size:13px;color:var(--slate);max-width:150px;min-width:0;
@@ -789,6 +802,14 @@
 .pw-wrap{position:relative}.pw-wrap .inp{padding-right:44px}
 .pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;font-size:17px;cursor:pointer;padding:6px;opacity:.7}
 .pw-warn{margin-top:6px;font-size:12px;color:#C2410C;background:#FFF7ED;border-radius:8px;padding:7px 9px;line-height:1.45}
+  .lapp-pay{flex:1;min-width:0;position:relative;margin-left:10px;line-height:1.25}
+  .lapp-pay .lp-top{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
+  .lapp-pay .lp-top b{font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+  .lapp-pay .lp-top span{font-size:12px;font-weight:700;color:#64748B}.lapp-pay .lp-top span.up{color:#0E9F6E}
+  .lapp-pay .lp-sub{font-size:11.5px;color:#64748B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lp-flash{position:absolute;right:0;top:0;font-weight:900;font-size:15px;animation:lpUp 1.2s ease-out forwards}
+  .lp-flash.up{color:#0E9F6E}.lp-flash.down{color:#E5484D}
+  @keyframes lpUp{0%{opacity:0;transform:translateY(6px)}20%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-10px)}}
 </style>
 </head>
 <body>
@@ -836,8 +857,8 @@
 <!-- ============ APP (하루틀 UI) ============ -->
 <div id="app" class="hidden">
   <div class="topbar">
-    <div class="tb-chips"><span id="tbStreak" title="연속 학습일">🔥 0</span><span id="tbDone" title="오늘 완료한 학습">✅ 0</span></div>
-    <span id="monHead" class="tb-mon" title="파트너 몬스터"></span>
+    <button id="payBar" class="paybar" onclick="openDrawer('allowance')" title="이번 주 용돈 · 눌러서 정산 보기"><div class="pb-top"><b class="pb-amt">₩ –</b></div></button>
+    <span id="monHead" class="tb-mon"></span>
     <div class="tb-right">
       <button class="tb-who" onclick="openMenu()" title="계정 · 메뉴"><span class="av" id="myAv">나</span><span id="myName">나</span></button>
       <div class="tb-pill">
@@ -1132,17 +1153,27 @@ function monImgSrc(species,stage){ return `${MON_IMG_BASE}${MON_ROW[species]||"a
 // 이미지가 있으면 <img>, 로드 실패 시 자동으로 오리지널 SVG로 대체
 // (기본 SVG는 3형태이므로 10단계를 3구간으로 매핑해 폴백)
 function svgStageOf(stage){ return stage<=2?0 : stage<=6?1 : 2; }
+// 주간 학습 등급 (캐릭터 대신) — Lv1~10, 2단계씩 브론즈 · 실버 · 골드 · 플래티넘 · 다이아
+const TIERS=[
+  {name:"브론즈",  c1:"#C98B5B", c2:"#8A5531"},
+  {name:"실버",    c1:"#B8C2CF", c2:"#6B7787"},
+  {name:"골드",    c1:"#F2C14E", c2:"#B07F12"},
+  {name:"플래티넘", c1:"#5FD3C6", c2:"#1F8C81"},
+  {name:"다이아",  c1:"#8CA8FF", c2:"#4B5FD6"},
+];
+function tierOf(stage){ return TIERS[Math.min(TIERS.length-1, Math.floor((stage|0)/2))]; }
+function tierName(stage){ return `${tierOf(stage).name} · Lv${(stage|0)+1}`; }
 function monArt(species,stage,size){
-  // 인라인 onerror 안에 들어가므로 줄바꿈·따옴표를 정리 (줄바꿈이 있으면 스크립트 오류로 이미지가 깨짐)
-  const svg=monsterSVG(species,svgStageOf(stage|0),size).replace(/\s*\n\s*/g," ").replace(/'/g,"\\'").replace(/"/g,"&quot;");
-  const src=monImgSrc(species,stage);
-  return `<img src="${src}" width="${size}" height="${size}" alt="${MONSTERS[species]?MONSTERS[species].name:""}"
-    style="object-fit:contain;display:inline-block;vertical-align:middle"
-    onerror="this.onerror=null;if(this.parentNode)this.outerHTML='${svg}'">`;
+  const T=tierOf(stage), lv=(stage|0)+1, id="tg"+lv+"_"+size;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 48 48" style="display:inline-block;vertical-align:middle" aria-label="${T.name} Lv${lv}">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${T.c1}"/><stop offset="1" stop-color="${T.c2}"/></linearGradient></defs>
+    <path d="M24 3 L42 10 V24 C42 34 34 41 24 45 C14 41 6 34 6 24 V10 Z" fill="url(#${id})"/>
+    <path d="M24 7 L38 12.5 V24 C38 31.5 32 37 24 40.5 C16 37 10 31.5 10 24 V12.5 Z" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.4"/>
+    <text x="24" y="29" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${lv>=10?14:16}" font-weight="800" fill="#fff">${lv}</text></svg>`;
 }
 function monMessage(stage,toStage){
-  if(stage>=MON_MAX_STAGE) return `최종 ${MON_MAX_STAGE+1}단계 달성! 이번 주 최고예요 🏆`;
-  return `이번 주 ${stage+1}단계 · ${toStage}XP 더 모으면 ${stage+2}단계 (완료 1개=20XP, 공부 1분=1XP)`;
+  if(stage>=MON_MAX_STAGE) return `이번 주 최고 등급 (${tierName(stage)})`;
+  return `다음 등급(${tierName(stage+1)})까지 ${toStage}XP · 완료 1개 20XP, 공부 1분 1XP`;
 }
 function monGainCheck(prev, next){
   if(!(next.done && !(prev&&prev.done))) return;
@@ -1153,9 +1184,7 @@ function monGainCheck(prev, next){
   const before=monsterCalc(tot.count,tot.min);
   tot.count+=1; tot.min+=creditedMin(next);
   const after=monsterCalc(tot.count,tot.min);
-  const M=MONSTERS[monSpecies()];
-  if(after.stage>before.stage) setTimeout(()=>toast(`✨ ${M.name} ${after.stage+1}단계로 진화!`,"cheer"),700);
-  else if(after.level>before.level) setTimeout(()=>toast(`⬆️ ${M.name} 레벨 ${after.level} 달성!`,"cheer"),700);
+  if(after.stage>before.stage) setTimeout(()=>toast(`이번 주 등급 ${tierName(after.stage)} 달성`,"cheer"),700);
 }
 function cheerFor(planned, done){
   const rate = planned? done/planned : -1;
@@ -2139,7 +2168,7 @@ async function drawExtApps(){
       · 앱별 하루 <b>${c.dailyCapPerApp}분</b>, 세 앱 합쳐 하루 <b>${c.dailyCapTotal}분</b>까지만 인정<br>
       · 그래머 인사이드는 5분 넘게 조작이 없으면 시간 측정을 멈춥니다<br>
       · 학습앱 시간은 <b>학습일수·복기 점수·이행률에는 반영되지 않음</b> — 플래너 계획 학습이 여전히 필요<br>
-      · 캐릭터 XP·주간 대결 포인트에는 반영되지 않고, <b>주간 학습시간(용돈)</b>에만 더해집니다
+      · 주간 등급 XP·주간 대결 포인트에는 반영되지 않고, <b>주간 학습시간(용돈)</b>에만 더해집니다
     </div>`;
   const root=document.querySelector("#drawerRoot .drawer-body");
   if(root) root.innerHTML=body;
@@ -2260,8 +2289,8 @@ function drawManage(){
       ${hubItem("👨‍👩‍👦","자녀 계정 관리","자녀 코드 등록 · 연결 해제","openDrawer('settings')")}
     `);
   }else{
-    hubShell("🐣 내 파트너", `
-      <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">파트너 성장과 나의 기록을 확인합니다.</div>
+    hubShell("🏅 내 등급 · 보상", `
+      <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">이번 주 등급과 보상을 확인합니다.</div>
       ${renderMonCard()}
       <div style="margin-top:12px">
         ${hubItem("🎴","카드 뽑기 · 대결","공부로 뽑기권 · 카드 모으기 · 형제 대결","drawCards()")}
@@ -2620,9 +2649,7 @@ function updateMonHead(){
   const tot=monReady();
   if(!tot){ loadMonTotals().then(updateMonHead); return; }
   const {count,min}=tot;
-  const c=monsterCalc(count,min), M=MONSTERS[monSpecies()];
-  elh.innerHTML=monArt(monSpecies(),c.stage,32);
-  elh.title=`${M.name} Lv.${c.level} · 이번 주 ${c.xp}XP`;
+  elh.innerHTML=""; elh.title="";
 }
 function renderHeader(){
   const me=state.profile.name||"나";
@@ -2740,7 +2767,65 @@ function planHead(){
       <button class="${state.view==="month"?"on":""}" onclick="setView('month')">월간</button>
     </div>`;
 }
+/* ----- 💰 상단 용돈 바 (모든 화면 고정) ----- */
+let payBarTimer=null, payBarSeq=0;
+function schedulePayBar(delay){ clearTimeout(payBarTimer); payBarTimer=setTimeout(refreshPayBar, delay==null?1200:delay); }
+function stripDay(X, ds){
+  const o={...X, focusFree:{...((X&&X.focusFree)||{})}}; delete o.focusFree[ds];
+  ["sentence","vocab","grammar"].forEach(k=>{ if(X&&X[k]){ const d={...X[k].days}; delete d[ds]; o[k]={...X[k], days:d}; } });
+  return o;
+}
+// 이번 주 용돈 + 오늘 번 금액 (오늘 기록을 뺀 주와 비교)
+async function computeWeekPay(uid){
+  const days=snapWeekDays(), weekId=days[6], ds=fmt(new Date());
+  const [tasks, crit, capOv, payout, exd]=await Promise.all([
+    fetchWeekTasks(uid,days), fetchAllowanceCrit(uid), fetchWeekCap(uid,weekId), fetchPayout(uid,weekId), fetchExtData(uid)]);
+  const cap=capOv!=null? capOv : null;
+  const r=computeAllowance(tasks,days,crit,exd), now=payAmount(r,cap);
+  let today=0;
+  if(days.includes(ds)){
+    const r0=computeAllowance(tasks.filter(t=>t.date!==ds), days, crit, stripDay(exd, ds));
+    today=now-payAmount(r0,cap);
+  }
+  return {r, amount:payout? Number(payout.amount)||0 : now, timePay:now-r.appBonus-r.mockBonus, today, days, paid:!!payout};
+}
+function payDeadline(days){
+  const end=parseD(days[6]); end.setHours(18,0,0,0);
+  const ms=end-new Date(), d=Math.floor(ms/86400000);
+  return ms<=0? "마감" : d===0? "오늘 18시 마감" : `D-${d}`;
+}
+function payBarHTML(P){
+  const r=P.r, won=n=>"₩"+Math.round(n).toLocaleString();
+  const tMax=r.timeCap+Math.round(r.timeCap*r.timerBonusRate), max=Math.max(1, tMax+r.appBonusMax+r.mockBonusMax);
+  const w=n=>Math.max(0,Math.min(100, n/max*100)).toFixed(1)+"%";
+  const td=Math.round(P.today), tdTxt=td===0? "오늘 ₩0" : `오늘 ${td>0?"+":"−"}₩${Math.abs(td).toLocaleString()}`;
+  return `<div class="pb-top"><b class="pb-amt">${won(P.amount)}</b><span class="pb-today ${td>0?"up":td<0?"down":""}">${tdTxt}</span>
+      <span class="pb-dl">${P.paid?"지급완료":payDeadline(P.days)}</span></div>
+    <div class="pb-track" aria-hidden="true"><i style="width:${w(P.timePay)};background:#6A58E6"></i><i style="width:${w(r.appBonus)};background:#0E9F6E"></i><i style="width:${w(r.mockBonus)};background:#E0A100"></i></div>
+    <div class="pb-lbl"><span>⏱ ${won(P.timePay)}</span><span>📚 ${won(r.appBonus)}</span><span>📝 ${r.mock? won(r.mockBonus) : "–"}</span></div>`;
+}
+async function refreshPayBar(){
+  const el=document.getElementById("payBar"); if(!el || !state.user || !state.profile) return;
+  const seq=++payBarSeq;
+  try{
+    if(state.profile.role==="parent" && !state.viewingChild){
+      const days=snapWeekDays(), weekId=days[6];
+      const rows=await Promise.all((state.children||[]).map(async ch=>{
+        try{ const d=await db.collection("planner").doc(ch.uid).collection("allowanceSnap").doc(weekId).get();
+          return {name:ch.name, amt:d.exists? Number(d.data().amount)||0 : 0}; }catch(_){ return {name:ch.name, amt:0}; } }));
+      if(seq!==payBarSeq) return;
+      const sum=rows.reduce((a,x)=>a+x.amt,0);
+      el.innerHTML=`<div class="pb-top"><b class="pb-amt">₩${sum.toLocaleString()}</b><span class="pb-today">자녀 이번 주</span><span class="pb-dl">${payDeadline(days)}</span></div>
+        <div class="pb-lbl">${rows.map(x=>`<span>${esc(x.name)} ₩${x.amt.toLocaleString()}</span>`).join("")||"<span>연결된 자녀 없음</span>"}</div>`;
+      return;
+    }
+    const P=await computeWeekPay(state.ownerUid);
+    if(seq!==payBarSeq) return;
+    el.innerHTML=payBarHTML(P);
+  }catch(e){ console.warn("용돈 바", e); }
+}
 function updateTopChips(){
+  schedulePayBar();
   const today=fmt(new Date());
   if(state.streakCache===null && !state._streakLoading){
     state._streakLoading=true;
@@ -2762,20 +2847,27 @@ function renderLearn(){
   }
   const c=extConf(), cr=extCreditedToday(), d=extData();
   const pct=c.dailyCapTotal? Math.min(100, Math.round(cr.total/c.dailyCapTotal*100)) : 0;
+  // 이번 주 정답률 보너스를 크게 — 앱에서 맞힌 만큼 용돈이 올라감
+  const T=payTermsOf(null, state.payTermsRaw), wk=snapWeekDays(), A=appAccuracy(wk, d);
+  const ok=A.total>=T.appMinAnswers, bonus=ok? accBonus(A.acc, T.appBonusMax, T.accFloor, T.accFull) : 0;
+  const tdAcc=appAccuracy([fmt(new Date())], d).per;
   const hero=`<div class="l-hero">
-    <div class="t">오늘 학습앱 인정 시간</div>
-    <div class="v">${cr.total}분 <small>/ 하루 최대 ${c.dailyCapTotal}분</small></div>
-    <div class="bar"><div style="width:${pct}%"></div></div>
-    <div class="per">${Object.keys(EXT_APPS).map(k=>`<span>${EXT_APPS[k].emo} ${EXT_APPS[k].short} ${cr.per[k]||0}분</span>`).join("")}</div>
+    <div class="t">이번 주 학습앱 정답률 보너스</div>
+    <div class="v">₩${bonus.toLocaleString()} <small>/ 최대 ₩${T.appBonusMax.toLocaleString()}</small></div>
+    <div class="bar"><div style="width:${T.appBonusMax? Math.round(bonus/T.appBonusMax*100) : 0}%"></div></div>
+    <div class="per"><span>정답률 ${A.total? Math.round(A.acc*100)+"%" : "–"} (${A.correct}/${A.total}문제)</span>
+      <span>${ok? `${Math.round(T.accFloor*100)}% 이하 0원 · ${Math.round(T.accFull*100)}% 이상 최대` : `${T.appMinAnswers-A.total}문제 더 풀면 보너스 시작`}</span>
+      <span>오늘 공부 인정 ${cr.total}분</span></div>
   </div>`;
-  const cards=Object.keys(EXT_APPS).map(k=>learnCard(k, d[k], cr.per[k]||0)).join("");
+  const order=Object.keys(EXT_APPS).sort((a,b)=>((tdAcc[a]||{}).t>0)-((tdAcc[b]||{}).t>0));   // 오늘 아직 안 한 앱이 위로
+  const cards=order.map(k=>learnCard(k, d[k], cr.per[k]||0, tdAcc[k])).join("");
   return `${hero}<div class="l-grid">${cards}</div>
-    <div class="lnote">📌 세 앱은 플래너와 <b>같은 계정</b>으로 기록이 저장돼요. 공부한 양은 날짜별로 학습시간에 더해지고
-      (앱별 하루 ${c.dailyCapPerApp}분까지), 이번 주 용돈 정산의 학습시간에도 반영됩니다.
+    <div class="lnote">세 앱에서 <b>맞힌 문제</b>는 정답률 보너스(최대 ₩${T.appBonusMax.toLocaleString()})로, <b>공부한 양</b>은 시간 용돈으로 이번 주 용돈에 들어가요
+      (앱별 하루 ${c.dailyCapPerApp}분까지).
       ${state.profile.role==="parent"||!state.viewingChild?`<a href="#" onclick="drawExtApps();return false" style="color:var(--accent);font-weight:800;text-decoration:none">인정 시간 설정 ›</a>`:""}
     </div>`;
 }
-function learnCard(k, x, min){
+function learnCard(k, x, min, td){
   const A=EXT_APPS[k], s=x&&x.sum;
   let sub, stats, prog;
   if(k==="sentence"){
@@ -2798,7 +2890,7 @@ function learnCard(k, x, min){
     <div class="lcard-top">
       <span class="lcard-ic" style="background:${A.soft}">${A.emo}</span>
       <div style="min-width:0"><div class="lcard-name">${A.name}</div><div class="lcard-sub">${sub}</div></div>
-      <span class="lcard-min ${min?"":"zero"}">오늘 +${min}분</span>
+      <span class="lcard-min ${td&&td.t?"":"zero"}">${td&&td.t? `오늘 ${td.c}/${td.t} · ${Math.round(td.c/td.t*100)}%` : "오늘 아직"}</span>
     </div>
     ${stats?`<div class="lstats">${stats.map(([v,l])=>`<div class="lstat"><b>${v}</b><span>${l}</span></div>`).join("")}</div>`:`<div style="font-size:12.5px;color:#8F8D9B;margin:12px 0 2px">${state.viewingChild?"아직 학습 기록이 없어요.":"아직 기록이 없어요. 첫 학습을 시작해 보세요!"}</div>`}
     ${prog?`<div class="lprog"><div style="width:${prog.pct}%;background:${A.color}"></div></div><div class="lprog-l"><span>${prog.l}</span><span>${prog.pct}%</span></div>`:""}
@@ -2813,19 +2905,57 @@ function openLearnApp(k){
   w.className="lapp"; w.id="learnApp";
   w.innerHTML=`<div class="lapp-h">
       <button class="lapp-back" onclick="leaveLearnApp()">‹ 플래너</button>
-      <span class="sp"></span><b>${A.emo} ${A.name}</b><span class="sp"></span>
-      <span style="width:84px"></span>
+      <div class="lapp-pay" id="lappPay"><div class="lp-top"><b>${A.emo} ${A.name}</b></div></div>
     </div>
     <iframe src="${A.page}" title="${A.name}"></iframe>`;
   document.body.appendChild(w);
   document.body.classList.add("lapp-open");
+  startLivePay(k);
   try{ history.pushState({lapp:k}, ""); }catch(_){}
 }
 function leaveLearnApp(){
   if(history.state && history.state.lapp) history.back(); else closeLearnApp();
 }
+/* ----- 학습앱 위 실시간 용돈 바: 앱이 채점할 때마다 정답률 보너스를 다시 계산 ----- */
+let LP=null;
+async function startLivePay(k){
+  LP={k, base:null, c:0, t:0, P:null};
+  const my=LP;
+  try{
+    if(state.viewingChild) return;
+    const P=await computeWeekPay(state.ownerUid);
+    if(LP!==my) return;
+    const acc=appAccuracy(P.days, await fetchExtData(state.ownerUid));
+    my.P=P; my.base={c:acc.correct, t:acc.total}; my.bonus=P.r.appBonus;
+    drawLivePay();
+  }catch(e){ console.warn("실시간 용돈", e); }
+}
+function liveBonus(c,t){
+  const r=LP.P.r;
+  return t>=r.appMinAnswers? accBonus(t? c/t : null, r.appBonusMax, r.accFloor, r.accFull) : 0;
+}
+function drawLivePay(flash){
+  const el=document.getElementById("lappPay"); if(!el || !LP || !LP.P) return;
+  const P=LP.P, r=P.r, c=LP.base.c+LP.c, t=LP.base.t+LP.t, b=liveBonus(c,t);
+  const amount=P.paid? P.amount : P.amount-r.appBonus+b, today=P.today-r.appBonus+b;
+  let hint;
+  if(t<r.appMinAnswers) hint=`보너스까지 ${r.appMinAnswers-t}문제`;
+  else if(b>=r.appBonusMax) hint="최대 보너스";
+  else { let n=1; while(n<300 && liveBonus(c+n,t+n)<=b) n++; hint=n<300? `연속 ${n}문제 정답이면 보너스 ↑` : ""; }
+  el.innerHTML=`<div class="lp-top"><b>₩${Math.round(amount).toLocaleString()}</b><span class="${today>0?"up":""}">오늘 ${today>=0?"+":"−"}₩${Math.abs(Math.round(today)).toLocaleString()}</span></div>
+    <div class="lp-sub">📚 이번 주 정답률 ${t? Math.round(c/t*100)+"%" : "–"} (${c}/${t}) → ₩${b.toLocaleString()}${hint?` · ${hint}`:""}</div>
+    ${flash? `<span class="lp-flash ${flash>0?"up":"down"}">${flash>0?"+":"−"}₩${Math.abs(flash).toLocaleString()}</span>` : ""}`;
+}
+window.addEventListener("message", e=>{
+  if(e.origin!==location.origin || !e.data || e.data.type!=="nogang-answer" || !LP || !LP.P) return;
+  const before=liveBonus(LP.base.c+LP.c, LP.base.t+LP.t);
+  LP.t++; if(e.data.ok) LP.c++;
+  const after=liveBonus(LP.base.c+LP.c, LP.base.t+LP.t);
+  drawLivePay(after-before);
+});
 function closeLearnApp(silent){
   const w=document.getElementById("learnApp"); if(!w) return;
+  LP=null;
   w.remove(); document.body.classList.remove("lapp-open");
   if(!silent){ state.extCache=null; render(); scheduleSnap(); }   // 방금 공부한 기록 다시 읽기 · 용돈 스냅샷
 }
@@ -2880,7 +3010,7 @@ function openMenu(){
       ${kids || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 자녀가 없어요. 아래 <b>가족 연결</b>에서 자녀의 이메일로 신청하세요.</div>`}`:""}
     <div class="r-sec">관리</div>
     ${hubItem("👨‍👩‍👧", "가족 연결"+(state.familyPending?` <span class="badge-dot">${state.familyPending}</span>`:""), isParent?"자녀에게 연결 신청 · 받은 신청 승인":"부모님께 연결 신청 · 받은 신청 승인","drawFamily()")}
-    ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🐣","내 파트너","파트너 성장 · 쿠폰 · 뱃지","drawManage()")}
+    ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🏅","내 등급 · 보상","주간 등급 · 카드 · 쿠폰 · 뱃지","drawManage()")}
     ${isParent? hubItem("🔔","용돈 알림","토요일 18시 · 휴대폰 푸시 · 이메일","drawNotify()") : ""}
     ${hubItem("⚙️","설정","계정 · 목표시간 · 방학 · 과목/교재 · 템플릿","openDrawer('settings')")}
     ${hubItem("🔗","학습앱 인정 시간","천문장 · 영단어 · 문법 환산과 상한","drawExtApps()")}
@@ -3634,7 +3764,6 @@ function renderWeek(){
     });
     cols+=`<div class="wcol ${isT?"today":""}">
       <div class="wcol-head" style="position:relative">
-        ${isT&&monMini?`<div style="position:absolute;top:4px;right:5px" title="파트너 몬스터">${monMini}</div>`:""}
         <div class="wd" style="color:${i===6?"#6A58E6":i===0?"#E5484D":"#64748B"}">${WD[i]}</div>
         <div class="num ${isT?"today":""}">${d.getDate()}</div>
         <div style="margin-top:3px;cursor:pointer" title="클릭하면 등교/자율 전환" onclick="toggleDayType('${ds}')">${dayTypeBadge(ds,true)}</div>
@@ -3749,15 +3878,14 @@ function renderMonCard(){
   const tot0=monReady();
   if(!tot0){
     loadMonTotals().then(()=>{ if(state.view==="day") render(); });
-    return `<div class="mon-card"><div style="font-size:12px;color:#94A3B8">파트너 불러오는 중…</div></div>`;
+    return `<div class="mon-card"><div style="font-size:12px;color:#94A3B8">불러오는 중…</div></div>`;
   }
   const {count,min}=tot0;
-  const sp=monSpecies(), M=MONSTERS[sp];
   const c=monsterCalc(count,min);
-  return `<div class="mon-card">
-    ${monArt(sp,c.stage,88)}
-    <div class="mon-name">${M.name} <span style="font-size:11px;color:#94A3B8">· ${M.kind}</span></div>
-    <div class="mon-lv">${c.stage+1}단계 / ${MON_MAX_STAGE+1} · 이번 주 ${c.xp} XP</div>
+  return `<div class="mon-card tier-card">
+    ${monArt("",c.stage,52)}
+    <div class="tier-txt"><div class="mon-name">이번 주 등급 · ${tierName(c.stage)}</div>
+    <div class="mon-lv">${c.xp} XP · 일요일마다 새로 시작</div></div>
     <div class="mon-xp" title="다음 단계까지"><div style="width:${c.stagePct}%"></div></div>
     <div class="mon-msg">${monMessage(c.stage,c.toStage)}</div>
   </div>`;
@@ -3782,7 +3910,7 @@ function renderDay(){
   const tot=monReady();
   const monBig = tot? monArt(monSpecies(), monsterCalc(tot.count,tot.min).stage, 48) : "";
   if(ts.length===0){
-    rows=`<div class="empty">${tot?`<div style="display:flex;justify-content:center;margin-bottom:8px">${monArt(monSpecies(), monsterCalc(tot.count,tot.min).stage, 72)}</div>`:"📚 "}오늘 계획한 학습이 없어요.<br>아래 버튼으로 오늘 할 일을 추가해 보세요.</div>`;
+    rows=`<div class="empty">오늘 계획한 학습이 없어요.<br>오른쪽 위 + 로 할 일을 추가하세요.</div>`;
   }else{
     ts.forEach(t=>rows+=renderTaskRow(t));
   }
@@ -4425,15 +4553,6 @@ function drawSettings(){
             <span class="hub-arr">›</span>
           </button>
           ${childrenBlock}
-          <div class="section-lbl" style="margin-top:22px">🐣 스타팅 파트너 (속성 선택)</div>
-          <div class="mon-pick">
-            ${Object.entries(MONSTERS).map(([k,M])=>`
-              <button class="${monSpecies()===k?"on":""}" onclick="pickStarter('${k}')">
-                ${monArt(k,0,58)}<div class="pk-name">${M.name}<br><span style="color:#94A3B8">${M.el}</span></div>
-              </button>`).join("")}
-          </div>
-          <div style="font-size:11.5px;color:#94A3B8;margin-top:8px;text-align:center">공부할수록 아기 → 성장기 → 완전체로 진화해요 (완료 1개=20XP, 공부 1분=1XP · 300XP·1500XP에 진화)</div>
-
           <div class="section-lbl" style="margin-top:22px">학습 목표 (등교일 / 자율학습일)</div>
           <div class="crit-grid">
             <div><label class="fld-lbl">🏫 등교일 목표(분)</label><input class="inp" type="number" value="${state.settings.dailyGoalSchool!=null?state.settings.dailyGoalSchool:120}"
@@ -5036,7 +5155,7 @@ async function drawReport(){
         const sp=(sd.exists&&sd.data().monster&&sd.data().monster.species)||"sprout";
         const done=tasks.filter(t=>t.done);
         const mc=monsterCalc(done.length, done.reduce((a,t)=>a+creditedMin(t),0));
-        monHTML=`<div style="display:flex;align-items:center;gap:6px;margin-left:auto">${monArt(sp,mc.stage,40)}<span style="font-size:11px;color:#94A3B8;font-weight:700">${mc.stage+1}단계</span></div>`;
+        monHTML=`<div style="display:flex;align-items:center;gap:6px;margin-left:auto">${monArt(sp,mc.stage,32)}<span style="font-size:11px;color:#94A3B8;font-weight:700">${tierName(mc.stage)}</span></div>`;
       }catch(_){}
       const sName=id=>{const s=(cats.subjects||[]).find(x=>x.id===id);return s?s:null;};
       const subRows=Object.entries(st.bySub).map(([id,b])=>({s:sName(id),...b}))
@@ -5141,7 +5260,7 @@ async function drawBattle(){
       <div class="rank-row">
         <span class="medal">${medals[i]||(i+1)}</span>
         ${monArt(r.species,r.stage,34)}
-        <div><div style="font-weight:800">${esc(r.ch.name)}</div><div style="font-size:11px;color:#94A3B8">${MONSTERS[r.species].name} ${r.stage+1}단계</div></div>
+        <div><div style="font-weight:800">${esc(r.ch.name)}</div><div style="font-size:11px;color:#94A3B8">${tierName(r.stage)}</div></div>
         <span class="pts">${r.pts.toLocaleString()} P</span>
       </div>`).join("");
 
@@ -5157,7 +5276,7 @@ async function drawBattle(){
       ${rankHTML}
       <div class="dash-section" style="margin-top:16px">보상</div>
       <button class="ghost-btn" style="width:100%;padding:11px" onclick="drawCoupons()">🎟️ 보상 쿠폰 · 이용권 보기</button>
-      <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">캐릭터 단계에 따라 2~8시간 이용권을, 10단계+챔피언이면 게임방 충전권을 받을 수 있어요.</div>`;
+      <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">주간 등급(Lv)에 따라 2~8시간 이용권을, Lv10+챔피언이면 게임방 충전권을 받을 수 있어요.</div>`;
   }
   const root=document.querySelector("#drawerRoot .drawer-body");
   if(root) root.innerHTML=body;
@@ -5247,10 +5366,10 @@ const COUPONS={};
 HOUR_COUPONS.forEach(c=>{
   COUPONS["h"+c.h]={ id:"h"+c.h, name:`${c.h}시간 이용권`, emo:c.emo, cls:"hour",
     img:`cupon0${c.h}.png`, kind:"hour", hours:c.h, target:c.stage,
-    desc:`이번 주 캐릭터 ${c.stage+1}단계 달성` };
+    desc:`이번 주 등급 ${tierName(c.stage)} 달성` };
 });
 COUPONS.pc10k={ id:"pc10k", name:"1만원 게임방 충전권", emo:"🕹️", cls:"pc", img:"cupon_pc.png",
-  kind:"special", desc:"이번 주 캐릭터 10단계(최종) 달성 + 주간 챔피언", target:MON_MAX_STAGE };
+  kind:"special", desc:"이번 주 다이아 Lv10 달성 + 주간 챔피언", target:MON_MAX_STAGE };
 // 이번 주 도달 가능한 최고 등급 이용권 (없으면 null)
 function bestHourCoupon(stage){
   let best=null;

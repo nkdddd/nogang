@@ -531,8 +531,8 @@ function renderHome(){
   const pct=Math.round(c.intro/c.total*100), masPct=Math.round(c.mastered/c.total*100);
   const who = (FB_ON&&USER)? (USER.displayName||USER.email.split("@")[0]) : "";
   let html=`<div class="book-switch" id="book-switch">
-    <button data-b="start" class="${curBook()==='start'?'on':''}">🐣 기본 스타트</button>
-    <button data-b="mid" class="${curBook()==='mid'?'on':''}">📖 중학 영단어</button></div>
+    <button data-b="start" class="${curBook()==='start'?'on':''}">기본 800</button>
+    <button data-b="mid" class="${curBook()==='mid'?'on':''}">중학 1800</button></div>
   <div class="hero"><div class="greet">${greeting()}${who?", "+esc(who):""} 👋</div>
     <div class="streak-row"><div class="streak-num">${S.streak}</div><div class="streak-lbl">일 연속<br>학습 중</div>
       <div class="streak-flame ${doneToday?'':'cold'}">${S.streak>0?'🔥':'🧊'}</div></div>
@@ -662,6 +662,7 @@ function renderQuiz(){
   else $("#opts").addEventListener("click",e=>{const b=e.target.closest(".opt");if(b)checkMCQ(q,b);});
 }
 function gradeAndAdvance(q,correct){answer(q.id,correct);SES.answered++;
+  try{ if(window.parent!==window) window.parent.postMessage({type:'nogang-answer',app:'vocab',ok:!!correct}, location.origin); }catch(_e){}
   if(correct){SES.correct++;SES.ptsEarned+=SES.newIds.includes(q.id)?6:4;beep("ok");}else{SES.wrongQueue.push(q.id);beep("no");}
   setTimeout(()=>{SES.qIdx++;save();renderQuiz();},correct?650:1500);}
 function checkMCQ(q,btn){const opts=$("#opts");if(opts.dataset.locked)return;opts.dataset.locked="1";
@@ -707,8 +708,8 @@ function renderBrowse(){
       <button class="hide-btn root ${browseHide.root?'on':''}" data-h="root">🌱 어근 보기</button>
     </div>
     <div class="book-switch" id="book-switch2" style="margin:2px 0 12px">
-      <button data-b="start" class="${curBook()==='start'?'on':''}">🐣 기본 스타트</button>
-      <button data-b="mid" class="${curBook()==='mid'?'on':''}">📖 중학 영단어</button></div>
+      <button data-b="start" class="${curBook()==='start'?'on':''}">기본 800</button>
+      <button data-b="mid" class="${curBook()==='mid'?'on':''}">중학 1800</button></div>
     <div class="eyebrow" style="margin:2px 2px 9px">DAY 선택 · 1–${BOOKS[curBook()].days}일</div>
     <div class="day-pills" id="pills"></div><div class="wlist" id="wlist"></div>`;
   const pills=$("#pills");
