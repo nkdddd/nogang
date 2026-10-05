@@ -1430,6 +1430,7 @@ function viewHome(){
     <div class="card cal" id="cal"></div>
   </div>`);
   v.querySelector('#start').onclick=()=>{ if(canStart)startSession(); else go('book'); };
+  if(PLAN_GO && !planGoUsed && UID){ planGoUsed=true; if(canStart) setTimeout(()=>startSession(),0); }
   const fg=v.querySelector('#focusgo'); if(fg)fg.onclick=()=>startSession(weak.map(s=>s.n));
   const wp=v.querySelector('#weakprev');
   if(wp){
@@ -1469,6 +1470,8 @@ function buildCal(){
 
 /* ============================ 학습 세션 ============================ */
 let SESSION=null;
+const PLAN_GO=(()=>{ try{ const m=location.hash.match(/go=([^&]+)/); return m? JSON.parse(decodeURIComponent(m[1])) : null; }catch(_e){ return null; } })();   // 플래너 할 일에서 바로 열기
+let planGoUsed=false;
 function startSession(forceList){
   let list;
   if(forceList&&forceList.length){

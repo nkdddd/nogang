@@ -521,7 +521,23 @@ async function doForgotPw(){
 
 /* ===================== HOME ===================== */
 function greeting(){const h=new Date().getHours();return h<6?"늦은 밤이에요":h<12?"좋은 아침이에요":h<18?"좋은 오후예요":"좋은 저녁이에요";}
+const PLAN_GO=(()=>{ try{ const m=location.hash.match(/go=([^&]+)/); return m? JSON.parse(decodeURIComponent(m[1])) : null; }catch(_e){ return null; } })();   // 플래너 할 일에서 바로 열기
+let planGoUsed=false;
+function planGo(){
+  if(planGoUsed || !PLAN_GO || (FB_ON && !USER)) return false;
+  planGoUsed=true;
+  if(PLAN_GO.book && BOOKS[PLAN_GO.book] && PLAN_GO.book!==curBook()) setBook(PLAN_GO.book);
+  const d=Number(PLAN_GO.day);
+  if(d>0){
+    const ids=WORDS.filter(w=>w.book===curBook() && w.day===d).map(w=>w.id);
+    if(ids.length){ toast("교재 Day "+d+" 학습을 시작해요"); startSession(ids, dueReviewIds(S.settings.revCap,new Set(ids))); return true; }
+  }
+  const nw=newWordIds(), rv=dueReviewIds(S.settings.revCap,new Set(nw));
+  if(nw.length||rv.length){ startSession(nw,rv); return true; }
+  return false;
+}
 function renderHome(){
+  if(planGo()) return;
   syncBar();
   const c=counts();
   const newToday=newWordIds();

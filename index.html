@@ -176,6 +176,7 @@
   .big-chk.on::after{content:"";position:absolute;left:7px;top:3px;width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
   .task-sub{font-size:12.5px;color:#64748B;margin-top:3px}.task-sub.ok{color:#0E7A55;font-weight:700}
   .task-quick{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .timer-btn.app{background:#F3FBF7;border-color:#BFE8D6;color:#0E7A55}
   .done-btn{border:1.5px solid #0E9F6E;background:#fff;color:#0E7A55;font-weight:800;font-size:13px;border-radius:10px;padding:7px 16px;cursor:pointer}
   .more-btn{border:0;background:none;color:#94A3B8;font-size:12px;font-weight:700;padding:8px 0 0;cursor:pointer}
   .task-links{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}.task-links .sp{flex:1}
@@ -2907,7 +2908,7 @@ function learnCard(k, x, min, td){
   </div>`;
 }
 // 학습앱을 전체 화면으로 열기 (같은 계정으로 자동 로그인)
-function openLearnApp(k){
+function openLearnApp(k, go){
   const A=EXT_APPS[k]; if(!A) return;
   closeLearnApp(true);
   const w=document.createElement("div");
@@ -2916,22 +2917,33 @@ function openLearnApp(k){
       <button class="lapp-back" onclick="leaveLearnApp()">‹ 플래너</button>
       <div class="lapp-pay" id="lappPay"><div class="lp-top"><b>${A.emo} ${A.name}</b></div></div>
     </div>
-    <iframe src="${A.page}" title="${A.name}"></iframe>`;
+    <iframe src="${A.page}${go?"#go="+encodeURIComponent(JSON.stringify(go)):""}" title="${A.name}"></iframe>`;
   document.body.appendChild(w);
   document.body.classList.add("lapp-open");
-  startLivePay(k);
+  startLivePay(k, go&&go.task);
   try{ history.pushState({lapp:k}, ""); }catch(_){}
 }
 function leaveLearnApp(){
   if(history.state && history.state.lapp) history.back(); else closeLearnApp();
 }
+// 앱에서 돌아왔을 때: 공부한 기록이 늘었으면 그 할 일을 완료로 표시할지 묻기
+async function offerAppComplete(back){
+  const t=state.tasksMap[back.taskId]; if(!t || t.done) return;
+  const d=await loadExtAll(), gained=(extCreditedOn(fmt(new Date()), d).per[back.k]||0)-back.before;
+  if(gained<=0) return;
+  const A=EXT_APPS[back.k], cr=creditFor(t.date); if(!cr.ok) return;
+  if(!confirm(`${A.short}에서 ${gained}분 공부했어요.\n'${t.unit||t.episode||"이 학습"}'을(를) 완료로 표시할까요?`)) return;
+  await saveTask({...t, done:true, actualMin:Math.max(gained, Number(t.actualMin)||0), creditRate:cr.rate, checkedAt:Date.now(), appLinked:back.k});
+  toast(`완료 · ${A.short} ${gained}분`,"good");
+}
 /* ----- 학습앱 위 실시간 용돈 바: 앱이 채점할 때마다 정답률 보너스를 다시 계산 ----- */
 let LP=null;
-async function startLivePay(k){
-  LP={k, base:null, c:0, t:0, P:null};
+async function startLivePay(k, taskId){
+  LP={k, base:null, c:0, t:0, P:null, taskId, before:null};
   const my=LP;
   try{
     if(state.viewingChild) return;
+    if(taskId){ const d=await ensureExt(); my.before=extCreditedOn(fmt(new Date()), d).per[k]||0; }
     const P=await computeWeekPay(state.ownerUid);
     if(LP!==my) return;
     const acc=appAccuracy(P.days, await fetchExtData(state.ownerUid));
@@ -2964,7 +2976,8 @@ window.addEventListener("message", e=>{
 });
 function closeLearnApp(silent){
   const w=document.getElementById("learnApp"); if(!w) return;
-  LP=null;
+  const back=LP; LP=null;
+  if(!silent && back && back.taskId && back.before!=null) setTimeout(()=>offerAppComplete(back), 50);
   w.remove(); document.body.classList.remove("lapp-open");
   if(!silent){ state.extCache=null; render(); scheduleSnap(); }   // 방금 공부한 기록 다시 읽기 · 용돈 스냅샷
 }
@@ -3913,7 +3926,7 @@ function nextUpHTML(ts, actMin, goal, done){
       <span class="subj-tag" style="background:${su?su.color:"#94A3B8"}">${esc(su?su.name:"과목")}</span>
       <div class="nu-title">${esc(nx.unit||(tb?tb.name:"")||(su?su.name:"학습"))}<small>${[tb?tb.name:"", m?m.name+(nx.episode?" "+nx.episode:""):"", (nx.plannedMin||0)+"분"].filter(Boolean).map(esc).join(" · ")}</small></div>
     </div>
-    <div class="task-quick">${timerBtnHTML(nx)}<button class="done-btn" onclick="toggleDone('${nx.id}')">완료</button></div>
+    <div class="task-quick">${appBtnHTML(nx)||timerBtnHTML(nx)}<button class="done-btn" onclick="toggleDone('${nx.id}')">완료</button></div>
   </div>`;
 }
 function renderDay(){
@@ -3996,6 +4009,27 @@ async function rolloverIncomplete(){
   for(const t of undone){ await saveTask({...t, date:next}); }
   toast(`${undone.length}건을 내일로 옮겼어요 ↪`,"good");
 }
+// 할 일 ↔ 학습앱 연결: 교재 · 단원 이름으로 판단
+function taskApp(t){
+  const tb=tbById(t.textbookId), txt=((tb?tb.name:"")+" "+(t.unit||"")+" "+(t.episode||"")).toLowerCase();
+  if(/천문장/.test(txt)) return "sentence";
+  if(/그래머|grammar|문법/.test(txt)) return "grammar";
+  if(/영단어|md\s*중학|voca/.test(txt)) return "vocab";
+  return null;
+}
+function taskGo(t,k){
+  const tb=tbById(t.textbookId), txt=[t.episode,t.unit].join(" "), go={task:t.id};
+  if(k==="vocab"){
+    const m=txt.match(/day\s*(\d+)/i); if(m) go.day=Number(m[1]);
+    if(tb && /1800|중학/.test(tb.name)) go.book="mid"; else if(tb && /기본|800/.test(tb.name)) go.book="start";
+  }
+  if(k==="grammar") go.unit=t.unit||t.episode||"";
+  return go;
+}
+function appBtnHTML(t){
+  const k=taskApp(t); if(!k || t.done || state.viewingChild) return "";
+  return `<button class="timer-btn app" onclick="openLearnApp('${k}', taskGo(state.tasksMap['${t.id}'],'${k}'))">${EXT_APPS[k].emo} ${EXT_APPS[k].short}에서 학습 ›</button>`;
+}
 function toggleTaskOpen(id){
   if(!state.openTasks) state.openTasks=new Set();
   if(state.openTasks.has(id)) state.openTasks.delete(id); else state.openTasks.add(id);
@@ -4050,7 +4084,7 @@ function renderTaskRow(t){
     </div>`:"";
   const open=state.openTasks && state.openTasks.has(t.id);
   const doneLine = t.done
-    ? `<div class="task-sub ok">완료 · ${Number(t.actualMin)||0}분${_tim>0?` · 타이머 ${Math.min(_tim,_act)}분(+10%)`:""}${t.understood?" · 메모 있음":""}</div>`
+    ? `<div class="task-sub ok">완료 · ${Number(t.actualMin)||0}분${t.appLinked? ` · ${EXT_APPS[t.appLinked]?EXT_APPS[t.appLinked].short:"학습앱"} 기록으로 인정` : (_tim>0?` · 타이머 ${Math.min(_tim,_act)}분(+10%)`:"")}${t.understood?" · 메모 있음":""}</div>`
     : (t.plannedNote? `<div class="task-sub">${esc(t.plannedNote)}</div>` : "");
   const details = open? `
         <div class="exec-row">
@@ -4090,7 +4124,7 @@ function renderTaskRow(t){
         </div>
         <div class="task-title" onclick="toggleTaskOpen('${t.id}')">${esc(t.unit||(su?su.name:"학습"))}</div>
         ${doneLine}
-        ${!t.done?`<div class="task-quick">${timerBtnHTML(t)}<button class="done-btn" onclick="toggleDone('${t.id}')">완료</button></div>`:""}
+        ${!t.done?`<div class="task-quick">${appBtnHTML(t)||timerBtnHTML(t)}<button class="done-btn" onclick="toggleDone('${t.id}')">완료</button></div>`:""}
         <button class="more-btn" onclick="toggleTaskOpen('${t.id}')">${open?"접기 ▴":"기록 · 메모 ▾"}</button>
         ${details}
         ${commentBlock}
@@ -4153,14 +4187,14 @@ async function toggleDone(id){
     if(!cr.ok){ alert(`이 학습은 ${t.date} 계획이라 ${cr.label}입니다.\n\n당일 체크 = 100% 인정, 다음날 체크 = 50% 인정,\n이틀이 지나면 체크할 수 없어요.`); return; }
     // 원탭 완료: 타이머로 잰 시간 → 적어 둔 시간 → 계획 시간 순으로 기록 (메모는 나중에 '기록 · 메모'에서)
     const actualMin=Number(t.actualMin)||Math.max(Number(t.timerMin)||0, Number(t.plannedMin)||0);
-    const saved={...t, done:true, actualMin, creditRate:cr.rate, checkedAt:Date.now()};
+    const saved={...t, done:true, actualMin, creditRate:cr.rate, checkedAt:Date.now(), appLinked:taskApp(t)};
     state.justDone=t.id; setTimeout(()=>{ state.justDone=null; },900);
     await saveTask(saved);
     const left=state.tasks.filter(x=>x.date===t.date && !x.done && x.id!==t.id).length;
     toast(`완료 · ${actualMin}분 기록${cr.rate<1?" (50% 인정)":""}${left? ` · 남은 학습 ${left}개` : " · 오늘 계획 끝"}`,"good");
     return;
   }else{
-    await saveTask({...t,done:false,creditRate:null});
+    await saveTask({...t,done:false,creditRate:null,appLinked:null});
   }
 }
 
@@ -4253,7 +4287,7 @@ async function submitComplete(){
   const actualMin=Number(document.getElementById("cm-min").value)||t.plannedMin||0;
   const dayTs=state.tasks.filter(x=>x.date===t.date);
   const doneCount=dayTs.filter(x=>x.done).length+1;
-  const saved={...t,done:true,understood,actualMin,creditRate:cr.rate,checkedAt:Date.now()};
+  const saved={...t,done:true,understood,actualMin,creditRate:cr.rate,checkedAt:Date.now(),appLinked:taskApp(t)};
   state.justDone=t.id;                       // 완료 애니메이션 표시용
   setTimeout(()=>{ state.justDone=null; },900);
   await saveTask(saved);
@@ -4859,7 +4893,7 @@ function computeAllowance(tasks, days, crit, exd){
   const dayMax=dayMaxSchool;
   const byDay=days.map(ds=>{
     const type=payDayType(ds, T), cap=type==="free"? dayMaxFree : dayMaxSchool;  // 등교일 / 자율학습일(주말·방학) 하루 최대
-    const dt=wk.filter(t=>t.date===ds);
+    const dt=wk.filter(t=>t.date===ds && !t.appLinked);   // 학습앱 할 일은 앱이 잰 시간으로 인정
     const task=dt.reduce((a,t)=>a+verifiedMin(t),0);                            // 과제에 기록한 시간 (직접 적은 시간 포함)
     const taskTimed=dt.reduce((a,t)=>a+timedMin(t),0);                         // 그중 타이머로 잰 시간
     const focus=Math.round(Number(focusFree[ds])||0);                          // 과제 없이 쓴 포커스 타이머

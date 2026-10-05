@@ -16000,8 +16000,26 @@ async function loadFriends(){
 }
 
 /* ================= 공통 렌더 ================= */
+const PLAN_GO=(()=>{ try{ const m=location.hash.match(/go=([^&]+)/); return m? JSON.parse(decodeURIComponent(m[1])) : null; }catch(_e){ return null; } })();   // 플래너 할 일에서 바로 열기
+let planGoUsed=false;
+function planGo(){
+  if(planGoUsed || !PLAN_GO || VIEW!=='home') return false;
+  planGoUsed=true;
+  const q=String(PLAN_GO.unit||'').toLowerCase().replace(/\s+/g,'');
+  const ch=(q.match(/(?:ch|chapter|챕터)\.?0*(\d+)/)||[])[1];
+  let u=null;
+  if(q){
+    u=ALL_UNITS.find(x=>q.length>=2 && (x.title||'').toLowerCase().replace(/\s+/g,'').includes(q))
+     || ALL_UNITS.find(x=>q.length>=2 && q.includes((x.title||'').toLowerCase().replace(/\s+/g,'')))
+     || (ch? ALL_UNITS.find(x=>String(x.chId)===String(Number(ch)) && !(S.prog[x.id]&&S.prog[x.id].d)) || ALL_UNITS.find(x=>String(x.chId)===String(Number(ch))) : null);
+  }
+  u=u||nextUnit();
+  if(u){ openUnit(u.id); return true; }
+  return false;
+}
 function render(){
   if(!U){ if(LOCAL){ renderLocalSetup(); } else renderAuth(); return; }
+  if(planGo()) return;
   const app=document.getElementById('app');
   let html='';
   if(VIEW==='import'){ app.innerHTML=vImport(); bindImport(); return; }
