@@ -59,8 +59,9 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 .hero{background:var(--ink);color:#fff;border-radius:18px;padding:20px;margin-bottom:12px;position:relative;overflow:hidden}
 .hero::after{content:'';position:absolute;right:-30px;top:-30px;width:130px;height:130px;border-radius:50%;background:rgba(255,227,77,.16)}
 .hero .hi{font-size:17px;font-weight:800}
-.hero .stats{display:flex;gap:18px;margin-top:14px}
-.hero .st b{font-size:21px;display:block}
+.hero .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+.hero .st{min-width:0}.hero .st span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero .st b{font-size:21px;display:block;white-space:nowrap}
 .hero .st span{font-size:11px;opacity:.75}
 .prog-line{height:8px;background:#E9EDF7;border-radius:5px;overflow:hidden}
 .prog-line i{display:block;height:100%;background:var(--ink);border-radius:5px;transition:width .3s}
@@ -15806,6 +15807,7 @@ function dueCards(){ return Object.keys(S.review||{}).filter(id=>S.review[id].du
 function problemReason(p){ const t=((p.q||'')+' '+(p.exp||'')).toLowerCase(); if(/시제|present|past|tense|완료/.test(t)) return '시제'; if(/단수|복수|third person|3인칭/.test(t)) return '3인칭 단수·수일치'; if(/전치사|preposition/.test(t)) return '전치사'; if(/order|어순|word/.test(t)) return '어순'; return '문법 규칙 적용'; }
 function recordAnswer(ok,p){
   const d=todayStats(); d.answered++; if(ok) d.correct++;
+  try{ if(window.parent!==window) window.parent.postMessage({type:'nogang-answer',app:'grammar',ok:!!ok}, location.origin); }catch(_e){}
   if(ok){ S.combo=(S.combo||0)+1; if(S.combo>0&&S.combo%5===0) gainXP(10,'🔥 '+S.combo+' 콤보 보너스'); }
   else { S.combo=0; const k=curUnit&&curUnit.id||'practice'; const x=S.wrongs[k]||(S.wrongs[k]={count:0,reasons:{}}); const reason=problemReason(p); x.count++; x.reasons[reason]=(x.reasons[reason]||0)+1; const id='err_'+k+'_'+(p.q||p.ko||'rule').replace(/[^a-z0-9가-힣]/gi,'').slice(0,28); S.errorCards[id]={id,category:'error',level:curUnit&&curUnit.lv||1,tags:[reason],difficulty:3,f:p.q||p.ko||'오답 문법 규칙',b:p.t==='mc'?p.c[p.a]:(Array.isArray(p.a)?p.a[0]:p.a),desc:'오답 원인: '+reason+(p.exp?' · '+p.exp:''),ex:null}; }
 }
@@ -16040,13 +16042,12 @@ function vHome(){
   return `<div class="top"><h1>Grammar <span class="hl">Inside</span></h1><div class="sub">Level 1·2·3 — 영문법 단계별 완성${LOCAL?" · 📴 로컬 모드":""}</div></div>
   <div class="wrap">
     <div class="hero">
-      <div class="hi">${esc(S.name)}님, 오늘도 한 유닛! ✍️</div>
+      <div class="hi">${esc(S.name)}님 · 오늘 집중 ${mins}분</div>
       <div class="stats">
-        <div class="st"><b>Lv.${levelOf()}</b><span>${S.pts||0} XP · 다음 ${xpToNext()} XP</span></div>
-        <div class="st"><b>🔥${S.combo||0}</b><span>콤보 · 집중 ${mins}분</span></div>
-        <div class="st"><b>⚡${S.energy||0}</b><span>Energy · 5분 집중 +2</span></div>
-        <div class="st"><b>${S.streak||0}일</b><span>연속 학습</span></div>
+        <div class="st"><b>${d.answered? Math.round(d.correct/d.answered*100)+'%' : '–'}</b><span>오늘 정답률</span></div>
         <div class="st"><b>${dn}/${TOTAL_UNITS}</b><span>완료 유닛</span></div>
+        <div class="st"><b>${S.streak||0}일</b><span>연속 학습</span></div>
+        <div class="st"><b>Lv.${levelOf()}</b><span>⚡${S.energy||0}</span></div>
       </div>
     </div>
     <div class="card" style="margin-bottom:12px"><div class="row"><div><b>🎯 오늘의 미션</b><div class="muted" style="margin-top:5px">암기 ${Math.min(d.cards,20)}/20 · 퀴즈 ${Math.min(d.answered,30)}/30 · 오답복습 ${Math.min(d.reviews,1)}/1</div></div><div style="text-align:right"><b>${quality}점</b><div class="muted">학습 품질</div></div></div><div class="prog-line" style="margin-top:9px"><i style="width:${Math.min(100,Math.round(((Math.min(d.cards,20)/20)+(Math.min(d.answered,30)/30)+Math.min(d.reviews,1))/3*100))}%"></i></div><div class="muted" style="margin-top:7px">보상 ${d.missionClaimed?'받음':'300 XP'} · 집중 보너스 x${focusBonus()}</div></div>
