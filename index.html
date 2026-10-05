@@ -137,8 +137,7 @@
   /* 완료 상태: 확실히 구분되는 시각 보상 */
   .task.done{border:1.5px solid #7BD3A8;background:linear-gradient(135deg,#F3FBF7 0%,#EAF7F1 100%);
     box-shadow:0 2px 10px rgba(14,159,110,.10);}
-  .task.done::after{content:"";position:absolute;top:0;right:0;width:0;height:0;
-    border-style:solid;border-width:0 44px 44px 0;border-color:transparent #0E9F6E transparent transparent;}
+  .task.done{background:#FAFCFB;}
   .task.done .done-mark{position:absolute;top:5px;right:6px;color:#fff;font-size:14px;font-weight:900;z-index:1;}
   .task.done .task-title{color:#0E7A55;}
   .done-stamp{display:inline-flex;align-items:center;gap:5px;background:#0E9F6E;color:#fff;
@@ -172,9 +171,22 @@
   .vs-bar span{font-size:11px;font-weight:800;color:#fff;white-space:nowrap;}
   .vs-verdict{font-size:12.5px;font-weight:800;padding:9px 12px;border-radius:9px;line-height:1.5;}
   .task-main{display:flex;gap:11px;padding:13px;}
-  .task.done .task-main{padding-right:94px;}
-  @media(max-width:720px){ .task.done .task-main{padding-right:74px;} }
-  .big-chk{border:none;background:transparent;padding:0;font-size:21px;line-height:1;margin-top:1px;}
+  .big-chk{flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:2px solid #CBD5E1;background:#fff;padding:0;margin-top:2px;cursor:pointer;position:relative}
+  .big-chk.on{background:#0E9F6E;border-color:#0E9F6E}
+  .big-chk.on::after{content:"";position:absolute;left:7px;top:3px;width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .task-sub{font-size:12.5px;color:#64748B;margin-top:3px}.task-sub.ok{color:#0E7A55;font-weight:700}
+  .task-quick{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .done-btn{border:1.5px solid #0E9F6E;background:#fff;color:#0E7A55;font-weight:800;font-size:13px;border-radius:10px;padding:7px 16px;cursor:pointer}
+  .more-btn{border:0;background:none;color:#94A3B8;font-size:12px;font-weight:700;padding:8px 0 0;cursor:pointer}
+  .task-links{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}.task-links .sp{flex:1}
+  .task-links button{border:1px solid var(--line,#E4E4EA);background:#fff;border-radius:8px;padding:4px 10px;font-size:12px;color:#64748B;cursor:pointer}
+  .task-links button.del{color:#E5484D}
+  .link-btn{border:0;background:none;color:#6A58E6;font-weight:800;font-size:12px;cursor:pointer}
+  .next-up{background:var(--surface,#fff);border:1px solid var(--line,#E4E4EA);border-radius:16px;padding:13px 14px;margin-bottom:12px}
+  .nu-prog{display:flex;justify-content:space-between;font-size:13px;color:#64748B;margin-bottom:6px}.nu-prog b{color:var(--ink,#1C1B22);font-size:16px}
+  .nu-lbl{font-size:11.5px;font-weight:800;color:#94A3B8;margin:12px 0 6px}
+  .nu-row{display:flex;gap:9px;align-items:flex-start}
+  .nu-title{font-weight:800;font-size:15.5px;min-width:0}.nu-title small{display:block;font-weight:600;font-size:12px;color:#94A3B8;margin-top:2px}
   .tags{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
   .subj-tag{color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:7px;}
   .tb-tag{font-size:11.5px;color:var(--slate);background:#F1F4F8;padding:3px 8px;border-radius:7px;font-weight:600;}
@@ -530,6 +542,7 @@
   /* 하루틀처럼 할 일 목록을 맨 위로, 응원·다이어리 같은 안내 카드는 그 아래로 */
   .day-list{display:flex;flex-direction:column;}
   .day>*,.day-list>*{min-width:0;max-width:100%;}
+  .day-list>.next-up{order:-5;}
   .day-list>.dl-head{order:-3;}
   .day-list>.task,.day-list>.empty{order:-2;}
   .day-list>.add-task-btn{order:-1;margin:0 0 16px;}
@@ -1031,7 +1044,7 @@ function toast(msg,type){
   w.appendChild(el);
   setTimeout(()=>{ el.style.transition="opacity .3s"; el.style.opacity="0"; setTimeout(()=>el.remove(),320); }, 2000);
 }
-const PRAISES=["잘하고 있어요! 👏","좋아요, 계속 가봐요! 💪","한 걸음 전진! 🚀","멋져요! ✨","꾸준함이 실력이 돼요 🌱","오늘도 해냈네요! 🎯"];
+const PRAISES=["기록했어요"];
 const TIPS=[
   "오늘 배운 걸 한 문장으로 요약하면 오래 기억돼요.",
   "어려운 과목일수록 컨디션 좋은 시간에 먼저 배치해보세요.",
@@ -1690,15 +1703,11 @@ function recoveryHTML(){
   if(!s) return "";
   if(s.missedYesterday && s.prevStreak>=2 && !s.doneToday){
     return `<div style="background:#FFF5F6;border:1px solid #FADADD;border-radius:10px;padding:11px 13px;margin-bottom:11px;font-size:12.5px;color:#A5323A;line-height:1.5">
-      🔥 <b>연속 ${s.prevStreak}일 기록이 끊길 뻔했어요!</b><br>
-      <span style="color:#8A6516">오늘 <b>짧은 복습 1개</b>만 완료하면 기록을 이어갈 수 있어요.</span>
-      <button class="add-btn" style="width:100%;margin-top:8px;padding:8px" onclick="createRecoveryTask()">💪 회복 미션 만들기 (15분)</button>
+      <b>연속 ${s.prevStreak}일 기록이 오늘 끊겨요.</b> 짧은 복습 1개만 완료하면 이어져요.
+      <button class="add-btn" style="width:100%;margin-top:8px;padding:8px" onclick="createRecoveryTask()">15분 복습 추가</button>
     </div>`;
   }
-  if(s.streak>=3){
-    return `<div style="background:#F3FBF7;border:1px solid #BFE8D6;border-radius:10px;padding:9px 13px;margin-bottom:11px;font-size:12.5px;color:#0E7A55">
-      🔥 <b>${s.streak}일 연속 학습 중!</b> 오늘도 이어가 볼까요?</div>`;
-  }
+
   return "";
 }
 async function createRecoveryTask(){
@@ -3890,6 +3899,23 @@ function renderMonCard(){
     <div class="mon-msg">${monMessage(c.stage,c.toStage)}</div>
   </div>`;
 }
+// 오늘 화면 맨 위: 오늘 진행 한 줄 + 다음 할 일 1개 (바로 시작 · 완료)
+function nextUpHTML(ts, actMin, goal, done){
+  const nx=ts.filter(t=>!t.done).sort((a,b)=>(a.order||0)-(b.order||0))[0];
+  const pct=goal>0? Math.min(100, Math.round(actMin/goal*100)) : 0;
+  const head=`<div class="nu-prog"><span>오늘 <b>${actMin}</b> / ${goal}분</span><span>완료 ${done}/${ts.length}</span></div>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>`;
+  if(!nx) return `<div class="next-up">${head}</div>`;
+  const su=subjById(nx.subjectId), m=methodByName(nx.method), tb=tbById(nx.textbookId);
+  return `<div class="next-up">${head}
+    <div class="nu-lbl">다음 할 일</div>
+    <div class="nu-row">
+      <span class="subj-tag" style="background:${su?su.color:"#94A3B8"}">${esc(su?su.name:"과목")}</span>
+      <div class="nu-title">${esc(nx.unit||(tb?tb.name:"")||(su?su.name:"학습"))}<small>${[tb?tb.name:"", m?m.name+(nx.episode?" "+nx.episode:""):"", (nx.plannedMin||0)+"분"].filter(Boolean).map(esc).join(" · ")}</small></div>
+    </div>
+    <div class="task-quick">${timerBtnHTML(nx)}<button class="done-btn" onclick="toggleDone('${nx.id}')">완료</button></div>
+  </div>`;
+}
 function renderDay(){
   const ds=fmt(state.cursor), ts=tasksOn(ds);
   const done=ts.filter(t=>t.done).length, rate=ts.length?Math.round(done/ts.length*100):0;
@@ -3924,14 +3950,14 @@ function renderDay(){
       ${renderMonCard()}
       <div class="goal-card" style="border:1.5px solid ${dDone?"#0E9F6E":"#DCD6F7"};background:${dDone?"#F3FBF7":"#F7F6FE"}">
         <div class="goal-top" style="justify-content:space-between">
-          <span>⏰ 오늘 목표시간 ${dDone?"· 달성! 🎉":""}</span>
-          <button class="icon-btn sm" style="width:26px;height:26px" onclick="promptDayGoal('${ds}')" title="목표 수정">✏️</button>
+          <span>오늘 목표시간 ${dDone?"· 달성":""}</span>
+          <button class="link-btn" onclick="promptDayGoal('${ds}')" title="목표 수정">수정</button>
         </div>
         <div style="display:flex;gap:5px;margin:0 0 8px">
           <button onclick="setDayType('${ds}','school')" style="flex:1;padding:6px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;
-            border:1.5px solid ${dType==="school"?"#6A58E6":"#E2E8F0"};background:${dType==="school"?"#EFECFD":"#fff"};color:${dType==="school"?"#4B3FA6":"#94A3B8"}">🏫 등교일</button>
+            border:1.5px solid ${dType==="school"?"#6A58E6":"#E2E8F0"};background:${dType==="school"?"#EFECFD":"#fff"};color:${dType==="school"?"#4B3FA6":"#94A3B8"}">등교일</button>
           <button onclick="setDayType('${ds}','free')" style="flex:1;padding:6px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;
-            border:1.5px solid ${dType==="free"?"#F5A524":"#E2E8F0"};background:${dType==="free"?"#FFF7E8":"#fff"};color:${dType==="free"?"#8A6516":"#94A3B8"}">🏖 자율학습일</button>
+            border:1.5px solid ${dType==="free"?"#F5A524":"#E2E8F0"};background:${dType==="free"?"#FFF7E8":"#fff"};color:${dType==="free"?"#8A6516":"#94A3B8"}">자율학습일</button>
         </div>
         <div style="display:flex;align-items:baseline;gap:6px;margin:2px 0 8px">
           <span style="font-size:26px;font-weight:800;color:${dDone?"#0E9F6E":"#1E2A4A"}">${actMin}</span>
@@ -3943,40 +3969,21 @@ function renderDay(){
           ${[60,90,120,180].map(m=>`<button class="pick" style="padding:5px 10px;font-size:12px;${dGoal===m?"background:#1E2A4A;color:#fff;border-color:#1E2A4A":""}" onclick="setDayGoal('${ds}',${m})">${m}분</button>`).join("")}
         </div>
       </div>
-      <div class="sum-card">
-        <div class="sum-title">오늘의 이행률</div>
-        ${ringSVG(rate)}
-        <div class="sum-stat"><b>${done}</b> / ${ts.length} 완료</div>
-      </div>
-      <div class="mini-row">
-        <div class="mini-stat"><div class="l">⏱ 계획 시간</div><div class="v">${planMin}분</div></div>
-        <div class="mini-stat"><div class="l" style="color:#0E9F6E">📈 실제 학습</div><div class="v">${actMin}분</div></div>
-      </div>
-      <div class="goal-card">
-        <div class="goal-top">🎯 이번 주 목표</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${wkPct}%"></div></div>
-        <div class="goal-num">${wk} / ${goal}분</div>
-      </div>
     </aside>
     <section class="day-list">
-      ${isToday?vsYesterdayHTML(ds):""}
-      ${todayDiaryHTML(ds)}
-      ${extTodayHTML()}
+      ${isToday? nextUpHTML(ts, actMin, dGoal, done) : ""}
       ${recoveryHTML()}
-      ${weakHintHTML()}
-      <div class="cheer">
-        <div class="emo">${monBig||ch.emo}</div>
-        <div><div class="msg">${ch.msg}</div><div class="tip">💡 ${ch.tip}</div></div>
-      </div>
       <div class="dl-head">
-        <h2>${isToday? (undoneCount>0? `오늘 남은 학습 ${undoneCount}개` : (ts.length? "오늘 학습 모두 완료! 🎉" : "오늘의 학습"))
+        <h2>${isToday? (undoneCount>0? `오늘 남은 학습 ${undoneCount}개` : (ts.length? "오늘 학습 모두 완료" : "오늘의 학습"))
                      : `${ds.slice(5).replace("-",".")} 학습 ${ts.length}개`}</h2>
         <div class="dl-actions">
           ${undoneCount>0?`<button class="rollover-btn" onclick="rolloverIncomplete()">↪ 미완료 ${undoneCount} 내일로</button>`:""}
         </div>
       </div>
       ${rows}
-      <button class="add-task-btn" onclick="openTask(null,'${ds}')">+ 새로운 학습 추가</button>
+      <button class="add-task-btn" onclick="openTask(null,'${ds}')">+ 학습 추가</button>
+      ${weakHintHTML()}
+      ${todayDiaryHTML(ds)}
     </section>
   </div>`;
 }
@@ -3989,11 +3996,14 @@ async function rolloverIncomplete(){
   for(const t of undone){ await saveTask({...t, date:next}); }
   toast(`${undone.length}건을 내일로 옮겼어요 ↪`,"good");
 }
+function toggleTaskOpen(id){
+  if(!state.openTasks) state.openTasks=new Set();
+  if(state.openTasks.has(id)) state.openTasks.delete(id); else state.openTasks.add(id);
+  render();
+}
 function renderTaskRow(t){
   const su=subjById(t.subjectId), c=su?su.color:"#94A3B8", tb=tbById(t.textbookId), m=methodByName(t.method);
   const isParent=state.profile.role==="parent";
-  let stars="";
-  for(let n=1;n<=5;n++) stars+=`<button class="star" onclick="setRating('${t.id}',${n})">${n<=(t.rating||0)?"⭐":"☆"}</button>`;
   const isScored = m && m.scored;
   const hasScore = Number(t.scoreTotal)>0 && t.score!=="" && t.score!=null;
   const acc = hasScore? Math.round(Number(t.score)/Number(t.scoreTotal)*100) : null;
@@ -4032,61 +4042,58 @@ function renderTaskRow(t){
               <input class="exec-min" style="width:56px" type="number" value="${t.scoreTotal}" placeholder="만점" onchange="updateExec('${t.id}','scoreTotal',this.value)">
             </div>
           </div>`:"";
-  const praiseChips=["잘했어! 👏","최고야 🔥","꾸준함이 멋져 💪","조금만 더 힘내자!","완벽해 💯"];
   const commentBlock = (isParent||t.parentComment)?`
-    ${isParent?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:9px">${praiseChips.map(p=>`<button class="quick-praise" onclick="quickPraise('${t.id}','${p}')">${p}</button>`).join("")}</div>`:""}
     <div class="comment-box">💬
       ${isParent
         ? `<input value="${esc(t.parentComment)}" placeholder="부모 코멘트 남기기…" onchange="updateExec('${t.id}','parentComment',this.value)">`
         : `<span class="txt">${esc(t.parentComment)}</span>`}
     </div>`:"";
-  return `<div class="task ${t.done?"done":""} ${state.justDone===t.id?"just-done":""}" style="border-left:4px solid ${t.done?"#0E9F6E":c}">
-    ${t.done?`<span class="done-mark">✓</span>${stampHTML(t)}`:""}
-    <div class="task-main">
-      <button class="big-chk" onclick="toggleDone('${t.id}')">${t.done?"✅":"⚪"}</button>
-      <div style="flex:1;min-width:0">
-        <div class="tags">
-          <span class="subj-tag" style="background:${c}">${esc(su?su.name:"과목")}</span>
-          ${tb?`<span class="tb-tag">${esc(tb.name)}</span>`:""}
-          ${t.unit?`<span class="unit-tag">${esc(t.unit)}</span>`:""}
-          ${m?`<span class="method-tag">${m.icon} ${esc(m.name)}${t.episode?" "+esc(t.episode):""}</span>`:""}
-          <span class="time-tag">⏱ ${t.plannedMin||0}분</span>
-          ${scoreTag}
-          ${reviewGapTag}
-          ${planTag}
-          ${reviewTag}
-          ${creditTag}
-        </div>
-        <div class="task-title" onclick="${t.done?`openTask('${t.id}')`:`openCompleteModal('${t.id}')`}">${esc(t.unit||(su?su.name:"학습"))}</div>
-        ${t.plannedNote?`<div class="planned-note">📌 ${esc(t.plannedNote)}</div>`:""}
-        ${t.done?`<div class="done-stamp">✅ 완료${t.understood?` · 🧠 ${reviewPoints(t)}/10점 인정`:""}${creditedMin(t)>0?` · ${creditedMin(t)}분`:""}</div>`:""}
-        ${!t.done?`<button class="rec-btn" onclick="openCompleteModal('${t.id}')">✍️ 학습 기록하기</button>`:""}
+  const open=state.openTasks && state.openTasks.has(t.id);
+  const doneLine = t.done
+    ? `<div class="task-sub ok">완료 · ${Number(t.actualMin)||0}분${_tim>0?` · 타이머 ${Math.min(_tim,_act)}분(+10%)`:""}${t.understood?" · 메모 있음":""}</div>`
+    : (t.plannedNote? `<div class="task-sub">${esc(t.plannedNote)}</div>` : "");
+  const details = open? `
         <div class="exec-row">
           <div class="exec-fld">
             <label class="exec-lbl">실제 학습(분) ${verifyTag}</label>
             <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-              ${timerBtnHTML(t)}
               <input class="exec-min" type="number" value="${t.actualMin||""}" placeholder="${t.plannedMin||0}"
                 onchange="updateExec('${t.id}','actualMin',this.value)">
-              <button class="quick-praise" style="border-color:#DCD6F7;background:#F7F6FE;color:#6A58E6" onclick="bumpTime('${t.id}',${t.plannedMin||0},true)">계획만큼</button>
-              <button class="quick-praise" style="border-color:#DCD6F7;background:#F7F6FE;color:#6A58E6" onclick="bumpTime('${t.id}',10)">+10</button>
-              <button class="quick-praise" style="border-color:#DCD6F7;background:#F7F6FE;color:#6A58E6" onclick="bumpTime('${t.id}',30)">+30</button>
+              <button class="quick-praise" onclick="bumpTime('${t.id}',${t.plannedMin||0},true)">계획만큼</button>
+              <button class="quick-praise" onclick="bumpTime('${t.id}',10)">+10</button>
+              <button class="quick-praise" onclick="bumpTime('${t.id}',30)">+30</button>
             </div>
           </div>
           ${scoreExec}
           <div class="exec-fld grow">
-            <label class="exec-lbl">이해한 내용 · 복습 메모</label>
-            <input class="exec-note" value="${esc(t.understood)}" placeholder="핵심 개념, 어려웠던 점, 다시 볼 부분…"
+            <label class="exec-lbl">배운 내용 · 복습 메모 ${t.done?`<span style="color:${rPts>=REVIEW_PTS.full?"#0E7A55":"#8A6516"}">복기 ${rPts}/10</span>`:""}</label>
+            <input class="exec-note" value="${esc(t.understood)}" placeholder="핵심 개념, 어려웠던 점, 다시 볼 부분"
               onchange="updateExec('${t.id}','understood',this.value)">
           </div>
         </div>
-        <div class="stars"><span class="exec-lbl">성취도</span>${stars}</div>
+        <div class="task-links">
+          ${planTag}${reviewGapTag}
+          <span class="sp"></span>
+          <button onclick="openTask('${t.id}')">수정</button><button onclick="openTaskCopy('${t.id}')">복사</button><button class="del" onclick="removeTask('${t.id}')">삭제</button>
+        </div>` : "";
+  return `<div class="task ${t.done?"done":""} ${state.justDone===t.id?"just-done":""}" style="border-left:4px solid ${t.done?"#0E9F6E":c}">
+    <div class="task-main">
+      <button class="big-chk ${t.done?"on":""}" onclick="toggleDone('${t.id}')" title="${t.done?"완료 취소":"완료"}" aria-label="완료"></button>
+      <div style="flex:1;min-width:0">
+        <div class="tags">
+          <span class="subj-tag" style="background:${c}">${esc(su?su.name:"과목")}</span>
+          ${tb?`<span class="tb-tag">${esc(tb.name)}</span>`:""}
+          ${m?`<span class="method-tag">${esc(m.name)}${t.episode?" "+esc(t.episode):""}</span>`:""}
+          <span class="time-tag">${t.plannedMin||0}분</span>
+          ${scoreTag}
+          ${creditTag}
+        </div>
+        <div class="task-title" onclick="toggleTaskOpen('${t.id}')">${esc(t.unit||(su?su.name:"학습"))}</div>
+        ${doneLine}
+        ${!t.done?`<div class="task-quick">${timerBtnHTML(t)}<button class="done-btn" onclick="toggleDone('${t.id}')">완료</button></div>`:""}
+        <button class="more-btn" onclick="toggleTaskOpen('${t.id}')">${open?"접기 ▴":"기록 · 메모 ▾"}</button>
+        ${details}
         ${commentBlock}
-      </div>
-      <div class="task-actions">
-        <button class="icon-btn sm" title="수정" onclick="openTask('${t.id}')">✏️</button>
-        <button class="icon-btn sm" title="복사" onclick="openTaskCopy('${t.id}')">📋</button>
-        <button class="icon-btn sm" title="삭제" onclick="removeTask('${t.id}')">🗑️</button>
       </div>
     </div>
   </div>`;
@@ -4144,7 +4151,14 @@ async function toggleDone(id){
   if(!t.done){
     const cr=creditFor(t.date);
     if(!cr.ok){ alert(`이 학습은 ${t.date} 계획이라 ${cr.label}입니다.\n\n당일 체크 = 100% 인정, 다음날 체크 = 50% 인정,\n이틀이 지나면 체크할 수 없어요.`); return; }
-    openCompleteModal(id); return;   // 완료는 항상 점검창에서(복기 입력 시 점수 상승)
+    // 원탭 완료: 타이머로 잰 시간 → 적어 둔 시간 → 계획 시간 순으로 기록 (메모는 나중에 '기록 · 메모'에서)
+    const actualMin=Number(t.actualMin)||Math.max(Number(t.timerMin)||0, Number(t.plannedMin)||0);
+    const saved={...t, done:true, actualMin, creditRate:cr.rate, checkedAt:Date.now()};
+    state.justDone=t.id; setTimeout(()=>{ state.justDone=null; },900);
+    await saveTask(saved);
+    const left=state.tasks.filter(x=>x.date===t.date && !x.done && x.id!==t.id).length;
+    toast(`완료 · ${actualMin}분 기록${cr.rate<1?" (50% 인정)":""}${left? ` · 남은 학습 ${left}개` : " · 오늘 계획 끝"}`,"good");
+    return;
   }else{
     await saveTask({...t,done:false,creditRate:null});
   }
@@ -4163,7 +4177,7 @@ function openCompleteModal(id){
     : `<div style="background:#F3FBF7;border:1px solid #BFE8D6;color:#0E7A55;border-radius:9px;padding:9px 11px;font-size:12.5px;margin-bottom:12px">✅ <b>${cr.label}</b></div>`;
   document.getElementById("modalRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()">
     <div class="modal" style="max-width:420px">
-      <div class="modal-head"><h3>✅ 학습 완료 점검</h3><button class="icon-btn sm" onclick="closeModal()">✕</button></div>
+      <div class="modal-head"><h3>학습 기록 · 메모</h3><button class="icon-btn sm" onclick="closeModal()">✕</button></div>
       <div class="modal-body">
         <div class="tags" style="margin-bottom:13px">
           <span class="subj-tag" style="background:${su?su.color:"#94A3B8"}">${esc(su?su.name:"과목")}</span>
@@ -4248,7 +4262,7 @@ async function submitComplete(){
   if(pp<PLAN_PTS.full || rp<REVIEW_PTS.full || cr.rate<1){
     toast(`계획 ${pp}/10 · 복기 ${rp}/10 → ${cm}분 인정`,"info");
   }else if(dayTs.length>0 && doneCount>=dayTs.length){
-    toast("오늘 계획을 모두 완료했어요! 🎉","cheer");
+    toast("오늘 계획 완료","good");
   }else{
     toast(PRAISES[Math.floor(Math.random()*PRAISES.length)],"good");
   }
@@ -5344,7 +5358,7 @@ function timerBtnHTML(t){
   const acc=Number(t.timerMin)||0;
   return on
     ? `<button class="timer-btn on" onclick="stopTimer()">⏹ <span id="timerClock">0:00</span> 정지</button>`
-    : `<button class="timer-btn" onclick="startTimer('${t.id}')">▶ 타이머${acc?` · ${acc}분 실측`:""}</button>`;
+    : `<button class="timer-btn" onclick="startTimer('${t.id}')">▶ 타이머${acc?` · ${acc}분`:""}</button>`;
 }
 
 /* ============================================================
