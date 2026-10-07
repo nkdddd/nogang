@@ -14,7 +14,7 @@
 | `assets/family.js` | 공용 가족 연결 (이메일 신청 → 승인) |
 | `assets/device.js` | 사용 환경(PC · 모바일) 판별 → `<html data-device>` 설정, 네 화면 공용 |
 | `assets/push-config.js` · `firebase-messaging-sw.js` · `manifest.webmanifest` | 휴대폰 푸시(웹 푸시 키) · 푸시 수신 서비스 워커 · 홈 화면 설치 정보 |
-| `assets/cards.js` | 🎴 카드 뽑기 · 대결 (카드 링크 등록 · 지급) |
+| `assets/cards.js` · `assets/pokecards.js` | 🎴 포켓몬 카드팩 · 대결 (카드 목록은 받아쓰기 프로그램과 공유) |
 | `tools/weekly-allowance.mjs` · `.github/workflows/weekly-allowance.yml` | 매주 토 18시 부모에게 용돈 알림 (GitHub Actions) |
 | `assets/focus-sounds.js` | 포커스 타이머용 집중 사운드 (브라우저에서 직접 생성 · 음원 파일 없음) |
 
@@ -31,7 +31,7 @@ links/{부모uid}/children/{uid}  부모-자녀 연결 {name, requestId, addedAt
 planner/{uid}/
   tasks/{id}                    학습 계획·실행 기록
   meta/categories, meta/settings  과목·교재·학습방법 / 목표·용돈 기준·학습앱 인정 설정(extApps)
-  diary, daygoals, daytypes, payouts, weekcaps, certs, coupons
+  diary, daygoals, daytypes, payouts, weekcaps, certs
   apps/sentence                 천문장 학습 상태 + summary + dayLog{날짜: 문장 수}
   apps/words                    MD영단어 state(날짜별 log 포함) + summary
   focus/{날짜}                   포커스 타이머 기록 {min, sessions}
@@ -79,7 +79,7 @@ giUsers/{uid}, giFriendRequests 그래머 인사이드 친구 랭킹용 공개 �
 - **학습앱 위 실시간 바**: 천문장 · 영단어 · 문법이 채점할 때마다 `postMessage({type:"nogang-answer"})`를 보내고,
   플래너가 이번 주 정답률 → 정답률 보너스 → 용돈을 바로 다시 계산해 `+₩ / −₩`로 보여 줍니다.
 - **학습 탭**: 맨 위에 이번 주 학습앱 정답률 보너스(₩), 앱 카드에 오늘 정답 수 · 정답률. 오늘 아직 안 한 앱이 위로.
-- **주간 등급**: 캐릭터 대신 브론즈 → 실버 → 골드 → 플래티넘 → 다이아(Lv1~10) 배지. 주간 XP(완료 1개 20 · 공부 1분 1)로 정해지고 일요일마다 새로 시작. 쿠폰 · 대결 등급 기준도 같음.
+- **주간 등급**: 캐릭터 대신 브론즈 → 실버 → 골드 → 플래티넘 → 다이아(Lv1~10) 배지. 주간 XP(완료 1개 20 · 공부 1분 1)로 정해지고 일요일마다 새로 시작. 대결 순위에도 쓰여요.
 
 ## 할 일 화면 (간결 모드)
 
@@ -97,14 +97,15 @@ giUsers/{uid}, giFriendRequests 그래머 인사이드 친구 랭킹용 공개 �
   돌아왔을 때 앱 기록이 늘었으면 완료 여부를 묻고, 이런 할 일은 `appLinked`로 표시해 **앱이 잰 시간으로만** 용돈에 넣습니다(이중 계산 방지).
 - 정리한 것: 칭찬 도장 · 별점 · 어제 vs 오늘 · 칭찬 문구 카드 · 이행률 도넛 · 계획/실제 카드 · 주간 목표 카드(상단 용돈 바가 대신).
 
-## 🎴 카드 뽑기 · 대결
+## 🎴 포켓몬 카드 (카드팩 · 대결)
 
-- **부모 (기록 → 카드 관리)**: 카드 이미지 링크를 한 줄에 하나씩 붙여 넣어 가족 카드풀에 등록합니다.
-  형식 `이름 | 이미지 링크 | 등급(일반·희귀·영웅·전설) | 공격력(선택)` — 링크만 넣어도 됩니다. 자녀에게 카드를 바로 주거나 뽑기권을 더하고 뺄 수 있습니다.
-- **자녀 (기록 → 카드 뽑기 · 대결)**: 공부로 뽑기권을 받아(하루 최대 4장: 공부 1시간 · 2시간 · 타이머 30분 · 학습앱 10문제 80%↑) 카드를 뽑습니다.
-  확률 일반 60 · 희귀 28 · 영웅 10 · 전설 2%, 10번 안에 영웅 이상 보장. 같은 카드는 겹치면 레벨업(최대 Lv5, 레벨당 공격력 +15%).
-- **대결**: 덱 3장으로 형제나 연습 상대와 3판 2선승. 이번 주 공부 1시간당 +1%(최대 +15%) 보너스. 이기면 하루 한 번 뽑기권 +1, 져도 카드는 잃지 않습니다. 용돈과는 연결되지 않습니다.
-- 데이터: `cardHub/{부모uid}/pool · decks · battles`, `planner/{자녀uid}/cards`, `planner/{자녀uid}/meta/cardWallet` (firestore.rules 에 cardHub 규칙 추가 — 다시 게시 필요)
+- 카드 목록은 받아쓰기 프로그램(`nkdddd/mdeng`, 브랜치 `claude/youthful-johnson-9uwwut`)의 `js/cards.js`를 그대로 가져온 `assets/pokecards.js` (카드 9,524장, 카드 화면을 열 때만 불러옴). 그림은 포켓몬카드 공식 이미지 주소로 연결.
+- **자녀**: 공부로 카드팩을 받아요(하루 최대 4개: 공부 1시간 · 2시간 · 타이머 30분 · 학습앱 10문제 80%↑).
+  카드팩 확률은 받아쓰기 프로그램과 같음 — ⚪ 일반 70 · 🔷 레어 22 · 🎨 아트 레어 6 · 💎 슈퍼 레어 1.7 · 👑 스페셜 0.3%, 10팩 안에 아트 레어 이상 보장.
+  같은 카드가 또 나오면 +1 강화(최대 +5).
+- **대결**: 덱 3장으로 형제나 연습 상대와 3판 2선승. 한 판 점수 = ⚡힘(등급 10/12/14/17/20 + 강화×2) × 🎲주사위(1~6) × 먹이사슬(타입 ×1.5, 진화 단계 가위바위보 ×1.2) × 이번 주 공부 보너스(1시간당 +1%, 최대 +15%). 이기면 하루 한 번 카드팩 +1, 져도 카드는 잃지 않음.
+- **부모**: 포켓몬 이름으로 찾아서 자녀에게 카드 주기 · 카드팩 더하기/빼기.
+- 데이터: `planner/{자녀uid}/cards`, `planner/{자녀uid}/meta/cardWallet`, `cardHub/{부모uid}/decks · battles`
 
 ## 💰 토요일 18시 용돈 알림
 

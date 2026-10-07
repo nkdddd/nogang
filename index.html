@@ -321,17 +321,6 @@
   .pts-hint.warn{background:#FFF7E8;color:#8A6516;}
   .pts-hint b{font-weight:800;}
 
-  /* 쿠폰 */
-  .coupon{position:relative;border-radius:14px;padding:14px 15px;margin-bottom:10px;display:flex;align-items:center;gap:12px;
-    border:2px dashed #CBD5E1;background:#fff;}
-  .coupon.play{border-color:#7BC96F;background:linear-gradient(135deg,#F2FCF3,#E7F8EA);}
-  .coupon.hour{border-color:#F5A524;background:linear-gradient(135deg,#FFFBEF,#FFF4DA);}
-  .coupon.pc{border-color:#8E4EC6;background:linear-gradient(135deg,#FAF5FF,#F3E8FF);}
-  .coupon.used{opacity:.5;filter:grayscale(.6);}
-  .coupon .cp-emo{font-size:28px;}
-  .coupon .cp-name{font-weight:800;font-size:14.5px;}
-  .coupon .cp-cond{font-size:11.5px;color:#64748B;margin-top:2px;line-height:1.4;}
-  .coupon .cp-act{margin-left:auto;display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
   .cp-btn{border:none;border-radius:9px;padding:7px 12px;font-weight:800;font-size:12.5px;color:#fff;background:#0E9F6E;}
   .cp-btn.gray{background:#94A3B8;}
   .cp-badge{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:#EAF7F1;color:#0E9F6E;border:1px solid #BFE8D6;}
@@ -424,8 +413,6 @@
     .drawer-body .dash-cards{grid-template-columns:1fr 1fr !important;}
     .drawer-body .crit-grid{grid-template-columns:1fr !important;}
     .dash-stat .big{font-size:15px !important;}
-    .drawer-body .coupon{flex-wrap:wrap;}
-    .drawer-body .coupon .cp-act{margin-left:0;width:100%;align-items:stretch;}
     .drawer-body .cp-act .cp-btn{width:100%;}
     .allow-card .name{flex-wrap:wrap;}
   }
@@ -2339,11 +2326,10 @@ function drawStatus(){
 function drawRewards(){
   const isParent=state.profile.role==="parent";
   hubShell("💰 보상", `
-    <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">용돈과 쿠폰, 주간 대결을 관리합니다.</div>
+    <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">용돈, 카드, 주간 대결을 관리합니다.</div>
     ${hubItem("💰","용돈 정산","이번 주 달성도와 지급액 확인","openDrawer('allowance')")}
     ${isParent? hubItem("🏆","주간 학습 대결","자녀 순위와 챔피언 인증카드","drawBattle()") : ""}
-    ${hubItem("🎴", isParent?"카드 관리":"카드 뽑기 · 대결", isParent?"카드 링크 등록 · 자녀에게 카드/뽑기권 지급":"공부로 뽑기권 · 카드 모으기 · 형제 대결","drawCards()")}
-    ${hubItem("🎟️","보상 쿠폰","시간 이용권 · 게임방 충전권","drawCoupons()")}
+    ${hubItem("🎴", isParent?"포켓몬 카드 관리":"포켓몬 카드", isParent?"포켓몬 카드 찾아서 주기 · 카드팩 지급":"공부로 카드팩 · 포켓몬 카드 모으기 · 대결","drawCards()")}
   `);
 }
 // 📈 자녀 관리(부모) / 📚 내 기록(자녀)
@@ -2355,7 +2341,7 @@ function drawManage(){
       ${hubItem("📈","자녀 학습 리포트","일·주·월 평균 학습시간과 과목·단원","drawReport()")}
       ${hubItem("📚","자녀 학습 다이어리","자녀별 주간·월간 기록 열람","drawArchive()")}
       ${hubItem("🏆","주간 학습 대결","순위 확인 및 챔피언 인증","drawBattle()")}
-      ${hubItem("🎴","카드 관리","카드 링크 등록 · 자녀에게 카드/뽑기권 지급","drawCards()")}
+      ${hubItem("🎴","카드 관리","포켓몬 카드 찾아서 주기 · 카드팩 지급","drawCards()")}
       ${hubItem("👨‍👩‍👦","자녀 계정 관리","자녀 코드 등록 · 연결 해제","openDrawer('settings')")}
     `);
   }else{
@@ -2363,8 +2349,7 @@ function drawManage(){
       <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">이번 주 등급과 보상을 확인합니다.</div>
       ${renderMonCard()}
       <div style="margin-top:12px">
-        ${hubItem("🎴","카드 뽑기 · 대결","공부로 뽑기권 · 카드 모으기 · 형제 대결","drawCards()")}
-        ${hubItem("🎟️","보상 쿠폰","단계별 이용권 · 내 쿠폰함","drawCoupons()")}
+        ${hubItem("🎴","카드 뽑기 · 대결","공부로 카드팩 · 포켓몬 카드 모으기 · 대결","drawCards()")}
         ${hubItem("🏅","성취 뱃지","연속 학습·완벽한 하루 기록","openDrawer('dash')")}
       </div>
     `);
@@ -3067,8 +3052,7 @@ function renderRecord(){
     ${isParent? hubItem("📈","자녀 학습 리포트","일·주·월 평균 학습시간과 과목·단원","drawReport()") : ""}
     <div class="r-sec">보상</div>
     ${hubItem("💰","용돈 정산","이번 주 달성도와 지급액 확인","openDrawer('allowance')")}
-    ${hubItem("🎴", isParent?"카드 관리":"카드 뽑기 · 대결", isParent?"카드 링크 등록 · 자녀에게 지급":"공부로 뽑기권 · 카드 모으기 · 대결","drawCards()")}
-    ${hubItem("🎟️","보상 쿠폰","시간 이용권 · 게임방 충전권","drawCoupons()")}
+    ${hubItem("🎴", isParent?"포켓몬 카드 관리":"포켓몬 카드", isParent?"포켓몬 카드 주기 · 카드팩 지급":"공부로 카드팩 · 포켓몬 카드 · 대결","drawCards()")}
     ${isParent? hubItem("🏆","주간 학습 대결","자녀 순위와 챔피언 인증카드","drawBattle()") : ""}
     ${hubItem("🚀","부스터 모드","시험 D-day · 목표시간 상향 · 시간 용돈 상한 2만 원","drawBooster()")}</div></div>`;
 }
@@ -3092,7 +3076,7 @@ function openMenu(){
       ${kids || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 자녀가 없어요. 아래 <b>가족 연결</b>에서 자녀의 이메일로 신청하세요.</div>`}`:""}
     <div class="r-sec">관리</div>
     ${hubItem("👨‍👩‍👧", "가족 연결"+(state.familyPending?` <span class="badge-dot">${state.familyPending}</span>`:""), isParent?"자녀에게 연결 신청 · 받은 신청 승인":"부모님께 연결 신청 · 받은 신청 승인","drawFamily()")}
-    ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🏅","내 등급 · 보상","주간 등급 · 카드 · 쿠폰 · 뱃지","drawManage()")}
+    ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🏅","내 등급 · 보상","주간 등급 · 카드 · 뱃지","drawManage()")}
     ${isParent? hubItem("🔔","용돈 알림","토요일 18시 · 휴대폰 푸시 · 이메일","drawNotify()") : ""}
     ${hubItem("⚙️","설정","계정 · 목표시간 · 방학 · 과목/교재 · 템플릿","openDrawer('settings')")}
     ${hubItem("🔗","학습앱 인정 시간","천문장 · 영단어 · 문법 환산과 상한","drawExtApps()")}
@@ -4795,7 +4779,6 @@ async function drawDashboard(){
         <div class="badges">${badgesHTML}</div>
         <div class="dash-section">바로가기</div>
         <div style="display:flex;gap:6px;margin-bottom:6px">
-          <button class="ghost-btn" style="flex:1" onclick="drawCoupons()">🎟️ 보상 쿠폰</button>
           <button class="ghost-btn" style="flex:1" onclick="drawArchive()">📚 학습 다이어리</button>
         </div>
         <div class="dash-section">최근 7일 이행률</div>
@@ -5321,9 +5304,7 @@ async function drawBattle(){
       ${champBlock}
       <div class="dash-section">주간 순위</div>
       ${rankHTML}
-      <div class="dash-section" style="margin-top:16px">보상</div>
-      <button class="ghost-btn" style="width:100%;padding:11px" onclick="drawCoupons()">🎟️ 보상 쿠폰 · 이용권 보기</button>
-      <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">주간 등급(Lv)에 따라 2~8시간 이용권을, Lv10+챔피언이면 게임방 충전권을 받을 수 있어요.</div>`;
+`;
   }
   const root=document.querySelector("#drawerRoot .drawer-body");
   if(root) root.innerHTML=body;
@@ -5392,174 +5373,6 @@ function timerBtnHTML(t){
   return on
     ? `<button class="timer-btn on" onclick="stopTimer()">⏹ <span id="timerClock">0:00</span> 정지</button>`
     : `<button class="timer-btn" onclick="startTimer('${t.id}')">▶ 타이머${acc?` · ${acc}분`:""}</button>`;
-}
-
-/* ============================================================
- *  10-e) 보상 쿠폰 (1시간 놀기 · 1만원 게임방 충전권)
- * ============================================================ */
-/* 쿠폰: 2~8시간 이용권(캐릭터 단계 연동) + 1만원 게임방 충전권(챔피언 전용)
-   - 이번 주 캐릭터 단계에 따라 받을 수 있는 이용권 등급이 올라감
-   - 매주 이용권은 '도달한 최고 등급 1장'만 발급 (누적 발급 방지) */
-const HOUR_COUPONS=[
-  {h:2, stage:3, emo:"🎫", cls:"h2"}, //  4단계
-  {h:3, stage:4, emo:"🎫", cls:"h3"}, //  5단계
-  {h:4, stage:5, emo:"🎟️", cls:"h4"}, //  6단계
-  {h:5, stage:6, emo:"🎟️", cls:"h5"}, //  7단계
-  {h:6, stage:7, emo:"🏅", cls:"h6"}, //  8단계
-  {h:7, stage:8, emo:"🏅", cls:"h7"}, //  9단계
-  {h:8, stage:9, emo:"👑", cls:"h8"}, // 10단계
-];
-const COUPONS={};
-HOUR_COUPONS.forEach(c=>{
-  COUPONS["h"+c.h]={ id:"h"+c.h, name:`${c.h}시간 이용권`, emo:c.emo, cls:"hour",
-    img:`cupon0${c.h}.png`, kind:"hour", hours:c.h, target:c.stage,
-    desc:`이번 주 등급 ${tierName(c.stage)} 달성` };
-});
-COUPONS.pc10k={ id:"pc10k", name:"1만원 게임방 충전권", emo:"🕹️", cls:"pc", img:"cupon_pc.png",
-  kind:"special", desc:"이번 주 다이아 Lv10 달성 + 주간 챔피언", target:MON_MAX_STAGE };
-// 이번 주 도달 가능한 최고 등급 이용권 (없으면 null)
-function bestHourCoupon(stage){
-  let best=null;
-  HOUR_COUPONS.forEach(c=>{ if(stage>=c.stage) best=c; });
-  return best? COUPONS["h"+best.h] : null;
-}
-function couponEligibility(stage, isChampion){
-  const e={};
-  HOUR_COUPONS.forEach(c=>{ e["h"+c.h]= stage>=c.stage; });
-  e.pc10k=(stage>=COUPONS.pc10k.target) && !!isChampion;
-  return e;
-}
-// 쿠폰 이미지 경로 (인덱스 페이지와 같은 폴더). 없으면 이모지로 자동 대체
-const COUPON_IMG_BASE="";
-function couponArt(type, size, emoFallback){
-  const cp=COUPONS[type];
-  const emo=emoFallback||(cp?cp.emo:"🎟️");
-  const src=cp&&cp.img? COUPON_IMG_BASE+cp.img : "";
-  if(!src) return `<span class="cp-emo">${emo}</span>`;
-  return `<img src="${src}" width="${size}" height="${size}" alt="${cp.name}"
-    style="object-fit:contain;border-radius:8px;display:inline-block;vertical-align:middle"
-    onerror="this.onerror=null;this.outerHTML='<span class=&quot;cp-emo&quot;>${emo}</span>'">`;
-}
-async function fetchCoupons(uid){
-  try{
-    const s=await db.collection("planner").doc(uid).collection("coupons").get();
-    return s.docs.map(d=>({id:d.id,...d.data()}));
-  }catch(e){ console.error(e); return []; }
-}
-async function grantCoupon(uid, type, weekId, label){
-  const c=COUPONS[type]; if(!c) return;
-  const docId=`${weekId}_${type}`;
-  await db.collection("planner").doc(uid).collection("coupons").doc(docId).set({
-    type, name:c.name, emo:c.emo, kind:c.kind||"special", hours:c.hours||null,
-    weekId, weekLabel:label, grantedAt:Date.now(), used:false
-  });
-}
-async function useCoupon(docId){
-  const uid=state.ownerUid;
-  if(!confirm("이 쿠폰을 사용 처리할까요? (되돌릴 수 없어요)")) return;
-  try{
-    await db.collection("planner").doc(uid).collection("coupons").doc(docId).update({used:true, usedAt:Date.now()});
-    toast("쿠폰을 사용했어요 🎉","cheer");
-    drawCoupons();
-  }catch(e){ console.error(e); alert("사용 처리 실패: "+firestoreDiag(e)); }
-}
-async function drawCoupons(){
-  document.getElementById("drawerRoot").innerHTML=`<div class="overlay"><div class="drawer wide">
-    <div class="drawer-head"><button class="icon-btn sm" onclick="drawRewards()" title="보상으로">←</button><h3 style="flex:1">🎟️ 보상 쿠폰</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
-    <div class="drawer-body"><div class="empty">불러오는 중…</div></div></div></div>`;
-  const uid=state.ownerUid;
-  const days=charWeekDays(), weekId=days[6], label=weekPhase().label;
-  const isParent=state.profile.role==="parent";
-  const canGrant=isParent;
-
-  const tot=await loadMonTotals();
-  const c=monsterCalc(tot.count,tot.min);
-  let isChamp=false;
-  try{ const cd=await db.collection("planner").doc(uid).collection("certs").doc(weekId).get(); isChamp=cd.exists&&cd.data().champion; }catch(_){}
-  const owned=await fetchCoupons(uid);
-  const hasThisWeek=(type)=>owned.some(o=>o.id===`${weekId}_${type}`);
-  const gotHourThisWeek=owned.some(o=>o.weekId===weekId && o.kind==="hour");
-
-  // 이번 주 이용권: 도달한 최고 등급 1장
-  const best=bestHourCoupon(c.stage);
-  const nextGrade=HOUR_COUPONS.find(x=>x.stage>c.stage);
-  const hourBlock = best
-    ? `<div class="coupon hour">
-        ${couponArt(best.id,54)}
-        <div style="min-width:0">
-          <div class="cp-name">${best.name} <span style="font-size:11px;color:#94A3B8">· 이번 주 최고 등급</span></div>
-          <div class="cp-cond">현재 ${c.stage+1}단계 달성 → <b>${best.hours}시간</b> 획득 가능${nextGrade?`<br>${nextGrade.stage+1}단계 달성 시 <b>${nextGrade.h}시간</b>으로 상승`:`<br>최고 등급이에요! 👑`}</div>
-        </div>
-        <div class="cp-act">
-          ${gotHourThisWeek? `<span class="cp-badge">발급 완료</span>`
-            : canGrant? `<button class="cp-btn" onclick="grantCouponUI('${best.id}','${weekId}','${esc(label)}')">발급하기</button>`
-                      : `<span class="cp-badge">획득 가능!</span>`}
-        </div>
-      </div>`
-    : `<div class="coupon">
-        <span class="cp-emo">🎫</span>
-        <div style="min-width:0">
-          <div class="cp-name">시간 이용권</div>
-          <div class="cp-cond">현재 ${c.stage+1}단계 · <b>${HOUR_COUPONS[0].stage+1}단계</b> 달성 시 <b>2시간 이용권</b>부터 받을 수 있어요</div>
-          <div class="cp-prog"><div style="width:${Math.min(100,Math.round((c.stage+1)/(HOUR_COUPONS[0].stage+1)*100))}%"></div></div>
-        </div>
-        <div class="cp-act"><span class="cp-badge lock">조건 미달</span></div>
-      </div>`;
-
-  // 등급표
-  const ladder=HOUR_COUPONS.map(x=>{
-    const on=c.stage>=x.stage;
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;opacity:${on?1:.38};min-width:56px">
-      <div style="font-size:18px">${on?x.emo:"🔒"}</div>
-      <div style="font-size:11.5px;font-weight:800;color:${on?"#1E2A4A":"#94A3B8"}">${x.h}시간</div>
-      <div style="font-size:10px;color:#94A3B8">${x.stage+1}단계</div>
-    </div>`;
-  }).join("");
-
-  // 게임방 충전권
-  const pcOK=(c.stage>=COUPONS.pc10k.target)&&isChamp;
-  const pcBlock=`<div class="coupon pc">
-      ${couponArt("pc10k",54)}
-      <div style="min-width:0">
-        <div class="cp-name">${COUPONS.pc10k.name}</div>
-        <div class="cp-cond">조건 · ${COUPONS.pc10k.desc}<br>현재 ${c.stage+1}단계 / 챔피언 ${isChamp?"✓":"미달성"}</div>
-        <div class="cp-prog"><div style="width:${Math.min(100,Math.round((c.stage+1)/(COUPONS.pc10k.target+1)*100))}%"></div></div>
-      </div>
-      <div class="cp-act">
-        ${hasThisWeek("pc10k")? `<span class="cp-badge">발급 완료</span>`
-          : pcOK? (canGrant? `<button class="cp-btn" onclick="grantCouponUI('pc10k','${weekId}','${esc(label)}')">발급하기</button>`
-                           : `<span class="cp-badge">획득 가능!</span>`)
-                : `<span class="cp-badge lock">조건 미달</span>`}
-      </div>
-    </div>`;
-
-  const wallet = owned.length? owned.sort((a,b)=>(b.grantedAt||0)-(a.grantedAt||0)).map(o=>`
-      <div class="cp-wallet ${o.used?"used":""}" style="${o.used?"opacity:.55":""}">
-        ${couponArt(o.type,34,o.emo||"🎟️")}
-        <div><div style="font-weight:700">${esc(o.name||"")}</div><div style="font-size:11px;color:#94A3B8">${esc(o.weekLabel||"")}</div></div>
-        <span class="w-when">${o.used?"사용함":`<button class="cp-btn" style="padding:5px 10px" onclick="useCoupon('${o.id}')">사용하기</button>`}</span>
-      </div>`).join("")
-    : `<div style="font-size:13px;color:#94A3B8">아직 받은 쿠폰이 없어요.</div>`;
-
-  const body=`
-    <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">${label} · ${esc(state.ownerName)} · 이번 주 <b>${c.stage+1}단계</b></div>
-    ${hourBlock}
-    <div style="display:flex;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 8px;margin-bottom:12px;overflow-x:auto">${ladder}</div>
-    ${pcBlock}
-    ${!canGrant?`<div style="font-size:11.5px;color:#94A3B8;margin:-2px 0 14px">조건을 채우면 부모님이 쿠폰을 발급해 주세요.</div>`:""}
-    <div class="dash-section">내 쿠폰함</div>
-    ${wallet}`;
-  const root=document.querySelector("#drawerRoot .drawer-body");
-  if(root) root.innerHTML=body;
-}
-async function grantCouponUI(type,weekId,label){
-  const cp=COUPONS[type];
-  if(!confirm(`${state.ownerName} 님에게 '${cp.name}'을 발급할까요?`)) return;
-  try{
-    await grantCoupon(state.ownerUid, type, weekId, label);
-    toast(`${cp.emo} ${cp.name} 발급 완료!`,"cheer");
-    drawCoupons();
-  }catch(e){ console.error(e); alert("발급 실패: "+firestoreDiag(e)); }
 }
 
 /* ============================================================
