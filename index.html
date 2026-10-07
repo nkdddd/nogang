@@ -885,6 +885,7 @@
   .dlg-msg{font-size:15px;margin:4px 2px 4px}.dlg-msg small{color:#94A3B8;font-size:12.5px}
   .dlg-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 </style>
+<link rel="stylesheet" href="assets/pokecatch.css">
 </head>
 <body>
 
@@ -976,6 +977,7 @@
 <script src="assets/focus-sounds.js"></script>
 <script src="assets/sfx.js"></script>
 <script src="assets/cards.js"></script>
+<script src="assets/pokecatch.js"></script>
 
 <script>
 /* ============================================================
@@ -4192,7 +4194,7 @@ async function toggleDone(id){
     state.justDone=t.id; setTimeout(()=>{ state.justDone=null; },900);
     await saveTask(saved);
     const left=state.tasks.filter(x=>x.date===t.date && !x.done && x.id!==t.id).length;
-    toast(`완료 · ${actualMin}분 기록${left? ` · 남은 학습 ${left}개` : " · 오늘 계획 끝"}`,"good");
+    toast(`완료 · ${actualMin}분 기록${left? ` · 남은 학습 ${left}개` : " · 오늘 계획 끝 · 🔴 몬스터볼 받으러 가요 (포켓몬 카드 → 포획)"}`,"good");
     return;
   }else{
     await saveTask({...t,done:false,creditRate:null,appLinked:null});
