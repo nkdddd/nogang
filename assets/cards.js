@@ -64,7 +64,8 @@ function info(row){
   return {id:row[0], name:row[1], kind:row[2], set:(window.CARD_SETS||[])[row[3]]||"", rarity:row[4], cls:CLS[row[5]]?row[5]:"n",
     img:(window.CARD_IMG||"")+row[6], type:row[7]||"", poke:row[8]||row[1], stage:stageOf(row[2])};
 }
-const lvOf=c=>Math.max(0, Math.min(MAX_LV, (Number(c.count)||1)-1));      // 같은 카드 겹치면 +1 강화
+const lvOf=c=>Math.max(0, Math.min(MAX_LV, Number(c.lv)||0));           // 강화 단계 (+0~+5) — 카드를 재료로 써서 올려요
+const UP_COST=[1,2,3,4,5], EVO_COST=5, TRADE_N=10;                     // 강화 · 상위 카드 진화에 드는 재료 카드 수, 일반 카드 교환
 const power=c=>(CLS[c.cls]||CLS.n).pw + lvOf(c)*2;
 function bonus(a,b){
   let mul=1; const why=[];
@@ -115,7 +116,7 @@ async function giveCard(uid, c){
   const ref=mine(uid).collection("cards").doc(c.id);
   const d=await ref.get(), cur=d.exists && d.data().cls? d.data() : null;
   const next={id:c.id, name:c.name, img:c.img, cls:c.cls, type:c.type, kind:c.kind, stage:c.stage, poke:c.poke, set:c.set,
-    count:(cur? Number(cur.count)||1 : 0)+1, firstAt:cur? cur.firstAt : Date.now(), lastAt:Date.now()};
+    count:(cur? Number(cur.count)||1 : 0)+1, lv:cur? Number(cur.lv)||0 : 0, firstAt:cur? cur.firstAt : Date.now(), lastAt:Date.now()};
   await ref.set(next);
   return {card:next, isNew:!cur};
 }
@@ -165,10 +166,10 @@ function cardsOpen(){ return !!(CS && document.querySelector("#drawerRoot .cd-ta
 function renderCards(){
   if(!CS) return;
   if(CS.tab==="battle" && CS.mid){ return renderMatch(); }
-  const tabs=[["draw","🎁 카드팩"],["mine","🗂️ 내 카드"],["battle","⚔️ 대결"]];
+  const tabs=[["draw","🎁 카드팩"],["catch","🌿 포획"],["mine","🗂️ 내 카드"],["battle","⚔️ 대결"]];
   const inv=incoming().length;
   const head=`<div class="seg cd-tabs">${tabs.map(([k,l])=>`<button class="${CS.tab===k?"on":""}" onclick="Cards.tab('${k}')">${l}${k==="battle"&&inv?` <span class="badge-dot">${inv}</span>`:""}</button>`).join("")}</div>`;
-  const body= CS.tab==="mine"? mineHTML() : CS.tab==="battle"? lobbyHTML() : drawHTML();
+  const body= CS.tab==="mine"? mineHTML() : CS.tab==="battle"? lobbyHTML() : CS.tab==="catch"? (window.PokeCatch? PokeCatch.tabHTML() : "") : drawHTML();
   hubShell("🎴 포켓몬 카드"+(state.viewingChild?` · ${eh(state.ownerName)}`:""), head+body);
 }
 function drawHTML(){
@@ -179,7 +180,7 @@ function drawHTML(){
     const R=CS.reveal, K=CLS[R.card.cls];
     rev=`<div class="cd-reveal c-${R.card.cls}"><div class="cd-flip">${cardFace(R.card,"big")}</div>
       <div class="cd-rv-txt">${K.icon} <b style="color:${K.color}">${K.name}</b> · ${eh(R.card.name)}</div>
-      <div class="cd-rv-sub">${R.isNew?"✨ 새 카드!":`🔁 겹친 카드 → <b>+${lvOf(R.card)} 강화</b> (⚡${power(R.card)})`}${R.card.type?` · ${eh(R.card.type)} 타입`:""}</div></div>`;
+      <div class="cd-rv-sub">${R.isNew?"✨ 새 카드!":`🔁 겹친 카드 (${R.card.count}장) — 강화 재료로 쓸 수 있어요`}${R.card.type?` · ${eh(R.card.type)} 타입`:""}</div></div>`;
   }
   return `
     <div class="cd-ticket">
@@ -191,7 +192,7 @@ function drawHTML(){
     <div class="cd-quests">${list.map(q=>`<div class="cd-q ${q.ok?"ok":""}"><span>${q.ok?"✅":"⬜"}</span>${eh(q.label)}</div>`).join("")}</div>
     <button class="ghost-btn" style="width:100%;margin-top:8px" ${(!ro && can>0)?"":"disabled"} onclick="Cards.claim()">${can>0?`🎴 카드팩 ${can}개 받기`:(got? `오늘 ${got}개 받았어요`:"공부하면 받을 수 있어요")}</button>
     <div class="cd-note">등급 확률: ${ORDER.slice().reverse().map(k=>`${CLS[k].icon} ${CLS[k].name} ${ODDS[k]}%`).join(" · ")}<br>
-      ${PITY}팩 안에 아트 레어 이상 1장 보장 (지금 ${W.pity||0}/${PITY}) · 같은 카드가 또 나오면 +1 강화(최대 +${MAX_LV}, 강화마다 ⚡+2)<br>
+      ${PITY}팩 안에 아트 레어 이상 1장 보장 (지금 ${W.pity||0}/${PITY}) · 내 카드에서 다른 카드를 재료로 강화(+1~+${MAX_LV}, ⚡+2씩) · +${MAX_LV}이면 상위 카드로 진화<br>
       대결에서 이기면 하루 한 번 카드팩 +1 · 카드 ${won(window.CARDS?window.CARDS.length:0)}장</div>`;
 }
 function mineHTML(){
@@ -201,7 +202,10 @@ function mineHTML(){
   const cnt=k=>all.filter(c=>c.cls===k).length;
   return `<div class="cd-dex">${[["all","전체",all.length],...ORDER.map(k=>[k,`${CLS[k].icon} ${CLS[k].name}`,cnt(k)])].map(([k,l,n])=>
       `<button class="${f===k?"on":""}" onclick="Cards.filter('${k}')">${l} <b>${n}</b></button>`).join("")}</div>
-    <div class="cd-grid">${list.map(c=>cardTile(c)).join("") || `<div class="empty" style="grid-column:1/-1">아직 카드가 없어요. 카드팩을 열어 보세요!</div>`}</div>`;
+    ${!state.viewingChild?`<div class="cd-trade"><span>♻️ 강화 안 한 일반 카드 ${TRADE_N}장 → 카드팩 1개 <small>(지금 ${tradeable().reduce((a,x)=>a+x.n,0)}장)</small></span>
+      <button class="ghost-btn" ${tradeable().reduce((a,x)=>a+x.n,0)>=TRADE_N?"":"disabled"} onclick="Cards.trade()">바꾸기</button></div>`:""}
+    <div class="cd-note" style="margin-top:4px">${state.viewingChild?"":"카드를 누르면 강화 · 진화할 수 있어요. 재료: 겹친 카드(남는 장) · 일반 카드 (레어 이상은 한 장씩 꼭 남겨요)"}</div>
+    <div class="cd-grid">${list.map(c=>cardTile(c,{on:state.viewingChild?"":`Cards.zoom('${c.id}')`, extra:(c.count>1?`<span class="cd-deck">×${c.count}</span>`:"")})).join("") || `<div class="empty" style="grid-column:1/-1">아직 카드가 없어요. 카드팩을 열어 보세요!</div>`}</div>`;
 }
 function weekBoost(){
   const days=(typeof snapWeekDays==="function")? snapWeekDays() : [];
@@ -570,8 +574,98 @@ function cpuCard(mine){
   return {...pickOf({...x, count:1}), boost:0.05};
 }
 
+/* ============ ⭐ 강화 · 🌟 진화 · ♻️ 교환 (받아쓰기 프로그램 방식, 별 대신 '재료 카드') ============ */
+// 재료로 쓸 수 있는 카드: 겹친 카드(남는 장)부터, 그다음 강화 안 한 다른 카드. 등급 낮은 것부터
+function materials(exceptId, onlyCls){
+  const out=[];
+  Object.values(CS.cards).forEach(c=>{
+    if(onlyCls && c.cls!==onlyCls) return;
+    // 강화할 카드 · 강화한 카드 · 레어 이상 카드는 한 장은 꼭 남겨요 (겹친 장만 재료). 일반 카드는 한 장짜리도 재료
+    const keep=(c.id===exceptId || lvOf(c)>0 || c.cls!=="n")? 1 : 0;
+    const n=Math.max(0,(Number(c.count)||1)-keep);
+    if(n>0) out.push({c, n, dup:(Number(c.count)||1)>1});
+  });
+  return out.sort((a,b)=>(b.dup-a.dup) || ORDER.indexOf(b.c.cls)-ORDER.indexOf(a.c.cls) || power(a.c)-power(b.c));
+}
+const tradeable=()=>materials(null,"n");
+async function useMaterials(list, need){
+  const used=[]; let left=need;
+  for(const x of list){ if(!left) break; const k=Math.min(left, x.n); left-=k; used.push({c:x.c, k}); }
+  for(const u of used){
+    const c=CS.cards[u.c.id], n=(Number(c.count)||1)-u.k, ref=mine(CS.uid).collection("cards").doc(c.id);
+    if(n<=0){ await ref.delete(); delete CS.cards[c.id]; } else { c.count=n; await ref.set(c); }
+  }
+  return used;
+}
+function evolveTarget(c){
+  const row=byId[c.id]; if(!row) return null;
+  const up=ORDER.slice().reverse(); const from=up.indexOf(c.cls);
+  for(const [k,how] of [[8,"mon"],[9,"family"]]){
+    if(!row[k]) continue;
+    for(const cls of up.slice(from+1)){
+      const list=byCls[cls].filter(d=>d[k]===row[k] && d[0]!==c.id);
+      if(list.length) return {cls, list, how};
+    }
+  }
+  return null;
+}
+function zoomHTML(c){
+  const lv=lvOf(c), cost=UP_COST[lv], evo=cost==null? evolveTarget(c) : null, mats=materials(c.id), have=mats.reduce((a,x)=>a+x.n,0);
+  const need=cost!=null? cost : EVO_COST;
+  const stars="★".repeat(lv)+"☆".repeat(MAX_LV-lv);
+  const K=CLS[c.cls];
+  return `<div class="zm">
+    <div class="zm-card">${cardFace(c,"big")}</div>
+    <div class="zm-info"><span class="cd-rar" style="--rc:${K.color}">${K.icon} ${K.name}</span><b>${eh(c.name)}${lv?` <em>+${lv}</em>`:""}</b>
+      <small>${eh(c.kind||"")}${c.type?` · ${eh(c.type)} 타입`:""}${c.set?` · ${eh(c.set)}`:""} · ${c.count||1}장 · ⚡${power(c)}</small>
+      <p class="zm-stars">${stars}</p></div>
+    ${cost!=null
+      ? `<button class="pay-btn" ${have>=cost?"":"disabled"} onclick="Cards.enhance('${c.id}')">⭐ 재료 카드 ${cost}장으로 +${lv+1} 강화</button>`
+      : evo? `<p class="zm-line">🌟 +${MAX_LV} 최고 단계! ${evo.how==="mon"?`같은 ${eh(c.poke||c.name)}`:`${eh(c.poke||c.name)} 진화 가족`}의 ${CLS[evo.cls].icon} ${CLS[evo.cls].name} 카드로 진화할 수 있어요</p>
+             <button class="pay-btn" ${have>=EVO_COST?"":"disabled"} onclick="Cards.evolve('${c.id}')">🌟 재료 카드 ${EVO_COST}장으로 상위 카드로 진화</button>`
+           : `<p class="zm-line">👑 이 포켓몬에서 가장 높은 카드예요</p>`}
+    ${(cost!=null||evo)? `<small class="zm-mat">${have>=need? `재료로 쓸 카드 ${have}장 (겹친 카드 → 낮은 등급부터)` : `재료 카드가 ${need-have}장 더 필요해요 (지금 ${have}장 · 카드팩을 열거나 포켓몬을 잡아요)`}</small>`:""}
+    <button class="ghost-btn" style="width:100%;margin-top:8px" onclick="Cards.tab('mine')">닫기</button>
+  </div>`;
+}
+
 const Cards={
   open:drawCards,
+  zoom(id){ const c=CS.cards[id]; if(!c) return; hubShell("🗂️ 카드", zoomHTML(c)); },
+  async enhance(id){
+    const c=CS.cards[id], lv=lvOf(c), cost=UP_COST[lv]; if(!c||cost==null) return;
+    const mats=materials(id); if(mats.reduce((a,x)=>a+x.n,0)<cost) return;
+    const preview=[]; let left=cost; for(const x of mats){ if(!left) break; const k=Math.min(left,x.n); left-=k; preview.push(`${x.c.name}${k>1?` ×${k}`:""}`); }
+    if(!confirm(`'${c.name}'을(를) +${lv+1} 강화할까요?\n\n재료로 사라지는 카드: ${preview.join(", ")}`)) return;
+    await useMaterials(mats, cost);
+    c.lv=lv+1; await mine(CS.uid).collection("cards").doc(id).set(c);
+    sfx("star"); toast(`⭐ ${c.name} +${c.lv} 강화! ⚡${power(c)}`,"cheer");
+    Cards.zoom(id);
+    const z=document.querySelector(".zm-card .pk"); if(z){ z.classList.add("powerup"); }
+  },
+  async evolve(id){
+    const c=CS.cards[id]; if(!c||lvOf(c)<MAX_LV) return;
+    const evo=evolveTarget(c); if(!evo) return;
+    const mats=materials(id); if(mats.reduce((a,x)=>a+x.n,0)<EVO_COST) return;
+    if(!confirm(`'${c.name}' +${MAX_LV} 카드를 ${CLS[evo.cls].name} 카드로 진화시킬까요?\n재료 카드 ${EVO_COST}장이 사라지고, 이 카드는 새 카드로 바뀌어요.`)) return;
+    await useMaterials(mats, EVO_COST);
+    const fromFace=cardFace(c,"big");
+    const row=evo.list[Math.floor(Math.random()*evo.list.length)], next=info(row);
+    // 진화한 카드 한 장 → 새 카드 (겹친 장은 +0으로 남아요)
+    const ref=mine(CS.uid).collection("cards").doc(id), n=(Number(c.count)||1)-1;
+    if(n<=0){ await ref.delete(); delete CS.cards[id]; } else { c.count=n; c.lv=0; await ref.set(c); }
+    const r=await giveCard(CS.uid, next); CS.cards[next.id]=r.card;
+    if(window.PokeCatch) await PokeCatch.evoCinema({card:true, from:fromFace, to:cardFace(r.card,"big"),
+      before:`어라…? <b>${eh(c.name)}</b> 카드가 빛나기 시작했어!`, after:`${CLS[next.cls].icon} <b>${eh(next.name)}</b> 카드로 진화했어! 🎉`});
+    Cards.zoom(next.id);
+  },
+  async trade(){
+    const mats=tradeable(); if(mats.reduce((a,x)=>a+x.n,0)<TRADE_N) return;
+    if(!confirm(`강화 안 한 일반 카드 ${TRADE_N}장을 카드팩 1개로 바꿀까요? (겹친 카드부터 써요)`)) return;
+    await useMaterials(mats, TRADE_N);
+    CS.wallet.tickets=(Number(CS.wallet.tickets)||0)+1; await saveWallet(CS.uid, CS.wallet);
+    sfx("star"); toast("♻️ 카드팩 1개를 받았어요","cheer"); CS.tab="draw"; renderCards();
+  },
   tab(k){ CS.tab=k; CS.reveal=null; CS.mid=null; renderCards(); },
   filter(k){ CS.filter=k; renderCards(); },
   async claim(){
@@ -657,6 +751,7 @@ function renderAdmin(){
     ${k?`<div class="cd-kid">
         <div class="cd-kid-h"><b>${eh(k.name)}</b><span>카드팩 ${Number(k.wallet.tickets)||0}개 · 카드 ${Object.keys(k.cards).length}종</span></div>
         <div class="me-row"><button class="ghost-btn" onclick="Cards.tickets(1)">카드팩 +1</button><button class="ghost-btn" onclick="Cards.tickets(3)">카드팩 +3</button><button class="ghost-btn" onclick="Cards.tickets(-1)">−1</button></div>
+        <div class="me-row" style="margin-top:6px"><button class="ghost-btn" onclick="Cards.balls(3)">몬스터볼 +3</button><button class="ghost-btn" onclick="Cards.balls(-1)">−1</button><span style="font-size:12px;color:#64748B;align-self:center">지금 ${Number(k.wallet.balls)||0}개 · 잡은 포켓몬 ${(k.wallet.dex||[]).length}종</span></div>
       </div>
       <div class="r-sec">카드 찾아서 주기</div>
       <input class="inp" id="cdQ" value="${eh(CA.q)}" placeholder="포켓몬 이름 (예: 피카츄, 리자몽)" onkeydown="if(event.key==='Enter')Cards.search(this.value)">
@@ -674,6 +769,11 @@ Object.assign(Cards, {
     if(!confirm(`${k.name}에게 '${c.name}'(${CLS[c.cls].name}) 카드를 줄까요?`)) return;
     const r=await giveCard(k.uid, c); k.cards[id]=r.card;
     toast(`${k.name}에게 '${c.name}' 카드를 줬어요`+(r.isNew?"":` (+${lvOf(r.card)})`),"good"); renderAdmin();
+  },
+  async balls(n){
+    const k=CA.kids[CA.kid]; if(!k) return;
+    const W=await loadWallet(k.uid); W.balls=Math.max(0,(Number(W.balls)||0)+n); await saveWallet(k.uid, W);
+    k.wallet=W; toast(`${k.name} 몬스터볼 ${W.balls}개`,"good"); renderAdmin();
   },
   async tickets(n){
     const k=CA.kids[CA.kid]; if(!k) return;
@@ -727,6 +827,15 @@ const css=`
 .cd-log{font-size:12.5px;padding:6px 2px;border-bottom:1px solid #F1F5F9}
 .cd-food{margin-top:12px;font-size:12.5px}.cd-food summary{cursor:pointer;font-weight:800;color:#475569}
 .cd-food-row{display:flex;gap:8px;padding:4px 2px;border-bottom:1px solid #F1F5F9}.cd-food-row b{width:46px}
+.cd-trade{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#F6F6FC;border-radius:12px;padding:9px 12px;font-size:13px;margin-bottom:6px}.cd-trade small{color:#94A3B8}
+.zm{display:flex;flex-direction:column;align-items:center;gap:8px}
+.zm-card .pk.big{width:min(62vw,240px)}
+.zm-card .pk.powerup{animation:btHit .7s cubic-bezier(.3,1.6,.5,1);box-shadow:0 0 24px 6px #FDE047}
+.zm-info{text-align:center;display:flex;flex-direction:column;gap:2px}.zm-info b{font-size:18px}.zm-info b em{font-style:normal;color:#B45309}.zm-info small{color:#64748B;font-size:12px}
+.zm-stars{margin:2px 0 0;color:#F59E0B;font-size:20px;letter-spacing:2px}
+.zm-line{font-size:13px;text-align:center;margin:0;color:#475569}
+.zm-mat{color:#94A3B8;font-size:12px;text-align:center}
+.zm .pay-btn{width:100%}
 .cd-kid{border:1px solid var(--line,#E4E4EA);border-radius:12px;padding:10px;margin-bottom:8px}
 .cd-kid-h{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px}.cd-kid-h span{color:#64748B;font-size:12px}
 
@@ -818,6 +927,21 @@ const css=`
 const st=document.createElement("style"); st.textContent=css; document.head.appendChild(st);
 
 window.Cards=Cards;
+// 포획(assets/pokecatch.js)에서 쓰는 공용 도구
+window.__CardsAPI={ get CS(){ return CS; }, giveCard, info, cardFace, cardTile, saveWallet, renderCards, dayStats, CLS, eh, today, sfx,
+  related:(name, glow)=>{                                     // 잡은 포켓몬과 관련된 카드 한 장 (받아쓰기 프로그램처럼)
+    const rel=(window.CARD_REL||{})[name]||[[],[],[]], C=window.CARDS, w=[];
+    rel[0].forEach(i=>w.push([C[i],3,"exact"])); rel[1].forEach(i=>w.push([C[i],1,"family"])); rel[2].forEach(i=>w.push([C[i],1,"similar"]));
+    if(!w.length) C.forEach(c=>w.push([c,1,"any"]));
+    const odds=glow? {r:45,a:30,s:18,u:7} : ODDS;
+    let classes=[...new Set(w.map(x=>x[0][5]))].filter(k=>odds[k]>0); if(!classes.length) classes=[...new Set(w.map(x=>x[0][5]))];
+    let roll=Math.random()*classes.reduce((a,k)=>a+(odds[k]||1),0);
+    const cls=classes.find(k=>(roll-=(odds[k]||1))<0)||classes[0];
+    const inC=w.filter(x=>x[0][5]===cls); let r=Math.random()*inC.reduce((a,x)=>a+x[1],0);
+    const hit=inC.find(x=>(r-=x[1])<0)||inC[0];
+    return {card:info(hit[0]), how:hit[2]};
+  },
+  loadCatalog:()=>loadCatalog().then(index) };
 window.drawCards=drawCards;
 window.drawCardAdmin=drawCardAdmin;
 })();
