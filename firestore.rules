@@ -69,6 +69,10 @@ service cloud.firestore {
       allow read: if isFamilyOf(p);
       allow write: if isMe(p) || (isMe(child) && isFamilyOf(p));
     }
+    match /cardHub/{p}/matches/{id} {       // ⚔️ 형제 대결 (신청 → 카드 → 주사위). 대결하는 두 사람만
+      allow read, update, delete: if isFamilyOf(p) && request.auth.uid in resource.data.users;
+      allow create: if isFamilyOf(p) && request.auth.uid in request.resource.data.users;
+    }
     match /cardHub/{p}/battles/{id} {       // 대결 기록
       allow read, create: if isFamilyOf(p);
       allow delete: if isMe(p);
