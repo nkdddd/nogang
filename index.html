@@ -824,6 +824,54 @@
   .lp-flash{position:absolute;right:0;top:0;font-weight:900;font-size:15px;animation:lpUp 1.2s ease-out forwards}
   .lp-flash.up{color:#0E9F6E}.lp-flash.down{color:#E5484D}
   @keyframes lpUp{0%{opacity:0;transform:translateY(6px)}20%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-10px)}}
+
+  /* 할 일 추가 · 카드형 */
+  .modal.tm{max-width:560px;background:#fff}
+  .tm .modal-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:#fff}
+  .tm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:520px){ .tm-grid{grid-template-columns:1fr} }
+  .tm-card{background:#F6F6FC;border-radius:16px;padding:13px;min-width:0}
+  .tm-card.warm{background:#FFF8E9}
+  .tm-h{display:flex;align-items:center;gap:9px;margin-bottom:10px}.tm-h b{font-size:15px;font-weight:800}
+  .tm-ic{width:22px;height:22px;color:#6A58E6;display:inline-flex}.tm-ic svg{width:22px;height:22px}
+  .tm-card.warm .tm-ic{color:#F59E0B}
+  .tm-h .tm-ex-btn{margin-left:auto}
+  .tm-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .tm-chips.three{display:grid;grid-template-columns:repeat(3,1fr)}
+  .tm-chips.five{display:grid;grid-template-columns:repeat(5,1fr)}
+  .tm-chip{border:1px solid #E4E4EE;background:#fff;border-radius:11px;padding:9px 6px;font-weight:700;font-size:14px;color:#334155;cursor:pointer;min-width:0;white-space:nowrap}
+  .tm-chip.on{background:#3F35B5;border-color:#3F35B5;color:#fff}
+  .tm-chips.three .tm-chip.on{background:#5B4DF0;border-color:#5B4DF0}
+  .tm-chip.wide{grid-column:span 2;display:flex;justify-content:space-between;padding:9px 12px}
+  .tm-inp{border:1px solid #E4E4EE;background:#fff;border-radius:11px;padding:9px 11px;font-size:14px;min-width:0;font-family:inherit;color:inherit}
+  .tm-date{flex:1;min-width:130px}
+  .tm-unit{position:relative;margin-top:8px}.tm-unit .tm-inp{width:100%;padding-right:34px}.tm-unit span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#64748B;font-size:13px}
+  .tm-sub{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tm-sub .tm-chip{padding:6px 10px;font-size:12.5px}
+  .tm-days{display:flex;gap:4px;margin-top:8px}.tm-days .tm-chip{flex:1;padding:7px 0}
+  .tm-mini{display:block;font-size:12px;color:#64748B;font-weight:700;margin:9px 0 5px}
+  .tm-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}.tm-row .tm-mini{margin:0 4px 0 0}
+  .tm-area{position:relative;background:#fff;border:1px solid #E4E4EE;border-radius:12px}
+  .tm-area textarea,.tm-area input{width:100%;border:0;outline:none;background:transparent;resize:none;padding:11px 12px 22px;font-size:14.5px;font-family:inherit;color:inherit;border-radius:12px}
+  .tm-area.one input{padding:12px 64px 12px 12px}
+  .tm-cnt{position:absolute;right:11px;bottom:6px;font-size:11.5px;color:#94A3B8}
+  .tm-area.one .tm-cnt{top:50%;bottom:auto;transform:translateY(-50%)}
+  .tm-ro{background:#fff;border-radius:12px;padding:11px 12px;font-size:14px}
+  .tm-ex-btn{display:inline-flex;align-items:center;gap:5px;border:1px solid #D9D3FA;background:#F4F2FF;color:#5B4DF0;font-weight:800;font-size:12.5px;border-radius:10px;padding:6px 10px;cursor:pointer}
+  .tm-ex-btn svg{width:15px;height:15px}
+  .tm-ex{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.tm-ex .tm-chip{padding:6px 10px;font-size:12.5px}
+  .tm-meths{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+  @media(max-width:520px){ .tm-meths{grid-template-columns:repeat(3,1fr)} }
+  .tm-meth{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid #E4E4EE;background:#fff;border-radius:12px;padding:10px 2px 8px;font-weight:700;font-size:13px;color:#334155;cursor:pointer;min-width:0}
+  .tm-meth .tm-mi{font-size:22px;line-height:1}
+  .tm-meth.on{border:1.5px solid #5B4DF0;background:#F4F2FF;color:#4B3FD0}
+  .tm-ck{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:#5B4DF0;color:#fff;display:flex;align-items:center;justify-content:center}
+  .tm-ck svg{width:12px;height:12px}
+  .tm-foot{gap:8px;flex-wrap:wrap;background:#fff}
+  .tm-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid #E4E4EE;background:#fff;border-radius:12px;padding:11px 14px;font-weight:800;font-size:14px;color:#334155;cursor:pointer}
+  .tm-btn svg{width:17px;height:17px}
+  .tm-btn.del{background:#FFF5F6;border-color:#FADADD;color:#E5484D}
+  .tm-btn.save{margin-left:auto;background:#5B4DF0;border-color:#5B4DF0;color:#fff;min-width:110px}
+  @media(max-width:520px){ .tm-foot .tm-btn{padding:10px 11px;font-size:13px} .tm-btn.save{min-width:0;flex:1} }
 </style>
 </head>
 <body>
@@ -4192,7 +4240,7 @@ function openTask(id, dateStr){
     score:"",scoreTotal:"",order:Date.now(),repeat:"none",repeatEnd:"",repeatDays:[]}; }
   if(!modalTask.repeat) modalTask.repeat="none";
   if(!modalTask.repeatDays) modalTask.repeatDays=[];
-  modalMore=false;
+  tmExamples=false;
   drawModal();
 }
 // 기존 항목 복사: 계획 내용은 유지, 실행 기록은 초기화한 '새 항목'으로 편집창 열기
@@ -4200,7 +4248,7 @@ function openTaskCopy(id){
   const s=state.tasksMap[id]; if(!s) return;
   modalTask={...s, id:uid(), done:false, actualMin:0, understood:"", rating:0, parentComment:"",
     score:"", scoreTotal:"", order:Date.now(), repeat:"none", repeatEnd:"", repeatDays:[]};
-  modalMore=false;
+  tmExamples=false;
   drawModal();
 }
 function mtoggleDay(dow){
@@ -4226,91 +4274,96 @@ function repeatDates(startStr, endStr, mode, weekdays){
 }
 let modalMore=false;
 function mset(k,v){ modalTask[k]=v; if(k==="subjectId") modalTask.textbookId=""; drawModal(); }
+// 할 일 추가/수정 — 카드형 레이아웃 (날짜 · 시간 / 과목 · 반복 / 무엇을 / 방법 / 메모 / 부모 코멘트)
+const TM_IC={
+  cal:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M8 14h.01M12 14h.01M16 14h.01"/></svg>`,
+  clock:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>`,
+  book:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5c2.6-1 5.4-1 8 .6v13c-2.6-1.4-5.4-1.5-8-.6zM21 5.5c-2.6-1-5.4-1-8 .6v13c2.6-1.4 5.4-1.5 8-.6z"/></svg>`,
+  rep:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9a8 8 0 0 0-14-3L4 8M4 4v4h4M4 15a8 8 0 0 0 14 3l2-2M20 20v-4h-4"/></svg>`,
+  doc:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M8.5 12h7M8.5 15.5h7M8.5 8.5h3"/></svg>`,
+  cap:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4 1.5 9 12 14l8.5-4v5.5h1.5V9zM5.5 12.6V16c0 1.7 3 3.4 6.5 3.4s6.5-1.7 6.5-3.4v-3.4L12 15.7z"/></svg>`,
+  flag:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3h1.8v18H5zM8 4h11l-2.5 4.2L19 12.5H8z"/></svg>`,
+  chat:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2.5 6.6 2.5 11c0 2.3 1.1 4.3 2.9 5.8L4.6 21l4.2-2.1c1 .3 2.1.4 3.2.4 5.5 0 9.5-3.6 9.5-8.3S17.5 3 12 3z"/><circle cx="8" cy="11" r="1.2" fill="#fff"/><circle cx="12" cy="11" r="1.2" fill="#fff"/><circle cx="16" cy="11" r="1.2" fill="#fff"/></svg>`,
+  sparkle:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 3l1.8 5.2L17 10l-5.2 1.8L10 17l-1.8-5.2L3 10l5.2-1.8zM18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z"/></svg>`,
+  trash:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`,
+  pin:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.5 2.5 21.5 9.5l-2 1-2.5-.5-3.5 3.5.5 4-1.5 1.5-4-4L4 19.5 4.5 17l4.5-4.5-4-4L6.5 7l4 .5L14 4l-.5-2.5z"/></svg>`,
+  check:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>`,
+};
+let tmExamples=false;
+function tmCount(el,max){ const c=el.parentNode.querySelector(".tm-cnt"); if(c) c.textContent=`${el.value.length}/${max}`; }
 function drawModal(){
   const t=modalTask;
   const isParent=state.profile.role==="parent";
   const subjTb=(state.categories.textbooks||[]).filter(x=>x.subjectId===t.subjectId);
   const selM=methodByName(t.method);
   const last=t.textbookId && lastEpisodeMap()[t.textbookId];
-  const subjChips=(state.categories.subjects||[]).map(s=>
-    `<button class="pick ${t.subjectId===s.id?"on":""}" style="${t.subjectId===s.id?`background:${s.color};border-color:${s.color}`:""}" onclick="mset('subjectId','${s.id}')">${esc(s.name)}</button>`).join("");
-  const tbChips=subjTb.map(tb=>`<button class="pick ${t.textbookId===tb.id?"on":""}" onclick="mset('textbookId','${tb.id}')">${esc(tb.name)}</button>`).join("");
-  const mChips=(state.categories.methods||[]).map(m=>`<button class="pick ${t.method===m.name?"on":""}" onclick="mset('method','${m.name}')">${m.icon} ${esc(m.name)}</button>`).join("");
-  const epField=selM&&selM.track?`
-    <div class="fld"><label class="fld-lbl">인강 회차 ${last?`(지난 회차: ${last}강)`:""}</label>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input class="inp" style="flex:1" value="${esc(t.episode)}" placeholder="예: 12강" oninput="modalTask.episode=this.value">
-        ${last?`<button class="next-btn" onclick="modalTask.episode='${last+1}강';drawModal()">다음 ${last+1}강</button>`:""}
-      </div></div>`:"";
-  const scoreField=selM&&selM.scored?`
-    <div class="fld"><label class="fld-lbl">문제풀이 점수 (맞은 점수 / 만점)</label>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input class="inp" style="width:90px" type="number" value="${t.score}" placeholder="맞은점수" oninput="modalTask.score=this.value">
-        <span style="color:#94A3B8">/</span>
-        <input class="inp" style="width:90px" type="number" value="${t.scoreTotal}" placeholder="만점" oninput="modalTask.scoreTotal=this.value">
-        <span style="font-size:12px;color:#94A3B8">예: 18 / 20</span>
-      </div></div>`:"";
-  const understoodField=(t.done||t.understood)?`
-    <div class="fld"><label class="fld-lbl">이해한 내용 / 복습 메모</label>
-      <textarea class="textarea" rows="2" oninput="modalTask.understood=this.value" placeholder="배운 핵심, 다시 볼 부분">${esc(t.understood)}</textarea></div>`:"";
-  const parentField=isParent?`
-    <div class="fld"><label class="fld-lbl">부모 코멘트</label>
-      <input class="inp" value="${esc(t.parentComment)}" placeholder="한 줄 피드백" oninput="modalTask.parentComment=this.value"></div>`:"";
-  const REPEATS=[["none","안 함"],["daily","매일"],["weekday","평일"],["weekend","주말"],["custom","요일선택"]];
-  const repeatChips=REPEATS.map(([k,l])=>`<button class="pick ${(t.repeat||"none")===k?"on":""}" onclick="mset('repeat','${k}')">${l}</button>`).join("");
-  const dayNames=["일","월","화","수","목","금","토"];
-  const repeatField=`
-    <div class="fld" style="border-top:1px dashed #E2E8F0;padding-top:14px">
-      <label class="fld-lbl">반복</label>
-      <div class="chip-wrap">${repeatChips}</div>
-    </div>
-    ${t.repeat==="custom"?`<div class="fld"><label class="fld-lbl">요일 선택</label><div class="chip-wrap">${dayNames.map((w,idx)=>`<button class="pick ${(t.repeatDays||[]).includes(idx)?"on":""}" onclick="mtoggleDay(${idx})">${w}</button>`).join("")}</div></div>`:""}
-    ${(t.repeat&&t.repeat!=="none")?`<div class="fld"><label class="fld-lbl">반복 종료일 (기한)</label><input class="inp" type="date" value="${t.repeatEnd||""}" min="${t.date}" onchange="modalTask.repeatEnd=this.value"><div style="font-size:11.5px;color:#94A3B8;margin-top:5px">시작일(${t.date})부터 종료일까지 조건에 맞는 날마다 같은 계획이 생성됩니다.</div></div>`:""}`;
-
-  // 기본은 과목 · 무엇을 · 시간 · 날짜만. 나머지는 '더 설정'
-  const more=!!modalMore;
-  const today=fmt(new Date()), tmr=fmt(addDays(new Date(),1));
-  const mins=[20,30,45,60,90];
   const isNew=!state.tasksMap[t.id];
-  document.getElementById("modalRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()">
-    <div class="modal">
+  const today=fmt(new Date()), tmr=fmt(addDays(new Date(),1));
+  const mins=[20,30,45,60,90], customMin=!mins.includes(Number(t.plannedMin));
+  const head=(ic,label,extra)=>`<div class="tm-h"><span class="tm-ic">${TM_IC[ic]}</span><b>${label}</b>${extra||""}</div>`;
+  const chip=(on,label,fn,style)=>`<button class="tm-chip ${on?"on":""}" style="${style||""}" onclick="${fn}">${label}</button>`;
+  const subj=(state.categories.subjects||[]).map(x=>chip(t.subjectId===x.id, esc(x.name), `mset('subjectId','${x.id}')`)).join("");
+  const tb=subjTb.length? `<div class="tm-sub">${subjTb.map(x=>chip(t.textbookId===x.id, esc(x.name), `mset('textbookId','${x.id}')`)).join("")}</div>` : "";
+  const REP=[["none","안 함"],["daily","매일"],["weekday","평일"],["weekend","주말"]];
+  const rep=t.repeat||"none";
+  const dayNames=["일","월","화","수","목","금","토"];
+  const repExtra = rep==="custom" || (rep!=="none")? `
+      ${rep==="custom"?`<div class="tm-days">${dayNames.map((w,i)=>chip((t.repeatDays||[]).includes(i), w, `mtoggleDay(${i})`)).join("")}</div>`:""}
+      <label class="tm-mini">종료일</label><input class="tm-inp" type="date" value="${t.repeatEnd||""}" min="${t.date}" onchange="modalTask.repeatEnd=this.value">` : "";
+  const meth=(state.categories.methods||[]).map(m=>`<button class="tm-meth ${t.method===m.name?"on":""}" onclick="mset('method','${t.method===m.name?"":m.name}')">
+      ${t.method===m.name?`<span class="tm-ck">${TM_IC.check}</span>`:""}<span class="tm-mi">${m.icon}</span><span>${esc(m.name)}</span></button>`).join("");
+  const T=templates();
+  const examples = tmExamples? `<div class="tm-ex">${T.length? T.map((x,i)=>`<button class="tm-chip" onclick="tmExamples=false;applyTemplate(${i})">${esc(x.name)}</button>`).join("")
+      : `<span class="tm-mini" style="margin:0">저장된 예시가 없어요. 아래 <b>템플릿으로 저장</b>으로 자주 하는 학습을 저장해 두세요.</span>`}</div>` : "";
+  const epField=selM&&selM.track?`<div class="tm-row"><label class="tm-mini">인강 회차 ${last?`(지난 ${last}강)`:""}</label>
+      <input class="tm-inp" style="max-width:140px" value="${esc(t.episode)}" placeholder="예: 12강" oninput="modalTask.episode=this.value">
+      ${last?`<button class="tm-chip" onclick="modalTask.episode='${last+1}강';drawModal()">다음 ${last+1}강</button>`:""}</div>`:"";
+  const scoreField=selM&&selM.scored?`<div class="tm-row"><label class="tm-mini">점수</label>
+      <input class="tm-inp" style="width:76px" type="number" value="${t.score}" placeholder="맞은" oninput="modalTask.score=this.value"> /
+      <input class="tm-inp" style="width:76px" type="number" value="${t.scoreTotal}" placeholder="만점" oninput="modalTask.scoreTotal=this.value"></div>`:"";
+  const area=(val,ph,key,max,rows)=>`<div class="tm-area"><textarea rows="${rows||2}" maxlength="${max}" placeholder="${ph}" oninput="modalTask.${key}=this.value;tmCount(this,${max})">${esc(val||"")}</textarea><span class="tm-cnt">${(val||"").length}/${max}</span></div>`;
+  const parentCard = (isParent || t.parentComment)? `<div class="tm-card">${head("chat","부모 코멘트")}
+      ${isParent? `<div class="tm-area one"><input maxlength="200" value="${esc(t.parentComment)}" placeholder="응원·피드백을 남겨주세요 😊" oninput="modalTask.parentComment=this.value;tmCount(this,200)"><span class="tm-cnt">${(t.parentComment||"").length}/200</span></div>`
+        : `<div class="tm-ro">${esc(t.parentComment)}</div>`}</div>` : "";
+  const inner=`
       <div class="modal-head"><h3>${isNew?"할 일 추가":"할 일 수정"}</h3><button class="icon-btn sm" onclick="closeModal()">✕</button></div>
       <div class="modal-body">
-        ${isNew? templateChipsHTML() : ""}
-        <div class="fld"><label class="fld-lbl">과목</label><div class="chip-wrap">${subjChips}</div></div>
-        <div class="fld"><label class="fld-lbl">무엇을</label>
-          <input class="inp" id="mUnit" value="${esc(t.unit)}" placeholder="예: 3단원 관계대명사 · p.42-58 · Day 12" oninput="modalTask.unit=this.value"></div>
-        <div class="fld"><label class="fld-lbl">시간</label>
-          <div class="chip-wrap">${mins.map(m=>`<button class="pick ${Number(t.plannedMin)===m?"on":""}" onclick="mset('plannedMin',${m})">${m}분</button>`).join("")}
-            <input class="inp" style="width:84px;padding:7px 10px" type="number" value="${mins.includes(Number(t.plannedMin))?"":t.plannedMin}" placeholder="직접" oninput="modalTask.plannedMin=Number(this.value)||modalTask.plannedMin"></div></div>
-        <div class="fld"><label class="fld-lbl">날짜</label>
-          <div class="chip-wrap">
-            <button class="pick ${t.date===today?"on":""}" onclick="mset('date','${today}')">오늘</button>
-            <button class="pick ${t.date===tmr?"on":""}" onclick="mset('date','${tmr}')">내일</button>
-            <input class="inp" style="width:auto;padding:7px 10px" type="date" value="${t.date}" onchange="mset('date',this.value)"></div></div>
-        ${parentField}
-        <button class="more-btn" style="padding:4px 0 2px" onclick="modalMore=!modalMore;drawModal()">${more?"간단히 ▴":"더 설정 (교재 · 방법 · 반복 · 메모) ▾"}</button>
-        ${more?`
-        ${subjTb.length?`<div class="fld"><label class="fld-lbl">교재</label><div class="chip-wrap">${tbChips}</div></div>`:""}
-        <div class="fld"><label class="fld-lbl">학습 방법</label><div class="chip-wrap">${mChips}</div></div>
-        ${epField}
-        ${scoreField}
-        <div class="fld"><label class="fld-lbl">목표 메모</label>
-          <input class="inp" value="${esc(t.plannedNote)}" placeholder="이 학습에서 꼭 할 것" oninput="modalTask.plannedNote=this.value"></div>
-        ${understoodField}
-        ${repeatField}
-        <div class="chip-wrap" style="margin-top:4px">
-          ${!isNew?`<button class="pick" onclick="copyFromModal()">복사해서 새로</button>`:""}
-          <button class="pick" onclick="saveTemplateFromModal()">템플릿으로 저장</button>
-        </div>`:""}
+        <div class="tm-grid">
+          <div class="tm-card">${head("cal","날짜")}
+            <div class="tm-chips">${chip(t.date===today,"오늘",`mset('date','${today}')`)}${chip(t.date===tmr,"내일",`mset('date','${tmr}')`)}
+              <input class="tm-inp tm-date" type="date" value="${t.date}" onchange="mset('date',this.value)"></div></div>
+          <div class="tm-card">${head("clock","시간 (분)")}
+            <div class="tm-chips five">${mins.map(m=>chip(Number(t.plannedMin)===m, m, `mset('plannedMin',${m})`)).join("")}</div>
+            <div class="tm-unit"><input class="tm-inp" type="number" min="1" value="${customMin?t.plannedMin:""}" placeholder="직접 입력" oninput="modalTask.plannedMin=Number(this.value)||30"><span>분</span></div></div>
+          <div class="tm-card">${head("book","과목")}<div class="tm-chips three">${subj}</div>${tb}</div>
+          <div class="tm-card warm">${head("rep","반복")}
+            <div class="tm-chips three">${REP.map(([k,l])=>chip(rep===k,l,`mset('repeat','${k}')`)).join("")}
+              <button class="tm-chip wide ${rep==="custom"?"on":""}" onclick="mset('repeat','custom')"><span>요일선택</span><span>›</span></button></div>
+            ${repExtra}</div>
+        </div>
+        <div class="tm-card">${head("doc","무엇을 할까요?",`<button class="tm-ex-btn" onclick="tmExamples=!tmExamples;drawModal()">${TM_IC.sparkle} 예시 불러오기</button>`)}
+          ${examples}
+          ${area(t.unit,"예: 3단원 관계대명사 · p.42-58 · Day 12","unit",100,2)}</div>
+        <div class="tm-card">${head("cap","학습 방법")}<div class="tm-meths">${meth}</div>${epField}${scoreField}</div>
+        <div class="tm-card">${head("flag","목표 메모")}${area(t.plannedNote,"이 학습에서 꼭 할 것","plannedNote",200,2)}</div>
+        ${t.done||t.understood? `<div class="tm-card">${head("doc","배운 내용 · 복습 메모")}${area(t.understood,"배운 핵심, 다시 볼 부분","understood",200,2)}</div>` : ""}
+        ${parentCard}
       </div>
-      <div class="modal-foot">
-        ${!isNew?`<button class="danger-btn" onclick="deleteFromModal()">삭제</button>`:""}
-        <div style="flex:1"></div>
-        <button class="ghost-btn" onclick="closeModal()">취소</button>
-        <button class="add-btn" onclick="saveFromModal()">저장</button>
-      </div>
-    </div></div>`;
+      <div class="modal-foot tm-foot">
+        ${!isNew?`<button class="tm-btn del" onclick="deleteFromModal()">${TM_IC.trash} 삭제</button>`:""}
+        <button class="tm-btn" onclick="saveTemplateFromModal()">${TM_IC.pin} 템플릿으로 저장</button>
+        <button class="tm-btn" onclick="closeModal()">취소</button>
+        <button class="tm-btn save" onclick="saveFromModal()">${TM_IC.check} 저장</button>
+      </div>`;
+  // 이미 열려 있으면 내용만 바꿔서 깜빡임·스크롤 튐 방지
+  const cur=document.querySelector("#modalRoot .modal.tm");
+  if(cur){
+    const sc=(cur.querySelector(".modal-body")||{}).scrollTop||0;
+    cur.innerHTML=inner;
+    const bd=cur.querySelector(".modal-body"); if(bd) bd.scrollTop=sc;
+    return;
+  }
+  document.getElementById("modalRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal tm">${inner}</div></div>`;
 }
 function planPtsHint(){}
 function closeModal(){ document.getElementById("modalRoot").innerHTML=""; modalTask=null; }
