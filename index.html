@@ -1610,7 +1610,7 @@ async function removeTemplate(i){
 function templateChipsHTML(){
   const T=templates();
   if(!T.length) return "";
-  return `<div class="fld"><label class="fld-lbl">📌 템플릿에서 불러오기</label>
+  return `<div class="fld"><label class="fld-lbl">자주 하는 것</label>
     <div class="chip-wrap">${T.map((t,i)=>`<button class="pick" onclick="applyTemplate(${i})">${esc(t.name)}</button>`).join("")}</div></div>`;
 }
 function templateListHTML(){
@@ -2184,19 +2184,6 @@ async function drawExtApps(){
   if(root) root.innerHTML=body;
 }
 // 할 일 화면용 요약 배너
-function extTodayHTML(){
-  const c=extConf();
-  if(!c.enabled) return "";
-  if(!state.extCache || state.extCache.uid!==state.ownerUid){ loadExtAll().then(()=>{ if(state.tab==="todo") render(); }); return ""; }
-  const cr=extCreditedToday();
-  if(cr.total<=0) return "";
-  const parts=Object.keys(EXT_APPS).filter(k=>cr.per[k]>0).map(k=>`${EXT_APPS[k].emo} ${EXT_APPS[k].short} ${cr.per[k]}분`);
-  return `<div style="background:#F7FDFA;border:1px solid #BFE8D6;border-radius:14px;padding:10px 13px;margin-bottom:11px;font-size:12.5px;color:#0E7A55;line-height:1.5;cursor:pointer" onclick="setTab('learn')">
-    📚 <b>오늘 학습앱에서 +${cr.total}분</b> 인정됐어요
-    <span style="color:#6D6B7A">· ${parts.join(" / ")}</span>
-  </div>`;
-}
-
 /* ----- 부스터(시험 대비) 모드 — 메인 진입 ----- */
 // 해당 주에 부스터 기간이 하루라도 포함되면 그 배율 적용(최댓값)
 function examBoostRateFor(days){
@@ -3855,47 +3842,7 @@ function setDayMood(ds, mood){
   saveDayDiary(ds, cur.mood===mood? "" : mood);
 }
 /* ----- 참잘했어요 도장 ----- */
-function stampHTML(t){
-  const pp=planPoints(t), rp=reviewPoints(t);
-  const cr=(t.creditRate!=null)?Number(t.creditRate):1;
-  const act=Number(t.actualMin)||0, plan=Number(t.plannedMin)||0;
-  const full = pp>=PLAN_PTS.full && rp>=REVIEW_PTS.full && cr>=1;   // 계획·복기·당일체크 모두 만점
-  let cls="", top="참잘했어요", sub="VERY GOOD";
-  if(full && plan>0 && act>=plan*1.5){ cls="gold"; top="최고예요"; sub="EXCELLENT"; }
-  else if(full){ cls=""; top="참잘했어요"; sub="VERY GOOD"; }
-  else { cls="blue"; top="잘했어요"; sub="GOOD"; }
-  return `<div class="stamp ${cls}"><b>${top}</b><i>${sub}</i></div>`;
-}
 /* ----- 어제의 나 vs 오늘의 나 ----- */
-function vsYesterdayHTML(ds){
-  const yst=fmt(addDays(parseD(ds),-1));
-  const sum=(d)=>{
-    const ts=state.tasks.filter(t=>t.date===d);
-    const done=ts.filter(t=>t.done);
-    return { min:done.reduce((a,t)=>a+creditedMin(t),0), done:done.length, planned:ts.length };
-  };
-  const y=sum(yst), o=sum(ds);
-  if(y.planned===0 && o.planned===0) return "";      // 비교할 게 없으면 숨김
-  const max=Math.max(y.min,o.min,30);
-  const bar=(v,color)=>`<div class="vs-bar"><div style="width:${Math.max(8,Math.round(v/max*100))}%;background:${color}"><span>${v}분</span></div></div>`;
-  const diff=o.min-y.min;
-  let verdict;
-  if(o.min===0 && y.min>0){
-    verdict=`<div class="vs-verdict" style="background:#F1F4F8;color:#64748B">어제는 ${y.min}분 했어요. 오늘도 시작해 볼까요?</div>`;
-  }else if(diff>0){
-    verdict=`<div class="vs-verdict" style="background:#EAF7F1;color:#0E7A55">🔥 어제보다 <b>${diff}분 더</b> 했어요! 오늘의 내가 이겼습니다</div>`;
-  }else if(diff===0 && o.min>0){
-    verdict=`<div class="vs-verdict" style="background:#EFECFD;color:#4B3FA6">🤝 어제와 똑같이 <b>${o.min}분</b> — 꾸준함이 최고예요</div>`;
-  }else{
-    verdict=`<div class="vs-verdict" style="background:#FFF7E8;color:#8A6516">어제보다 <b>${-diff}분</b> 적어요. ${-diff}분만 더 하면 어제의 나를 넘어요!</div>`;
-  }
-  return `<div class="vs-card">
-    <div class="vs-head">⚔️ 어제의 나 vs 오늘의 나</div>
-    <div class="vs-row"><span class="vs-lbl">어제</span>${bar(y.min,"#94A3B8")}<span style="font-size:11px;color:#94A3B8;width:44px;text-align:right">${y.done}/${y.planned}</span></div>
-    <div class="vs-row"><span class="vs-lbl">오늘</span>${bar(o.min,o.min>=y.min?"#0E9F6E":"#F5A524")}<span style="font-size:11px;color:#94A3B8;width:44px;text-align:right">${o.done}/${o.planned}</span></div>
-    ${verdict}
-  </div>`;
-}
 function renderMonCard(){
   const tot0=monReady();
   if(!tot0){
@@ -3955,7 +3902,6 @@ function renderDay(){
   }
   const isParent = state.profile.role==="parent";
   const undoneCount = ts.filter(t=>!t.done).length;
-  const ch = cheerFor(ts.length, done);
   if(state.weakCache===null) refreshWeakCache().then(()=>{ if(state.view==="day") render(); });
   if(state.streakCache===null) refreshStreakCache().then(()=>{ if(state.view==="day") render(); });
   return `<div class="day">
@@ -4100,13 +4046,13 @@ function renderTaskRow(t){
           </div>
           ${scoreExec}
           <div class="exec-fld grow">
-            <label class="exec-lbl">배운 내용 · 복습 메모 ${t.done?`<span style="color:${rPts>=REVIEW_PTS.full?"#0E7A55":"#8A6516"}">복기 ${rPts}/10</span>`:""}</label>
+            <label class="exec-lbl">메모 (선택)</label>
             <input class="exec-note" value="${esc(t.understood)}" placeholder="핵심 개념, 어려웠던 점, 다시 볼 부분"
               onchange="updateExec('${t.id}','understood',this.value)">
           </div>
         </div>
         <div class="task-links">
-          ${planTag}${reviewGapTag}
+          ${reviewGapTag}
           <span class="sp"></span>
           <button onclick="openTask('${t.id}')">수정</button><button onclick="openTaskCopy('${t.id}')">복사</button><button class="del" onclick="removeTask('${t.id}')">삭제</button>
         </div>` : "";
@@ -4120,7 +4066,6 @@ function renderTaskRow(t){
           ${m?`<span class="method-tag">${esc(m.name)}${t.episode?" "+esc(t.episode):""}</span>`:""}
           <span class="time-tag">${t.plannedMin||0}분</span>
           ${scoreTag}
-          ${creditTag}
         </div>
         <div class="task-title" onclick="toggleTaskOpen('${t.id}')">${esc(t.unit||(su?su.name:"학습"))}</div>
         ${doneLine}
@@ -4143,10 +4088,8 @@ function hasText(v,min){ return !!(v && String(v).trim().length>=(min||2)); }
 function planPoints(t){ return (hasText(t.unit)||hasText(t.plannedNote,4))? PLAN_PTS.full : PLAN_PTS.bare; }
 function reviewPoints(t){ return hasText(t.understood,5)? REVIEW_PTS.full : REVIEW_PTS.bare; }
 // 두 점수의 평균이 학습 인정 배율(0.25 ~ 1.0)
-function qualityRate(t){
-  if(!t.done) return planPoints(t)/10;
-  return (planPoints(t)+reviewPoints(t))/20;
-}
+// 계획·복기 점수로 시간을 깎지 않음 (습관 들이기가 우선) — 메모는 선택
+function qualityRate(t){ return 1; }
 /* ----- 체크 시점별 학습 인정률: 당일 100% · 다음날 50% · 이틀 후 불가 ----- */
 function daysLate(dateStr, now){
   now=now||new Date();
@@ -4155,9 +4098,8 @@ function daysLate(dateStr, now){
 }
 function creditFor(dateStr, now){
   const d=daysLate(dateStr, now);
-  if(d<0) return {rate:1, label:"예정일 이전", ok:true};      // 미래 날짜(미리 체크)는 100%
-  if(d===0) return {rate:1, label:"당일 체크 · 100% 인정", ok:true};
-  if(d===1) return {rate:0.5, label:"다음날 체크 · 50% 인정", ok:true};
+  // 늦게 체크해도 깎지 않음 · 일주일 안에만 체크 가능
+  if(d<=7) return {rate:1, label:"인정", ok:true};
   return {rate:0, label:`${d}일 지나 체크 불가`, ok:false};
 }
 /* ----- 학습시간 검증: 기록한 시간 인정 (타이머로 잰 시간은 용돈 +10%) · 이상치 차단 ----- */
@@ -4184,127 +4126,20 @@ async function toggleDone(id){
   const t=state.tasksMap[id]; if(!t)return;
   if(!t.done){
     const cr=creditFor(t.date);
-    if(!cr.ok){ alert(`이 학습은 ${t.date} 계획이라 ${cr.label}입니다.\n\n당일 체크 = 100% 인정, 다음날 체크 = 50% 인정,\n이틀이 지나면 체크할 수 없어요.`); return; }
+    if(!cr.ok){ alert(`${t.date} 계획은 일주일이 지나 체크할 수 없어요.`); return; }
     // 원탭 완료: 타이머로 잰 시간 → 적어 둔 시간 → 계획 시간 순으로 기록 (메모는 나중에 '기록 · 메모'에서)
     const actualMin=Number(t.actualMin)||Math.max(Number(t.timerMin)||0, Number(t.plannedMin)||0);
     const saved={...t, done:true, actualMin, creditRate:cr.rate, checkedAt:Date.now(), appLinked:taskApp(t)};
     state.justDone=t.id; setTimeout(()=>{ state.justDone=null; },900);
     await saveTask(saved);
     const left=state.tasks.filter(x=>x.date===t.date && !x.done && x.id!==t.id).length;
-    toast(`완료 · ${actualMin}분 기록${cr.rate<1?" (50% 인정)":""}${left? ` · 남은 학습 ${left}개` : " · 오늘 계획 끝"}`,"good");
+    toast(`완료 · ${actualMin}분 기록${left? ` · 남은 학습 ${left}개` : " · 오늘 계획 끝"}`,"good");
     return;
   }else{
     await saveTask({...t,done:false,creditRate:null,appLinked:null});
   }
 }
 
-/* ----- 완료 점검 창: 학습내용(필수) + 실제 시간 입력 후 학습 인정 ----- */
-let completeTarget=null;
-function openCompleteModal(id){
-  const t=state.tasksMap[id]; if(!t)return;
-  const cr=creditFor(t.date);
-  if(!cr.ok){ alert(`이 학습은 ${t.date} 계획이라 ${cr.label}입니다.\n\n당일 체크 = 100% 인정, 다음날 체크 = 50% 인정,\n이틀이 지나면 체크할 수 없어요.`); return; }
-  completeTarget=id;
-  const su=subjById(t.subjectId);
-  const crBox = cr.rate<1
-    ? `<div style="background:#FFF7E8;border:1px solid #F5DFA6;color:#8A6516;border-radius:9px;padding:9px 11px;font-size:12.5px;margin-bottom:12px;line-height:1.45">⏳ <b>${cr.label}</b><br>계획한 날 저녁에 체크하면 100% 인정돼요.</div>`
-    : `<div style="background:#F3FBF7;border:1px solid #BFE8D6;color:#0E7A55;border-radius:9px;padding:9px 11px;font-size:12.5px;margin-bottom:12px">✅ <b>${cr.label}</b></div>`;
-  document.getElementById("modalRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()">
-    <div class="modal" style="max-width:420px">
-      <div class="modal-head"><h3>학습 기록 · 메모</h3><button class="icon-btn sm" onclick="closeModal()">✕</button></div>
-      <div class="modal-body">
-        <div class="tags" style="margin-bottom:13px">
-          <span class="subj-tag" style="background:${su?su.color:"#94A3B8"}">${esc(su?su.name:"과목")}</span>
-          ${t.unit?`<span class="unit-tag">${esc(t.unit)}</span>`:""}
-          <span class="time-tag">⏱ 계획 ${t.plannedMin||0}분</span>
-        </div>
-        ${crBox}
-        <div class="fld"><label class="fld-lbl">오늘 학습한 내용 복기 <span id="cm-pts" style="color:#0E9F6E">(${REVIEW_PTS.full}/10점)</span></label>
-          <textarea class="textarea" id="cm-understood" rows="4" placeholder="예) to부정사의 명사적 용법 — 주어·목적어·보어 자리에 쓰임. It ~ to 구문으로 가주어 처리. 부사적 용법(목적)은 '~하기 위해'로 해석."
-            oninput="cmPts()">${esc(t.understood||"")}</textarea>
-          <div style="font-size:11.5px;color:#64748B;margin-top:6px;line-height:1.45">
-            💡 배운 내용을 직접 정리하면 <b>${REVIEW_PTS.full}/10점</b>, 체크만 하면 <b>${REVIEW_PTS.bare}/10점</b>으로 인정돼요.
-          </div></div>
-        <div class="fld"><label class="fld-lbl">실제 학습 시간(분)</label>
-          <input class="inp" id="cm-min" type="number" value="${t.actualMin||t.plannedMin||0}" oninput="cmPts()">
-          <div style="font-size:11.5px;margin-top:6px;line-height:1.45;color:${(Number(t.timerMin)||0)>0?"#0E7A55":"#A5323A"}">
-            ⏱ 적은 시간은 모두 인정되고, <b>타이머로 잰 시간은 용돈 +10%</b>예요 · 지금 타이머 <b>${Number(t.timerMin)||0}분</b>${(Number(t.timerMin)||0)>0?"":" — 다음엔 ▶ 타이머나 포커스 타이머를 켜 보세요"}
-          </div>
-          <div class="chip-wrap" style="margin-top:7px">
-            ${[["계획만큼",t.plannedMin||0],["+10",-10],["+30",-30]].map(([l,v])=>
-              `<button class="pick" onclick="cmTime(${v})">${l}</button>`).join("")}
-          </div></div>
-      </div>
-      <div id="cmHint" class="pts-hint"></div>
-      <div class="modal-foot">
-        <div style="flex:1"></div>
-        <button class="ghost-btn" onclick="closeModal()">취소</button>
-        <button class="add-btn" onclick="submitComplete()">✔ 학습 인정</button>
-      </div>
-    </div></div>`;
-  cmPts();
-  setTimeout(()=>{const el=document.getElementById("cm-understood");if(el)el.focus();},50);
-}
-function cmPts(){
-  const el=document.getElementById("cm-pts");
-  const v=(document.getElementById("cm-understood")||{}).value||"";
-  const full=hasText(v,5);
-  if(el){
-    el.textContent=`(${full?REVIEW_PTS.full:REVIEW_PTS.bare}/10점)`;
-    el.style.color= full? "#0E9F6E" : "#F5A524";
-  }
-  const hint=document.getElementById("cmHint"); if(!hint) return;
-  const t=state.tasksMap[completeTarget]; if(!t) return;
-  const minEl=document.getElementById("cm-min");
-  const typed=Number(minEl&&minEl.value)||t.plannedMin||0;
-  const actual=typed;   // 기록한 시간 인정 (타이머 보너스는 용돈에서)
-  const cr=creditFor(t.date);
-  const mk=(rp)=>Math.round(actual*cr.rate*((planPoints(t)+rp)/20));
-  const nowMin=mk(full?REVIEW_PTS.full:REVIEW_PTS.bare), bestMin=mk(REVIEW_PTS.full);
-  if(full){
-    hint.className="pts-hint good";
-    hint.innerHTML=`<span>✅</span><div>복기 <b>${REVIEW_PTS.full}/10점</b> · 계획 <b>${planPoints(t)}/10점</b> → 이번 학습 <b>${nowMin}분</b> 인정돼요!</div>`;
-  }else{
-    hint.className="pts-hint warn";
-    hint.innerHTML=`<span>💡</span><div><b>오늘 배운 내용을 적으면 포인트가 크게 올라가요!</b><br>
-      지금 완료 시 복기 <b>${REVIEW_PTS.bare}/10점</b> → <b>${nowMin}분</b> 인정.
-      내용을 적으면 <b>${REVIEW_PTS.full}/10점</b>이 되어 <b>${bestMin}분</b> 인정돼요.</div>`;
-  }
-}
-function cmTime(v){
-  const inp=document.getElementById("cm-min"); if(!inp)return;
-  if(v<0) inp.value=(Number(inp.value)||0)+(-v); else inp.value=v;
-  cmPts();
-}
-async function submitComplete(){
-  const t=state.tasksMap[completeTarget]; if(!t){closeModal();return;}
-  const cr=creditFor(t.date);
-  if(!cr.ok){ alert(cr.label+" — 체크할 수 없어요."); closeModal(); return; }
-  const understood=(document.getElementById("cm-understood").value||"").trim();
-  if(!hasText(understood,5)){
-    if(!confirm(`복기 내용이 비어 있어요.\n\n지금 완료하면 복기 점수 ${REVIEW_PTS.bare}/10점으로 인정됩니다.\n(배운 내용을 정리하면 ${REVIEW_PTS.full}/10점)\n\n이대로 완료할까요?`)) return;
-  }
-  const actualMin=Number(document.getElementById("cm-min").value)||t.plannedMin||0;
-  const dayTs=state.tasks.filter(x=>x.date===t.date);
-  const doneCount=dayTs.filter(x=>x.done).length+1;
-  const saved={...t,done:true,understood,actualMin,creditRate:cr.rate,checkedAt:Date.now(),appLinked:taskApp(t)};
-  state.justDone=t.id;                       // 완료 애니메이션 표시용
-  setTimeout(()=>{ state.justDone=null; },900);
-  await saveTask(saved);
-  closeModal(); completeTarget=null;
-  const cm=creditedMin(saved), pp=planPoints(saved), rp=reviewPoints(saved);
-  if(pp<PLAN_PTS.full || rp<REVIEW_PTS.full || cr.rate<1){
-    toast(`계획 ${pp}/10 · 복기 ${rp}/10 → ${cm}분 인정`,"info");
-  }else if(dayTs.length>0 && doneCount>=dayTs.length){
-    toast("오늘 계획 완료","good");
-  }else{
-    toast(PRAISES[Math.floor(Math.random()*PRAISES.length)],"good");
-  }
-  // 복습 제안: 복기를 충실히 한 새 학습에 대해서만(복습 항목 자체는 제외)
-  if(!saved.reviewOf && rp>=REVIEW_PTS.full && saved.method!=="복습"){
-    setTimeout(()=>openReviewSuggest(saved.id), 500);
-  }
-}
 function openReviewSuggest(id){
   const t=state.tasksMap[id]; if(!t) return;
   const su=subjById(t.subjectId);
@@ -4357,6 +4192,7 @@ function openTask(id, dateStr){
     score:"",scoreTotal:"",order:Date.now(),repeat:"none",repeatEnd:"",repeatDays:[]}; }
   if(!modalTask.repeat) modalTask.repeat="none";
   if(!modalTask.repeatDays) modalTask.repeatDays=[];
+  modalMore=false;
   drawModal();
 }
 // 기존 항목 복사: 계획 내용은 유지, 실행 기록은 초기화한 '새 항목'으로 편집창 열기
@@ -4364,6 +4200,7 @@ function openTaskCopy(id){
   const s=state.tasksMap[id]; if(!s) return;
   modalTask={...s, id:uid(), done:false, actualMin:0, understood:"", rating:0, parentComment:"",
     score:"", scoreTotal:"", order:Date.now(), repeat:"none", repeatEnd:"", repeatDays:[]};
+  modalMore=false;
   drawModal();
 }
 function mtoggleDay(dow){
@@ -4387,6 +4224,7 @@ function repeatDates(startStr, endStr, mode, weekdays){
   }
   return out.length?out:[startStr];
 }
+let modalMore=false;
 function mset(k,v){ modalTask[k]=v; if(k==="subjectId") modalTask.textbookId=""; drawModal(); }
 function drawModal(){
   const t=modalTask;
@@ -4417,73 +4255,68 @@ function drawModal(){
       <textarea class="textarea" rows="2" oninput="modalTask.understood=this.value" placeholder="배운 핵심, 다시 볼 부분">${esc(t.understood)}</textarea></div>`:"";
   const parentField=isParent?`
     <div class="fld"><label class="fld-lbl">부모 코멘트</label>
-      <input class="inp" value="${esc(t.parentComment)}" placeholder="응원·피드백" oninput="modalTask.parentComment=this.value"></div>`:"";
+      <input class="inp" value="${esc(t.parentComment)}" placeholder="한 줄 피드백" oninput="modalTask.parentComment=this.value"></div>`:"";
   const REPEATS=[["none","안 함"],["daily","매일"],["weekday","평일"],["weekend","주말"],["custom","요일선택"]];
   const repeatChips=REPEATS.map(([k,l])=>`<button class="pick ${(t.repeat||"none")===k?"on":""}" onclick="mset('repeat','${k}')">${l}</button>`).join("");
   const dayNames=["일","월","화","수","목","금","토"];
   const repeatField=`
     <div class="fld" style="border-top:1px dashed #E2E8F0;padding-top:14px">
-      <label class="fld-lbl">🔁 반복 생성 <span style="color:#94A3B8;font-weight:600">— 기간 동안 자동으로 여러 날에 추가</span></label>
+      <label class="fld-lbl">반복</label>
       <div class="chip-wrap">${repeatChips}</div>
     </div>
     ${t.repeat==="custom"?`<div class="fld"><label class="fld-lbl">요일 선택</label><div class="chip-wrap">${dayNames.map((w,idx)=>`<button class="pick ${(t.repeatDays||[]).includes(idx)?"on":""}" onclick="mtoggleDay(${idx})">${w}</button>`).join("")}</div></div>`:""}
     ${(t.repeat&&t.repeat!=="none")?`<div class="fld"><label class="fld-lbl">반복 종료일 (기한)</label><input class="inp" type="date" value="${t.repeatEnd||""}" min="${t.date}" onchange="modalTask.repeatEnd=this.value"><div style="font-size:11.5px;color:#94A3B8;margin-top:5px">시작일(${t.date})부터 종료일까지 조건에 맞는 날마다 같은 계획이 생성됩니다.</div></div>`:""}`;
 
+  // 기본은 과목 · 무엇을 · 시간 · 날짜만. 나머지는 '더 설정'
+  const more=!!modalMore;
+  const today=fmt(new Date()), tmr=fmt(addDays(new Date(),1));
+  const mins=[20,30,45,60,90];
+  const isNew=!state.tasksMap[t.id];
   document.getElementById("modalRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()">
     <div class="modal">
-      <div class="modal-head"><h3>${t.done?"학습 점검":"학습 계획"}</h3><button class="icon-btn sm" onclick="closeModal()">✕</button></div>
+      <div class="modal-head"><h3>${isNew?"할 일 추가":"할 일 수정"}</h3><button class="icon-btn sm" onclick="closeModal()">✕</button></div>
       <div class="modal-body">
-        <div class="fld"><label class="fld-lbl">날짜</label>
-          <input class="inp" type="date" value="${t.date}" onchange="modalTask.date=this.value"></div>
-        ${templateChipsHTML()}
+        ${isNew? templateChipsHTML() : ""}
         <div class="fld"><label class="fld-lbl">과목</label><div class="chip-wrap">${subjChips}</div></div>
+        <div class="fld"><label class="fld-lbl">무엇을</label>
+          <input class="inp" id="mUnit" value="${esc(t.unit)}" placeholder="예: 3단원 관계대명사 · p.42-58 · Day 12" oninput="modalTask.unit=this.value"></div>
+        <div class="fld"><label class="fld-lbl">시간</label>
+          <div class="chip-wrap">${mins.map(m=>`<button class="pick ${Number(t.plannedMin)===m?"on":""}" onclick="mset('plannedMin',${m})">${m}분</button>`).join("")}
+            <input class="inp" style="width:84px;padding:7px 10px" type="number" value="${mins.includes(Number(t.plannedMin))?"":t.plannedMin}" placeholder="직접" oninput="modalTask.plannedMin=Number(this.value)||modalTask.plannedMin"></div></div>
+        <div class="fld"><label class="fld-lbl">날짜</label>
+          <div class="chip-wrap">
+            <button class="pick ${t.date===today?"on":""}" onclick="mset('date','${today}')">오늘</button>
+            <button class="pick ${t.date===tmr?"on":""}" onclick="mset('date','${tmr}')">내일</button>
+            <input class="inp" style="width:auto;padding:7px 10px" type="date" value="${t.date}" onchange="mset('date',this.value)"></div></div>
+        ${parentField}
+        <button class="more-btn" style="padding:4px 0 2px" onclick="modalMore=!modalMore;drawModal()">${more?"간단히 ▴":"더 설정 (교재 · 방법 · 반복 · 메모) ▾"}</button>
+        ${more?`
         ${subjTb.length?`<div class="fld"><label class="fld-lbl">교재</label><div class="chip-wrap">${tbChips}</div></div>`:""}
-        <div class="fld"><label class="fld-lbl">단원 / 범위 <span style="color:#0E9F6E">(적으면 계획 ${PLAN_PTS.full}/10점, 비우면 ${PLAN_PTS.bare}/10점)</span></label>
-          <input class="inp" value="${esc(t.unit)}" placeholder="예: 3단원 관계대명사, p.42-58" oninput="modalTask.unit=this.value;planPtsHint()"></div>
         <div class="fld"><label class="fld-lbl">학습 방법</label><div class="chip-wrap">${mChips}</div></div>
         ${epField}
         ${scoreField}
-        <div class="fld"><label class="fld-lbl">계획 시간(분)</label>
-          <input class="inp" type="number" value="${t.plannedMin}" oninput="modalTask.plannedMin=Number(this.value)"></div>
-        <div class="fld"><label class="fld-lbl">계획 내용 / 목표</label>
-          <textarea class="textarea" rows="2" oninput="modalTask.plannedNote=this.value;planPtsHint()" placeholder="오늘 이 학습에서 이루고 싶은 것">${esc(t.plannedNote)}</textarea></div>
+        <div class="fld"><label class="fld-lbl">목표 메모</label>
+          <input class="inp" value="${esc(t.plannedNote)}" placeholder="이 학습에서 꼭 할 것" oninput="modalTask.plannedNote=this.value"></div>
         ${understoodField}
-        ${parentField}
         ${repeatField}
+        <div class="chip-wrap" style="margin-top:4px">
+          ${!isNew?`<button class="pick" onclick="copyFromModal()">복사해서 새로</button>`:""}
+          <button class="pick" onclick="saveTemplateFromModal()">템플릿으로 저장</button>
+        </div>`:""}
       </div>
-      <div id="planHint" class="pts-hint"></div>
       <div class="modal-foot">
-        <button class="danger-btn" onclick="deleteFromModal()">🗑️ 삭제</button>
-        ${state.tasksMap[t.id]?`<button class="ghost-btn" onclick="copyFromModal()">📋 복사</button>`:""}
-        <button class="ghost-btn" onclick="saveTemplateFromModal()">📌 템플릿</button>
+        ${!isNew?`<button class="danger-btn" onclick="deleteFromModal()">삭제</button>`:""}
         <div style="flex:1"></div>
         <button class="ghost-btn" onclick="closeModal()">취소</button>
-        <button class="add-btn" onclick="saveFromModal()">✔ 저장</button>
+        <button class="add-btn" onclick="saveFromModal()">저장</button>
       </div>
     </div></div>`;
-  planPtsHint();
 }
-function planPtsHint(){
-  const el=document.getElementById("planHint"); if(!el||!modalTask) return;
-  const pts=planPoints(modalTask), min=Number(modalTask.plannedMin)||0;
-  if(pts>=PLAN_PTS.full){
-    el.className="pts-hint good";
-    el.innerHTML=`<span>✅</span><div>계획 점수 <b>${PLAN_PTS.full}/10점</b>으로 저장돼요. 이대로 학습하고 복기까지 하면 <b>${min}분 전부</b> 인정받아요!</div>`;
-  }else{
-    const now=Math.round(min*(PLAN_PTS.bare/10 + REVIEW_PTS.full/10)/2);
-    const full=Math.round(min*1);
-    el.className="pts-hint warn";
-    el.innerHTML=`<span>💡</span><div><b>학습할 단원·범위를 적으면 포인트가 올라가요!</b><br>
-      지금 저장하면 계획 <b>${PLAN_PTS.bare}/10점</b> → 나중에 복기까지 해도 ${min}분 중 <b>${now}분</b>만 인정.
-      범위를 적으면 <b>${PLAN_PTS.full}/10점</b>이 되어 <b>${full}분</b>까지 인정돼요.</div>`;
-  }
-}
+function planPtsHint(){}
 function closeModal(){ document.getElementById("modalRoot").innerHTML=""; modalTask=null; }
 async function saveFromModal(){
   if(!modalTask.subjectId){ alert("과목을 선택해 주세요."); return; }
-  if(planPoints(modalTask)<PLAN_PTS.full){
-    if(!confirm(`학습할 단원·범위가 비어 있어요.\n\n지금 저장하면 계획 점수 ${PLAN_PTS.bare}/10점으로 인정됩니다.\n(구체적으로 적으면 ${PLAN_PTS.full}/10점)\n\n이대로 저장할까요?`)) return;
-  }
+
   const {repeat,repeatEnd,repeatDays,...base}=modalTask;
   if(repeat && repeat!=="none"){
     if(!repeatEnd){ alert("반복 종료일(기한)을 선택해 주세요."); return; }
