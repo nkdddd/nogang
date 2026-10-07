@@ -335,6 +335,13 @@ body.fx-on .pk-open .pack-stage { position: relative; z-index: 90; }
 /* 📖 도감: 잡은 포켓몬 → 못 잡은 포켓몬(세대별) */
 .pd-h{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px;margin:6px 0 8px;color:#0E7A55}
 .pd-h b{font-size:15px}.pd-h.miss{margin-top:16px;color:#64748B}
-.pd-gens{margin-bottom:10px}
 .pdex.locked-list{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
 .pdex.locked-list .pcard{padding:6px}
+.pd-sum{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:10px}.pd-sum b{font-size:20px}.pd-sum .pd-bar{flex:1;height:8px}.pd-sum small{color:#64748B;font-weight:700}
+.pd-bar{display:block;height:5px;border-radius:9px;background:#E2E8F0;overflow:hidden}.pd-bar i{display:block;height:100%;background:linear-gradient(90deg,#34D399,#10B981);border-radius:9px}
+.pd-by{margin-bottom:10px}
+.pd-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px;margin-bottom:12px}
+.pd-g{display:flex;flex-direction:column;align-items:flex-start;gap:3px;border:1px solid var(--line,#E4E4EA);background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer;text-align:left;font-size:12.5px;font-weight:700;color:#334155}
+.pd-g small{color:#94A3B8;font-weight:700;font-size:11.5px}.pd-g .pd-bar{width:100%}
+.pd-g.on{border-color:#1C1B22;box-shadow:0 0 0 2px #1C1B22 inset}.pd-g.full{background:#F0FDF4}
+.pd-tog{width:100%;border:0;background:#F8FAFC;border-radius:10px;padding:10px 12px;cursor:pointer;justify-content:flex-start}.pd-tog span{margin-left:auto;font-size:12px}

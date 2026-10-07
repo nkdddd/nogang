@@ -138,21 +138,33 @@ function tabHTML(){
 
 // 📖 도감: 잡은 포켓몬을 앞에 · 아직 못 잡은 포켓몬은 세대별로 따로
 const GEN_NAME={1:"1세대 관동",2:"2세대 성도",3:"3세대 호연",4:"4세대 신오",5:"5세대 하나",6:"6세대 칼로스",7:"7세대 알로라",8:"8세대 가라르",9:"9세대 팔데아"};
-let dexGen=0;
+// 분류: 세대 · 타입 · 등급. 묶음마다 잡은 수를 보여 주고, 고른 묶음만 펼쳐요 (잡은 포켓몬 앞 · 못 잡은 포켓몬 따로)
+const TYPE_ORDER=["노말","불꽃","물","풀","전기","얼음","격투","독","땅","비행","에스퍼","벌레","바위","고스트","드래곤","악","강철","페어리"];
+const TYPE_EMO={노말:"⚪",불꽃:"🔥",물:"💧",풀:"🌿",전기:"⚡",얼음:"❄️",격투:"🥊",독:"☠️",땅:"⛰️",비행:"🪽",에스퍼:"🔮",벌레:"🐛",바위:"🪨",고스트:"👻",드래곤:"🐉",악:"🌑",강철:"⚙️",페어리:"🧚"};
+const DEX_BY={
+  gen:{name:"세대", keys:()=>[...new Set(POKEMON.map(m=>m[7]||1))].sort((a,b)=>a-b), of:m=>m[7]||1, label:k=>GEN_NAME[k]||k+"세대"},
+  type:{name:"타입", keys:()=>TYPE_ORDER.filter(t=>POKEMON.some(m=>m[2]===t)), of:m=>m[2], label:k=>`${TYPE_EMO[k]||""} ${k}`},
+  grade:{name:"등급", keys:()=>["c","r","l","m","s"].filter(g=>POKEMON.some(m=>m[5]===g)), of:m=>m[5], label:k=>`${GRADES[k].icon} ${GRADES[k].name}`},
+};
+let dexBy="gen", dexKey=null, dexMiss=false;
 function dexHTML(){
-  const shin=W().shinies||[];
-  const got=POKEMON.filter(m=>dexHas(m[0])).sort((a,b)=>a[3]-b[3]);
-  const miss=POKEMON.filter(m=>!dexHas(m[0]));
-  const gens=[...new Set(POKEMON.map(m=>m[7]||1))].sort((a,b)=>a-b);
-  const cnt=g=>miss.filter(m=>(m[7]||1)===g).length;
-  if(!dexGen || !gens.includes(dexGen) || (!cnt(dexGen) && gens.some(cnt))) dexGen=gens.find(cnt)||gens[0];
-  const list=miss.filter(m=>(m[7]||1)===dexGen);
-  return `<div class="pd-h">✅ 잡은 포켓몬 <b>${got.length}</b>종</div>
+  const shin=W().shinies||[], by=DEX_BY[dexBy], keys=by.keys();
+  const total=POKEMON.length, gotN=POKEMON.filter(m=>dexHas(m[0])).length;
+  const stat=k=>{ const all=POKEMON.filter(m=>by.of(m)===k); return {all:all.length, got:all.filter(m=>dexHas(m[0])).length}; };
+  if(dexKey==null || !keys.includes(dexKey)) dexKey=keys[0];
+  const inK=POKEMON.filter(m=>by.of(m)===dexKey);
+  const got=inK.filter(m=>dexHas(m[0])).sort((a,b)=>a[3]-b[3]), miss=inK.filter(m=>!dexHas(m[0]));
+  const pct=(a,b)=>b? Math.round(a/b*100) : 0;
+  return `<div class="pd-sum"><b>${gotN}</b> / ${total}종 <span class="pd-bar"><i style="width:${Math.max(gotN?1:0,pct(gotN,total))}%"></i></span><small>${pct(gotN,total)}%</small></div>
+    <div class="seg pd-by">${Object.entries(DEX_BY).map(([k,v])=>`<button class="${k===dexBy?"on":""}" onclick="PokeCatch.dexBy('${k}')">${v.name}별</button>`).join("")}</div>
+    <div class="pd-groups">${keys.map(k=>{ const t=stat(k); return `<button class="pd-g ${k===dexKey?"on":""} ${t.got===t.all?"full":""}" onclick="PokeCatch.dexKey('${k}')">
+        <span>${eh(by.label(k))}</span><small>${t.got}/${t.all}</small><span class="pd-bar"><i style="width:${pct(t.got,t.all)}%"></i></span></button>`; }).join("")}</div>
+    <div class="pd-h">✅ ${eh(by.label(dexKey))} · 잡은 포켓몬 <b>${got.length}</b>종</div>
     ${got.length? `<div class="pdex">${got.map(m=>`<div class="pd-w">${pokeCard(m, shin.includes(m[0]))}${evoNext(m[0])&&!dexHas(evoNext(m[0]))? `<div class="pd-dots">${evoDots(m[0])} ${catches()[m[0]]||0}/${EVO_NEED}</div>`:""}</div>`).join("")}</div>`
-      : `<div class="cd-note" style="margin-top:0">아직 잡은 포켓몬이 없어요. 풀숲을 탐색해 봐요!</div>`}
-    <div class="pd-h miss">❔ 아직 못 잡은 포켓몬 <b>${miss.length}</b>종</div>
-    ${gens.length>1? `<div class="cd-dex pd-gens">${gens.map(g=>`<button class="${g===dexGen?"on":""}" onclick="PokeCatch.dexGen(${g})">${GEN_NAME[g]||g+"세대"} <b>${cnt(g)}</b></button>`).join("")}</div>` : ""}
-    ${list.length? `<div class="pdex locked-list">${list.map(m=>pokeCard(m,false,true)).join("")}</div>` : `<div class="cd-note" style="margin-top:0">🎉 이 세대는 모두 잡았어요!</div>`}`;
+      : `<div class="cd-note" style="margin-top:0">이 묶음에서 아직 잡은 포켓몬이 없어요.</div>`}
+    ${miss.length? `<button class="pd-h miss pd-tog" onclick="PokeCatch.dexMiss()">❔ 아직 못 잡은 포켓몬 <b>${miss.length}</b>종 <span>${dexMiss?"접기 ▲":"보기 ▼"}</span></button>
+      ${dexMiss? `<div class="pdex locked-list">${miss.map(m=>pokeCard(m,false,true)).join("")}</div>` : ""}`
+      : `<div class="cd-note">🎉 이 묶음은 모두 잡았어요!</div>`}`;
 }
 
 /* ----- 풀숲에서 만나기 ----- */
@@ -434,7 +446,9 @@ async function evolvePokemon(n){
 window.PokeCatch={
   tabHTML, explore, evoCinema,
   toggleDex(){ dexOpen=!dexOpen; A().renderCards(); },
-  dexGen(g){ dexGen=g; A().renderCards(); },
+  dexBy(k){ dexBy=k; dexKey=null; dexMiss=false; A().renderCards(); },
+  dexKey(k){ dexKey=dexBy==="gen"? Number(k) : k; dexMiss=false; A().renderCards(); },
+  dexMiss(){ dexMiss=!dexMiss; A().renderCards(); },
   async claim(){
     const ds=A().today(), add=ballsReady(ds); if(add<=0) return;
     const w=W(); w.balls=(Number(w.balls)||0)+add; w.ballClaimed={...(w.ballClaimed||{}), [ds]:(Number((w.ballClaimed||{})[ds])||0)+add};
