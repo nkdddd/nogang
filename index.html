@@ -872,6 +872,31 @@
   .tm-btn.del{background:#FFF5F6;border-color:#FADADD;color:#E5484D}
   .tm-btn.save{margin-left:auto;background:#5B4DF0;border-color:#5B4DF0;color:#fff;min-width:110px}
   @media(max-width:520px){ .tm-foot .tm-btn{padding:10px 11px;font-size:13px} .tm-btn.save{min-width:0;flex:1} }
+
+  /* 일정 상세 · 삭제 확인 */
+  .modal.ev{max-width:440px}
+  .ev-top{display:flex;align-items:center;gap:6px;padding:12px 12px 0;justify-content:flex-end}
+  .ev-ic{width:38px;height:38px;border-radius:50%;border:0;background:transparent;color:#475569;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px}
+  .ev-ic:hover{background:#F1F1F6}.ev-ic svg{width:20px;height:20px}.ev-ic.del{color:#E5484D}
+  .ev-head{display:flex;gap:12px;padding:6px 20px 4px;align-items:flex-start}
+  .ev-head h3{font-size:19px;font-weight:800;margin:0}.ev-head small{color:#64748B;font-size:13px}
+  .dlg-bar{width:14px;height:14px;border-radius:4px;flex:0 0 auto;margin-top:6px}
+  .ev-body{padding:8px 20px 6px;overflow:auto}
+  .ev-row{display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #F1F1F6;font-size:14px}.ev-row span{width:52px;color:#94A3B8;flex:0 0 auto}.ev-row b{font-weight:600;min-width:0;word-break:break-all}
+  .ev-item{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid #F1F1F6;cursor:pointer}
+  .ev-item b{display:block;font-size:14.5px}.ev-item small{color:#94A3B8;font-size:12px}.ev-item .dlg-bar{margin-top:0}
+  .ev-foot{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px 16px}
+  .dlg-ov{position:fixed;inset:0;z-index:90;background:rgba(15,12,35,.42);display:flex;align-items:center;justify-content:center;padding:16px}
+  .dlg{background:#fff;border-radius:20px;width:100%;max-width:400px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:dlgIn .16s ease}
+  @keyframes dlgIn{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+  .dlg h3{font-size:18px;font-weight:800;margin:0 0 12px}
+  .dlg-ev{display:flex;gap:10px;background:#F6F6FC;border-radius:12px;padding:10px 12px;margin-bottom:12px}
+  .dlg-ev b{display:block;font-size:14.5px}.dlg-ev small{color:#64748B;font-size:12.5px}.dlg-ev .dlg-bar{margin-top:4px}
+  .dlg-opt{display:flex;gap:10px;align-items:flex-start;padding:11px 4px;cursor:pointer;font-size:15px;font-weight:600}
+  .dlg-opt input{width:19px;height:19px;accent-color:#5B4DF0;margin-top:1px;flex:0 0 auto}
+  .dlg-opt small{display:block;font-size:12px;color:#94A3B8;font-weight:500;margin-top:2px}
+  .dlg-msg{font-size:15px;margin:4px 2px 4px}.dlg-msg small{color:#94A3B8;font-size:12.5px}
+  .dlg-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 </style>
 </head>
 <body>
@@ -3780,7 +3805,7 @@ function renderMonth(){
     const dowColor=d.getDay()===0?"#E5484D":d.getDay()===6?"#6A58E6":"#334155";
     let dots="";
     ts.slice(0,8).forEach(t=>{const s=subjById(t.subjectId);dots+=`<span class="dot" style="background:${s?s.color:"#CBD5E1"};opacity:${t.done?1:.35}"></span>`;});
-    cells+=`<div class="mcell ${inMonth?"":"out"}" onclick="pickDay('${ds}')">
+    cells+=`<div class="mcell ${inMonth?"":"out"}" onclick="openDaySheet('${ds}')">
       <div class="mcell-top">
         <span class="daynum ${isSameDay(d,today)?"today":""}" style="color:${isSameDay(d,today)?"#fff":dowColor}">${d.getDate()}</span>
         ${ts.length?`<span class="rate-badge" style="background:${rc}">${done}/${ts.length}</span>`:""}
@@ -3796,6 +3821,7 @@ function renderMonth(){
   </div>`;
 }
 function pickDay(ds){ state.cursor=parseD(ds); setTab("todo"); }
+function pickDayTodo(ds){ pickDay(ds); }
 
 /* ----- 주간 ----- */
 function renderWeek(){
@@ -3811,7 +3837,7 @@ function renderWeek(){
     let cards="";
     ts.forEach(t=>{
       const su=subjById(t.subjectId), c=su?su.color:"#94A3B8", m=methodByName(t.method);
-      cards+=`<div class="wcard" style="border-left:3px solid ${c};opacity:${t.done?.62:1}" onclick="openTask('${t.id}')">
+      cards+=`<div class="wcard" style="border-left:3px solid ${c};opacity:${t.done?.62:1}" onclick="openEventSheet('${t.id}')">
         <button class="chk" onclick="event.stopPropagation();toggleDone('${t.id}')">${t.done?"✅":"⚪"}</button>
         <div style="flex:1;min-width:0">
           <div class="tt" style="text-decoration:${t.done?"line-through":"none"}">${esc(su?su.name:"과목")}</div>
@@ -4218,10 +4244,7 @@ async function updateExec(id,field,val){
   const v = numFields.includes(field)? (val===""?"":Number(val)) : val;
   await saveTask({...t,[field]:v});
 }
-async function removeTask(id){
-  if(!confirm("이 학습을 삭제할까요?")) return;
-  await deleteTaskDoc(id);
-}
+async function removeTask(id){ askDelete(id); }
 
 /* ============================================================
  *  9) 태스크 편집 모달
@@ -4285,6 +4308,7 @@ const TM_IC={
   flag:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3h1.8v18H5zM8 4h11l-2.5 4.2L19 12.5H8z"/></svg>`,
   chat:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2.5 6.6 2.5 11c0 2.3 1.1 4.3 2.9 5.8L4.6 21l4.2-2.1c1 .3 2.1.4 3.2.4 5.5 0 9.5-3.6 9.5-8.3S17.5 3 12 3z"/><circle cx="8" cy="11" r="1.2" fill="#fff"/><circle cx="12" cy="11" r="1.2" fill="#fff"/><circle cx="16" cy="11" r="1.2" fill="#fff"/></svg>`,
   sparkle:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 3l1.8 5.2L17 10l-5.2 1.8L10 17l-1.8-5.2L3 10l5.2-1.8zM18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z"/></svg>`,
+  pen:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>`,
   trash:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`,
   pin:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.5 2.5 21.5 9.5l-2 1-2.5-.5-3.5 3.5.5 4-1.5 1.5-4-4L4 19.5 4.5 17l4.5-4.5-4-4L6.5 7l4 .5L14 4l-.5-2.5z"/></svg>`,
   check:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>`,
@@ -4376,9 +4400,9 @@ async function saveFromModal(){
     if(repeat==="custom" && (!repeatDays||!repeatDays.length)){ alert("반복할 요일을 선택해 주세요."); return; }
     const dates=repeatDates(base.date, repeatEnd, repeat, repeatDays);
     if(state.tasksMap[base.id]){ try{ await deleteTaskDoc(base.id); }catch(_){} } // 기존 단일 제거 후 시리즈 생성
-    let n=0;
+    let n=0; const series=uid();   // 같은 반복 묶음 — '이후 일정 모두 삭제'에 사용
     for(const dt of dates){
-      await saveTask({...base, id:uid(), date:dt, done:false, actualMin:0, understood:"", rating:0, parentComment:"", score:"", scoreTotal:"", order:Date.now()+n});
+      await saveTask({...base, id:uid(), series, date:dt, done:false, actualMin:0, understood:"", rating:0, parentComment:"", score:"", scoreTotal:"", order:Date.now()+n});
       n++;
     }
     closeModal();
@@ -4395,7 +4419,96 @@ function copyFromModal(){
   drawModal();
   toast("복사본을 만들었어요. 내용을 수정한 뒤 저장하세요","info");
 }
-async function deleteFromModal(){ if(state.tasksMap[modalTask.id]){ if(!confirm("삭제할까요?"))return; await deleteTaskDoc(modalTask.id);} closeModal(); }
+async function deleteFromModal(){ if(state.tasksMap[modalTask.id]) askDelete(modalTask.id); else closeModal(); }
+
+/* ----- 일정 삭제 (구글 캘린더처럼 '이 일정만' / '이 일정 및 이후 일정') ----- */
+// 같은 반복 묶음(series) — 예전 항목은 과목 · 교재 · 내용 · 방법 · 시간이 같은 이후 일정으로 판단. 완료한 기록은 남김
+async function followingTasks(t){
+  let later=[];
+  try{ later=(await plannerRef().collection("tasks").where("date",">",t.date).get()).docs.map(d=>({...d.data(), id:d.id})); }
+  catch(e){ later=state.tasks.filter(x=>x.date>t.date); }
+  const same=x=> t.series? x.series===t.series
+    : (x.subjectId===t.subjectId && (x.textbookId||"")===(t.textbookId||"") && (x.unit||"")===(t.unit||"")
+       && (x.method||"")===(t.method||"") && Number(x.plannedMin)===Number(t.plannedMin));
+  return later.filter(x=>x.id!==t.id && !x.done && same(x)).sort((a,b)=>a.date<b.date?-1:1);
+}
+function dlgClose(){ const d=document.getElementById("dlgRoot"); if(d) d.remove(); }
+async function askDelete(id){
+  const t=state.tasksMap[id]; if(!t) return;
+  const fol=await followingTasks(t);
+  const su=subjById(t.subjectId), d=parseD(t.date);
+  const when=`${d.getMonth()+1}월 ${d.getDate()}일 (${WD[d.getDay()]})`;
+  dlgClose();
+  const w=document.createElement("div"); w.id="dlgRoot";
+  w.innerHTML=`<div class="dlg-ov" onclick="if(event.target===this)dlgClose()"><div class="dlg">
+    <h3>일정 삭제</h3>
+    <div class="dlg-ev"><span class="dlg-bar" style="background:${su?su.color:"#94A3B8"}"></span>
+      <div><b>${esc(t.unit||(su?su.name:"학습"))}</b><small>${esc(su?su.name:"")} · ${when}${t.done?" · 완료한 기록":""}</small></div></div>
+    ${fol.length? `
+      <label class="dlg-opt"><input type="radio" name="dlgScope" value="one" checked><span>이 일정만 삭제</span></label>
+      <label class="dlg-opt"><input type="radio" name="dlgScope" value="after"><span>이 일정 및 이후 일정 모두 삭제<small>${when} 이후 같은 일정 ${fol.length}개 · 마지막 ${fol[fol.length-1].date.slice(5).replace("-",".")} (완료한 기록은 남겨요)</small></span></label>`
+      : `<p class="dlg-msg">이 일정을 삭제할까요?${t.done?"<br><small>완료한 기록도 함께 지워지고 이번 주 용돈 계산에서 빠져요.</small>":""}</p>`}
+    <div class="dlg-btns"><button class="tm-btn" onclick="dlgClose()">취소</button>
+      <button class="tm-btn del" onclick="doDelete('${id}')">삭제</button></div>
+  </div></div>`;
+  document.body.appendChild(w);
+  w._fol=fol;
+}
+async function doDelete(id){
+  const w=document.getElementById("dlgRoot"); if(!w) return;
+  const scope=(w.querySelector('input[name="dlgScope"]:checked')||{}).value||"one";
+  const ids=[id, ...(scope==="after"? (w._fol||[]).map(x=>x.id) : [])];
+  dlgClose(); closeModal();
+  for(const x of ids){ try{ await deleteTaskDoc(x); }catch(e){ console.error("삭제", e); } }
+  toast(ids.length>1? `일정 ${ids.length}개를 삭제했어요` : "일정을 삭제했어요","info");
+}
+
+/* ----- 일정 상세 (주간 · 월간에서 누르면) ----- */
+function openEventSheet(id){
+  const t=state.tasksMap[id]; if(!t) return;
+  const su=subjById(t.subjectId), tb=tbById(t.textbookId), m=methodByName(t.method), d=parseD(t.date);
+  const row=(k,v)=>v? `<div class="ev-row"><span>${k}</span><b>${v}</b></div>` : "";
+  document.getElementById("modalRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal ev">
+      <div class="ev-top">
+        <button class="ev-ic" title="수정" onclick="openTask('${id}')">${TM_IC.pen}</button>
+        <button class="ev-ic del" title="삭제" onclick="askDelete('${id}')">${TM_IC.trash}</button>
+        <button class="ev-ic" title="닫기" onclick="closeModal()">✕</button>
+      </div>
+      <div class="ev-head"><span class="dlg-bar" style="background:${su?su.color:"#94A3B8"}"></span>
+        <div><h3>${esc(t.unit||(su?su.name:"학습"))}</h3>
+        <small>${d.getMonth()+1}월 ${d.getDate()}일 (${WD[d.getDay()]})${t.series?" · 반복":""}</small></div></div>
+      <div class="ev-body">
+        ${row("과목", esc(su?su.name:""))}${row("교재", tb?esc(tb.name):"")}${row("방법", m?esc(m.name)+(t.episode?" "+esc(t.episode):""):"")}
+        ${row("계획", (t.plannedMin||0)+"분")}${row("상태", t.done? `완료 · ${Number(t.actualMin)||0}분` : "아직")}
+        ${row("목표", esc(t.plannedNote||""))}${row("메모", esc(t.understood||""))}${row("코멘트", esc(t.parentComment||""))}
+      </div>
+      <div class="ev-foot">
+        <button class="tm-btn" onclick="closeModal();pickDayTodo('${t.date}')">할 일에서 보기</button>
+        ${t.done? "" : `<button class="tm-btn save" onclick="closeModal();toggleDone('${id}')">${TM_IC.check} 완료</button>`}
+      </div>
+    </div></div>`;
+}
+// 월간에서 날짜를 누르면: 그날 일정 목록 (누르면 상세 · 삭제)
+function openDaySheet(ds){
+  const ts=tasksOn(ds), d=parseD(ds);
+  document.getElementById("modalRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal ev">
+      <div class="ev-top"><b style="margin-right:auto;font-size:16px">${d.getMonth()+1}월 ${d.getDate()}일 (${WD[d.getDay()]})</b>
+        <button class="ev-ic" title="닫기" onclick="closeModal()">✕</button></div>
+      <div class="ev-body">
+        ${ts.length? ts.map(t=>{ const su=subjById(t.subjectId); return `<div class="ev-item" onclick="openEventSheet('${t.id}')">
+            <span class="dlg-bar" style="background:${su?su.color:"#94A3B8"}"></span>
+            <div style="flex:1;min-width:0"><b style="${t.done?"text-decoration:line-through;color:#94A3B8":""}">${esc(t.unit||(su?su.name:"학습"))}</b><small>${esc(su?su.name:"")} · ${t.plannedMin||0}분${t.done?" · 완료":""}</small></div>
+            <button class="ev-ic del" title="삭제" onclick="event.stopPropagation();askDelete('${t.id}')">${TM_IC.trash}</button></div>`; }).join("")
+          : `<div class="empty" style="padding:18px">일정이 없어요.</div>`}
+      </div>
+      <div class="ev-foot">
+        <button class="tm-btn" onclick="closeModal();pickDayTodo('${ds}')">할 일에서 보기</button>
+        <button class="tm-btn save" onclick="openTask(null,'${ds}')">+ 일정 추가</button>
+      </div>
+    </div></div>`;
+}
 
 /* ============================================================
  *  10) 드로어 (설정 / 대시보드)
