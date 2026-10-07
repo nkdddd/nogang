@@ -7,8 +7,8 @@
  *  - 그림·울음소리: PokeAPI (raw.githubusercontent.com) — 못 불러오면 이모지 · 스타일: assets/pokecatch.css
  * ============================================================ */
 (function(){
-/* 도감 포켓몬 · 진화 (받아쓰기 프로그램 js/data.js 와 같음) */
-const POKEMON = [
+/* 도감: 전국도감 1~1025 (assets/pokedex.js) · 못 불러오면 받아쓰기 프로그램 js/data.js 의 85종 */
+const POKEMON = (window.POKEDEX && window.POKEDEX.length)? window.POKEDEX : [
   ['피카츄', '⚡', '전기', 25, '쥐포켓몬', 'c'], ['라이츄', '⚡', '전기', 26, '쥐포켓몬', 'r'],
   ['코일', '🧲', '전기', 81, '자석포켓몬', 'c'], ['레어코일', '🧲', '전기', 82, '자석포켓몬', 'c'], ['자포코일', '🛸', '전기', 462, '자기장포켓몬', 'r'],
   ['데덴네', '🐭', '전기', 702, '안테나포켓몬', 'c'],
@@ -84,7 +84,7 @@ const reduceMotion=window.matchMedia && matchMedia("(prefers-reduced-motion: red
 const wait=ms=>new Promise(r=>setTimeout(r, reduceMotion? Math.min(ms,80) : ms));
 const josa=(w,j)=>{ const c=w.charCodeAt(w.length-1)-0xac00; return (c>=0 && c<=11171 && c%28)? j[0] : j[1]; };
 const ro=w=>{ const c=w.charCodeAt(w.length-1)-0xac00; return c>=0 && c%28 && c%28!==8? "으로" : "로"; };
-const artImg=(m,shiny,cls)=>`<img class="art ${cls||""}" src="${POKE_ART(m[3],shiny)}" alt="" draggable="false" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;art-fallback&quot;>${m[1]}</span>'">`;
+const artImg=(m,shiny,cls)=>`<img class="art ${cls||""}" src="${POKE_ART(m[3],shiny)}" alt="" loading="lazy" draggable="false" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;art-fallback&quot;>${m[1]}</span>'">`;
 const ballSvg='<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" class="b-bot"/><path d="M4 50 A46 46 0 0 1 96 50 Z" class="b-top"/><path d="M4 50 H96" class="b-line"/><circle cx="50" cy="50" r="13" class="b-btn"/><circle cx="50" cy="50" r="6" class="b-dot"/></svg>';
 const gradeChip=(g,shiny)=>shiny? `<span class="grade-chip gs">🌈 시크릿 ✨</span>` : `<span class="grade-chip g${g}">${GRADES[g].icon} ${GRADES[g].name}</span>`;
 let cry=null;
@@ -94,9 +94,15 @@ function playCry(id){ try{ if(cry) cry.pause(); cry=new Audio(POKE_CRY(id)); cry
 const dex=()=>W().dex||(W().dex=[]);
 const dexHas=n=>dex().includes(n);
 const catches=()=>W().catches||(W().catches={});
-const evoLine=n=>EVOLUTION.find(l=>l.includes(n));
-const evoNext=n=>{ const l=evoLine(n); return l && l[l.indexOf(n)+1]; };
-function evoNow(n){ const l=evoLine(n); if(!l) return n; let cur=l[0]; l.forEach(x=>{ if(dexHas(x)) cur=x; }); return cur; }
+// 진화 가족: 진화 전 → 진화 후 (이브이처럼 여러 갈래도 있어요)
+const EVO_FROM={}, EVO_KIDS={};
+if(POKEMON[0] && POKEMON[0].length>6) POKEMON.forEach(m=>{ if(m[6] && POKE_BY[m[6]]) EVO_FROM[m[0]]=m[6]; });
+else EVOLUTION.forEach(l=>l.forEach((n,i)=>{ if(i) EVO_FROM[n]=l[i-1]; }));
+Object.entries(EVO_FROM).forEach(([b,a])=>{ (EVO_KIDS[a]=EVO_KIDS[a]||[]).push(b); });
+// 다음 진화: 아직 도감에 없는 갈래부터
+const evoNext=n=>{ const k=EVO_KIDS[n]; return k && (k.find(x=>!dexHas(x)) || k[0]); };
+// 풀숲에 나오는 모습: 가족의 첫 모습이나 도감에 있는 모습 중, 진화한 모습을 다 모으지 않은 것
+const spawnable=n=>(!EVO_FROM[n] || dexHas(n)) && !((EVO_KIDS[n]||[]).length && EVO_KIDS[n].every(dexHas));
 const canEvolve=n=>!!evoNext(n) && (catches()[n]||0)>=EVO_NEED;
 const evoDots=n=>`<span class="evo-dots">${"●".repeat(Math.min(EVO_NEED,catches()[n]||0)).padEnd(EVO_NEED,"○")}</span>`;
 async function save(){ await A().saveWallet(A().CS.uid, W()); }
@@ -125,9 +131,28 @@ function tabHTML(){
     <button class="ghost-btn" style="width:100%;margin-top:8px" ${(!ro && ready>0)?"":"disabled"} onclick="PokeCatch.claim()">${ready>0?`🔴 몬스터볼 ${ready}개 받기`:(Number((W().ballClaimed||{})[ds])||0)? `오늘 몬스터볼 ${(W().ballClaimed||{})[ds]}개를 받았어요` : "할 일을 다 끝내면 받을 수 있어요"}</button>
     ${ev.length?`<div class="r-sec">🧬 진화할 수 있어요!</div><div class="pc-evo">${ev.map(n=>`<button class="ghost-btn evo-cta" onclick="PokeCatch.evolve('${n}')">${eh(n)} ${EVO_NEED}마리 → ${eh(evoNext(n))}</button>`).join("")}</div>`:""}
     <div class="r-sec">📖 포켓몬 도감 ${owned.length}/${POKEMON.length} <button class="link-btn" onclick="PokeCatch.toggleDex()">${dexOpen?"접기":"펼치기"}</button></div>
-    ${dexOpen? `<div class="pdex">${POKEMON.map(m=>{ const has=dexHas(m[0]); return has? `<div class="pd-w">${pokeCard(m, (W().shinies||[]).includes(m[0]))}${evoNext(m[0])&&!dexHas(evoNext(m[0]))? `<div class="pd-dots">${evoDots(m[0])} ${catches()[m[0]]||0}/${EVO_NEED}</div>`:""}</div>` : pokeCard(m,false,true); }).join("")}</div>` : ""}
+    ${dexOpen? dexHTML() : ""}
     <div class="cd-note">풀숲에서 포켓몬을 만나면 몬스터볼을 던져 잡아요. 색 고리가 금색 고리 안으로 작아졌을 때, 포켓몬 쪽으로 휙! (컴퓨터는 스페이스바)<br>
       잡으면 그 포켓몬과 관련된 카드 1장 · 같은 포켓몬 ${EVO_NEED}마리면 진화 · 세 번 빗나가면 도망가요</div>`;
+}
+
+// 📖 도감: 잡은 포켓몬을 앞에 · 아직 못 잡은 포켓몬은 세대별로 따로
+const GEN_NAME={1:"1세대 관동",2:"2세대 성도",3:"3세대 호연",4:"4세대 신오",5:"5세대 하나",6:"6세대 칼로스",7:"7세대 알로라",8:"8세대 가라르",9:"9세대 팔데아"};
+let dexGen=0;
+function dexHTML(){
+  const shin=W().shinies||[];
+  const got=POKEMON.filter(m=>dexHas(m[0])).sort((a,b)=>a[3]-b[3]);
+  const miss=POKEMON.filter(m=>!dexHas(m[0]));
+  const gens=[...new Set(POKEMON.map(m=>m[7]||1))].sort((a,b)=>a-b);
+  const cnt=g=>miss.filter(m=>(m[7]||1)===g).length;
+  if(!dexGen || !gens.includes(dexGen) || (!cnt(dexGen) && gens.some(cnt))) dexGen=gens.find(cnt)||gens[0];
+  const list=miss.filter(m=>(m[7]||1)===dexGen);
+  return `<div class="pd-h">✅ 잡은 포켓몬 <b>${got.length}</b>종</div>
+    ${got.length? `<div class="pdex">${got.map(m=>`<div class="pd-w">${pokeCard(m, shin.includes(m[0]))}${evoNext(m[0])&&!dexHas(evoNext(m[0]))? `<div class="pd-dots">${evoDots(m[0])} ${catches()[m[0]]||0}/${EVO_NEED}</div>`:""}</div>`).join("")}</div>`
+      : `<div class="cd-note" style="margin-top:0">아직 잡은 포켓몬이 없어요. 풀숲을 탐색해 봐요!</div>`}
+    <div class="pd-h miss">❔ 아직 못 잡은 포켓몬 <b>${miss.length}</b>종</div>
+    ${gens.length>1? `<div class="cd-dex pd-gens">${gens.map(g=>`<button class="${g===dexGen?"on":""}" onclick="PokeCatch.dexGen(${g})">${GEN_NAME[g]||g+"세대"} <b>${cnt(g)}</b></button>`).join("")}</div>` : ""}
+    ${list.length? `<div class="pdex locked-list">${list.map(m=>pokeCard(m,false,true)).join("")}</div>` : `<div class="cd-note" style="margin-top:0">🎉 이 세대는 모두 잡았어요!</div>`}`;
 }
 
 /* ----- 풀숲에서 만나기 ----- */
@@ -135,7 +160,7 @@ function rollWild(){
   const caughtBig=dex().some(n=>POKE_BY[n] && "lms".includes(POKE_BY[n][5]));
   let x=Math.random()*100, g="c";
   for(const k of ["s","m","l","r","c"]){ if((x-=SPAWN[k])<0){ g=k; break; } }
-  const now=k=>POKEMON.filter(m=>m[5]===k && evoNow(m[0])===m[0]);
+  const now=k=>POKEMON.filter(m=>m[5]===k && spawnable(m[0]));
   const pool=now(g).length? now(g) : now("c");
   const fresh=pool.filter(m=>!dexHas(m[0]));
   const src=(fresh.length && Math.random()<0.7)? fresh : pool;
@@ -409,6 +434,7 @@ async function evolvePokemon(n){
 window.PokeCatch={
   tabHTML, explore, evoCinema,
   toggleDex(){ dexOpen=!dexOpen; A().renderCards(); },
+  dexGen(g){ dexGen=g; A().renderCards(); },
   async claim(){
     const ds=A().today(), add=ballsReady(ds); if(add<=0) return;
     const w=W(); w.balls=(Number(w.balls)||0)+add; w.ballClaimed={...(w.ballClaimed||{}), [ds]:(Number((w.ballClaimed||{})[ds])||0)+add};

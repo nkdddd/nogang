@@ -1210,6 +1210,7 @@ window.__CardsAPI={ get CS(){ return CS; }, giveCard, info, cardFace, cardTile, 
   related:(name, glow)=>{                                     // 잡은 포켓몬과 관련된 카드 한 장 (받아쓰기 프로그램처럼)
     const rel=(window.CARD_REL||{})[name]||[[],[],[]], C=window.CARDS, w=[];
     rel[0].forEach(i=>w.push([C[i],3,"exact"])); rel[1].forEach(i=>w.push([C[i],1,"family"])); rel[2].forEach(i=>w.push([C[i],1,"similar"]));
+    if(!w.length) C.forEach(c=>{ if(c[8]===name || c[1].includes(name)) w.push([c,3,"exact"]); });   // 관계표에 없는 포켓몬은 이름으로 찾아요
     if(!w.length) C.forEach(c=>w.push([c,1,"any"]));
     const odds=glow? {r:45,a:30,s:18,u:7} : ODDS;
     let classes=[...new Set(w.map(x=>x[0][5]))].filter(k=>odds[k]>0); if(!classes.length) classes=[...new Set(w.map(x=>x[0][5]))];
