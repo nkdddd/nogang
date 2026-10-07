@@ -20,7 +20,7 @@ service cloud.firestore {
     }
 
     // 플래너 · 학습앱 기록 전체 (tasks, meta, diary, apps/*, focus, payouts …)
-    // 부모는 연결된 자녀의 기록을 보고, 코멘트 · 용돈 지급 · 쿠폰 발급 등을 기록합니다.
+    // 부모는 연결된 자녀의 기록을 보고, 코멘트 · 용돈 지급 · 카드 지급 등을 기록합니다.
     match /planner/{uid}/{document=**} {
       allow read, write: if isMe(uid) || isParentOf(uid);
     }
@@ -61,7 +61,7 @@ service cloud.firestore {
     function isFamilyOf(p) {
       return isMe(p) || (signedIn() && exists(/databases/$(database)/documents/links/$(p)/children/$(request.auth.uid)));
     }
-    match /cardHub/{p}/pool/{id} {          // 카드풀(카드 링크): 부모만 등록 · 가족은 보기
+    match /cardHub/{p}/pool/{id} {          // (예전) 카드 링크 카드풀 — 지금은 쓰지 않음
       allow read: if isFamilyOf(p);
       allow write: if isMe(p);
     }
