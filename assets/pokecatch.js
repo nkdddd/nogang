@@ -335,7 +335,7 @@ function catchScene(q){
       catches()[N]=(catches()[N]||0)+1;
       if(q.shiny && !(W().shinies||[]).includes(N)) W().shinies=[...(W().shinies||[]), N];
       await save();
-      try{ await A().loadCatalog(); rel=A().related(N, q.shiny || "lms".includes(q.grade)); const r=await A().giveCard(A().CS.uid, rel.card); A().CS.cards[rel.card.id]=r.card; rel.isNew=r.isNew; }catch(e){ console.warn("관련 카드", e); }
+      try{ await A().loadCatalog(); rel=A().related(N, q.shiny || "lms".includes(q.grade)); const r=await A().giveCard(A().CS.uid, rel.card, {pass:true}); A().CS.cards[rel.card.id]=r.card; rel.isNew=r.isNew; rel.pass=r.pass; }catch(e){ console.warn("관련 카드", e); }
     }
     const balls=Number(W().balls)||0;
     box.innerHTML= ok? `
@@ -345,6 +345,7 @@ function catchScene(q){
         ${isNew?`<li><span>📖 도감 새로 등록</span><b>NEW!</b></li>`:""}
         ${q.shiny?`<li><span>✨ 색이 다른 포켓몬</span><b>대박!</b></li>`:""}
         ${rel?`<li><span>🎴 ${A().CLS[rel.card.cls].icon} ${eh(rel.card.name)}</span><b>${rel.isNew?"NEW":"+1장"}</b></li>`:""}
+        ${rel&&rel.pass?`<li><span>🎫 PC 이용권</span><b>${rel.pass.h}시간!</b></li>`:""}
         ${evoNext(N) && !canEvolve(N)? `<li><span>🧬 ${eh(evoNext(N))}까지</span><b>${evoDots(N)} ${catches()[N]}/${EVO_NEED}</b></li>`:""}
       </ul>
       ${canEvolve(N)?`<button class="ghost-btn evo-cta" id="evoNow">🧬 ${eh(N)} ${EVO_NEED}마리 모였어요! 눌러서 진화!</button>`:""}

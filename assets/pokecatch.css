@@ -188,3 +188,146 @@ body.scene-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce){.go-hint,.go-ball,.evo-cta{animation:none}}
 .go-name .grade-chip{color:#1e293b;background:#fff;border-color:#fff}
 .go-name{max-width:calc(100% - 150px)}
+
+/* 🎴 카드팩 뜯기 (받아쓰기 프로그램 css/style.css 856-955) */
+.pack-stage { position: relative; height: 380px; display: grid; place-items: center; perspective: 900px; }
+.pack {
+  position: relative; width: 190px; height: 290px; cursor: pointer; user-select: none;
+  filter: drop-shadow(0 8px 0 rgba(34, 54, 92, .18));
+}
+.pack-top, .pack-body { position: absolute; left: 0; right: 0; border: 3px solid #1C1B22; }
+.pack-top { top: 0; height: 34px; border-radius: 12px 12px 0 0; border-bottom: 3px dashed #1C1B22; }
+.pack-body {
+  top: 31px; bottom: 0; border-radius: 0 0 14px 14px; border-top: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #fff; text-align: center;
+}
+.pack-body b { font-family: inherit; font-weight: 400; font-size: 22px; text-shadow: 0 2px 0 rgba(0, 0, 0, .25); }
+.pack-body small { font-size: 11px; letter-spacing: .12em; opacity: .9; }
+.pack-ball { width: 76px; height: 76px; display: block; }
+.pack.pb .pack-top, .pack.pb .pack-body { background: linear-gradient(135deg, #2f6fdb, #6aa8ff 40%, #c9e0ff 50%, #3a7ae6 60%, #1d4fb3); }
+.pack.pl .pack-top, .pack.pl .pack-body { background: linear-gradient(135deg, #f7b500, #ffe27a 35%, #fff6cc 48%, #ff9ad5 62%, #9b7bff 80%, #5ec8ff); }
+.pack.pl { animation: packGlow 1.6s ease-in-out infinite; }
+@keyframes packGlow { 50% { filter: drop-shadow(0 0 18px #ffd84d) drop-shadow(0 8px 0 rgba(34, 54, 92, .18)); } }
+.pack.shake { animation: packShake .35s; }
+@keyframes packShake { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
+.pack.t1 .pack-top { transform: rotate(-2deg); transform-origin: left bottom; }
+.pack.t2 .pack-top { transform: rotate(-6deg) translateY(-3px); transform-origin: left bottom; }
+.pack.torn .pack-top { animation: tearOff .6s ease-in forwards; }
+@keyframes tearOff { to { transform: translate(140px, -120px) rotate(35deg); opacity: 0; } }
+.pack.torn .pack-body { animation: packDrop .7s .5s ease-in forwards; }
+@keyframes packDrop { to { transform: translateY(260px); opacity: 0; } }
+.tap-hint { position: absolute; bottom: 0; margin: 0; font-family: inherit; font-size: 22px; animation: bob 1.2s ease-in-out infinite; }
+
+/* 카드가 올라와 뒤집혀요 */
+.flip { position: absolute; width: 210px; aspect-ratio: 63 / 88; max-width: 100%; }
+.flip.rise { animation: rise2 .7s cubic-bezier(.3, 1.3, .5, 1); }
+@keyframes rise2 { from { transform: translateY(120px) scale(.8); opacity: 0; } }
+.flip-in { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, 1.3, .5, 1); }
+.flip.turn .flip-in { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 12px; overflow: hidden; }
+.face.back {
+  display: grid; place-items: center; border: 6px solid #f4c64a;
+  background: radial-gradient(circle, #5a8de8 0 30%, #2a4fa8 31% 60%, #1b2f6e 61%);
+}
+.face.back .pack-ball { width: 90px; height: 90px; }
+.face.front { transform: rotateY(180deg); }
+.flip.turn.cr .face.front { box-shadow: 0 0 22px 4px #60a5fa; }
+.flip.turn.ca .face.front { box-shadow: 0 0 26px 6px #c084fc; }
+.flip.turn.cs .face.front { box-shadow: 0 0 30px 8px #fbbf24; }
+.flip.turn.cu .face.front { box-shadow: 0 0 34px 10px #f472b6, 0 0 60px 16px #60a5fa; }
+.flip.turn.cs .face.front::after, .flip.turn.cu .face.front::after {
+  content: ''; position: absolute; inset: -40%; pointer-events: none;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, .6) 50%, transparent 60%);
+  animation: shine 2.4s ease-in-out infinite;
+}
+
+/* 카드 그림 */
+.tcg { display: block; width: 100%; aspect-ratio: 63 / 88; border-radius: 4.5% / 3.2%; overflow: hidden; background: #e2e8f0; }
+.tcg .cimg { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cimg-fallback {
+  width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; text-align: center;
+  background: linear-gradient(160deg, #fff7d6, #e0ecff); color: #22365c; border: 4px solid #f4c64a; border-radius: inherit;
+}
+.cimg-fallback b { font-family: inherit; font-weight: 400; font-size: 18px; }
+.cimg-fallback small { font-size: 11px; }
+.cimg-fallback i { font-style: normal; font-size: 34px; }
+.class-chip { display: inline-block; font-family: inherit; font-size: 16px; padding: 1px 12px; border-radius: 999px; border: 2px solid #1C1B22; background: #fff; }
+.class-chip.cr { background: #dbeafe; color: #1e3a8a; }
+.class-chip.ca { background: #f3e8ff; color: #5b21b6; }
+.class-chip.cs { background: #fef3c7; color: #7c4a00; }
+.class-chip.cu { background: linear-gradient(90deg, #ffd1dc, #fff3b0, #c8f7d8, #cfe6ff, #e9d5ff); color: #3b2a55; }
+.reveal-info { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; min-height: 60px; }
+.reveal-info b { font-family: inherit; font-weight: 400; font-size: 26px; }
+.reveal-info small { color: #64748B; font-size: 14px; }
+.reveal-info p { margin: 0; }
+.pack-got { margin: 0; font-family: inherit; font-size: 20px; color: #E5484D; animation: pop .6s; }
+.pack-cta {
+  display: flex; align-items: center; gap: 16px; text-align: left; width: 100%; max-width: 420px; padding: 10px 18px;
+  border: 3px solid #1C1B22; border-radius: 22px; background: #fff; box-shadow: 0 4px 0 rgba(34,54,92,.12); animation: pop 1.2s ease-in-out infinite;
+}
+.pack-cta .pack { width: 58px; height: 88px; flex: none; pointer-events: none; }
+.pack-cta .pack-top { height: 12px; }
+.pack-cta .pack-body { top: 10px; }
+.pack-cta .pack-body b, .pack-cta .pack-body small { display: none; }
+.pack-cta .pack-ball { width: 32px; height: 32px; }
+.pack-cta > span b { display: block; font-family: inherit; font-weight: 400; font-size: 24px; }
+.pack-cta > span small { color: #64748B; font-size: 15px; }
+
+/* 🗂️ 앨범 */
+.album { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.album-card { position: relative; padding: 0; border: 0; background: none; border-radius: 8px; box-shadow: 0 4px 0 rgba(34,54,92,.12); }
+.album-card .tcg { border-radius: 6px; }
+.dup { position: absolute; right: 4px; bottom: 4px; font-family: inherit; font-size: 14px; background: #1C1B22; color: var(--paper); border-radius: 999px; padding: 0 8px; }
+.zoom { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; padding: 16px; background: rgba(15, 25, 45, .7); }
+.zoom-in { display: flex; flex-direction: column; align-items: center; gap: 10px; width: min(92vw, 340px); padding: 16px; border-radius: 22px; background: #fff; border: 3px solid #1C1B22; max-height: 100%; overflow: auto; }
+.zoom-in .tcg { width: min(100%, 260px); }
+@media (max-width: 480px) {
+  .album { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .pack-stage { height: 340px; }
+  .pack { width: 170px; height: 260px; }
+  .flip { width: 190px; }
+}
+@media (prefers-reduced-motion: reduce) { .pack.pl, .pack-cta { animation: none; } }
+.pack.torn { pointer-events: none; }
+.pack-stage { overflow: hidden; }
+.tcg.lv { outline: 3px solid var(--lvc, #cbd5e1); outline-offset: 2px; box-shadow: 0 0 var(--lvg, 8px) var(--lvc, #cbd5e1); }
+.tcg.lv1 { --lvc: #cbd5e1; --lvg: 6px; }
+.tcg.lv2 { --lvc: #60a5fa; --lvg: 10px; }
+.tcg.lv3 { --lvc: #a855f7; --lvg: 14px; }
+.tcg.lv4 { --lvc: #f5b400; --lvg: 18px; }
+.tcg.lv5 { --lvc: #f472b6; --lvg: 22px; animation: lvRainbow 3s linear infinite; }
+@keyframes lvRainbow { 0% { --lvc: #f472b6; outline-color: #f472b6; } 33% { outline-color: #60a5fa; } 66% { outline-color: #fbbf24; } 100% { outline-color: #f472b6; } }
+.tcg.lv4::after, .tcg.lv5::after {
+  content: ''; position: absolute; inset: -40%; pointer-events: none; z-index: 1;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, .55) 50%, transparent 60%);
+  animation: shine 2.6s ease-in-out infinite;
+}
+.lv-badge {
+  position: absolute; z-index: 2; top: 4px; left: 4px; font-style: normal; font-family: inherit; font-size: 15px;
+  padding: 0 7px; border-radius: 999px; color: #fff; background: var(--lvc, #64748b); border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+.lv-stars { margin: 0; font-size: 24px; color: #f5b400; letter-spacing: 2px; }
+.lv-text { color: #E5484D; }
+.pack{width:190px;height:290px;position:relative;cursor:pointer}
+.face.front .pk{width:100%;height:100%;border-radius:12px}
+.pk-stage-wrap .reveal-info b{font-size:20px;font-weight:800}
+.pass-chip{display:inline-flex;gap:6px;align-items:center;background:#FFF7D6;border:1.5px solid #F5B400;color:#7c4a00;border-radius:999px;padding:4px 12px;font-weight:800;font-size:13px}
+.passes{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.pass{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1.5px solid #F5B400;border-radius:12px;padding:9px 12px}
+.pass b{font-size:15px}.pass small{color:#92400E;font-size:12px}.pass.used{opacity:.5;filter:grayscale(.6)}
+.pass .sp{flex:1}
+@media (prefers-reduced-motion: reduce){.pack.pl,.tap-hint{animation:none}}
+/* ⚡🔥💧 카드 뽑기 효과 (받아쓰기 프로그램) — 카드팩 화면 위에 */
+.fx-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 91; pointer-events: none; }
+.fx-dim { position: fixed; inset: 0; z-index: 89; pointer-events: none; background: radial-gradient(circle at 50% 45%, rgba(14, 18, 40, .72), rgba(6, 8, 20, .92)); animation: fxDim .25s ease-out; transition: opacity .4s; }
+.fx-dim.out { opacity: 0; }
+@keyframes fxDim { from { opacity: 0; } }
+.pk-open { position: fixed; inset: 0; z-index: 88; background: #F3F2F7; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)); overflow: auto; }
+.pk-open h3 { margin: 4px 0 0; font-size: 20px; font-weight: 900; }
+.pk-open .pk-left { font-size: 13px; color: #64748B; margin: 0; }
+body.fx-on .pk-open .pack-stage { position: relative; z-index: 90; }
+.pk-open .pack-stage { width: 100%; max-width: 420px; }
+.pk-open .pk-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.pk-open .pk-btns button { border: 0; border-radius: 14px; padding: 13px 18px; font-weight: 900; font-size: 15px; cursor: pointer; background: #e2e8f0; color: #1C1B22; }
+.pk-open .pk-btns button.main { background: #5B4DF0; color: #fff; }
+.pk-open .pk-x { position: absolute; right: 14px; top: calc(12px + env(safe-area-inset-top)); border: 0; background: #fff; border-radius: 50%; width: 38px; height: 38px; font-size: 18px; cursor: pointer; }

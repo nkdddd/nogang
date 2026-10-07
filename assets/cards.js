@@ -2,12 +2,13 @@
  *  🎴 포켓몬 카드 뽑기 · 대결 (우리집 학습플래너)
  *  - 카드 목록: assets/pokecards.js (받아쓰기 프로그램 nkdddd/mdeng 의 카드 9,524장 — 필요할 때만 불러와요)
  *    [카드 id, 이름, 종류, 세트 번호, 희귀도, 앱 등급(n r a s u), 그림 경로, 타입, 포켓몬 이름, 진화 가족]
- *  - 자녀: 공부로 카드팩(뽑기권)을 받아 뽑기 → 같은 카드는 겹쳐서 강화(+1~+5) → 덱 3장으로 형제·연습 대결
+ *  - 자녀: 공부로 카드팩을 받아 뜯기(받아쓰기 프로그램과 같은 효과) → 재료 카드로 강화(+1~+5) → 형제 · 받아쓰기 친구 · 연습 봇과 대결
+ *  - 🎫 공부로 얻은 💎 슈퍼 레어 카드 PC 1시간 · 👑 스페셜 카드 PC 3시간 이용권 · 🎴 카드 걸기 대결(이기면 상대 카드)
  *  - 대결: 한 판 점수 = ⚡힘(등급 + 강화×2) × 🎲주사위(1~6) × 먹이사슬(타입 ×1.5 · 진화 단계 ×1.2) × 이번 주 공부 보너스
  *  - 부모: 카드 이름으로 찾아서 자녀에게 바로 주기 · 카드팩 더하기/빼기
  *  - 데이터
  *    planner/{자녀uid}/cards/{카드id}   내 카드 {count, 카드 정보}
- *    planner/{자녀uid}/meta/cardWallet  {tickets, claimed{날짜:n}, pity, draws, deck[], winDay}
+ *    planner/{자녀uid}/meta/cardWallet  {tickets, claimed{날짜:n}, pity, draws, winDay, pcPasses[], escrow{}, done{}, balls…}
  *    cardHub/{부모uid}/decks/{자녀uid}  대결용 덱 공개본 · cardHub/{부모uid}/battles/{id} 대결 기록
  * ============================================================ */
 (function(){
@@ -64,6 +65,7 @@ function info(row){
   return {id:row[0], name:row[1], kind:row[2], set:(window.CARD_SETS||[])[row[3]]||"", rarity:row[4], cls:CLS[row[5]]?row[5]:"n",
     img:(window.CARD_IMG||"")+row[6], type:row[7]||"", poke:row[8]||row[1], stage:stageOf(row[2])};
 }
+const imgOf=id=>{ const row=byId&&byId[id]; return row? (window.CARD_IMG||"")+row[6] : ""; };
 const lvOf=c=>Math.max(0, Math.min(MAX_LV, Number(c.lv)||0));           // 강화 단계 (+0~+5) — 카드를 재료로 써서 올려요
 const UP_COST=[1,2,3,4,5], EVO_COST=5, TRADE_N=10;                     // 강화 · 상위 카드 진화에 드는 재료 카드 수, 일반 카드 교환
 const power=c=>(CLS[c.cls]||CLS.n).pw + lvOf(c)*2;
@@ -78,7 +80,7 @@ function bonus(a,b){
 function cardFace(c, cls){
   const K=CLS[c.cls]||CLS.n, lv=lvOf(c);
   return `<div class="pk ${cls||""} c-${c.cls} ${lv?"lv"+lv:""}" style="--rc:${K.color}">
-    <img src="${eh(c.img)}" alt="${eh(c.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">
+    <img src="${eh(c.img||imgOf(c.id))}" alt="${eh(c.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">
     <span class="pk-fb"><b>${eh(c.name)}</b><small>${eh(c.type||"")}</small></span>
     ${lv?`<span class="pk-lv">+${lv}</span>`:""}</div>`;
 }
@@ -112,13 +114,47 @@ async function loadMyCards(uid){
   const s=await mine(uid).collection("cards").get();
   const out={}; s.docs.forEach(d=>{ const x=d.data(); if(x && x.cls) out[d.id]={...x, id:d.id}; }); return out;   // 예전 링크 카드(cls 없음)는 제외
 }
-async function giveCard(uid, c){
+// 카드 한 장 받기. opt.lv: 함께 오는 강화 단계 (대결에서 받은 카드) · opt.pass: 공부로 얻은 카드면 🎫 PC 이용권도
+async function giveCard(uid, c, opt){
+  opt=opt||{};
   const ref=mine(uid).collection("cards").doc(c.id);
   const d=await ref.get(), cur=d.exists && d.data().cls? d.data() : null;
-  const next={id:c.id, name:c.name, img:c.img, cls:c.cls, type:c.type, kind:c.kind, stage:c.stage, poke:c.poke, set:c.set,
-    count:(cur? Number(cur.count)||1 : 0)+1, lv:cur? Number(cur.lv)||0 : 0, firstAt:cur? cur.firstAt : Date.now(), lastAt:Date.now()};
+  const next={id:c.id, name:c.name, img:c.img||imgOf(c.id), cls:c.cls, type:c.type||"", kind:c.kind||"", stage:c.stage||1, poke:c.poke||c.name, set:c.set||"",
+    count:(cur? Number(cur.count)||1 : 0)+1, lv:Math.max(cur? Number(cur.lv)||0 : 0, Math.min(MAX_LV, Number(opt.lv)||0)), firstAt:cur? cur.firstAt : Date.now(), lastAt:Date.now()};
   await ref.set(next);
-  return {card:next, isNew:!cur};
+  if(CS && CS.uid===uid) CS.cards[c.id]=next;
+  const pass=opt.pass? await givePass(uid, next) : null;
+  return {card:next, isNew:!cur, pass};
+}
+// 카드 한 장 내보내기 (대결에 걸기). 마지막 한 장은 강화 단계도 함께, 겹친 카드는 +0짜리를 보내요
+async function takeCard(uid, id){
+  const ref=mine(uid).collection("cards").doc(id);
+  const d=await ref.get(), c=d.exists? d.data() : null;
+  if(!c || !c.cls) return null;
+  const n=(Number(c.count)||1)-1;
+  let lv=0;
+  if(n<=0){ lv=lvOf(c); await ref.delete(); if(CS && CS.uid===uid) delete CS.cards[id]; }
+  else { c.count=n; await ref.set(c); if(CS && CS.uid===uid) CS.cards[id]={...c, id}; }
+  return {id, lv, name:c.name};
+}
+// 🎫 PC 이용권: 공부로 얻은 💎 슈퍼 레어 카드 1시간 · 👑 스페셜 카드 3시간
+const PASS_H={s:1, u:3};
+async function givePass(uid, c){
+  const h=PASS_H[c.cls]; if(!h) return null;
+  const W=(CS && CS.uid===uid)? CS.wallet : await loadWallet(uid);
+  const p={id:Math.random().toString(36).slice(2,9), h, card:c.name, cls:c.cls, at:Date.now(), used:0};
+  W.pcPasses=[...(W.pcPasses||[]), p];
+  await saveWallet(uid, W);
+  return p;
+}
+const passLeft=W=>(W.pcPasses||[]).filter(p=>!p.used);
+function passesHTML(W, admin){
+  const all=(W.pcPasses||[]).slice().sort((a,b)=>(a.used?1:0)-(b.used?1:0) || b.at-a.at).slice(0, admin? 30 : 8);
+  if(!all.length) return "";
+  const h=passLeft(W).reduce((a,p)=>a+p.h,0);
+  return `<div class="r-sec">🎫 PC 이용권 ${h? `<b style="color:#B45309">${h}시간</b> 남음` : ""}</div><div class="passes">${all.map(p=>`<div class="pass ${p.used?"used":""}">
+      <span style="font-size:22px">🎫</span><span class="sp"><b>PC ${p.h}시간</b><br><small>${CLS[p.cls]?CLS[p.cls].icon:""} ${eh(p.card)} · ${new Date(p.at).toLocaleDateString()}${p.used?` · 사용함`:""}</small></span>
+      ${admin && !p.used? `<button class="ghost-btn" onclick="Cards.usePass('${p.id}')">사용 처리</button>` : ""}</div>`).join("")}</div>`;
 }
 
 /* ----- 오늘 받을 수 있는 카드팩 ----- */
@@ -175,25 +211,19 @@ function renderCards(){
 function drawHTML(){
   const W=CS.wallet, ds=today(), got=Number(W.claimed[ds])||0, list=dayEarned(ds), ok=list.filter(q=>q.ok).length;
   const can=Math.max(0, ok-got), ro=state.viewingChild;
-  let rev="";
-  if(CS.reveal){
-    const R=CS.reveal, K=CLS[R.card.cls];
-    rev=`<div class="cd-reveal c-${R.card.cls}"><div class="cd-flip">${cardFace(R.card,"big")}</div>
-      <div class="cd-rv-txt">${K.icon} <b style="color:${K.color}">${K.name}</b> · ${eh(R.card.name)}</div>
-      <div class="cd-rv-sub">${R.isNew?"✨ 새 카드!":`🔁 겹친 카드 (${R.card.count}장) — 강화 재료로 쓸 수 있어요`}${R.card.type?` · ${eh(R.card.type)} 타입`:""}</div></div>`;
-  }
   return `
     <div class="cd-ticket">
       <div><div class="cd-t-lbl">내 카드팩</div><div class="cd-t-n">🎴 ${W.tickets||0}개</div></div>
-      <button class="pay-btn" ${(!ro && W.tickets>0)?"":"disabled"} onclick="Cards.draw()">카드팩 열기</button>
+      <button class="pay-btn" ${(!ro && W.tickets>0)?"":"disabled"} onclick="Cards.draw()">🎴 카드팩 뜯기</button>
     </div>
-    ${rev}
+    ${passesHTML(W)}
     <div class="r-sec">오늘 받을 수 있는 카드팩 (하루 최대 ${DAY_TICKETS.length}개)</div>
     <div class="cd-quests">${list.map(q=>`<div class="cd-q ${q.ok?"ok":""}"><span>${q.ok?"✅":"⬜"}</span>${eh(q.label)}</div>`).join("")}</div>
     <button class="ghost-btn" style="width:100%;margin-top:8px" ${(!ro && can>0)?"":"disabled"} onclick="Cards.claim()">${can>0?`🎴 카드팩 ${can}개 받기`:(got? `오늘 ${got}개 받았어요`:"공부하면 받을 수 있어요")}</button>
     <div class="cd-note">등급 확률: ${ORDER.slice().reverse().map(k=>`${CLS[k].icon} ${CLS[k].name} ${ODDS[k]}%`).join(" · ")}<br>
       ${PITY}팩 안에 아트 레어 이상 1장 보장 (지금 ${W.pity||0}/${PITY}) · 내 카드에서 다른 카드를 재료로 강화(+1~+${MAX_LV}, ⚡+2씩) · +${MAX_LV}이면 상위 카드로 진화<br>
-      대결에서 이기면 하루 한 번 카드팩 +1 · 카드 ${won(window.CARDS?window.CARDS.length:0)}장</div>`;
+      🎫 공부로 얻은 💎 슈퍼 레어 카드 → PC 이용권 1시간 · 👑 스페셜 카드 → 3시간 (카드팩 · 포획 · 진화)<br>
+      친선 대결에서 이기면 하루 한 번 카드팩 +1 · 카드 ${won(window.CARDS?window.CARDS.length:0)}장</div>`;
 }
 function mineHTML(){
   const all=Object.values(CS.cards);
@@ -216,7 +246,8 @@ function weekBoost(){
 /* ============ ⚔️ 대결 (받아쓰기 프로그램과 같은 방식) ============
  * 상대 고르기 → 서로 카드 한 장 → 3판 2선승. 판마다 두 사람이 🎲 직접 눌러 굴리고, 둘 다 굴려야 그 판 결과가 나와요.
  * 주사위 값은 대결마다 정해진 seed로 미리 정해져서 두 기기 결과가 같아요.
- * 형제: cardHub/{부모uid}/matches/{id} 로 실시간 · 🤖 연습 상대: 이 기기에서 바로                                */
+ * 🎴 카드 걸기: 고른 카드를 맡겨 두고(escrow) 이기면 내 카드 + 상대 카드, 지면 상대에게 가요 · 🤝 친선: 카드는 그대로, 이기면 하루 한 번 카드팩 +1
+ * 형제: cardHub/{부모uid}/matches/{id} · 🌐 받아쓰기 친구: assets/ttobak.js · 🤖 연습: 이 기기에서 (항상 카드 걸기 · 주사위 숫자로만)   */
 function rng(seed){ let t=seed>>>0; return ()=>{ t+=0x6d2b79f5; let r=Math.imul(t^(t>>>15),1|t); r^=r+Math.imul(r^(r>>>7),61|r); return ((r^(r>>>14))>>>0)/4294967296; }; }
 const mulOf=(a,b)=>bonus(a,b).mul*(1+(Number(a.boost)||0));
 const scoreOf=(a,b,die)=>Math.round(power(a)*die*mulOf(a,b));
@@ -230,14 +261,41 @@ function battle(seed, a, b){
   }
   return {winner: wa>wb?0:1, rounds};
 }
-const pickOf=c=>({id:c.id, name:c.name, img:c.img, cls:c.cls, type:c.type||"", stage:c.stage||1, count:c.count||1, boost:weekBoost()});
+// 🤖 연습: 주사위 숫자로만 (같으면 다시) · 3판 2선승
+function diceBattle(seed){
+  const r=rng(seed), dice=()=>1+Math.floor(r()*6), rounds=[]; let wa=0, wb=0;
+  while(wa<2 && wb<2 && rounds.length<40){
+    const da=dice(), db2=dice();
+    if(da===db2){ rounds.push({da, db:db2, sa:da, sb:db2, w:-1}); continue; }
+    const w=da>db2?0:1; if(w===0) wa++; else wb++;
+    rounds.push({da, db:db2, sa:da, sb:db2, w});
+  }
+  return {winner: wa>wb?0:1, rounds};
+}
+const lvIn=(c,lv)=>lv==null? lvOf(c) : lv;
+const pickOf=(c,lv)=>({id:c.id, name:c.name, img:c.img||imgOf(c.id), cls:c.cls, type:c.type||"", stage:c.stage||1, lv:lvIn(c,lv), boost:weekBoost()});
+const tbPick=(c,lv)=>({id:c.id, name:c.name, cls:c.cls, type:c.type||"", stage:c.stage||1, lv:lvIn(c,lv)});   // 받아쓰기 프로그램 모양 그대로 (공부 보너스 없음)
+const cardById=x=>byId&&byId[x.id]? info(byId[x.id]) : {id:x.id, name:x.name||"카드", cls:CLS[x.cls]?x.cls:"n", type:x.type||"", stage:x.stage||1};
 const ONLINE_MS=90000;
-let arenaSubs=[], beatT=0;
+const TB=()=>window.TTOBAK && TTOBAK.st.on && TTOBAK.st.kid? TTOBAK : null;
+const meOf=m=>m.src==="tb"? (window.TTOBAK? TTOBAK.st.uid : null) : CS.uid;
+const otherOf=m=>m.users.find(u=>u!==meOf(m));
+const hostOf=m=>m.host||m.from;
+const keyOf=m=>(m.src||"hub")+":"+(m.src==="local"? m.seed : m.id);
+const dbOf=m=>m.src==="tb"? TTOBAK.db() : db;
+const refOf=m=>m.src==="tb"? TTOBAK.db().collection("matches").doc(m.id) : hub(m.hub).collection("matches").doc(m.id);
+const fresh=m=>m.status!=="invite" || Date.now()-(m.createdAt||0)<(m.src==="tb"? 2 : 10)*60000;
+let arenaSubs=[], beatT=0, tbOff=null;
 function startArena(){
   arenaSubs.forEach(u=>{ try{u();}catch(_){} }); arenaSubs=[];
   const me=CS.uid, name=state.ownerName||state.profile.name||"";
   const beat=()=>{ if(!CS) return; CS.parents.forEach(p=>hub(p).collection("decks").doc(me).set({name, seen:Date.now()},{merge:true}).catch(()=>{})); };
   beat(); clearInterval(beatT); beatT=setInterval(()=>{ if(document.visibilityState!=="hidden") beat(); }, 30000);
+  const changed=()=>{
+    settleSweep();
+    if(!cardsOpen()){ const n=incoming().length; if(n) toast(`⚔️ 대결 신청이 왔어요 (${n})`,"info"); return; }
+    if(CS.tab==="battle" || incoming().length) renderCards();
+  };
   CS.parents.forEach(p=>{
     arenaSubs.push(hub(p).collection("decks").onSnapshot(s=>{
       const others=s.docs.filter(d=>d.id!==me).map(d=>({uid:d.id, hub:p, ...d.data()}));
@@ -245,41 +303,81 @@ function startArena(){
       if(CS.tab==="battle" && !CS.mid && cardsOpen()) renderCards();
     }, e=>console.warn("대결 상대", e)));
     arenaSubs.push(hub(p).collection("matches").where("users","array-contains",me).onSnapshot(s=>{
-      Object.keys(CS.matches).forEach(id=>{ if(CS.matches[id].hub===p && !CS.matches[id].keep) delete CS.matches[id]; });
-      s.docs.forEach(d=>{ CS.matches[d.id]={...(CS.matches[d.id]||{}), ...d.data(), id:d.id, hub:p}; });
-      if(!cardsOpen()){ const n=incoming().length; if(n) toast(`⚔️ 대결 신청이 왔어요 (${n})`,"info"); return; }
-      if(CS.tab==="battle") renderCards(); else if(incoming().length) renderCards();
+      Object.keys(CS.matches).forEach(id=>{ const x=CS.matches[id]; if(x.src==="hub" && x.hub===p && !x.keep && id!==CS.mid) delete CS.matches[id]; });
+      s.docs.forEach(d=>{ CS.matches[d.id]={...(CS.matches[d.id]||{}), ...d.data(), id:d.id, hub:p, src:"hub"}; });
+      changed();
     }, e=>console.warn("대결 기록", e)));
   });
+  // 🌐 받아쓰기 친구
+  if(tbOff){ tbOff(); tbOff=null; }
+  if(window.TTOBAK){
+    TTOBAK.init();
+    TTOBAK.setKid({id:"ng-"+me, name:name||"플래너 친구", avatar:"🎓"});
+    const syncTb=()=>{
+      if(!CS) return;
+      Object.keys(CS.matches).forEach(id=>{ const x=CS.matches[id]; if(x.src==="tb" && !x.keep && id!==CS.mid) delete CS.matches[id]; });
+      if(TB()) TTOBAK.myMatches().forEach(x=>{ CS.matches[x.id]={...(CS.matches[x.id]||{}), ...x, src:"tb"}; });
+    };
+    syncTb();
+    tbOff=TTOBAK.on(w=>{
+      if(!CS) return;
+      if(w==="matches"){ syncTb(); return changed(); }
+      if(CS.tab==="battle" && !CS.mid && cardsOpen()) renderCards();
+    });
+  }
   hub(CS.parents[0]||"_").collection("battles").get().then(s=>{ CS.log=s.docs.map(d=>d.data()).filter(l=>l.aUid===me||l.bUid===me).sort((a,b)=>b.at-a.at).slice(0,5); }).catch(()=>{});
 }
-const fresh=m=>m.status!=="invite" || Date.now()-(m.createdAt||0)<10*60000;
-function incoming(){ return Object.values(CS?CS.matches:{}).filter(m=>m.status==="invite" && m.from!==CS.uid && fresh(m)); }
+function incoming(){ return Object.values(CS?CS.matches:{}).filter(m=>m.status==="invite" && meOf(m) && hostOf(m)!==meOf(m) && fresh(m)); }
 function curMatch(){ return CS.mid==="local"? CS.local : CS.matches[CS.mid]; }
+const modeTag=m=>m.src==="local"? `<span class="bt-tag stake">🎲 주사위 · 카드 걸기</span>` : m.stake? `<span class="bt-tag stake">🎴 카드 걸기</span>` : `<span class="bt-tag">🤝 친선</span>`;
+const srcTag=m=>m.src==="tb"? `<span class="bt-tag tb">🌐 받아쓰기</span>` : "";
 function lobbyHTML(){
-  const ro=state.viewingChild, me=CS.uid, has=Object.keys(CS.cards).length>0;
-  const inv=incoming(), live=Object.values(CS.matches).filter(m=>(m.status==="pick"||m.status==="roll") || (m.status==="invite" && m.from===me && fresh(m)));
+  const ro=state.viewingChild, has=Object.keys(CS.cards).length>0, off=(!has||ro)?"disabled":"";
+  const inv=incoming(), live=Object.values(CS.matches).filter(m=>meOf(m) && ((m.status==="pick"||m.status==="roll") || (m.status==="invite" && hostOf(m)===meOf(m) && fresh(m))));
   const sibs=CS.players.filter((x,i,a)=>a.findIndex(y=>y.uid===x.uid)===i);
-  const opp=m=>m.who? m.who[m.users.find(u=>u!==me)] : {name:"상대"};
+  const opp=m=>(m.who||{})[otherOf(m)]||{name:"상대"};
   return `
     ${inv.length?`<div class="r-sec">받은 대결 신청</div>${inv.map(m=>`<div class="list-item bt-inv">
-        <span style="flex:1"><b>${eh(opp(m).name)}</b>이(가) 대결을 신청했어요!</span>
+        <span style="flex:1"><b>${eh(opp(m).name)}</b>이(가) 대결을 신청했어요! ${srcTag(m)}${modeTag(m)}</span>
         <button class="fam-btn" onclick="Cards.accept('${m.id}')">수락</button><button class="ghost-btn" style="padding:7px 12px" onclick="Cards.decline('${m.id}')">거절</button></div>`).join("")}`:""}
     ${live.length?`<div class="r-sec">진행 중인 대결</div>${live.map(m=>`<div class="list-item">
-        <span style="flex:1">vs <b>${eh(opp(m).name)}</b> <small style="color:#94A3B8">${m.status==="invite"?"대답 기다리는 중":m.status==="pick"?"카드 고르는 중":"주사위 굴리는 중"}</small></span>
+        <span style="flex:1">vs <b>${eh(opp(m).name)}</b> ${srcTag(m)}${modeTag(m)} <small style="color:#94A3B8">${m.status==="invite"?"대답 기다리는 중":m.status==="pick"?"카드 고르는 중":"주사위 굴리는 중"}</small></span>
         <button class="fam-btn" onclick="Cards.openMatch('${m.id}')">이어서</button></div>`).join("")}`:""}
     <div class="r-sec">대결 상대 고르기</div>
     ${!has?`<div class="pb-sub warn">카드가 있어야 대결할 수 있어요. 카드팩을 먼저 열어 봐요!</div>`:""}
-    ${sibs.map(x=>{ const on=Date.now()-(x.seen||0)<ONLINE_MS; return `<div class="list-item" style="margin-bottom:6px">
+    ${sibs.map(x=>{ const on=Date.now()-(x.seen||0)<ONLINE_MS; return `<div class="list-item bt-opp">
         <span class="bt-av">${eh((x.name||"?").slice(0,1))}</span>
         <span style="flex:1;min-width:0"><b>${eh(x.name||"형제")}</b> <small class="${on?"bt-on":"bt-off"}">${on?"● 접속 중":"○ 오프라인"}</small></span>
-        <button class="fam-btn" ${(!has||ro)?"disabled":""} onclick="Cards.invite('${x.uid}','${x.hub}')">⚔️ 대결 신청</button></div>`; }).join("")
+        <span class="bt-btns"><button class="fam-btn" ${off} onclick="Cards.invite('${x.uid}','${x.hub}',true)">🎴 걸기</button><button class="ghost-btn" ${off} onclick="Cards.invite('${x.uid}','${x.hub}',false)">🤝 친선</button></span></div>`; }).join("")
       || `<div class="cd-note" style="margin-top:0">형제가 카드 화면을 한 번 열면 여기에 나타나요.</div>`}
-    <div class="list-item" style="margin-bottom:6px"><span class="bt-av cpu">🤖</span><span style="flex:1"><b>연습 상대</b> <small style="color:#94A3B8">언제든 · 비슷한 등급 카드</small></span>
-      <button class="fam-btn" ${(!has||ro)?"disabled":""} onclick="Cards.practice()">⚔️ 대결</button></div>
-    ${CS.log&&CS.log.length?`<div class="r-sec">최근 대결</div>${CS.log.map(l=>`<div class="cd-log">${eh(l.a)} ${l.win?"🏆":"·"} vs ${eh(l.b)} ${l.win?"":"🏆"} <small>${eh(l.score)} · ${new Date(l.at).toLocaleDateString()}</small></div>`).join("")}`:""}
+    <div class="list-item bt-opp"><span class="bt-av cpu">🤖</span><span style="flex:1;min-width:0"><b>연습 상대</b> <small style="color:#94A3B8;display:block">내 카드와 같은 등급 · 같은 강화 카드 · 🎲 주사위 숫자로만<br>이기면 봇 카드를 받고, 지면 내 카드가 사라져요</small></span>
+      <span class="bt-btns"><button class="fam-btn" ${off} onclick="Cards.practice()">🎴 걸고 연습</button></span></div>
+    ${tbHTML(off)}
+    ${CS.log&&CS.log.length?`<div class="r-sec">최근 대결</div>${CS.log.map(l=>`<div class="cd-log">${eh(l.a)} ${l.win?"🏆":"·"} vs ${eh(l.b)} ${l.win?"":"🏆"} <small>${eh(l.score)}${l.stake?" · 🎴":""} · ${new Date(l.at).toLocaleDateString()}</small></div>`).join("")}`:""}
     ${foodHTML()}
-    <div class="cd-note">한 판 점수 = ⚡힘(등급 + 강화×2) × 🎲주사위 × 먹이사슬(타입 ×1.5 · 진화 단계 ×1.2) × 이번 주 공부 보너스(+${Math.round(weekBoost()*100)}%). 3판 2선승 · 져도 카드는 잃지 않아요 · 이기면 하루 한 번 카드팩 +1</div>`;
+    <div class="cd-note">한 판 점수 = ⚡힘(등급 + 강화×2) × 🎲주사위 × 먹이사슬(타입 ×1.5 · 진화 단계 ×1.2) × 이번 주 공부 보너스(+${Math.round(weekBoost()*100)}%, 형제 대결). 3판 2선승<br>
+      🎴 카드 걸기: 이기면 상대 카드를 받고, 지면 내 카드가 상대에게 가요 (겹친 카드는 +0짜리를 걸어요) · 🤝 친선: 카드는 그대로, 이기면 하루 한 번 카드팩 +1</div>`;
+}
+// 🌐 받아쓰기(또박또박) 친구
+function tbHTML(off){
+  if(!window.TTOBAK || state.viewingChild) return "";
+  const T=TTOBAK.st;
+  if(!T.on) return `<div class="r-sec">🌐 받아쓰기 친구와 대결</div>
+    <div class="tb-box"><p>받아쓰기 프로그램(또박또박)을 쓰는 친구와도 카드 대결을 할 수 있어요.<br><small>부모님 Google 계정으로 한 번 연결해 주세요 (이 기기에 기억돼요)</small></p>
+      <button class="fam-btn" onclick="Cards.tbLogin()">🔗 Google 계정으로 연결</button></div>`;
+  const list=TTOBAK.friendList();
+  const kids=[]; list.filter(f=>f.status==="ok").forEach(f=>f.kids.filter(k=>!(T.kid && k.id===T.kid.id)).forEach(k=>kids.push({...k, fuid:f.uid, fam:f.name})));
+  kids.sort((a,b)=>b.online-a.online);
+  return `<div class="r-sec">🌐 받아쓰기 친구와 대결</div>
+    ${list.filter(f=>f.incoming).map(f=>`<div class="list-item bt-inv"><span style="flex:1"><b>${eh(f.name)}</b> 가족이 친구 신청을 했어요 <small style="color:#94A3B8">${eh(f.email)}</small></span>
+      <button class="fam-btn" onclick="Cards.tbAccept('${f.pid}')">수락</button></div>`).join("")}
+    ${kids.map(k=>`<div class="list-item bt-opp"><span class="bt-av">${eh(k.avatar||(k.name||"?").slice(0,1))}</span>
+        <span style="flex:1;min-width:0"><b>${eh(k.name)}</b> <small class="${k.online?"bt-on":"bt-off"}">${k.online?"● 접속 중":"○ 오프라인"}</small><small style="color:#94A3B8;display:block">${eh(k.fam)} 가족</small></span>
+        <span class="bt-btns"><button class="fam-btn" ${off} onclick="Cards.tbInvite('${k.fuid}','${eh(k.id)}',true)">🎴 걸기</button><button class="ghost-btn" ${off} onclick="Cards.tbInvite('${k.fuid}','${eh(k.id)}',false)">🤝 친선</button></span></div>`).join("")
+      || `<div class="cd-note" style="margin-top:0">${list.length? "친구 가족의 아이가 받아쓰기 프로그램을 켜면 여기에 나타나요." : "아직 친구가 없어요. 친구 부모님의 Google 이메일로 신청해 보세요."}</div>`}
+    ${list.filter(f=>f.status==="pending" && !f.incoming).map(f=>`<div class="cd-note" style="margin-top:2px">⏳ ${eh(f.email||f.name)} — 친구 수락 기다리는 중</div>`).join("")}
+    <div class="tb-add"><input class="inp" id="tbMail" type="email" placeholder="친구 부모님 Google 이메일" onkeydown="if(event.key==='Enter')Cards.tbFriend()"><button class="ghost-btn" onclick="Cards.tbFriend()">친구 신청</button></div>
+    <div class="cd-note" style="margin-top:4px">연결됨: ${eh(T.email)} · 친구에게 이 이메일을 알려 주세요 · <a href="#" onclick="Cards.tbLogout();return false">연결 끊기</a>${T.err?` · <span style="color:#E5484D">${eh(T.err)}</span>`:""}</div>`;
 }
 function foodHTML(){
   return `<details class="cd-food"><summary>🍖 먹이사슬 보기</summary>
@@ -289,38 +387,44 @@ function foodHTML(){
 
 /* ----- 대결 방 화면 ----- */
 function arenaShell(m, inner){
-  const me=CS.uid, other=m.users.find(u=>u!==me), A=m.who[me]||{name:"나"}, B=m.who[other]||{name:"상대"};
-  hubShell("⚔️ 카드 대결", `<div class="bt-top"><button class="ghost-btn" style="padding:6px 12px" onclick="Cards.leave()">‹ 목록</button></div>
+  const me=meOf(m), other=otherOf(m), A=m.who[me]||{name:"나"}, B=m.who[other]||{name:"상대"};
+  hubShell("⚔️ 카드 대결", `<div class="bt-top"><button class="ghost-btn" style="padding:6px 12px" onclick="Cards.leave()">‹ 목록</button> ${srcTag(m)}${modeTag(m)}</div>
     <div class="vs"><span class="vs-kid"><span class="bt-av">${eh((A.name||"나").slice(0,1))}</span><b>${eh(A.name)}</b></span><span class="vs-x">VS</span>
-      <span class="vs-kid"><span class="bt-av ${other==="cpu"?"cpu":""}">${other==="cpu"?"🤖":eh((B.name||"?").slice(0,1))}</span><b>${eh(B.name)}</b></span></div>
+      <span class="vs-kid"><span class="bt-av ${other==="cpu"?"cpu":""}">${other==="cpu"?"🤖":eh(B.avatar||(B.name||"?").slice(0,1))}</span><b>${eh(B.name)}</b></span></div>
     <div id="arenaBody">${inner}</div>`);
 }
 function renderMatch(){
-  const m=curMatch(), me=CS.uid;
+  const m=curMatch();
   if(!m){ CS.mid=null; return renderCards(); }
-  const other=m.users.find(u=>u!==me), them=(m.who[other]||{}).name||"상대";
+  const me=meOf(m);
+  if(!me){ return hubShell("⚔️ 카드 대결", `<div class="bt-wait">🌐 받아쓰기 프로그램 연결이 끊겼어요. 목록에서 다시 연결해 주세요.</div><div class="bt-row"><button class="fam-btn" onclick="Cards.leave()">목록으로</button></div>`); }
+  const other=otherOf(m), them=(m.who[other]||{}).name||"상대";
   const quit=`<button class="ghost-btn" onclick="Cards.cancel()">그만하기</button>`;
   if(m.status==="invite"){
-    return arenaShell(m, `<div class="bt-wait">⏳ <b>${eh(them)}</b>의 대답을 기다려요…<br><small>같은 시간에 카드 화면을 열고 있어야 해요</small></div><div class="bt-row">${quit}</div>`);
+    if(!fresh(m)) return arenaShell(m, `<div class="bt-wait">⌛ 대답이 없어서 대결 신청이 끝났어요.</div><div class="bt-row"><button class="fam-btn" onclick="Cards.leave()">목록으로</button></div>`);
+    return arenaShell(m, `<div class="bt-wait">⏳ <b>${eh(them)}</b>의 대답을 기다려요…<br><small>${m.src==="tb"? "친구가 받아쓰기 프로그램을 켜 두어야 해요 (2분 동안)" : "같은 시간에 카드 화면을 열고 있어야 해요"}</small></div><div class="bt-row">${quit}</div>`);
   }
   if(m.status==="declined"||m.status==="cancel"){
-    return arenaShell(m, `<div class="bt-wait">${m.status==="declined"? `🙅 ${eh(them)}이(가) 다음에 하재요.` : "대결을 그만했어요."}</div><div class="bt-row"><button class="fam-btn" onclick="Cards.leave()">목록으로</button></div>`);
+    return arenaShell(m, `<div class="bt-wait">${m.status==="declined"? `🙅 ${eh(them)}이(가) 다음에 하재요.` : "대결을 그만했어요."}${m.stake?"<br><small>건 카드는 돌려받아요</small>":""}</div><div class="bt-row"><button class="fam-btn" onclick="Cards.leave()">목록으로</button></div>`);
   }
   if(m.status==="pick"){
     const mine=(m.picks||{})[me];
     if(mine){
-      return arenaShell(m, `<div class="bt-pick">${cardFace(mine,"mid")}<p>내 카드: <b>${eh(mine.name)}</b> · ⚡${power(mine)}${mine.type?` · ${eh(mine.type)}`:""}</p></div>
+      return arenaShell(m, `<div class="bt-pick">${cardFace(mine,"mid")}<p>내 카드: <b>${eh(mine.name)}</b> · ⚡${power(mine)}${mine.type?` · ${eh(mine.type)}`:""}${m.stake?" · 🎴 걸었어요":""}</p></div>
         <div class="bt-wait">⏳ ${eh(them)}이(가) 카드를 고르는 중…</div><div class="bt-row">${quit}</div>`);
     }
     const owned=Object.values(CS.cards).sort((a,b)=>power(b)-power(a));
-    return arenaShell(m, `<p class="bt-say">대결할 카드를 골라! <small>점수 = ⚡힘 × 🎲주사위 · 먹이를 만나면 ×1.5</small></p>
-      <div class="cd-grid">${owned.map(c=>cardTile(c,{on:`Cards.confirmPick('${c.id}')`})).join("")}</div>${foodHTML()}<div class="bt-row">${quit}</div>`);
+    const say= m.src==="local"? `걸 카드를 골라! <small>같은 등급 · 같은 강화의 봇 카드와 🎲 주사위 숫자로만 겨뤄요 · 이기면 봇 카드를 받고, 지면 이 카드는 사라져요</small>`
+      : m.stake? `걸 카드를 골라! <small>점수 = ⚡힘 × 🎲주사위 · 먹이를 만나면 ×1.5 · 지면 이 카드가 ${eh(them)}에게 가요</small>`
+      : `대결할 카드를 골라! <small>점수 = ⚡힘 × 🎲주사위 · 먹이를 만나면 ×1.5 · 친선 대결이라 카드는 그대로예요</small>`;
+    return arenaShell(m, `<p class="bt-say">${say}</p>
+      <div class="cd-grid">${owned.map(c=>cardTile(c,{on:`Cards.confirmPick('${c.id}')`, extra:(c.count>1?`<span class="cd-deck">×${c.count}</span>`:"")})).join("")}</div>${m.src==="local"?"":foodHTML()}<div class="bt-row">${quit}</div>`);
   }
   rollView(m);
 }
-function bonusTag(P,Q){ const b=bonus(P,Q); return b.why.length? `<span class="bt-edge">${b.why.join(" ")}</span>` : ""; }
+function bonusTag(P,Q,m){ if(m && m.dice) return ""; const b=bonus(P,Q); return b.why.length? `<span class="bt-edge">${b.why.join(" ")}</span>` : ""; }
 function rollSides(m){
-  const me=CS.uid, other=m.users.find(u=>u!==me), first=m.users[0]===me;
+  const me=meOf(m), other=otherOf(m), first=m.users[0]===me;
   const rounds=(m.rounds||[]).map(r=>first? r : {da:r.db, db:r.da, sa:r.sb, sb:r.sa, w:r.w===-1?-1:1-r.w});
   return {me, other, rounds, A:m.picks[me], B:m.picks[other]};
 }
@@ -330,9 +434,9 @@ function rollView(m){
   let root=document.getElementById("arena");
   if(!root || root.dataset.mid!==m.id){
     arenaShell(m, `<div class="arena" id="arena" data-mid="${m.id}" data-shown="0">
-        <div class="fighter" id="fA">${cardFace(A,"mid")}<b>${eh(A.name)}</b><span class="pw">⚡${power(A)}${A.type?` ${eh(A.type)}`:""}</span>${bonusTag(A,B)}<span class="die" id="dA">🎲</span></div>
+        <div class="fighter" id="fA">${cardFace(A,"mid")}<b>${eh(A.name)}</b><span class="pw">${m.dice?`${CLS[A.cls].icon}${lvOf(A)?` +${lvOf(A)}`:""}`:`⚡${power(A)}`}${A.type?` ${eh(A.type)}`:""}</span>${bonusTag(A,B,m)}<span class="die" id="dA">🎲</span></div>
         <div class="score" id="bScore">0 : 0</div>
-        <div class="fighter" id="fB">${cardFace(B,"mid")}<b>${eh(B.name)}</b><span class="pw">⚡${power(B)}${B.type?` ${eh(B.type)}`:""}</span>${bonusTag(B,A)}<span class="die" id="dB">🎲</span><small class="die-note" id="nB"></small></div>
+        <div class="fighter" id="fB">${cardFace(B,"mid")}<b>${eh(B.name)}</b><span class="pw">${m.dice?`${CLS[B.cls].icon}${lvOf(B)?` +${lvOf(B)}`:""}`:`⚡${power(B)}`}${B.type?` ${eh(B.type)}`:""}</span>${bonusTag(B,A,m)}<span class="die" id="dB">🎲</span><small class="die-note" id="nB"></small></div>
       </div>
       <div class="roll-ctl" id="rollCtl"></div><div class="rounds" id="bRounds"></div><div id="bEnd"></div>`);
     root=document.getElementById("arena");
@@ -451,7 +555,7 @@ async function rollPane(p, value, from){
   if(value===6){ sfx("diceBig"); confetti(); }
   await dwait(800);
 }
-const scoreHow=(P,Q,die,sc)=>{ const x=mulOf(P,Q); return `⚡${power(P)} × 🎲${die}${x>1.0001?` × ${+x.toFixed(2)}`:""} = <b>${sc}</b>`; };
+const scoreHow=(P,Q,die,sc)=>{ if(CS && (curMatch()||{}).dice) return `🎲 <b>${die}</b>`; const x=mulOf(P,Q); return `⚡${power(P)} × 🎲${die}${x>1.0001?` × ${+x.toFixed(2)}`:""} = <b>${sc}</b>`; };
 async function revealRound(rounds, i, A, B){
   if(!document.getElementById("arena")) return;
   const r=rounds[i];
@@ -485,13 +589,15 @@ function confetti(){
     s.style.left=Math.random()*100+"%"; s.style.animationDelay=Math.random()*0.3+"s"; s.style.fontSize=18+Math.random()*22+"px"; box.appendChild(s); }
   document.body.appendChild(box); setTimeout(()=>box.remove(), 2600);
 }
-async function battleScene(won, reward){
+async function battleScene(won, n){
   const el=document.createElement("div");
   el.className="bt-over "+(won?"win":"lose");
+  const winSub= n.got? `🎴 <b>${eh(n.got.name)}</b> 카드를 받았어요!${n.local?"":" 내 카드도 돌아왔어요"}` : n.reward? "🎴 카드팩 +1 (오늘 첫 승리)" : n.stake? "" : "오늘 승리 보상은 이미 받았어요";
+  const loseSub= n.lost? (n.local? `<b>${eh(n.lost.name)}</b> 카드가 사라졌어요…` : `<b>${eh(n.lost.name)}</b> 카드가 상대에게 갔어요`) : "카드는 그대로예요. 다음엔 꼭 이길 거야 💪";
   el.innerHTML= won
-    ? `<div class="bt-rays"></div><p class="bt-big">🏆</p><p class="bt-word">승리!</p><p class="bt-sub">${reward?"🎴 카드팩 +1 (오늘 첫 승리)":"오늘 승리 보상은 이미 받았어요"}</p><button class="bt-ok">좋아! 👍</button>`
+    ? `<div class="bt-rays"></div><p class="bt-big">🏆</p><p class="bt-word">승리!</p>${n.got?`<div class="bt-got">${cardFace(n.got,"mid")}</div>`:""}<p class="bt-sub">${winSub}</p><button class="bt-ok">좋아! 👍</button>`
     : `<div class="bt-rain">${Array.from({length:28},()=>`<i style="left:${Math.random()*100}%;animation-delay:${(Math.random()*1.2).toFixed(2)}s;animation-duration:${(0.7+Math.random()*0.6).toFixed(2)}s"></i>`).join("")}</div>
-       <p class="bt-big">😢</p><p class="bt-word">아쉽다…</p><p class="bt-sub">카드는 그대로예요. 다음엔 꼭 이길 거야 💪</p><button class="bt-ok">다시 힘내기 💪</button>`;
+       <p class="bt-big">😢</p><p class="bt-word">아쉽다…</p><p class="bt-sub">${loseSub}</p><button class="bt-ok">다시 힘내기 💪</button>`;
   document.body.appendChild(el);
   await dwait(20); el.classList.add("in");
   if(won){ sfx("victory"); confetti(); setTimeout(confetti,700); setTimeout(confetti,1500); } else sfx("defeat");
@@ -502,54 +608,137 @@ async function battleScene(won, reward){
 }
 async function battleEnd(m){
   if(!document.getElementById("arena")) return;
-  const {me, other, A, B}=rollSides(m);
-  const won=m.winner===me, them=(m.who[other]||{}).name||"상대";
-  let reward=false;
-  if(!(m.settled||{})[me]){
-    const W=CS.wallet;
-    if(won && W.winDay!==today()){ W.winDay=today(); W.tickets=(Number(W.tickets)||0)+1; reward=true; await saveWallet(CS.uid, W); }
-    const w=rollSides(m).rounds.filter(x=>x.w===0).length, l=rollSides(m).rounds.filter(x=>x.w===1).length;
-    const logDoc={aUid:me, a:(m.who[me]||{}).name||"", bUid:other, b:them, win:won, score:`${w} : ${l}`, at:Date.now()};
-    if(CS.parents[0]) hub(CS.parents[0]).collection("battles").add(logDoc).catch(()=>{});
-    CS.log=[logDoc, ...(CS.log||[])].slice(0,5);
-    matchSettle(m);
-  }
-  await battleScene(won, reward);
+  const {me, other}=rollSides(m);
+  const won=m.winner===me;
+  await settleSweep();
+  const n=(CS.notes||{})[keyOf(m)]||{won, stake:!!m.stake};
+  await battleScene(won, n);
   const end=document.getElementById("bEnd"); if(!end) return;
+  const again= m.src==="local"? "Cards.practice()" : m.src==="tb"? `Cards.tbInvite('${other}','${eh((m.kids||{})[other]||"")}',${!!m.stake})` : `Cards.invite('${other}','${m.hub}',${!!m.stake})`;
   end.innerHTML=`<p class="bt-result ${won?"win":"lose"}">${won?"🏆 이겼어요!":"😢 아쉽게 졌어요"}</p>
-    <div class="bt-row"><button class="fam-btn" onclick="${other==="cpu"?"Cards.practice()":`Cards.invite('${other}','${m.hub}')`}">⚔️ 한 번 더</button><button class="ghost-btn" onclick="Cards.leave()">목록으로</button></div>`;
+    <div class="bt-row"><button class="fam-btn" onclick="${again}">⚔️ 한 번 더</button><button class="ghost-btn" onclick="Cards.leave()">목록으로</button></div>`;
+}
+function logBattle(m, me, other, won){
+  const rs=rollSides(m).rounds, w=rs.filter(x=>x.w===0).length, l=rs.filter(x=>x.w===1).length;
+  const logDoc={aUid:CS.uid, a:(m.who[me]||{}).name||"", bUid:other, b:(m.who[other]||{}).name||"상대", win:won, stake:!!m.stake, src:m.src||"hub", score:`${w} : ${l}`, at:Date.now()};
+  if(CS.parents[0]) hub(CS.parents[0]).collection("battles").add(logDoc).catch(()=>{});
+  CS.log=[logDoc, ...(CS.log||[])].slice(0,5);
 }
 
-/* ----- 대결 기록 바꾸기 (형제: Firestore 트랜잭션 · 연습: 이 기기) ----- */
-async function matchPick(m, card){
-  if(m.id==="local"){
-    m.picks[CS.uid]=card;
-    const cpu=cpuCard(card);
-    m.picks.cpu=cpu;
-    const r=battle(m.seed, m.picks[m.users[0]], m.picks[m.users[1]]);
-    Object.assign(m, {status:"roll", winner:m.users[r.winner], rounds:r.rounds, rolled:{}});
-    return renderCards();
+/* ----- 🎴 대결 정리: 건 카드 돌려받기 · 이긴 카드 받기 (받아쓰기 프로그램의 settleSocial과 같은 방식) ----- */
+let sweeping=null, sweepAgain=false;
+function settleSweep(){
+  if(!CS) return Promise.resolve();
+  if(sweeping){ sweepAgain=true; return sweeping; }
+  sweeping=(async()=>{ do{ sweepAgain=false; await sweepOnce(); }while(sweepAgain); })()
+    .catch(e=>console.warn("대결 정리", e)).finally(()=>{ sweeping=null; });
+  return sweeping;
+}
+async function sweepOnce(){
+  const W=CS.wallet; W.escrow=W.escrow||{}; W.done=W.done||{}; CS.notes=CS.notes||{};
+  let changed=false;
+  for(const m of Object.values(CS.matches)){
+    const me=meOf(m); if(!me || !m.users || !m.users.includes(me)) continue;
+    const key=keyOf(m), other=otherOf(m), s=m.settled||{};
+    if(W.done[key]){ if(!s[me] || s[other]) markSettled(m); continue; }
+    if(s[me]){ W.done[key]=1; changed=true; continue; }            // 예전 방식으로 이미 정리한 대결
+    const expired=m.status==="invite" && !fresh(m), esc=W.escrow[key];
+    const them=((m.who||{})[other]||{}).name||"상대";
+    if(m.status==="done"){
+      const won=m.winner===me, note={won, stake:!!m.stake};
+      if(won && m.stake){
+        if(esc) await giveCard(CS.uid, cardById(esc), {lv:esc.lv});
+        const got=(m.picks||{})[other];
+        if(got){ const r=await giveCard(CS.uid, cardById(got), {lv:got.lv}); note.got=r.card; }
+      }else if(won){
+        if(W.winDay!==today()){ W.winDay=today(); W.tickets=(Number(W.tickets)||0)+1; note.reward=true; }
+      }else if(m.stake) note.lost=esc||{name:((m.picks||{})[me]||{}).name||"카드"};
+      CS.notes[key]=note;
+      logBattle(m, me, other, won);
+      if(m.id!==CS.mid){
+        if(note.got) toast(`⚔️ ${them}와(과)의 대결에서 이겨서 '${note.got.name}' 카드를 받았어요!`,"cheer");
+        else if(note.lost) toast(`⚔️ '${note.lost.name}' 카드가 ${them}에게 갔어요`,"info");
+        else if(won) toast(`⚔️ ${them}와(과)의 대결에서 이겼어요!`,"cheer");
+      }
+    }else if(m.status==="cancel" || m.status==="declined" || expired){
+      if(esc) await giveCard(CS.uid, cardById(esc), {lv:esc.lv});
+      if(expired && hostOf(m)===me) refOf(m).update({status:"cancel", updatedAt:Date.now()}).catch(()=>{});
+    }else continue;
+    delete W.escrow[key]; W.done[key]=1; changed=true;
+    if(m.id===CS.mid) m.keep=true;     // 상대가 기록을 지워도 이 화면에서는 끝까지 보여 줘요
+    markSettled(m);
   }
-  const ref=hub(m.hub).collection("matches").doc(m.id), me=CS.uid;
-  await db.runTransaction(async t=>{
-    const d=(await t.get(ref)).data();
-    if(!d || d.status!=="pick") throw new Error("closed");
-    const picks={...(d.picks||{}), [me]:card}, upd={picks, updatedAt:Date.now()};
-    if(picks[d.users[0]] && picks[d.users[1]]){
-      const r=battle(d.seed, picks[d.users[0]], picks[d.users[1]]);
-      Object.assign(upd, {status:"roll", winner:d.users[r.winner], rounds:r.rounds, rolled:{}});
-    }
-    t.update(ref, upd);
-  });
+  if(changed){
+    const ks=Object.keys(W.done); if(ks.length>200) ks.slice(0, ks.length-200).forEach(k=>delete W.done[k]);
+    await saveWallet(CS.uid, W);
+    if(cardsOpen() && !CS.mid && CS.tab!=="battle") renderCards();
+  }
+}
+// 내 쪽 정리 끝 표시. 둘 다 끝나면 기록을 지워요
+function markSettled(m){
+  if(m.src==="local") return;
+  const me=meOf(m), other=otherOf(m), ref=refOf(m);
+  return dbOf(m).runTransaction(async t=>{
+    const d=await t.get(ref); if(!d.exists) return;
+    const s=d.data().settled||{};
+    if(s[other]) t.delete(ref); else if(!s[me]) t.update(ref, {settled:{...s, [me]:true}});
+  }).catch(()=>{});
+}
+
+/* ----- 대결 기록 바꾸기 (형제·받아쓰기 친구: Firestore 트랜잭션 · 연습: 이 기기) ----- */
+async function matchPick(m, c){
+  const key=keyOf(m), W=CS.wallet; W.escrow=W.escrow||{};
+  let lv=lvOf(c);
+  if(m.stake){                                            // 이 카드를 맡겨 둬요 (이기면 돌아와요)
+    const t=await takeCard(CS.uid, c.id); if(!t) throw new Error("nocard");
+    lv=t.lv; W.escrow[key]={...t, cls:c.cls, type:c.type||"", stage:c.stage||1};
+    await saveWallet(CS.uid, W);
+  }
+  if(m.src==="local") return localPick(m, c, lv);
+  const card=m.src==="tb"? tbPick(c, lv) : pickOf(c, lv), me=meOf(m), ref=refOf(m);
+  try{
+    await dbOf(m).runTransaction(async t=>{
+      const d=(await t.get(ref)).data();
+      if(!d || d.status!=="pick") throw new Error("closed");
+      const picks={...(d.picks||{}), [me]:card}, upd={picks, updatedAt:Date.now()};
+      if(picks[d.users[0]] && picks[d.users[1]]){
+        const r=battle(d.seed, picks[d.users[0]], picks[d.users[1]]);
+        Object.assign(upd, {status:"roll", winner:d.users[r.winner], rounds:r.rounds, rolled:{}});
+      }
+      t.update(ref, upd);
+    });
+  }catch(e){
+    const t=W.escrow[key];
+    if(t){ delete W.escrow[key]; await giveCard(CS.uid, cardById(t), {lv:t.lv}); await saveWallet(CS.uid, W); }
+    throw e;
+  }
+}
+// 🤖 연습: 결과는 seed로 이미 정해져서, 고르는 순간 바로 정리해요 (중간에 나가도 같아요)
+async function localPick(m, c, lv){
+  const me=CS.uid, key=keyOf(m), W=CS.wallet;
+  const mineP=pickOf(c, lv), cpu=cpuCard(mineP);
+  m.picks={[me]:mineP, cpu};
+  const r=diceBattle(m.seed);
+  Object.assign(m, {status:"roll", winner:m.users[r.winner], rounds:r.rounds, rolled:{}});
+  const won=m.winner===me, esc=W.escrow[key], note={won, stake:true, local:true};
+  if(won){
+    if(esc) await giveCard(CS.uid, cardById(esc), {lv:esc.lv});
+    const g=await giveCard(CS.uid, cardById(cpu), {lv:cpu.lv}); note.got=g.card;
+  }else note.lost=esc||{name:c.name};
+  delete W.escrow[key]; W.done=W.done||{}; W.done[key]=1;
+  await saveWallet(CS.uid, W);
+  CS.notes=CS.notes||{}; CS.notes[key]=note;
+  logBattle(m, me, "cpu", won);
+  renderCards();
 }
 function matchRoll(m, who, n){
-  if(m.id==="local"){
+  if(m.src==="local"){
     m.rolled={...(m.rolled||{}), [who]:n, cpu:n};          // 연습 상대는 바로 따라 굴려요
     if((m.rolled[CS.uid]||0)>=m.rounds.length) m.status="done";
     return rollView(m);
   }
-  const ref=hub(m.hub).collection("matches").doc(m.id);
-  return db.runTransaction(async t=>{
+  const ref=refOf(m);
+  return dbOf(m).runTransaction(async t=>{
     const d=(await t.get(ref)).data();
     if(!d || d.status!=="roll") return;
     const rolled={...(d.rolled||{})}; rolled[who]=Math.max(rolled[who]||0, n);
@@ -558,20 +747,12 @@ function matchRoll(m, who, n){
     t.update(ref, upd);
   }).catch(()=>toast("앗, 연결이 끊겼어요. 다시 눌러 봐요","info"));
 }
-async function matchSettle(m){
-  if(m.id==="local"){ m.settled={[CS.uid]:true}; return; }
-  const ref=hub(m.hub).collection("matches").doc(m.id), other=m.users.find(u=>u!==CS.uid);
-  m.keep=true;   // 상대가 기록을 지워도 이 화면에서는 끝까지 보여 줘요
-  try{
-    const d=await ref.get(), cur=d.exists? d.data() : null;
-    if(!cur) return;
-    if((cur.settled||{})[other]) await ref.delete(); else await ref.update({settled:{...(cur.settled||{}), [CS.uid]:true}});
-  }catch(_){}
-}
+// 🤖 봇 카드: 내 카드와 같은 등급 · 같은 강화 단계
 function cpuCard(mine){
-  const pool=byCls[mine.cls]&&byCls[mine.cls].length? byCls[mine.cls] : byCls.n;
+  const all=byCls[mine.cls]&&byCls[mine.cls].length? byCls[mine.cls] : byCls.n;
+  const pool=all.length>1? all.filter(r=>r[0]!==mine.id) : all;
   const x=info(pool[Math.floor(Math.random()*pool.length)]);
-  return {...pickOf({...x, count:1}), boost:0.05};
+  return {...pickOf(x, mine.lv), boost:0};
 }
 
 /* ============ ⭐ 강화 · 🌟 진화 · ♻️ 교환 (받아쓰기 프로그램 방식, 별 대신 '재료 카드') ============ */
@@ -629,6 +810,63 @@ function zoomHTML(c){
   </div>`;
 }
 
+
+/* ============ 🎴 카드팩 뜯기 (받아쓰기 프로그램과 똑같이: 톡톡톡 세 번 → 찢어지고 → 카드가 올라와 타입 효과와 함께 뒤집혀요) ============ */
+const BALL_SVG='<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" class="b-bot"/><path d="M4 50 A46 46 0 0 1 96 50 Z" class="b-top"/><path d="M4 50 H96" class="b-line"/><circle cx="50" cy="50" r="13" class="b-btn"/><circle cx="50" cy="50" r="6" class="b-dot"/></svg>';
+const classChip=k=>`<span class="class-chip c${k}">${CLS[k].icon} ${CLS[k].name}</span>`;
+function openPack(){
+  const W=CS.wallet; if(state.viewingChild || !(W.tickets>0)) return;
+  document.querySelectorAll(".pk-open").forEach(x=>x.remove());
+  const k=rollClass(Number(W.pity)||0), pool=byCls[k].length? byCls[k] : byCls.n;
+  const card=info(pool[Math.floor(Math.random()*pool.length)]);
+  const el=document.createElement("div");
+  el.className="pk-open";
+  el.innerHTML=`<button class="pk-x" aria-label="닫기">✕</button>
+    <h3>🎴 카드팩 뜯기</h3><p class="pk-left">남은 카드팩 ${W.tickets}개</p>
+    <div class="pack-stage">
+      <div class="pack pb"><div class="pack-top"></div><div class="pack-body"><span class="pack-ball">${BALL_SVG}</span><b>카드팩</b><small>POKÉMON CARD</small></div></div>
+      <div class="flip" hidden><div class="flip-in"><div class="face back"><span class="pack-ball">${BALL_SVG}</span></div><div class="face front">${cardFace(card)}</div></div></div>
+      <p class="tap-hint">👆 톡! 톡! 톡!</p>
+    </div>
+    <div class="reveal-info" aria-live="polite"></div>
+    <div class="pk-btns"></div>`;
+  document.body.appendChild(el);
+  const $=q=>el.querySelector(q), pack=$(".pack");
+  const close=()=>{ el.remove(); document.body.classList.remove("fx-on"); document.querySelectorAll(".fx-dim,.fx-canvas").forEach(x=>x.remove()); renderCards(); };
+  $(".pk-x").onclick=close;
+  let taps=0, opening=false;
+  pack.addEventListener("click", async ()=>{
+    if(opening) return;
+    taps++;
+    sfx(taps<3? "crinkle" : "tear");
+    pack.classList.remove("shake"); void pack.offsetWidth; pack.classList.add("shake", "t"+Math.min(taps,3));
+    if(taps<3) return;
+    opening=true; $(".pk-x").hidden=true;
+    // 뜯은 순간 기록해요 (중간에 나가도 카드는 받아요)
+    let r;
+    try{
+      W.tickets-=1; W.draws=(Number(W.draws)||0)+1; W.pity=(k==="a"||k==="s"||k==="u")? 0 : (Number(W.pity)||0)+1;
+      await saveWallet(CS.uid, W);
+      r=await giveCard(CS.uid, card, {pass:true});
+    }catch(e){ console.error(e); toast("카드를 저장하지 못했어요. 인터넷을 확인해 주세요","info"); return close(); }
+    $(".tap-hint").hidden=true;
+    pack.classList.add("torn");
+    await dwait(650);
+    const flip=$(".flip"); flip.hidden=false; flip.classList.add("rise");
+    await dwait(600);
+    try{ if(typeof CardFX!=="undefined") await CardFX.play(card.type, card.cls, flip); }catch(_){}
+    flip.classList.add("turn", "c"+card.cls);
+    if(card.cls==="u") setTimeout(confetti, 500);
+    $(".reveal-info").innerHTML=`${classChip(card.cls)}<b>${eh(card.name)}</b><small>${eh(card.kind)}${card.set?` · ${eh(card.set)}`:""}${card.type?` · ${eh(card.type)} 타입`:""} · ⚡${power(r.card)}</small>
+      ${r.pass? `<p class="pass-chip">🎫 PC 이용권 ${r.pass.h}시간 획득!</p>` : ""}
+      <p class="cd-note" style="margin:0">${r.isNew? "🗂️ 새 카드! 내 카드에 넣었어요." : `이미 가진 카드예요 (${r.card.count}장) · 강화 재료로 쓸 수 있어요`}</p>`;
+    $(".pk-left").textContent=`남은 카드팩 ${W.tickets}개`;
+    $(".pk-btns").innerHTML=`${W.tickets>0? `<button class="main" data-a="more">🎴 한 팩 더 (${W.tickets})</button>` : ""}<button data-a="mine">🗂️ 내 카드</button><button data-a="close">닫기</button>`;
+    $(".pk-btns").onclick=e=>{ const a=e.target.closest("button"); if(!a) return; sfx("pop");
+      if(a.dataset.a==="more"){ el.remove(); openPack(); } else { if(a.dataset.a==="mine") CS.tab="mine"; close(); } };
+  });
+}
+
 const Cards={
   open:drawCards,
   zoom(id){ const c=CS.cards[id]; if(!c) return; hubShell("🗂️ 카드", zoomHTML(c)); },
@@ -654,7 +892,8 @@ const Cards={
     // 진화한 카드 한 장 → 새 카드 (겹친 장은 +0으로 남아요)
     const ref=mine(CS.uid).collection("cards").doc(id), n=(Number(c.count)||1)-1;
     if(n<=0){ await ref.delete(); delete CS.cards[id]; } else { c.count=n; c.lv=0; await ref.set(c); }
-    const r=await giveCard(CS.uid, next); CS.cards[next.id]=r.card;
+    const r=await giveCard(CS.uid, next, {pass:true}); CS.cards[next.id]=r.card;
+    if(r.pass) toast(`🎫 PC 이용권 ${r.pass.h}시간을 받았어요!`,"cheer");
     if(window.PokeCatch) await PokeCatch.evoCinema({card:true, from:fromFace, to:cardFace(r.card,"big"),
       before:`어라…? <b>${eh(c.name)}</b> 카드가 빛나기 시작했어!`, after:`${CLS[next.cls].icon} <b>${eh(next.name)}</b> 카드로 진화했어! 🎉`});
     Cards.zoom(next.id);
@@ -675,46 +914,70 @@ const Cards={
     const cut=fmt(addDays(new Date(),-14)); Object.keys(W.claimed).forEach(k=>{ if(k<cut) delete W.claimed[k]; });
     await saveWallet(CS.uid, W); toast(`🎴 카드팩 ${add}개를 받았어요`,"cheer"); renderCards();
   },
-  async draw(){
-    const W=CS.wallet; if(!(W.tickets>0)) return;
-    const k=rollClass(Number(W.pity)||0), pool=byCls[k].length? byCls[k] : byCls.n;
-    const c=info(pool[Math.floor(Math.random()*pool.length)]);
-    W.tickets-=1; W.draws=(Number(W.draws)||0)+1; W.pity=(k==="a"||k==="s"||k==="u")? 0 : (Number(W.pity)||0)+1;
-    await saveWallet(CS.uid, W);
-    const r=await giveCard(CS.uid, c);
-    CS.cards[c.id]=r.card; CS.reveal=r;
-    renderCards();
-    if(k==="u") toast("👑 스페셜 카드!","cheer"); else if(k==="s") toast("💎 슈퍼 레어!","cheer"); else if(k==="a") toast("🎨 아트 레어!","cheer");
-  },
-  // 형제에게 대결 신청
-  async invite(uid, hubId){
+  draw(){ openPack(); },
+  // 형제에게 대결 신청 (stake: 🎴 카드 걸기)
+  async invite(uid, hubId, stake){
     const x=CS.players.find(p=>p.uid===uid)||{name:"형제"}, me=CS.uid;
     const ref=hub(hubId).collection("matches").doc();
-    const doc={users:[me, uid], from:me, who:{[me]:{name:state.ownerName||state.profile.name||"나"}, [uid]:{name:x.name||"형제"}},
+    const doc={users:[me, uid], from:me, host:me, stake:!!stake, who:{[me]:{name:state.ownerName||state.profile.name||"나"}, [uid]:{name:x.name||"형제"}},
       seed:Math.floor(Math.random()*2147483647), status:"invite", picks:{}, rolled:{}, settled:{}, createdAt:Date.now(), updatedAt:Date.now()};
     try{ await ref.set(doc); }catch(e){ console.error(e); alert("대결을 신청하지 못했어요.\n\nFirebase 보안 규칙에 카드 대결(matches) 규칙이 필요해요. 저장소의 firestore.rules 를 다시 게시해 주세요."); return; }
-    CS.matches[ref.id]={...doc, id:ref.id, hub:hubId};
+    CS.matches[ref.id]={...doc, id:ref.id, hub:hubId, src:"hub"};
     sfx("pop"); CS.tab="battle"; CS.mid=ref.id; renderCards();
   },
-  async accept(id){ const m=CS.matches[id]; if(!m) return; await hub(m.hub).collection("matches").doc(id).update({status:"pick", updatedAt:Date.now()}).catch(()=>{}); m.status="pick"; CS.mid=id; renderCards(); },
-  async decline(id){ const m=CS.matches[id]; if(!m) return; await hub(m.hub).collection("matches").doc(id).update({status:"declined", updatedAt:Date.now()}).catch(()=>{}); renderCards(); },
+  // 🌐 받아쓰기 친구
+  async tbLogin(){
+    try{ await TTOBAK.login(); }catch(e){ console.error(e); if(!/popup-closed|cancelled-popup/.test(e&&e.code||"")) alert("Google 계정으로 연결하지 못했어요.\n"+((e&&e.code)||e)); }
+  },
+  async tbLogout(){ if(!confirm("받아쓰기 프로그램 연결을 끊을까요?")) return; await TTOBAK.logout(); renderCards(); },
+  async tbFriend(){
+    const v=(document.getElementById("tbMail")||{}).value;
+    try{
+      const r=await TTOBAK.requestFriend(v);
+      toast({sent:"친구 신청을 보냈어요. 친구 쪽에서 수락하면 대결할 수 있어요", accepted:"친구가 됐어요!", already:"이미 친구예요", pending:"친구 수락을 기다리는 중이에요",
+        self:"내 이메일이에요", bad:"이메일을 확인해 주세요", notfound:"받아쓰기 프로그램에 연결한 적이 없는 이메일이에요"}[r]||r, r==="sent"||r==="accepted"?"good":"info");
+    }catch(e){ console.error(e); toast("친구 신청을 하지 못했어요","info"); }
+    renderCards();
+  },
+  async tbAccept(pid){ try{ await TTOBAK.acceptFriend(pid); toast("친구가 됐어요!","good"); }catch(e){ console.error(e); toast("수락하지 못했어요","info"); } },
+  async tbInvite(fuid, kidId, stake){
+    if(!TB()) return toast("받아쓰기 프로그램에 먼저 연결해 주세요","info");
+    const f=TTOBAK.friendList().find(x=>x.uid===fuid), k=f && f.kids.find(x=>x.id===kidId);
+    if(!k) return toast("친구를 찾지 못했어요","info");
+    try{
+      const id=await TTOBAK.invite(fuid, k, stake);
+      const T=TTOBAK.st;
+      CS.matches[id]={id, src:"tb", users:[T.uid, fuid], host:T.uid, stake:!!stake, status:"invite", kids:{[T.uid]:T.kid.id, [fuid]:k.id},
+        who:{[T.uid]:{...T.kid}, [fuid]:{id:k.id, name:k.name, avatar:k.avatar||""}}, picks:{}, settled:{}, createdAt:Date.now()};
+      sfx("pop"); CS.tab="battle"; CS.mid=id; renderCards();
+    }catch(e){ console.error(e); toast("대결을 신청하지 못했어요","info"); }
+  },
+  async accept(id){ const m=CS.matches[id]; if(!m) return; await refOf(m).update({status:"pick", updatedAt:Date.now()}).catch(()=>{}); m.status="pick"; CS.mid=id; renderCards(); },
+  async decline(id){ const m=CS.matches[id]; if(!m) return; await refOf(m).update({status:"declined", updatedAt:Date.now()}).catch(()=>{}); renderCards(); },
   openMatch(id){ CS.mid=id; renderCards(); },
+  // 🤖 연습: 항상 카드 걸기 · 같은 등급 · 같은 강화 봇 카드 · 주사위 숫자로만
   practice(){
     const me=CS.uid;
-    CS.local={id:"local", users:[me,"cpu"], who:{[me]:{name:state.ownerName||state.profile.name||"나"}, cpu:{name:"연습 상대"}},
-      seed:Math.floor(Math.random()*2147483647), status:"pick", picks:{}, rolled:{}};
+    CS.local={id:"local", src:"local", users:[me,"cpu"], who:{[me]:{name:state.ownerName||state.profile.name||"나"}, cpu:{name:"연습 봇"}},
+      seed:Math.floor(Math.random()*2147483647), status:"pick", stake:true, dice:true, picks:{}, rolled:{}};
     CS.tab="battle"; CS.mid="local"; renderCards();
   },
   confirmPick(id){
     const m=curMatch(), c=CS.cards[id]; if(!m||!c) return;
-    const why=(FOOD[c.type]||[]).length? `${c.type} 타입이 먹는 것: ${FOOD[c.type].join(" · ")} · ` : "";
-    if(!confirm(`'${c.name}' (⚡${power(c)})로 대결할까요?\n${why}${STAGE_NAME[c.stage||1]}`)) return;
+    const dupNote=m.stake && (Number(c.count)||1)>1 && lvOf(c)? `\n(겹친 카드라 +0짜리 한 장을 걸어요)` : "";
+    const msg= m.src==="local"? `'${c.name}' 카드를 걸고 연습할까요?\n같은 등급 · 같은 강화의 봇 카드와 🎲 주사위 숫자로만 겨뤄요.\n이기면 봇 카드를 받고, 지면 이 카드는 사라져요.${dupNote}`
+      : m.stake? `'${c.name}' (⚡${power(c)}) 카드를 걸까요?\n지면 이 카드가 상대에게 가요.${dupNote}`
+      : `'${c.name}' (⚡${power(c)})로 대결할까요?\n${(FOOD[c.type]||[]).length? `${c.type} 타입이 먹는 것: ${FOOD[c.type].join(" · ")} · ` : ""}${STAGE_NAME[c.stage||1]}`;
+    if(!confirm(msg)) return;
     sfx("pop");
-    matchPick(m, pickOf(c)).catch(()=>{ toast("대결이 이미 끝났어요","info"); CS.mid=null; renderCards(); });
+    matchPick(m, c).catch(e=>{ console.warn(e); toast("대결이 이미 끝났어요","info"); CS.mid=null; renderCards(); });
   },
   async cancel(){
     const m=curMatch(); if(!m) return;
-    if(m.id!=="local" && (m.status==="invite"||m.status==="pick")) await hub(m.hub).collection("matches").doc(m.id).update({status:"cancel", updatedAt:Date.now()}).catch(()=>{});
+    if(m.src!=="local" && (m.status==="invite"||m.status==="pick")){
+      await refOf(m).update({status:"cancel", updatedAt:Date.now()}).catch(()=>{});
+      m.status="cancel"; settleSweep();
+    }
     CS.mid=null; CS.local=null; renderCards();
   },
   leave(){ closeStage(); CS.mid=null; renderCards(); },
@@ -753,6 +1016,7 @@ function renderAdmin(){
         <div class="me-row"><button class="ghost-btn" onclick="Cards.tickets(1)">카드팩 +1</button><button class="ghost-btn" onclick="Cards.tickets(3)">카드팩 +3</button><button class="ghost-btn" onclick="Cards.tickets(-1)">−1</button></div>
         <div class="me-row" style="margin-top:6px"><button class="ghost-btn" onclick="Cards.balls(3)">몬스터볼 +3</button><button class="ghost-btn" onclick="Cards.balls(-1)">−1</button><span style="font-size:12px;color:#64748B;align-self:center">지금 ${Number(k.wallet.balls)||0}개 · 잡은 포켓몬 ${(k.wallet.dex||[]).length}종</span></div>
       </div>
+      ${passesHTML(k.wallet, true)}
       <div class="r-sec">카드 찾아서 주기</div>
       <input class="inp" id="cdQ" value="${eh(CA.q)}" placeholder="포켓몬 이름 (예: 피카츄, 리자몽)" onkeydown="if(event.key==='Enter')Cards.search(this.value)">
       <button class="pay-btn" style="width:100%;margin-top:8px" onclick="Cards.search(document.getElementById('cdQ').value)">찾기</button>
@@ -769,6 +1033,13 @@ Object.assign(Cards, {
     if(!confirm(`${k.name}에게 '${c.name}'(${CLS[c.cls].name}) 카드를 줄까요?`)) return;
     const r=await giveCard(k.uid, c); k.cards[id]=r.card;
     toast(`${k.name}에게 '${c.name}' 카드를 줬어요`+(r.isNew?"":` (+${lvOf(r.card)})`),"good"); renderAdmin();
+  },
+  async usePass(pid){
+    const k=CA.kids[CA.kid]; if(!k) return;
+    const W=await loadWallet(k.uid), p=(W.pcPasses||[]).find(x=>x.id===pid); if(!p||p.used) return;
+    if(!confirm(`${k.name}의 PC 이용권 ${p.h}시간을 사용 처리할까요?`)) return;
+    p.used=Date.now(); await saveWallet(k.uid, W);
+    k.wallet=W; toast(`🎫 PC ${p.h}시간 사용 처리했어요`,"good"); renderAdmin();
   },
   async balls(n){
     const k=CA.kids[CA.kid]; if(!k) return;
@@ -924,7 +1195,14 @@ const css=`
 .bt-confetti span{position:absolute;top:-40px;animation:btFall 2.2s ease-in forwards}
 @keyframes btFall{to{transform:translateY(110vh) rotate(540deg)}}
 `;
-const st=document.createElement("style"); st.textContent=css; document.head.appendChild(st);
+const st=document.createElement("style"); st.textContent=css+`.bt-tag{display:inline-block;font-size:10.5px;font-weight:800;border-radius:6px;padding:1px 6px;margin-left:3px;background:#F1F5F9;color:#475569;vertical-align:middle}
+.bt-tag.stake{background:#FEF3C7;color:#92400E}.bt-tag.tb{background:#E0F2FE;color:#075985}
+.bt-opp{margin-bottom:6px;flex-wrap:wrap}.bt-btns{display:flex;gap:6px;margin-left:auto}.bt-btns button{padding:7px 11px;white-space:nowrap}
+.tb-box{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.tb-box p{margin:0;font-size:13.5px;line-height:1.5}.tb-box small{color:#64748B}
+.tb-add{display:flex;gap:6px;margin-top:6px}.tb-add .inp{flex:1;min-width:0}
+.bt-got{position:relative;width:120px}.bt-got .pk{width:120px}
+`; document.head.appendChild(st);
 
 window.Cards=Cards;
 // 포획(assets/pokecatch.js)에서 쓰는 공용 도구
