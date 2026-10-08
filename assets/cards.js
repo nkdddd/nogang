@@ -201,6 +201,7 @@ async function drawCards(tab){
 function cardsOpen(){ return !!(CS && document.querySelector("#drawerRoot .cd-tabs, #drawerRoot #arenaBody")); }
 function renderCards(){
   if(!CS) return;
+  if(typeof refreshPkBadge==="function") setTimeout(()=>refreshPkBadge(true), 300);
   if(CS.tab==="battle" && CS.mid){ return renderMatch(); }
   const tabs=[["draw","🎁 카드팩"],["catch","🌿 포획"],["mine","🗂️ 내 카드"],["battle","⚔️ 대결"]];
   const inv=incoming().length;
@@ -1024,6 +1025,11 @@ function renderAdmin(){
         <div class="cd-grid">${res.map(c=>cardTile({...c,count:1},{on:`Cards.grant('${c.id}')`, extra: k.cards[c.id]? `<span class="cd-deck">보유 ${k.cards[c.id].count}</span>` : ""})).join("")}</div>` : ""}`:""}
     <div class="cd-note">카드 ${won(window.CARDS.length)}장 · 받아쓰기 프로그램과 같은 포켓몬 카드 목록이에요. 자녀는 공부해서 받은 카드팩으로 뽑아요.</div>`);
 }
+// 위쪽 포켓몬 버튼 배지용: 카드팩 · 몬스터볼 · 오늘 받을 수 있는 카드팩
+Cards.counts=async uid=>{
+  const W=await loadWallet(uid), ds=today();
+  return {tickets:Number(W.tickets)||0, balls:Number(W.balls)||0, packClaim:Math.max(0, dayEarned(ds).filter(q=>q.ok).length-(Number((W.claimed||{})[ds])||0))};
+};
 Object.assign(Cards, {
   pickKid(i){ CA.kid=i; renderAdmin(); },
   search(q){ CA.q=String(q||"").trim(); renderAdmin(); },
