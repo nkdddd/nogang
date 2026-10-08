@@ -135,6 +135,11 @@ giUsers/{uid}, giFriendRequests 그래머 인사이드 친구 랭킹용 공개 �
 - **부모**: 포켓몬 이름으로 찾아서 자녀에게 카드 주기 · 카드팩 더하기/빼기 · 🎫 PC 이용권 사용 처리.
 - 데이터: `planner/{자녀uid}/cards`, `planner/{자녀uid}/meta/cardWallet`, `cardHub/{부모uid}/decks · battles`
 
+## 🔐 보안 규칙 자동 게시
+`firestore.rules`가 main에 바뀌면 GitHub Actions **보안 규칙 게시**(`.github/workflows/deploy-rules.yml` → `tools/deploy-rules.mjs`)가
+주간 용돈 알림과 같은 `FIREBASE_SERVICE_ACCOUNT`로 Firebase(splan-5512)에 그대로 게시해요. Actions 탭에서 직접 실행(Run workflow)도 돼요.
+서비스 계정에 규칙 권한이 없다고 실패하면 Google Cloud 콘솔 → IAM에서 그 서비스 계정에 **Firebase Rules Admin** 역할을 더하거나, Firebase 콘솔 → Firestore → 규칙에 붙여넣고 게시하세요.
+
 ## 💰 토요일 18시 용돈 알림
 
 - 학습 주간은 **일요일 ~ 토요일 18시 마감**. 토 18시 이후는 다음 주 계획 시간입니다.

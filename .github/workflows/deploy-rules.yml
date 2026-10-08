@@ -1,0 +1,33 @@
+# firestore.rules 가 main 에 바뀌면 Firebase 보안 규칙을 자동으로 게시해요 (수동 실행도 가능)
+# 필요한 저장소 Secrets: FIREBASE_SERVICE_ACCOUNT (주간 용돈 알림과 같은 것)
+name: 보안 규칙 게시
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - firestore.rules
+      - tools/deploy-rules.mjs
+      - .github/workflows/deploy-rules.yml
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "게시하지 않고 문법만 확인 (1)"
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 필요한 패키지 설치
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+      - name: 규칙 게시
+        run: node tools/deploy-rules.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
