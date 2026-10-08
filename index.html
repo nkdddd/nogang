@@ -922,6 +922,13 @@
 @keyframes pkWig{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-18deg)}86%{transform:rotate(14deg)}94%{transform:rotate(-6deg)}}
 @media(max-width:520px){.tb-pk .tb-pk-l{display:none}.tb-pk{padding:6px}}
 @media (prefers-reduced-motion:reduce){.tb-pk.glow svg{animation:none}}
+.overlay.pop-ov{align-items:center!important;justify-content:center;padding:16px;z-index:75}
+.modal.pop{margin:auto!important;width:100%;max-width:420px!important;max-height:86vh;border-radius:22px!important;overflow:hidden;animation:popIn .18s ease!important}
+@keyframes popIn{from{transform:scale(.94);opacity:0}}
+.pop-amt{display:flex;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(135deg,#F3F0FF,#FFF7E8);border-radius:14px;padding:12px;margin-bottom:10px}
+.pop-amt small{font-size:12px;color:#64748B;font-weight:700}.pop-amt b{font-size:26px;font-weight:900}
+.pop-sec{font-weight:800;font-size:13.5px;margin:4px 0 0}
+.pop-empty{text-align:center;padding:18px 6px;font-size:14.5px;line-height:1.6}.pop-empty small{color:#94A3B8}
 </style>
 <link rel="stylesheet" href="assets/pokecatch.css">
 </head>
@@ -3546,13 +3553,6 @@ async function openNotice(id){
   openDrawer("allowance");
 }
 
-async function openPayReq(uid, weekId){
-  const ch=state.children.find(c=>c.uid===uid); if(!ch) return;
-  state.cursor=addDays(parseD(weekId),-6);
-  await viewChild(ch.uid, ch.name);
-  setTimeout(()=>openDrawer("allowance"), 400);
-}
-
 /* ----- 🔔 알림 설정 (부모) ----- */
 async function loadNotifyPrefs(){
   try{ const d=await db.collection("planner").doc(state.user.uid).collection("meta").doc("notify").get(); return Object.assign({},NOTIFY_DEFAULT, d.exists? d.data():{}); }
@@ -4311,7 +4311,7 @@ function drawDoneSheet(){
     </div>`;
   const cur=document.querySelector("#modalRoot .modal.ds");
   if(cur){ const ta=document.getElementById("dsContent"), had=ta===document.activeElement; cur.innerHTML=inner; if(had){ const n=document.getElementById("dsContent"); n.focus(); n.setSelectionRange(n.value.length,n.value.length); } return; }
-  document.getElementById("modalRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal tm ds" style="max-width:440px">${inner}</div></div>`;
+  document.getElementById("modalRoot").innerHTML=`<div class="overlay pop-ov" onclick="if(event.target===this)closeModal()"><div class="modal tm ds pop">${inner}</div></div>`;
   if(!d.planned) setTimeout(()=>{ const n=document.getElementById("dsContent"); if(n) n.focus(); }, 50);
 }
 async function saveDoneSheet(){
@@ -5274,16 +5274,42 @@ function weekStudyHTML(items){
 const payReqRef=(uid,weekId)=>db.collection("planner").doc(uid).collection("payRequests").doc(weekId);
 async function fetchPayReq(uid, weekId){ try{ const d=await payReqRef(uid,weekId).get(); return d.exists? d.data() : null; }catch(_){ return null; } }
 // 💌 자녀: 이번 주 학습한 내용을 담아 용돈 요청
-async function requestAllowance(){
+function popupHTML(title, body, foot){
+  document.getElementById("modalRoot").innerHTML=`<div class="overlay pop-ov" onclick="if(event.target===this)closeModal()"><div class="modal pop">
+    <div class="modal-head"><h3>${title}</h3><button class="icon-btn sm" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">${body}</div><div class="modal-foot tm-foot">${foot}</div></div></div>`;
+}
+function requestAllowance(){
   const c=allowCache[state.ownerUid]; if(!c) return;
-  const items=c.items||[];
-  if(!items.length){ alert("이번 주에 완료한 학습이 없어요. 학습을 완료한 뒤 요청해 주세요."); return; }
-  if(!confirm(`${c.label} 용돈 ${wonFmt(c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap))}을 요청할까요?\n이번 주 학습한 내용 ${items.length}개가 부모님께 함께 보여요.`)) return;
+  const items=c.items||[], amt=c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap);
+  if(!items.length){ popupHTML("💌 용돈 요청", `<div class="pop-empty">이번 주에 완료한 학습이 아직 없어요.<br><small>학습을 완료한 뒤 요청해 주세요.</small></div>`, `<button class="tm-btn save" onclick="closeModal()">확인</button>`); return; }
+  popupHTML("💌 이번 주 용돈 요청", `
+    <div class="pop-amt"><small>${esc(c.label)}</small><b>${wonFmt(amt)}</b></div>
+    <div class="pop-sec">📒 부모님께 함께 보여 드릴 학습 내용</div>${weekStudyHTML(items)}`,
+    `<button class="tm-btn" onclick="closeModal()">취소</button><button class="tm-btn save" onclick="sendAllowanceRequest()">💌 요청 보내기</button>`);
+}
+async function sendAllowanceRequest(){
+  const c=allowCache[state.ownerUid]; if(!c) return;
+  const amt=c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap);
   try{
-    await payReqRef(state.ownerUid, c.weekId).set({weekId:c.weekId, label:c.label, name:state.ownerName||state.profile.name||"", amount:c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap),
-      payMin:c.r.payMin, items, status:"pending", at:Date.now()});
-    toast("💌 용돈을 요청했어요. 부모님이 학습 내용을 보고 지급해요","good"); drawAllowance();
+    await payReqRef(state.ownerUid, c.weekId).set({weekId:c.weekId, label:c.label, name:state.ownerName||state.profile.name||"", amount:amt,
+      payMin:c.r.payMin, items:c.items||[], status:"pending", at:Date.now()});
+    closeModal(); toast("💌 용돈을 요청했어요. 부모님이 학습 내용을 보고 지급해요","good"); drawAllowance();
   }catch(e){ console.error(e); alert("요청하지 못했어요.\n"+firestoreDiag(e)); }
+}
+// 부모: 요청 카드를 누르면 팝업으로 학습 내용 먼저 보기
+function openPayReq(uid, weekId){
+  const q=(state.payReqs||[]).find(x=>x.uid===uid && x.weekId===weekId); if(!q) return goPayReq(uid, weekId);
+  popupHTML(`💌 ${esc(q.name)}의 용돈 요청`, `
+    <div class="pop-amt"><small>${esc(q.label||"")} · 요청 ${new Date(q.at).getMonth()+1}.${new Date(q.at).getDate()}</small><b>${wonFmt(q.amount)}</b></div>
+    <div class="pop-sec">📒 이번 주 학습한 내용</div>${weekStudyHTML(q.items||[])}`,
+    `<button class="tm-btn" onclick="closeModal()">닫기</button><button class="tm-btn save" onclick="closeModal();goPayReq('${uid}','${weekId}')">💰 정산하러 가기</button>`);
+}
+async function goPayReq(uid, weekId){
+  const ch=state.children.find(c=>c.uid===uid); if(!ch) return;
+  state.cursor=addDays(parseD(weekId),-6);
+  await viewChild(ch.uid, ch.name);
+  setTimeout(()=>openDrawer("allowance"), 400);
 }
 function payReqBannerHTML(req, isParent){
   if(!req) return "";
@@ -5348,11 +5374,11 @@ async function drawAllowance(){
         ${payReqBannerHTML(req, isParent)}
         ${termsRow}
         ${allowanceMetricsHTML(r,crit)}
-        <details class="mock-det" ${(!isParent || (req&&req.status!=="paid"))?"open":""}><summary>📒 이번 주 학습한 내용</summary>${weekStudyHTML(items)}</details>
+        <details class="mock-det" ${(isParent && req && req.status!=="paid")?"open":""}><summary>📒 이번 주 학습한 내용 (${items.length}개)</summary>${weekStudyHTML(items)}</details>
         <details class="mock-det"><summary>📝 이번 주 모의고사 범위 (완료한 학습)</summary>${mockRangeHTML(tasks, days)}</details>
         ${payControlsHTML(uid, r, cap, payout, canPay)}
         ${(!isParent && !payout && !req)? `<button class="pay-btn" style="width:100%;margin-top:10px" onclick="requestAllowance()">💌 이번 주 용돈 요청하기</button>
-          <div class="cd-note" style="text-align:center;margin-top:6px">위의 학습한 내용이 부모님께 함께 보여요</div>` : ""}
+          <div class="cd-note" style="text-align:center;margin-top:6px">이번 주 학습한 내용이 부모님께 함께 보여요</div>` : ""}
       </div>
       ${hist.length?`<div class="dash-section">지급 내역</div>${hist.map(h=>`<div class="pay-hist"><span>${esc(h.weekLabel||h.id)}${h.rate!=null?` · ${hmFmt(h.payMin||0)} × ${wonFmt(h.rate)}`:(h.percent!=null?` · ${h.percent}%`:"")}</span><b style="color:#0E9F6E">${wonFmt(h.amount)}</b></div>`).join("")}`:""}`;
   }
