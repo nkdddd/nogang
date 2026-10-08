@@ -15,6 +15,7 @@
 | `assets/device.js` | 사용 환경(PC · 모바일) 판별 → `<html data-device>` 설정, 네 화면 공용 |
 | `assets/push-config.js` · `firebase-messaging-sw.js` · `manifest.webmanifest` | 휴대폰 푸시(웹 푸시 키) · 푸시 수신 서비스 워커 · 홈 화면 설치 정보 |
 | `assets/cards.js` · `assets/pokecards.js` · `assets/fx.js` | 🎴 포켓몬 카드팩 · 대결 (카드 목록 · 카드팩 뜯기 효과는 받아쓰기 프로그램과 공유) |
+| `assets/gcal.js` | 📅 구글 캘린더 동기화 (Google Identity Services · Calendar API, 서버 없음) |
 | `assets/ttobak.js` | 🌐 받아쓰기 프로그램(또박또박) 친구와 카드 대결 (그쪽 Firebase에 Google 계정으로 연결) |
 | `tools/weekly-allowance.mjs` · `.github/workflows/weekly-allowance.yml` | 매주 토 18시 부모에게 용돈 알림 (GitHub Actions) |
 | `assets/focus-sounds.js` | 포커스 타이머용 집중 사운드 (브라우저에서 직접 생성 · 음원 파일 없음) |
@@ -109,6 +110,15 @@ giUsers/{uid}, giFriendRequests 그래머 인사이드 친구 랭킹용 공개 �
 ## 💌 용돈 요청 (이번 주 학습한 내용과 함께)
 - 자녀: 기록 → 💰 용돈 정산에 **📒 이번 주 학습한 내용**(날짜별 과목 · 내용 · 시간 · 이행/이해 별점, 평균 이행)이 보이고, **💌 이번 주 용돈 요청하기**로 요청 (`planner/{자녀uid}/payRequests/{주 토요일}`).
 - 부모: 앱을 열면 "💌 ○○이 용돈을 요청했어요" 알림, 기록 탭 맨 위 요청 카드 → 그 주 용돈 정산으로. 정산 카드에 요청 표시와 학습한 내용이 펼쳐져 있고, 지급하면 요청이 '지급 완료'로 바뀌어요.
+
+## 📅 구글 캘린더 동기화
+- 설정 → **📅 구글 캘린더 → Google 계정으로 연결** (보고 있는 플래너 기준: 내 플래너 또는 부모가 연 자녀 플래너).
+- **플래너 → 구글**: 'OO 학습플래너' 캘린더를 새로 만들고, 할 일을 종일 일정으로 넣어요 (제목 `📘 과목 · 공부할 내용 (30분)`, 완료하면 `✅` · 초록색, 설명에 교재 · 방법 · 별점 · 메모).
+  추가 · 수정 · 완료 · 삭제 · 다른 기기에서 바꾼 것도 따라가요. 오늘 기준 30일 전 ~ 90일 뒤를 맞추고, 구글에서 지운 일정은 다시 만들어요.
+- **구글 → 플래너**: 내 구글 캘린더(선택된 캘린더) 일정을 일정(주간) · 할 일 화면에 읽기 전용으로 보여 줘요 (설정에서 끄기 가능).
+- 서버 없이 브라우저에서 Google Calendar API를 불러요 → 앱을 열어 둔 동안 반영, 로그인 토큰은 약 1시간 (지나면 일정 탭의 "📅 구글 캘린더 다시 연결"을 누르면 그동안 바뀐 것을 한꺼번에 맞춰요).
+- Google Cloud(프로젝트 splan-5512): Calendar API 사용 설정 · OAuth 동의 화면(테스트 모드면 가족 계정을 테스트 사용자로) · 웹 클라이언트 ID(승인된 자바스크립트 원본 `https://nkdddd.github.io`). 클라이언트 ID는 `assets/gcal.js`의 `CLIENT_ID`.
+- 기록: `planner/{uid}/meta/gcal` {on, cals:{구글계정:캘린더id}, showGoogle}, 이 기기에서 맞춘 기록은 localStorage.
 
 ## 🎴 포켓몬 카드 (카드팩 · 대결)
 - **위쪽 몬스터볼 버튼**(용돈 바 옆)으로 바로 열어요. 뜯을 카드팩 · 몬스터볼 · 받을 수 있는 카드팩 수가 빨간 배지로 보이고, 있으면 볼이 흔들려요.
