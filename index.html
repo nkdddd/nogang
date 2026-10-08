@@ -929,6 +929,20 @@
 .pop-amt small{font-size:12px;color:#64748B;font-weight:700}.pop-amt b{font-size:26px;font-weight:900}
 .pop-sec{font-weight:800;font-size:13.5px;margin:4px 0 0}
 .pop-empty{text-align:center;padding:18px 6px;font-size:14.5px;line-height:1.6}.pop-empty small{color:#94A3B8}
+.gc-chip{display:inline-flex;align-items:center;gap:4px;border:1px solid #BFDBFE;background:#EFF6FF;color:#1D4ED8;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;cursor:pointer;margin:0 0 8px}
+.gc-chip.warn{border-color:#FDE68A;background:#FFFBEB;color:#92400E}
+.gc-day{background:#F8FAFF;border:1px solid #E0E7FF;border-radius:12px;padding:8px 10px;margin-bottom:10px}
+.gc-h{font-size:11.5px;font-weight:800;color:#4F46E5;margin-bottom:4px}
+.gc-ev{font-size:12px;line-height:1.35;padding:3px 6px;border-left:3px solid var(--gc,#94A3B8);background:#fff;border-radius:6px;margin:3px 0;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wcol-body .gc-ev{font-size:10.5px;padding:2px 5px;background:#F1F5F9}
+.gc-ev b{font-weight:800;color:#475569}
+.gc-set{background:#fff;border:1px solid var(--line,#E4E4EA);border-radius:14px;padding:12px}
+.gc-set p{margin:0 0 10px;font-size:13px;line-height:1.55}
+.gc-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;padding:6px 0;border-bottom:1px solid #F1F5F9}.gc-row span{color:#64748B}
+.gc-sw{position:relative;width:42px;height:24px;flex:0 0 auto}.gc-sw input{opacity:0;width:0;height:0}
+.gc-sw i{position:absolute;inset:0;background:#CBD5E1;border-radius:999px;cursor:pointer;transition:.2s}
+.gc-sw i::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.gc-sw input:checked+i{background:#4F46E5}.gc-sw input:checked+i::after{transform:translateX(18px)}
 </style>
 <link rel="stylesheet" href="assets/pokecatch.css">
 </head>
@@ -1025,6 +1039,7 @@
 <script src="assets/fx.js"></script>
 <script src="assets/cards.js"></script>
 <script src="assets/ttobak.js"></script>
+<script src="assets/gcal.js"></script>
 <script src="assets/pokedex.js"></script>
 <script src="assets/pokecatch.js"></script>
 
@@ -2586,6 +2601,7 @@ function subscribeTasks(){
       state.tasks=snap.docs.map(d=>({id:d.id,...d.data()}));
       scheduleSnap();
       state.tasksMap={}; state.tasks.forEach(t=>state.tasksMap[t.id]=t);
+      if(window.GCal) GCal.onTasks(state.ownerUid, state.tasks, start, end);
       render();
     }, err=>console.error("tasks",err));
 }
@@ -2615,8 +2631,9 @@ function subscribeCategories(){
 async function saveTask(t){
   try{ monGainCheck(state.tasksMap[t.id], t); }catch(_){}
   await plannerRef().collection("tasks").doc(t.id).set(t);
+  if(window.GCal) GCal.onSave(state.ownerUid, t);
 }
-async function deleteTaskDoc(id){ await plannerRef().collection("tasks").doc(id).delete(); }
+async function deleteTaskDoc(id){ await plannerRef().collection("tasks").doc(id).delete(); if(window.GCal) GCal.onDelete(state.ownerUid, id); }
 async function saveCategories(c){ state.categories=c; await plannerRef().collection("meta").doc("categories").set(c); }
 async function saveSettings(s){ state.settings=s; await plannerRef().collection("meta").doc("settings").set(s); }
 /* ----- 일일 목표시간 (날짜별 저장, 캐시는 state.dayGoals) ----- */
@@ -2831,6 +2848,7 @@ function render(){
   updateMonHead();
   updateTopChips();
   updateWeekBanner();
+  if(window.GCal){ GCal.load(state.ownerUid); const r=rangeFor(); GCal.want(r.start, r.end); }
 }
 function pageHead(title, sub){
   return `<div class="page-h"><div><div class="h-sub">${sub||""}</div><h2>${title}</h2></div></div>`;
@@ -2869,6 +2887,7 @@ function planHead(){
         <button onclick="nav(1)" aria-label="다음">›</button>
       </div>
     </div>
+    ${window.GCal? GCal.chipHTML() : ""}
     <div class="seg">
       <button class="${state.view==="week"?"on":""}" onclick="setView('week')">주간</button>
       <button class="${state.view==="month"?"on":""}" onclick="setView('month')">월간</button>
@@ -3909,6 +3928,7 @@ function renderWeek(){
         </div>
       </div>`;
     });
+    if(window.GCal) cards=GCal.dayHTML(ds, true)+cards;
     cols+=`<div class="wcol ${isT?"today":""}">
       <div class="wcol-head" style="position:relative">
         <div class="wd" style="color:${i===6?"#6A58E6":i===0?"#E5484D":"#64748B"}">${WD[i]}</div>
@@ -4077,6 +4097,7 @@ function renderDay(){
           ${undoneCount>0?`<button class="rollover-btn" onclick="rolloverIncomplete()">↪ 미완료 ${undoneCount} 내일로</button>`:""}
         </div>
       </div>
+      ${window.GCal? GCal.dayHTML(ds) : ""}
       ${rows}
       <button class="add-task-btn" onclick="openTask(null,'${ds}')">+ 학습 추가</button>
       ${weakHintHTML()}
@@ -4804,6 +4825,9 @@ function drawSettings(){
           <button class="ghost-btn" style="width:100%;padding:11px" onclick="closeDrawer();drawBooster()">🚀 부스터 모드 열기</button>
           <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">시험 기간을 등록하면 목표시간이 올라가고 <b>시간 용돈 상한이 시험기간 금액</b>으로 오릅니다(더 오래 공부해야 채워져요 · 금액은 아래 용돈 기준에서). <b>기록</b> 탭에서도 열 수 있어요.</div>
 
+
+          <div class="section-lbl" id="gcalSec" style="margin-top:22px">📅 구글 캘린더</div>
+          ${window.GCal? (GCal.load(state.ownerUid), GCal.settingsHTML()) : ""}
 
           <div class="section-lbl" id="payTermsSec" style="margin-top:22px">💰 용돈 기준 (부모님이 정해요)</div>
           ${payTermsBlockHTML()}
