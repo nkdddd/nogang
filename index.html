@@ -4889,7 +4889,7 @@ async function savePayTerms(uid, patch){
     return true;
   }catch(e){
     console.error("용돈 기준 저장", e);
-    alert("용돈 기준을 저장하지 못했어요.\n\nFirebase 보안 규칙에 payTerms 규칙이 필요해요. 저장소의 firestore.rules 를 다시 게시해 주세요.\n\n"+firestoreDiag(e));
+    alert("용돈 기준을 저장하지 못했어요.\n\nFirebase에 게시된 보안 규칙에 용돈 기준(payTerms) 규칙이 아직 없어요.\n· GitHub 저장소 → Actions → '보안 규칙 게시' → Run workflow, 또는\n· Firebase 콘솔 → Firestore → 규칙에 저장소의 firestore.rules 를 붙여넣고 '게시'\n\n"+firestoreDiag(e));
     return false;
   }
 }
