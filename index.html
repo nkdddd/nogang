@@ -896,6 +896,32 @@
 .pt-more summary{cursor:pointer;font-size:12.5px;font-weight:800;color:#475569}
 .pt-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:#475569;background:#F8FAFC;border-radius:10px;padding:7px 10px;margin:8px 0}
 .pt-row small{color:#94A3B8}.pt-row .ghost-btn{padding:6px 10px;white-space:nowrap}
+.ds-box{background:#F6F6FC;border-radius:12px;padding:10px 12px;margin-bottom:12px}.ds-lbl{font-size:12px;color:#64748B;font-weight:700;margin-bottom:3px}.ds-plan{font-weight:700;font-size:15px;line-height:1.45}
+.ds-q{font-weight:800;font-size:14px;margin:12px 0 6px}.ds-q small{font-weight:600;color:#94A3B8;font-size:12px}
+.ds-stars{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.ds-st{border:0;background:none;font-size:32px;line-height:1;color:#E2E8F0;cursor:pointer;padding:0 2px}.ds-st.on{color:#F5B400}
+.ds-zero{border:1px solid var(--line,#E4E4EA);background:#fff;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;color:#64748B;cursor:pointer;margin-left:4px}.ds-zero.on{background:#1C1B22;color:#fff;border-color:#1C1B22}
+.ds-val{font-size:12.5px;color:#94A3B8;margin-left:6px;font-weight:700}
+.ds-hint{font-size:11.5px;color:#94A3B8;margin-top:14px;line-height:1.5}
+.tm-btn:disabled{opacity:.45;cursor:not-allowed}
+.ds-mini{color:#F59E0B;letter-spacing:-1px}
+.ws-sum{font-size:12.5px;color:#475569;margin:8px 0}
+.ws-list{display:flex;flex-direction:column;gap:8px}
+.ws-date{font-size:12px;font-weight:800;color:#64748B;margin-bottom:3px}
+.ws-it{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid #F1F5F9}
+.ws-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:0 0 auto}
+.ws-t{font-size:13px;line-height:1.4;word-break:keep-all}.ws-m{font-size:11.5px;color:#94A3B8;margin-top:1px}
+.preq{background:#FFF1F2;border:1px solid #FECDD3;color:#9F1239;border-radius:12px;padding:9px 12px;font-size:13px;margin-bottom:8px}.preq small{color:#BE123C;opacity:.7;margin-left:4px}
+.preq.paid{background:#F0FDF4;border-color:#BBF7D0;color:#166534}
+.notice-card.req{border-color:#FECDD3;background:#FFF7F8}
+.tb-pk{position:relative;display:flex;align-items:center;gap:5px;border:1px solid var(--line,#E4E4EA);background:var(--surface,#fff);border-radius:999px;padding:6px 11px 6px 7px;cursor:pointer;font:inherit;font-weight:800;font-size:13px;color:var(--ink,#1C1B22);flex:0 0 auto;box-shadow:0 1px 2px rgba(20,16,50,.06)}
+.tb-pk svg{width:24px;height:24px}
+.tb-pk i{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#E5484D;color:#fff;font-style:normal;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.tb-pk i[hidden]{display:none}
+.tb-pk.glow svg{animation:pkWig 1.6s ease-in-out infinite}
+@keyframes pkWig{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-18deg)}86%{transform:rotate(14deg)}94%{transform:rotate(-6deg)}}
+@media(max-width:520px){.tb-pk .tb-pk-l{display:none}.tb-pk{padding:6px}}
+@media (prefers-reduced-motion:reduce){.tb-pk.glow svg{animation:none}}
 </style>
 <link rel="stylesheet" href="assets/pokecatch.css">
 </head>
@@ -946,6 +972,7 @@
   <div class="topbar">
     <button id="payBar" class="paybar" onclick="openDrawer('allowance')" title="이번 주 용돈 · 눌러서 정산 보기"><div class="pb-top"><b class="pb-amt">₩ –</b></div></button>
     <span id="monHead" class="tb-mon"></span>
+    <button id="pkBtn" class="tb-pk" onclick="drawCards()" title="포켓몬 카드 · 포획 · 대결" aria-label="포켓몬"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="#fff" stroke="#22365c" stroke-width="7"/><path d="M6 50 A44 44 0 0 1 94 50 Z" fill="#E8393A" stroke="#22365c" stroke-width="7"/><circle cx="50" cy="50" r="13" fill="#fff" stroke="#22365c" stroke-width="7"/></svg><span class="tb-pk-l">포켓몬</span><i id="pkBadge" hidden></i></button>
     <div class="tb-right">
       <button class="tb-who" onclick="openMenu()" title="계정 · 메뉴"><span class="av" id="myAv">나</span><span id="myName">나</span></button>
       <div class="tb-pill">
@@ -2897,8 +2924,23 @@ async function refreshPayBar(){
     el.innerHTML=payBarHTML(P);
   }catch(e){ console.warn("용돈 바", e); }
 }
+// 🎴 위쪽 포켓몬 버튼: 뜯을 카드팩 · 몬스터볼 · 받을 수 있는 카드팩 수
+let pkBadgeAt=0;
+async function refreshPkBadge(force){
+  const b=document.getElementById("pkBadge"), btn=document.getElementById("pkBtn"); if(!b||!btn) return;
+  if(state.profile.role==="parent" && !state.viewingChild){ b.hidden=true; btn.classList.remove("glow"); return; }
+  if(!force && Date.now()-pkBadgeAt<30000) return;
+  pkBadgeAt=Date.now();
+  try{
+    const c=(window.Cards && Cards.counts)? await Cards.counts(state.ownerUid) : null; if(!c) return;
+    const n=c.tickets+c.balls+c.packClaim;
+    b.textContent=n>99?"99+":n; b.hidden=!n; btn.classList.toggle("glow", n>0 && !state.viewingChild);
+    btn.title=`포켓몬 · 카드팩 ${c.tickets}개 · 몬스터볼 ${c.balls}개${c.packClaim?` · 받을 카드팩 ${c.packClaim}개`:""}`;
+  }catch(_){}
+}
 function updateTopChips(){
   schedulePayBar();
+  refreshPkBadge();
   const today=fmt(new Date());
   if(state.streakCache===null && !state._streakLoading){
     state._streakLoading=true;
@@ -3468,14 +3510,27 @@ async function checkAllowanceNotices(){
     const snap=await ref.where("read","==",false).get();
     state.notices=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.weekId<a.weekId?-1:1);
   }catch(e){ console.warn("정산 알림 확인", e); }
+  // 💌 자녀의 용돈 요청
+  try{
+    const reqs=[];
+    for(const ch of state.children){
+      const q=await db.collection("planner").doc(ch.uid).collection("payRequests").where("status","==","pending").get();
+      q.docs.forEach(d=>reqs.push({...d.data(), uid:ch.uid, name:ch.name, weekId:d.id}));
+    }
+    state.payReqs=reqs.sort((a,b)=>b.at-a.at);
+    if(reqs.length) toast(`💌 ${reqs[0].name}이(가) 용돈을 요청했어요${reqs.length>1?` 외 ${reqs.length-1}건`:""}`,"info");
+  }catch(e){ console.warn("용돈 요청 확인", e); }
   const n=state.notices.length;
   const b=document.getElementById("menuBtn"); if(b && n) b.classList.add("has-dot");
   if(n) toast(`💰 ${state.notices[0].label} 용돈 정산서가 도착했어요`,"info");
   if(state.tab==="stats") render();
 }
 function noticeCardsHTML(){
-  if(!state.notices || !state.notices.length) return "";
-  return state.notices.map(nt=>`<div class="notice-card" onclick="openNotice('${nt.id}')">
+  const reqs=(state.payReqs||[]).map(q=>`<div class="notice-card req" onclick="openPayReq('${q.uid}','${q.weekId}')">
+      <div class="nc-top"><span class="nc-emo">💌</span><div style="flex:1;min-width:0"><b>${esc(q.name)}의 용돈 요청 · ${esc(q.label||"")}</b>
+        <span>${wonFmt(q.amount)} · 학습 ${(q.items||[]).length}개 · ${hmFmt((q.items||[]).reduce((a,i)=>a+(Number(i.min)||0),0))}</span></div><span class="nc-new">요청</span></div></div>`).join("");
+  if(!state.notices || !state.notices.length) return reqs;
+  return reqs+state.notices.map(nt=>`<div class="notice-card" onclick="openNotice('${nt.id}')">
       <div class="nc-top"><span class="nc-emo">💰</span><div style="flex:1;min-width:0"><b>${esc(nt.label)} 용돈 정산서</b>
         <span>토요일 18시 마감 · ${nt.items.length}명 · 합계 ${wonFmt(nt.total)}</span></div><span class="nc-new">NEW</span></div>
       <div class="nc-rows">${nt.items.map(i=>`<div><span>${esc(i.name)}</span><b>${i.amount==null?"기록 없음":wonFmt(i.amount)}</b>${i.pct!=null?`<em>달성 ${i.pct}% · ${i.weekMin}분</em>`:""}</div>`).join("")}</div>
@@ -3489,6 +3544,13 @@ async function openNotice(id){
   state.cursor=addDays(parseD(nt.weekId),-6);      // 그 주로 이동해 용돈 정산 열기
   subscribeTasks();
   openDrawer("allowance");
+}
+
+async function openPayReq(uid, weekId){
+  const ch=state.children.find(c=>c.uid===uid); if(!ch) return;
+  state.cursor=addDays(parseD(weekId),-6);
+  await viewChild(ch.uid, ch.name);
+  setTimeout(()=>openDrawer("allowance"), 400);
 }
 
 /* ----- 🔔 알림 설정 (부모) ----- */
@@ -4106,7 +4168,7 @@ function renderTaskRow(t){
     </div>`:"";
   const open=state.openTasks && state.openTasks.has(t.id);
   const doneLine = t.done
-    ? `<div class="task-sub ok">완료 · ${Number(t.actualMin)||0}분${t.appLinked? ` · ${EXT_APPS[t.appLinked]?EXT_APPS[t.appLinked].short:"학습앱"} 기록으로 인정` : (_tim>0?` · 타이머 ${Math.min(_tim,_act)}분(+10%)`:"")}${t.understood?" · 메모 있음":""}</div>`
+    ? `<div class="task-sub ok">완료 · ${Number(t.actualMin)||0}분${t.appLinked? ` · ${EXT_APPS[t.appLinked]?EXT_APPS[t.appLinked].short:"학습앱"} 기록으로 인정` : (_tim>0?` · 타이머 ${Math.min(_tim,_act)}분(+10%)`:"")}${t.understood?" · 메모 있음":""}${t.doneStars!=null?` · <span class="ds-mini">이행 ${starsTxt(t.doneStars)}</span>`:""}${t.underStars!=null?` · <span class="ds-mini">이해 ${starsTxt(t.underStars)}</span>`:""}</div>`
     : (t.plannedNote? `<div class="task-sub">${esc(t.plannedNote)}</div>` : "");
   const details = open? `
         <div class="exec-row">
@@ -4203,17 +4265,73 @@ async function toggleDone(id){
   if(!t.done){
     const cr=creditFor(t.date);
     if(!cr.ok){ alert(`${t.date} 계획은 일주일이 지나 체크할 수 없어요.`); return; }
-    // 원탭 완료: 타이머로 잰 시간 → 적어 둔 시간 → 계획 시간 순으로 기록 (메모는 나중에 '기록 · 메모'에서)
-    const actualMin=Number(t.actualMin)||Math.max(Number(t.timerMin)||0, Number(t.plannedMin)||0);
-    const saved={...t, done:true, actualMin, creditRate:cr.rate, checkedAt:Date.now(), appLinked:taskApp(t)};
-    state.justDone=t.id; setTimeout(()=>{ state.justDone=null; },900);
-    await saveTask(saved);
-    const left=state.tasks.filter(x=>x.date===t.date && !x.done && x.id!==t.id).length;
-    toast(`완료 · ${actualMin}분 기록${left? ` · 남은 학습 ${left}개` : " · 오늘 계획 끝 · 🔴 몬스터볼 받으러 가요 (포켓몬 카드 → 포획)"}`,"good");
-    return;
+    if(state.profile.role==="parent" && state.viewingChild) return finishTask(t, {});   // 부모가 대신 체크: 별점 없이
+    return openDoneSheet(t);
   }else{
     await saveTask({...t,done:false,creditRate:null,appLinked:null});
   }
+}
+/* ✅ 완료 확인
+ *  - 미리 '공부할 내용'을 적었으면 → 계획 대비 얼마나 했는지 ⭐0~5 (doneStars)
+ *  - 안 적었으면 → 공부한 내용을 적고 ⭐이행(doneStars) · ⭐이해도(underStars)            */
+let doneDraft=null;
+function starsHTML(key, val){
+  return `<div class="ds-stars" role="radiogroup">${[1,2,3,4,5].map(n=>`<button class="ds-st ${val!=null&&n<=val?"on":""}" aria-label="${n}점" onclick="doneDraft.${key}=${n};drawDoneSheet()">★</button>`).join("")}
+    <button class="ds-zero ${val===0?"on":""}" onclick="doneDraft.${key}=0;drawDoneSheet()">0점</button>
+    <span class="ds-val">${val==null?"골라 주세요":val+" / 5"}</span></div>`;
+}
+const starsTxt=n=>n==null||n===""? "" : "★".repeat(n)+"☆".repeat(5-n);
+function openDoneSheet(t){
+  const planned=!!String(t.unit||"").trim();
+  doneDraft={id:t.id, planned, content:planned? "" : "", doneStars:null, underStars:null};
+  drawDoneSheet();
+}
+function drawDoneSheet(){
+  const d=doneDraft, t=d && state.tasksMap[d.id]; if(!t) return;
+  const su=subjById(t.subjectId), tb=tbById(t.textbookId);
+  const min=Number(t.actualMin)||Math.max(Number(t.timerMin)||0, Number(t.plannedMin)||0);
+  const ready=d.planned? d.doneStars!=null : (d.content.trim() && d.doneStars!=null && d.underStars!=null);
+  const inner=`<div class="modal-head"><h3>✅ 학습 완료</h3><button class="icon-btn sm" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="tags" style="margin-bottom:10px"><span class="subj-tag" style="background:${su?su.color:"#94A3B8"}">${esc(su?su.name:"과목")}</span>
+        ${tb?`<span class="tb-tag">${esc(tb.name)}</span>`:""}<span class="time-tag">${min}분 기록</span></div>
+      ${d.planned? `
+        <div class="ds-box"><div class="ds-lbl">📝 계획한 내용</div><div class="ds-plan">${esc(t.unit)}</div></div>
+        <div class="ds-q">계획한 만큼 얼마나 했나요?</div>${starsHTML("doneStars", d.doneStars)}`
+      : `
+        <div class="ds-q">무엇을 공부했나요? <small>(미리 적지 않았어요)</small></div>
+        <div class="tm-area"><textarea id="dsContent" rows="2" maxlength="100" placeholder="예: 수학 3단원 일차함수 p.42-58 · 영단어 Day 12" oninput="doneDraft.content=this.value;document.getElementById('dsOk').disabled=!(doneDraft.content.trim()&&doneDraft.doneStars!=null&&doneDraft.underStars!=null)">${esc(d.content)}</textarea></div>
+        <div class="ds-q">계획한 만큼 했나요? (이행)</div>${starsHTML("doneStars", d.doneStars)}
+        <div class="ds-q">얼마나 이해했나요? (이해도)</div>${starsHTML("underStars", d.underStars)}`}
+      <div class="ds-hint">${d.planned? "계획한 내용은 할 일 수정에서 바꿀 수 있어요" : "💡 다음부터는 계획할 때 '공부할 내용'을 미리 적으면 완료할 때 별점만 주면 돼요"}</div>
+    </div>
+    <div class="modal-foot tm-foot">
+      <button class="tm-btn" onclick="closeModal()">취소</button>
+      <button class="tm-btn save" id="dsOk" ${ready?"":"disabled"} onclick="saveDoneSheet()">${TM_IC.check} 완료</button>
+    </div>`;
+  const cur=document.querySelector("#modalRoot .modal.ds");
+  if(cur){ const ta=document.getElementById("dsContent"), had=ta===document.activeElement; cur.innerHTML=inner; if(had){ const n=document.getElementById("dsContent"); n.focus(); n.setSelectionRange(n.value.length,n.value.length); } return; }
+  document.getElementById("modalRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal tm ds" style="max-width:440px">${inner}</div></div>`;
+  if(!d.planned) setTimeout(()=>{ const n=document.getElementById("dsContent"); if(n) n.focus(); }, 50);
+}
+async function saveDoneSheet(){
+  const d=doneDraft, t=d && state.tasksMap[d.id]; if(!t) return;
+  if(d.doneStars==null || (!d.planned && (!d.content.trim() || d.underStars==null))) return;
+  const extra={doneStars:d.doneStars};
+  if(!d.planned){ extra.unit=d.content.trim(); extra.underStars=d.underStars; extra.contentAfter=true; }
+  closeModal(); doneDraft=null;
+  await finishTask(t, extra);
+}
+async function finishTask(t, extra){
+  const cr=creditFor(t.date);
+  // 원탭 완료: 타이머로 잰 시간 → 적어 둔 시간 → 계획 시간 순으로 기록
+  const actualMin=Number(t.actualMin)||Math.max(Number(t.timerMin)||0, Number(t.plannedMin)||0);
+  const saved={...t, ...extra, done:true, actualMin, creditRate:cr.rate, checkedAt:Date.now(), appLinked:taskApp(t)};
+  state.justDone=t.id; setTimeout(()=>{ state.justDone=null; },900);
+  await saveTask(saved);
+  setTimeout(()=>refreshPkBadge(true), 800);
+  const left=state.tasks.filter(x=>x.date===t.date && !x.done && x.id!==t.id).length;
+  toast(`완료 · ${actualMin}분${extra.doneStars!=null?` · 이행 ${starsTxt(extra.doneStars)}`:""}${left? ` · 남은 학습 ${left}개` : " · 오늘 계획 끝 · 🔴 몬스터볼 받으러 가요 (🎴 포켓몬)"}`,"good");
 }
 
 function openReviewSuggest(id){
@@ -4367,9 +4485,10 @@ function drawModal(){
               <button class="tm-chip wide ${rep==="custom"?"on":""}" onclick="mset('repeat','custom')"><span>요일선택</span><span>›</span></button></div>
             ${repExtra}</div>
         </div>
-        <div class="tm-card">${head("doc","무엇을 할까요?",`<button class="tm-ex-btn" onclick="tmExamples=!tmExamples;drawModal()">${TM_IC.sparkle} 예시 불러오기</button>`)}
+        <div class="tm-card">${head("doc","공부할 내용",`<button class="tm-ex-btn" onclick="tmExamples=!tmExamples;drawModal()">${TM_IC.sparkle} 예시 불러오기</button>`)}
           ${examples}
-          ${area(t.unit,"예: 3단원 관계대명사 · p.42-58 · Day 12","unit",100,2)}</div>
+          ${area(t.unit,"예: 3단원 관계대명사 · p.42-58 · Day 12","unit",100,2)}
+          <div class="tm-mini" style="margin:6px 0 0">미리 적어 두면 완료할 때 ⭐별점만 주면 돼요 (안 적으면 완료할 때 적어요)</div></div>
         <div class="tm-card">${head("cap","학습 방법")}<div class="tm-meths">${meth}</div>${epField}${scoreField}</div>
         <div class="tm-card">${head("flag","목표 메모")}${area(t.plannedNote,"이 학습에서 꼭 할 것","plannedNote",200,2)}</div>
         ${t.done||t.understood? `<div class="tm-card">${head("doc","배운 내용 · 복습 메모")}${area(t.understood,"배운 핵심, 다시 볼 부분","understood",200,2)}</div>` : ""}
@@ -5132,6 +5251,46 @@ function payTermsRowHTML(uid, crit){
     ${ptOpen[uid]? payTermsEditorHTML(uid, P, "allow") : ""}`;
 }
 function pickPayTerms(o){ const out={}; Object.keys(PAY_DEFAULT).forEach(k=>{ if(o && o[k]!==undefined) out[k]=o[k]; }); return out; }
+// 📒 이번 주 학습한 내용 (날짜별 · 과목 · 내용 · 시간 · 별점)
+function weekStudyItems(tasks, days){
+  return tasks.filter(t=>days.includes(t.date) && t.done).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.order||0)-(b.order||0)).map(t=>{
+    const su=subjById(t.subjectId), tb=tbById(t.textbookId);
+    return {date:t.date, subj:su?su.name:"기타", color:su?su.color:"#94A3B8", tb:tb?tb.name:"", content:t.unit||t.method||"", min:Number(t.actualMin)||0,
+      doneStars:t.doneStars!=null?t.doneStars:null, underStars:t.underStars!=null?t.underStars:null, after:!!t.contentAfter};
+  });
+}
+function weekStudyHTML(items){
+  if(!items || !items.length) return `<div class="pb-sub">이번 주 완료한 학습이 아직 없어요.</div>`;
+  const W=["일","월","화","수","목","금","토"], by={};
+  items.forEach(i=>{ (by[i.date]=by[i.date]||[]).push(i); });
+  const tot=items.reduce((a,i)=>a+i.min,0), st=items.filter(i=>i.doneStars!=null), avg=st.length? st.reduce((a,i)=>a+i.doneStars,0)/st.length : null;
+  const noContent=items.filter(i=>!i.content).length;
+  return `<div class="ws-sum">${items.length}개 · ${hmFmt(tot)}${avg!=null?` · 평균 이행 <b>★${avg.toFixed(1)}</b>`:""}${noContent?` · <span style="color:#E5484D">내용 없음 ${noContent}</span>`:""}</div>
+    <div class="ws-list">${Object.entries(by).map(([ds,L])=>{ const d=parseD(ds); return `<div class="ws-day"><div class="ws-date">${d.getMonth()+1}.${d.getDate()} (${W[d.getDay()]})</div>
+      ${L.map(i=>`<div class="ws-it"><span class="ws-dot" style="background:${i.color}"></span><div style="flex:1;min-width:0">
+          <div class="ws-t"><b>${esc(i.subj)}</b>${i.tb?` · ${esc(i.tb)}`:""} · ${esc(i.content||"내용 없음")}</div>
+          <div class="ws-m">${i.min}분${i.doneStars!=null?` · 이행 <span class="ds-mini">${starsTxt(i.doneStars)}</span>`:""}${i.underStars!=null?` · 이해 <span class="ds-mini">${starsTxt(i.underStars)}</span>`:""}${i.after?" · 공부 후 기록":""}</div></div></div>`).join("")}</div>`; }).join("")}</div>`;
+}
+const payReqRef=(uid,weekId)=>db.collection("planner").doc(uid).collection("payRequests").doc(weekId);
+async function fetchPayReq(uid, weekId){ try{ const d=await payReqRef(uid,weekId).get(); return d.exists? d.data() : null; }catch(_){ return null; } }
+// 💌 자녀: 이번 주 학습한 내용을 담아 용돈 요청
+async function requestAllowance(){
+  const c=allowCache[state.ownerUid]; if(!c) return;
+  const items=c.items||[];
+  if(!items.length){ alert("이번 주에 완료한 학습이 없어요. 학습을 완료한 뒤 요청해 주세요."); return; }
+  if(!confirm(`${c.label} 용돈 ${wonFmt(c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap))}을 요청할까요?\n이번 주 학습한 내용 ${items.length}개가 부모님께 함께 보여요.`)) return;
+  try{
+    await payReqRef(state.ownerUid, c.weekId).set({weekId:c.weekId, label:c.label, name:state.ownerName||state.profile.name||"", amount:c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap),
+      payMin:c.r.payMin, items, status:"pending", at:Date.now()});
+    toast("💌 용돈을 요청했어요. 부모님이 학습 내용을 보고 지급해요","good"); drawAllowance();
+  }catch(e){ console.error(e); alert("요청하지 못했어요.\n"+firestoreDiag(e)); }
+}
+function payReqBannerHTML(req, isParent){
+  if(!req) return "";
+  const t=new Date(req.at), when=`${t.getMonth()+1}.${t.getDate()} ${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}`;
+  if(req.status==="paid") return `<div class="preq paid">💌 용돈 요청 → ✅ 지급 완료</div>`;
+  return `<div class="preq">💌 ${isParent? `<b>${esc(req.name||"자녀")}</b>이(가) 용돈 ${wonFmt(req.amount)}을 요청했어요` : `용돈 ${wonFmt(req.amount)} 요청함 · 부모님 확인 기다리는 중`} <small>${when}</small></div>`;
+}
 async function drawAllowance(){
   const days=allowanceWeekDays(state.cursor), weekId=days[6], label=weekLabelOf(days);
   document.getElementById("drawerRoot").innerHTML=`<div class="overlay"><div class="drawer wide">
@@ -5146,8 +5305,8 @@ async function drawAllowance(){
   if(overview){
     let cards=""; let sum=0;
     for(const ch of state.children){
-      const [tasks,crit,payout,capOv,exd]=await Promise.all([
-        fetchWeekTasks(ch.uid,days), fetchAllowanceCrit(ch.uid), fetchPayout(ch.uid,weekId), fetchWeekCap(ch.uid,weekId), fetchExtData(ch.uid)
+      const [tasks,crit,payout,capOv,exd,req]=await Promise.all([
+        fetchWeekTasks(ch.uid,days), fetchAllowanceCrit(ch.uid), fetchPayout(ch.uid,weekId), fetchWeekCap(ch.uid,weekId), fetchExtData(ch.uid), fetchPayReq(ch.uid,weekId)
       ]);
       const r=computeAllowance(tasks,days,crit,exd);
       const cap = capOv!=null? capOv : null;
@@ -5156,8 +5315,10 @@ async function drawAllowance(){
       cards+=`<div class="allow-card">
         <div class="name"><span class="av" style="background:${ch.color}">${esc((ch.name||"").slice(0,1))}</span>${esc(ch.name)}
           <span style="margin-left:auto;font-size:11.5px;color:#94A3B8;font-weight:600">${r.boost?"🚀 시험기간 · ":""}예상 ${wonFmt(payAmount(r,cap))}</span></div>
+        ${payReqBannerHTML(req, true)}
         ${payTermsRowHTML(ch.uid, crit)}
         ${allowanceMetricsHTML(r,crit)}
+        <details class="mock-det" ${req&&req.status!=="paid"?"open":""}><summary>📒 이번 주 학습한 내용</summary>${weekStudyHTML(weekStudyItems(tasks, days))}</details>
         <details class="mock-det"><summary>📝 이번 주 모의고사 범위 (완료한 학습)</summary>${mockRangeHTML(tasks, days)}</details>
         ${payControlsHTML(ch.uid, r, cap, payout, true)}
       </div>`;
@@ -5168,25 +5329,30 @@ async function drawAllowance(){
   } else {
     // 단일 대상(내 플래너 또는 특정 자녀 열람 중)
     const uid=state.ownerUid;
-    const [tasks,payout,capOv,histSnap]=await Promise.all([
+    const [tasks,payout,capOv,histSnap,req]=await Promise.all([
       fetchWeekTasks(uid,days), fetchPayout(uid,weekId), fetchWeekCap(uid,weekId),
-      db.collection("planner").doc(uid).collection("payouts").get(), ensureExt()
+      db.collection("planner").doc(uid).collection("payouts").get(), fetchPayReq(uid,weekId), ensureExt()
     ]);
     await loadDayTypes(days);
     const crit={...allowCrit(), ...payTermsOf(null, await fetchPayTerms(uid))};
     const r=computeAllowance(tasks,days,crit);
     const cap = capOv!=null? capOv : null;
-    allowCache[uid]={r,crit,cap,weekId,label,name:state.ownerName};
+    const items=weekStudyItems(tasks, days);
+    allowCache[uid]={r,crit,cap,weekId,label,name:state.ownerName,items};
     const canPay = isParent && state.viewingChild; // 부모가 자녀를 열람 중일 때만 지급
     const termsRow = canPay? payTermsRowHTML(uid, crit) : "";
     const shownAmt = payout? payout.amount : payAmount(r, cap);
     const hist=histSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.paidAt||0)-(a.paidAt||0)).slice(0,8);
     body=`<div class="allow-hero"><div class="wk">${label} · ${esc(state.ownerName)}</div><div class="amt">${wonFmt(shownAmt)}</div><div class="cap">⏱ ${wonFmt(payAmount(r,cap)-r.appBonus-r.mockBonus)} + 📚 ${wonFmt(r.appBonus)} + 📝 ${wonFmt(r.mockBonus)}${r.boost?" · 🚀 시험기간":""}</div></div>
       <div class="allow-card">
+        ${payReqBannerHTML(req, isParent)}
         ${termsRow}
         ${allowanceMetricsHTML(r,crit)}
+        <details class="mock-det" ${(!isParent || (req&&req.status!=="paid"))?"open":""}><summary>📒 이번 주 학습한 내용</summary>${weekStudyHTML(items)}</details>
         <details class="mock-det"><summary>📝 이번 주 모의고사 범위 (완료한 학습)</summary>${mockRangeHTML(tasks, days)}</details>
         ${payControlsHTML(uid, r, cap, payout, canPay)}
+        ${(!isParent && !payout && !req)? `<button class="pay-btn" style="width:100%;margin-top:10px" onclick="requestAllowance()">💌 이번 주 용돈 요청하기</button>
+          <div class="cd-note" style="text-align:center;margin-top:6px">위의 학습한 내용이 부모님께 함께 보여요</div>` : ""}
       </div>
       ${hist.length?`<div class="dash-section">지급 내역</div>${hist.map(h=>`<div class="pay-hist"><span>${esc(h.weekLabel||h.id)}${h.rate!=null?` · ${hmFmt(h.payMin||0)} × ${wonFmt(h.rate)}`:(h.percent!=null?` · ${h.percent}%`:"")}</span><b style="color:#0E9F6E">${wonFmt(h.amount)}</b></div>`).join("")}`:""}`;
   }
@@ -5205,6 +5371,8 @@ async function payAllowanceUI(uid){
     appAcc:r.appAcc.acc, mockAcc:r.mockAcc, weekLabel:c.label, paidAt:Date.now(),
     breakdown:{timerMin:r.timerMin, focusMin:r.focusMin, appMin:r.appMin, overDayMin:r.overDayMin, done:r.done, planned:r.planned, studyDays:r.studyDays}
   });
+  payReqRef(uid, c.weekId).get().then(d=>{ if(d.exists) return payReqRef(uid, c.weekId).update({status:"paid", paidAt:Date.now(), paidAmount:amount}); }).catch(()=>{});
+  state.payReqs=(state.payReqs||[]).filter(x=>!(x.uid===uid && x.weekId===c.weekId));
   drawAllowance();
 }
 
