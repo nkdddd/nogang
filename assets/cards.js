@@ -351,7 +351,7 @@ function lobbyHTML(){
         <span style="flex:1;min-width:0"><b>${eh(x.name||"형제")}</b> <small class="${on?"bt-on":"bt-off"}">${on?"● 접속 중":"○ 오프라인"}</small></span>
         <span class="bt-btns"><button class="fam-btn" ${off} onclick="Cards.invite('${x.uid}','${x.hub}',true)">🎴 걸기</button><button class="ghost-btn" ${off} onclick="Cards.invite('${x.uid}','${x.hub}',false)">🤝 친선</button></span></div>`; }).join("")
       || `<div class="cd-note" style="margin-top:0">형제가 카드 화면을 한 번 열면 여기에 나타나요.</div>`}
-    <div class="list-item bt-opp"><span class="bt-av cpu">🤖</span><span style="flex:1;min-width:0"><b>연습 상대</b> <small style="color:#94A3B8;display:block">내 카드와 같은 등급 · 같은 강화 카드 · 👆 탭 횟수 대결<br>이기면 봇 카드를 받고, 지면 내 카드가 사라져요</small></span>
+    <div class="list-item bt-opp"><span class="bt-av cpu">🤖</span><span style="flex:1;min-width:0"><b>연습 상대</b> <small style="color:#94A3B8;display:block">봇 카드를 보고 할지 말지 정해요 · 👆 탭 횟수 대결<br>이기면 봇 카드를 받고, 지면 내 카드가 사라져요</small></span>
       <span class="bt-btns"><button class="fam-btn" ${off} onclick="Cards.practice()">🎴 걸고 연습</button></span></div>
     ${tbHTML(off)}
     ${CS.log&&CS.log.length?`<div class="r-sec">최근 대결</div>${CS.log.map(l=>`<div class="cd-log">${eh(l.a)} ${l.win?"🏆":"·"} vs ${eh(l.b)} ${l.win?"":"🏆"} <small>${eh(l.score)}${l.stake?" · 🎴":""} · ${new Date(l.at).toLocaleDateString()}</small></div>`).join("")}`:""}
@@ -407,6 +407,15 @@ function renderMatch(){
   if(m.status==="declined"||m.status==="cancel"){
     return arenaShell(m, `<div class="bt-wait">${m.status==="declined"? `🙅 ${eh(them)}이(가) 다음에 하재요.` : "대결을 그만했어요."}${m.stake?"<br><small>건 카드는 돌려받아요</small>":""}</div><div class="bt-row"><button class="fam-btn" onclick="Cards.leave()">목록으로</button></div>`);
   }
+  if(m.src==="local" && m.status==="offer"){              // 🤖 봇 카드를 보고 대결할지 정해요
+    const A=m.picks[me], B=m.picks.cpu, d=tapPw(B)-tapPw(A);
+    const how= d>0? `봇 카드가 ⚡${d} 더 세요` : d<0? `내 카드가 ⚡${-d} 더 세요` : "힘이 똑같아요";
+    return arenaShell(m, `<p class="bt-say">🤖 봇은 이 카드를 냈어! <small>${how} · 싫으면 거부해도 돼요 (건 카드는 돌려받아요)</small></p>
+      <div class="arena"><div class="fighter">${cardFace(A,"mid")}<b>${eh(A.name)}</b><span class="pw">⚡${tapPw(A)}</span></div>
+        <div class="score">VS</div>
+        <div class="fighter">${cardFace(B,"mid")}<b>${eh(B.name)}</b><span class="pw">⚡${tapPw(B)}</span></div></div>
+      <div class="bt-row"><button class="fam-btn" onclick="Cards.acceptBot()">⚔️ 대결!</button><button class="ghost-btn" onclick="Cards.refuseBot()">🙅 거부하기</button></div>`);
+  }
   if(m.status==="pick"){
     const mine=(m.picks||{})[me];
     if(mine){
@@ -414,7 +423,7 @@ function renderMatch(){
         <div class="bt-wait">⏳ ${eh(them)}이(가) 카드를 고르는 중…</div><div class="bt-row">${quit}</div>`);
     }
     const owned=Object.values(CS.cards).sort((a,b)=>power(b)-power(a));
-    const say= m.src==="local"? `걸 카드를 골라! <small>같은 등급 · 같은 강화의 봇 카드와 👆 탭 대결 · 이기면 봇 카드를 받고, 지면 이 카드는 사라져요</small>`
+    const say= m.src==="local"? `걸 카드를 골라! <small>봇이 비슷한 카드(더 세거나 약할 수도)를 내요 · 보고 싫으면 거부할 수 있어요 · 이기면 봇 카드를 받고, 지면 이 카드는 사라져요</small>`
       : m.stake? `걸 카드를 골라! <small>점수 = ⚡카드 파워 × 👆탭 수 · 지면 이 카드가 ${eh(them)}에게 가요</small>`
       : `대결할 카드를 골라! <small>점수 = ⚡카드 파워 × 👆탭 수 · 친선 대결이라 카드는 그대로예요</small>`;
     return arenaShell(m, `<p class="bt-say">${say}</p>
@@ -701,14 +710,18 @@ async function matchPick(m, c){
     throw e;
   }
 }
-// 🤖 연습: 봇과 탭 대결 (봇은 5초에 41~56번)
+// 🤖 연습: 봇과 탭 대결 — 봇 카드를 먼저 보여 주고(offer) 대결할지 거부할지 골라요
 async function localPick(m, c, lv){
   const me=CS.uid, mineP=pickOf(c, lv), cpu=cpuCard(mineP);
-  m.picks={[me]:mineP, cpu};
-  Object.assign(m, TapBattle.startFields());
+  m.picks={[me]:mineP, cpu}; m.status="offer";
   renderCards();
 }
-const botTaps=()=>41+Math.floor(Math.random()*16);   // 41~56
+// 봇 탭 수: 1판은 내 탭 수 ±3을 기준으로, 2판부터는 그 기준에서 0~7번 더하거나 빼요
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function botTaps(m, round, mine){
+  if(round===0 || m.botBase==null){ m.botBase=Math.max(0, mine+rnd(-3,3)); return m.botBase; }
+  return Math.max(0, m.botBase+(Math.random()<.5? -1 : 1)*rnd(0,7));
+}
 async function localSettle(m){
   const me=CS.uid, key=keyOf(m), W=CS.wallet, won=m.winner===me, esc=(W.escrow||{})[key], note={won, stake:true, local:true};
   if(W.done && W.done[key]) return;
@@ -721,12 +734,18 @@ async function localSettle(m){
   CS.notes=CS.notes||{}; CS.notes[key]=note;
   logBattle(m, me, "cpu", won);
 }
+// 연습 대결 전에 그만두면 맡긴 카드를 돌려줘요
+async function refundLocal(m){
+  const key=keyOf(m), W=CS.wallet, t=(W.escrow||{})[key];
+  if(t){ delete W.escrow[key]; await giveCard(CS.uid, cardById(t), {lv:t.lv}); await saveWallet(CS.uid, W); }
+  m.status="cancel";
+}
 // 탭 수 내기 (round: 0부터)
 async function matchTap(m, who, round, n){
   if(m.src==="local"){
     let upd=TapBattle.addTaps(m, who, round, n); if(!upd) return;
     Object.assign(m, upd);
-    if(m.status==="roll"){ upd=TapBattle.addTaps(m, "cpu", round, botTaps()); if(upd) Object.assign(m, upd); }
+    if(m.status==="roll"){ upd=TapBattle.addTaps(m, "cpu", round, botTaps(m, round, n)); if(upd) Object.assign(m, upd); }
     if(m.status==="done") await localSettle(m);
     return rollView(m);
   }
@@ -737,12 +756,14 @@ async function matchTap(m, who, round, n){
     if(upd) t.update(ref, upd);
   }).catch(()=>toast("앗, 연결이 끊겼어요. 다시 눌러 봐요","info"));
 }
-// 🤖 봇 카드: 내 카드와 같은 등급 · 같은 강화 단계
+// 🤖 봇 카드: 내 카드와 비슷하게 — 등급은 한 단계 아래 · 같음 · 한 단계 위, 강화는 ±1 (더 세거나 약할 수도 있어요)
 function cpuCard(mine){
-  const all=byCls[mine.cls]&&byCls[mine.cls].length? byCls[mine.cls] : byCls.n;
+  const UP=["n","r","a","s","u"], i=Math.max(0, UP.indexOf(mine.cls));
+  const cls=UP[Math.max(0, Math.min(UP.length-1, i+rnd(-1,1)))];
+  const all=byCls[cls]&&byCls[cls].length? byCls[cls] : byCls[mine.cls]&&byCls[mine.cls].length? byCls[mine.cls] : byCls.n;
   const pool=all.length>1? all.filter(r=>r[0]!==mine.id) : all;
   const x=info(pool[Math.floor(Math.random()*pool.length)]);
-  return {...pickOf(x, mine.lv), boost:0};
+  return {...pickOf(x, Math.max(0, Math.min(MAX_LV, (Number(mine.lv)||0)+rnd(-1,1)))), boost:0};
 }
 
 /* ============ ⭐ 강화 · 🌟 진화 · ♻️ 교환 (받아쓰기 프로그램 방식, 별 대신 '재료 카드') ============ */
@@ -955,15 +976,18 @@ const Cards={
   confirmPick(id){
     const m=curMatch(), c=CS.cards[id]; if(!m||!c) return;
     const dupNote=m.stake && (Number(c.count)||1)>1 && lvOf(c)? `\n(겹친 카드라 +0짜리 한 장을 걸어요)` : "";
-    const msg= m.src==="local"? `'${c.name}' 카드를 걸고 연습할까요?\n같은 등급 · 같은 강화의 봇 카드와 👆 탭 대결 (5초 동안 탭한 수)\n이기면 봇 카드를 받고, 지면 이 카드는 사라져요.${dupNote}`
+    const msg= m.src==="local"? `'${c.name}' 카드를 걸고 연습할까요?\n봇이 비슷한 카드를 내면 보고 대결할지 정해요 (👆 5초 동안 탭한 수)\n이기면 봇 카드를 받고, 지면 이 카드는 사라져요.${dupNote}`
       : m.stake? `'${c.name}' (⚡${power(c)}) 카드를 걸까요?\n지면 이 카드가 상대에게 가요.${dupNote}`
       : `'${c.name}' (⚡${power(c)})로 대결할까요?\n점수 = ⚡${power(c)} × 👆탭 수`;
     if(!confirm(msg)) return;
     sfx("pop");
     matchPick(m, c).catch(e=>{ console.warn(e); toast("대결이 이미 끝났어요","info"); CS.mid=null; renderCards(); });
   },
+  acceptBot(){ const m=curMatch(); if(!m || m.status!=="offer") return; sfx("pop"); Object.assign(m, TapBattle.startFields()); renderCards(); },
+  async refuseBot(){ const m=curMatch(); if(!m || m.status!=="offer") return; await refundLocal(m); toast("대결을 거부했어요. 건 카드는 돌려받았어요","info"); CS.mid=null; CS.local=null; renderCards(); },
   async cancel(){
     const m=curMatch(); if(!m) return;
+    if(m.src==="local" && m.status==="offer") await refundLocal(m);
     if(m.src!=="local" && (m.status==="invite"||m.status==="pick")){
       await refOf(m).update({status:"cancel", updatedAt:Date.now()}).catch(()=>{});
       m.status="cancel"; settleSweep();
@@ -972,6 +996,7 @@ const Cards={
   },
   async leave(){
     const m=curMatch();
+    if(m && m.src==="local" && m.status==="offer") await refundLocal(m);   // 대결 전이면 건 카드를 돌려받아요
     if(m && m.src==="local" && m.status==="roll"){       // 연습 중간에 나가면 진 걸로 (건 카드는 사라져요)
       if(!confirm("지금 나가면 진 것으로 처리돼서 건 카드가 사라져요. 나갈까요?")) return;
       Object.assign(m, {status:"done", winner:"cpu"}); await localSettle(m);
