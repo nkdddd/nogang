@@ -410,7 +410,8 @@ function renderMatch(){
   if(m.src==="local" && m.status==="offer"){              // 🤖 봇 카드를 보고 대결할지 정해요
     const A=m.picks[me], B=m.picks.cpu, d=tapPw(B)-tapPw(A);
     const how= d>0? `봇 카드가 ⚡${d} 더 세요` : d<0? `내 카드가 ⚡${-d} 더 세요` : "힘이 똑같아요";
-    return arenaShell(m, `<p class="bt-say">🤖 봇은 이 카드를 냈어! <small>${how} · 싫으면 거부해도 돼요 (건 카드는 돌려받아요)</small></p>
+    const odds=Math.round(botWinRate(m)*100);
+    return arenaShell(m, `<p class="bt-say">🤖 봇은 이 카드를 냈어! <small>${how} · 이길 확률 약 ${odds}% · 싫으면 거부해도 돼요 (건 카드는 돌려받아요)</small></p>
       <div class="arena"><div class="fighter">${cardFace(A,"mid")}<b>${eh(A.name)}</b><span class="pw">⚡${tapPw(A)}</span></div>
         <div class="score">VS</div>
         <div class="fighter">${cardFace(B,"mid")}<b>${eh(B.name)}</b><span class="pw">⚡${tapPw(B)}</span></div></div>
@@ -717,21 +718,20 @@ async function localPick(m, c, lv){
   renderCards();
 }
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
-/* 🎯 연습봇 난이도: 아이 승률이 40% 정도 (모의 실험으로 맞춘 값)
-   - 1판: 내 탭 수 −2~+3을 봇 기준값으로 · 2판부터: 기준값에서 0~7번 더하거나(55%) 빼요(45%)
-   - 카드 힘이 달라도 승률이 흔들리지 않게 봇 탭 수를 ⚡힘 비율로 맞춰요 (센 카드면 탭을 덜 해요)
-   - 최근 10판 승률이 50%를 넘으면 조금 더 세게, 30% 아래면 조금 더 약하게 */
-const BOT_HIST="tapBotHist";
-const botHist=()=>{ try{ return JSON.parse(localStorage.getItem(BOT_HIST)||"[]"); }catch(_){ return []; } };
-const botRecord=won=>{ try{ localStorage.setItem(BOT_HIST, JSON.stringify([...botHist(), won?1:0].slice(-10))); }catch(_){} };
+/* 🎯 연습봇 난이도: 기본 승률 35%~55% — 내 카드가 셀수록 올라가요 (힘이 같으면 45%)
+   - 카드 힘 비율로 목표 승률을 정하고(모의 실험으로 맞춘 값), 그만큼 봇 1판 탭 수를 조금 올리거나 내려요
+   - 1판: 봇 = 내 탭 수 ±3 (+ 난이도 보정) · 2판부터: 그 기준값에서 0~7번 더하거나 빼요
+   - 2판부터 내가 1판보다 더 많이 탭하면 그만큼 더 잘 이겨요 */
+const botWinRate=m=>{ const me=Object.keys(m.picks).find(k=>k!=="cpu"), r=TapBattle.power(m.picks[me])/TapBattle.power(m.picks.cpu);
+  return Math.max(.35, Math.min(.55, .45+(r-1)*.5)); };
 function botTaps(m, round, mine){
+  const me=Object.keys(m.picks).find(k=>k!=="cpu"), ratio=TapBattle.power(m.picks[me])/TapBattle.power(m.picks.cpu);
   let raw;
   if(round===0 || m.botBase==null){
-    const h=botHist(), rate=h.length>=5? h.reduce((a,b)=>a+b,0)/h.length : .4;
-    m.botBase=Math.max(0, mine+rnd(rate>.5? -1 : rate<.3? -3 : -2, 3)); raw=m.botBase;
-  }else raw=Math.max(0, m.botBase+(Math.random()<.55? 1 : -1)*rnd(0,7));
-  const me=Object.keys(m.picks).find(k=>k!=="cpu");
-  return Math.round(raw*TapBattle.power(m.picks[me])/TapBattle.power(m.picks.cpu));
+    const bias=(.5-botWinRate(m))/.14;                          // 승률 1%p ≈ 탭 0.07번 (모의 실험)
+    m.botBase=Math.max(0, mine+Math.round(Math.random()*6-3+bias)); raw=m.botBase;
+  }else raw=Math.max(0, m.botBase+(Math.random()<.5? 1 : -1)*rnd(0,7));
+  return Math.round(raw*ratio);                                 // ⚡힘 차이만큼 봇 탭 수를 맞춰요 (위 승률이 되게)
 }
 async function localSettle(m){
   const me=CS.uid, key=keyOf(m), W=CS.wallet, won=m.winner===me, esc=(W.escrow||{})[key], note={won, stake:true, local:true};
@@ -741,7 +741,6 @@ async function localSettle(m){
     const g=await giveCard(CS.uid, cardById(m.picks.cpu), {lv:m.picks.cpu.lv}); note.got=g.card;
   }else note.lost=esc||{name:(m.picks[me]||{}).name||"카드"};
   if(W.escrow) delete W.escrow[key]; W.done=W.done||{}; W.done[key]=1;
-  botRecord(won);
   await saveWallet(CS.uid, W);
   CS.notes=CS.notes||{}; CS.notes[key]=note;
   logBattle(m, me, "cpu", won);
