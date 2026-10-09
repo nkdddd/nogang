@@ -4,7 +4,7 @@
  *    [카드 id, 이름, 종류, 세트 번호, 희귀도, 앱 등급(n r a s u), 그림 경로, 타입, 포켓몬 이름, 진화 가족]
  *  - 자녀: 공부로 카드팩을 받아 뜯기(받아쓰기 프로그램과 같은 효과) → 재료 카드로 강화(+1~+5) → 형제 · 받아쓰기 친구 · 연습 봇과 대결
  *  - 🎫 공부로 얻은 💎 슈퍼 레어 카드 PC 1시간 · 👑 스페셜 카드 PC 3시간 이용권 · 🎴 카드 걸기 대결(이기면 상대 카드)
- *  - 대결: 한 판 점수 = ⚡힘(등급 + 강화×2) × 🎲주사위(1~6) × 먹이사슬(타입 ×1.5 · 진화 단계 ×1.2) × 이번 주 공부 보너스
+ *  - 대결: 👆 탭 대결 (assets/tapbattle.js) — 한 판 점수 = ⚡힘(등급 + 강화×2) × 👆5초 동안 탭한 수, 3판 2선승
  *  - 부모: 카드 이름으로 찾아서 자녀에게 바로 주기 · 카드팩 더하기/빼기
  *  - 데이터
  *    planner/{자녀uid}/cards/{카드id}   내 카드 {count, 카드 정보}
@@ -330,7 +330,7 @@ function startArena(){
 }
 function incoming(){ return Object.values(CS?CS.matches:{}).filter(m=>m.status==="invite" && meOf(m) && hostOf(m)!==meOf(m) && fresh(m)); }
 function curMatch(){ return CS.mid==="local"? CS.local : CS.matches[CS.mid]; }
-const modeTag=m=>m.src==="local"? `<span class="bt-tag stake">🎲 주사위 · 카드 걸기</span>` : m.stake? `<span class="bt-tag stake">🎴 카드 걸기</span>` : `<span class="bt-tag">🤝 친선</span>`;
+const modeTag=m=>m.src==="local"? `<span class="bt-tag stake">👆 연습 · 카드 걸기</span>` : m.stake? `<span class="bt-tag stake">🎴 카드 걸기</span>` : `<span class="bt-tag">🤝 친선</span>`;
 const srcTag=m=>m.src==="tb"? `<span class="bt-tag tb">🌐 받아쓰기</span>` : "";
 function lobbyHTML(){
   const ro=state.viewingChild, has=Object.keys(CS.cards).length>0, off=(!has||ro)?"disabled":"";
@@ -351,12 +351,11 @@ function lobbyHTML(){
         <span style="flex:1;min-width:0"><b>${eh(x.name||"형제")}</b> <small class="${on?"bt-on":"bt-off"}">${on?"● 접속 중":"○ 오프라인"}</small></span>
         <span class="bt-btns"><button class="fam-btn" ${off} onclick="Cards.invite('${x.uid}','${x.hub}',true)">🎴 걸기</button><button class="ghost-btn" ${off} onclick="Cards.invite('${x.uid}','${x.hub}',false)">🤝 친선</button></span></div>`; }).join("")
       || `<div class="cd-note" style="margin-top:0">형제가 카드 화면을 한 번 열면 여기에 나타나요.</div>`}
-    <div class="list-item bt-opp"><span class="bt-av cpu">🤖</span><span style="flex:1;min-width:0"><b>연습 상대</b> <small style="color:#94A3B8;display:block">내 카드와 같은 등급 · 같은 강화 카드 · 🎲 주사위 숫자로만<br>이기면 봇 카드를 받고, 지면 내 카드가 사라져요</small></span>
+    <div class="list-item bt-opp"><span class="bt-av cpu">🤖</span><span style="flex:1;min-width:0"><b>연습 상대</b> <small style="color:#94A3B8;display:block">내 카드와 같은 등급 · 같은 강화 카드 · 👆 탭 횟수 대결<br>이기면 봇 카드를 받고, 지면 내 카드가 사라져요</small></span>
       <span class="bt-btns"><button class="fam-btn" ${off} onclick="Cards.practice()">🎴 걸고 연습</button></span></div>
     ${tbHTML(off)}
     ${CS.log&&CS.log.length?`<div class="r-sec">최근 대결</div>${CS.log.map(l=>`<div class="cd-log">${eh(l.a)} ${l.win?"🏆":"·"} vs ${eh(l.b)} ${l.win?"":"🏆"} <small>${eh(l.score)}${l.stake?" · 🎴":""} · ${new Date(l.at).toLocaleDateString()}</small></div>`).join("")}`:""}
-    ${foodHTML()}
-    <div class="cd-note">한 판 점수 = ⚡힘(등급 + 강화×2) × 🎲주사위 × 먹이사슬(타입 ×1.5 · 진화 단계 ×1.2) × 이번 주 공부 보너스(+${Math.round(weekBoost()*100)}%, 형제 대결). 3판 2선승<br>
+    <div class="cd-note">👆 탭 대결: 한 판 = 5초 동안 휴대폰은 화면을 톡톡, 컴퓨터는 스페이스바. 점수 = ⚡카드 파워(등급 10/12/14/17/20 + 강화×2) × 👆탭 수. 3판 2선승<br>
       🎴 카드 걸기: 이기면 상대 카드를 받고, 지면 내 카드가 상대에게 가요 (겹친 카드는 +0짜리를 걸어요) · 🤝 친선: 카드는 그대로, 이기면 하루 한 번 카드팩 +1</div>`;
 }
 // 🌐 받아쓰기(또박또박) 친구
@@ -415,74 +414,74 @@ function renderMatch(){
         <div class="bt-wait">⏳ ${eh(them)}이(가) 카드를 고르는 중…</div><div class="bt-row">${quit}</div>`);
     }
     const owned=Object.values(CS.cards).sort((a,b)=>power(b)-power(a));
-    const say= m.src==="local"? `걸 카드를 골라! <small>같은 등급 · 같은 강화의 봇 카드와 🎲 주사위 숫자로만 겨뤄요 · 이기면 봇 카드를 받고, 지면 이 카드는 사라져요</small>`
-      : m.stake? `걸 카드를 골라! <small>점수 = ⚡힘 × 🎲주사위 · 먹이를 만나면 ×1.5 · 지면 이 카드가 ${eh(them)}에게 가요</small>`
-      : `대결할 카드를 골라! <small>점수 = ⚡힘 × 🎲주사위 · 먹이를 만나면 ×1.5 · 친선 대결이라 카드는 그대로예요</small>`;
+    const say= m.src==="local"? `걸 카드를 골라! <small>같은 등급 · 같은 강화의 봇 카드와 👆 탭 대결 · 이기면 봇 카드를 받고, 지면 이 카드는 사라져요</small>`
+      : m.stake? `걸 카드를 골라! <small>점수 = ⚡카드 파워 × 👆탭 수 · 지면 이 카드가 ${eh(them)}에게 가요</small>`
+      : `대결할 카드를 골라! <small>점수 = ⚡카드 파워 × 👆탭 수 · 친선 대결이라 카드는 그대로예요</small>`;
     return arenaShell(m, `<p class="bt-say">${say}</p>
-      <div class="cd-grid">${owned.map(c=>cardTile(c,{on:`Cards.confirmPick('${c.id}')`, extra:(c.count>1?`<span class="cd-deck">×${c.count}</span>`:"")})).join("")}</div>${m.src==="local"?"":foodHTML()}<div class="bt-row">${quit}</div>`);
+      <div class="cd-grid">${owned.map(c=>cardTile(c,{on:`Cards.confirmPick('${c.id}')`, extra:(c.count>1?`<span class="cd-deck">×${c.count}</span>`:"")})).join("")}</div><div class="bt-row">${quit}</div>`);
   }
   rollView(m);
 }
 function bonusTag(P,Q,m){ if(m && m.dice) return ""; const b=bonus(P,Q); return b.why.length? `<span class="bt-edge">${b.why.join(" ")}</span>` : ""; }
 function rollSides(m){
   const me=meOf(m), other=otherOf(m), first=m.users[0]===me;
-  const rounds=(m.rounds||[]).map(r=>first? r : {da:r.db, db:r.da, sa:r.sb, sb:r.sa, w:r.w===-1?-1:1-r.w});
+  const rounds=(m.rounds||[]).map(r=>first? r : {ta:r.tb, tb:r.ta, da:r.db, db:r.da, sa:r.sb, sb:r.sa, w:r.w===-1?-1:1-r.w});
   return {me, other, rounds, A:m.picks[me], B:m.picks[other]};
 }
+const tapPw=c=>TapBattle.power(c);
+// 👆 탭 대결: 판마다 5초 동안 탭 → ⚡기본 파워 × 👆탭 수. 둘 다 끝내야 그 판 결과가 나와요
 function rollView(m){
+  if(m.mode!=="tap"){                                       // 예전 주사위 대결 (업데이트 전에 시작한 것)
+    return arenaShell(m, `<div class="bt-wait">🎲 예전 주사위 방식으로 시작한 대결이에요.<br><small>그만하고 새로 신청해 주세요 (건 카드는 돌려받아요)</small></div>
+      <div class="bt-row"><button class="fam-btn" onclick="Cards.dropLegacy()">그만하기</button></div>`);
+  }
   const {me, other, rounds, A, B}=rollSides(m);
-  stageWho={me:m.who[me]||{name:"나"}, them:m.who[other]||{name:"상대"}};
   let root=document.getElementById("arena");
   if(!root || root.dataset.mid!==m.id){
     arenaShell(m, `<div class="arena" id="arena" data-mid="${m.id}" data-shown="0">
-        <div class="fighter" id="fA">${cardFace(A,"mid")}<b>${eh(A.name)}</b><span class="pw">${m.dice?`${CLS[A.cls].icon}${lvOf(A)?` +${lvOf(A)}`:""}`:`⚡${power(A)}`}${A.type?` ${eh(A.type)}`:""}</span>${bonusTag(A,B,m)}<span class="die" id="dA">🎲</span></div>
+        <div class="fighter" id="fA">${cardFace(A,"mid")}<b>${eh(A.name)}</b><span class="pw">⚡${tapPw(A)}</span><span class="die" id="dA">👆</span></div>
         <div class="score" id="bScore">0 : 0</div>
-        <div class="fighter" id="fB">${cardFace(B,"mid")}<b>${eh(B.name)}</b><span class="pw">${m.dice?`${CLS[B.cls].icon}${lvOf(B)?` +${lvOf(B)}`:""}`:`⚡${power(B)}`}${B.type?` ${eh(B.type)}`:""}</span>${bonusTag(B,A,m)}<span class="die" id="dB">🎲</span><small class="die-note" id="nB"></small></div>
+        <div class="fighter" id="fB">${cardFace(B,"mid")}<b>${eh(B.name)}</b><span class="pw">⚡${tapPw(B)}</span><span class="die" id="dB">👆</span><small class="die-note" id="nB"></small></div>
       </div>
+      <p class="cd-note" style="text-align:center;margin-top:4px">한 판 점수 = ⚡카드 파워 × 👆5초 동안 탭한 수 (컴퓨터는 스페이스바) · 3판 2선승</p>
       <div class="roll-ctl" id="rollCtl"></div><div class="rounds" id="bRounds"></div><div id="bEnd"></div>`);
     root=document.getElementById("arena");
   }
-  const rolled=m.rolled||{}, mine=rolled[me]||0, theirs=rolled[other]||0;
-  const doneN=m.status==="done"? rounds.length : Math.min(mine, theirs);
+  const taps=m.taps||{}, mine=(taps[me]||[]).length, theirs=(taps[other]||[]).length;
   let shown=+root.dataset.shown;
-  for(; shown<doneN; shown++){ const i=shown; revealChain=revealChain.then(()=>revealRound(rounds, i, A, B)); }
+  for(; shown<rounds.length; shown++){ const i=shown; revealChain=revealChain.then(()=>revealRound(rounds, i, A, B)); }
   root.dataset.shown=shown;
   const ctl=document.getElementById("rollCtl");
-  if(doneN>=rounds.length){
+  if(m.status==="done"){
     ctl.innerHTML="";
     if(!root.dataset.end){ root.dataset.end="1"; revealChain=revealChain.then(()=>battleEnd(m)); }
     return;
   }
-  const cur=doneN;
-  document.getElementById("nB").textContent= theirs>cur? "✅ 굴렸어!" : "";
+  const cur=rounds.length;
+  document.getElementById("nB").textContent= theirs>cur? "✅ 탭 끝! (숫자는 비밀)" : "";
   if(mine>cur){
-    ctl.innerHTML=`<p class="bt-wait">⏳ 상대가 주사위를 굴리길 기다려요…</p>`;
+    ctl.innerHTML=`<p class="bt-wait">⏳ 상대가 탭하길 기다려요…</p>`;
     clearTimeout(rollView.t);
     rollView.t=setTimeout(()=>{
       const now=curMatch();
-      if(!now || now.status!=="roll" || ((now.rolled||{})[other]||0)>cur || !document.getElementById("rollCtl")) return;
-      document.getElementById("rollCtl").insertAdjacentHTML("beforeend", `<button class="ghost-btn" id="proxyRoll">⏩ 상대 주사위도 굴려 주기</button>`);
-      document.getElementById("proxyRoll").onclick=()=>{ document.getElementById("proxyRoll").disabled=true; matchRoll(m, other, cur+1); };
-    }, 20000);
+      if(!now || now.status!=="roll" || ((now.taps||{})[other]||[]).length>cur || !document.getElementById("rollCtl")) return;
+      document.getElementById("rollCtl").insertAdjacentHTML("beforeend", `<button class="ghost-btn" id="proxyRoll">⏩ 상대가 안 와요 (이번 판 상대 0번으로)</button>`);
+      document.getElementById("proxyRoll").onclick=()=>{ if(!confirm("상대가 이번 판을 하지 않은 것으로(0번) 처리할까요?")) return; document.getElementById("proxyRoll").disabled=true; matchTap(m, other, cur, 0); };
+    }, 45000);
     return;
   }
   const btn=document.getElementById("rollBtn");
-  if(btn && +btn.dataset.r===cur){ document.getElementById("rollHint").textContent= theirs>cur? "상대는 벌써 굴렸어! 너도 굴려!" : ""; return; }
-  ctl.innerHTML=`<button class="roll-btn" id="rollBtn" data-r="${cur}">🎲 ${cur+1}판 주사위 굴리기!</button><p class="cd-note" style="text-align:center" id="rollHint">${theirs>cur?"상대는 벌써 굴렸어! 너도 굴려!":""}</p>`;
+  const hint= theirs>cur? "상대는 벌써 탭했어! 너도 힘껏!" : "";
+  if(btn && +btn.dataset.r===cur){ document.getElementById("rollHint").textContent=hint; return; }
+  const done=rounds.filter(x=>x.w!==-1), tension=done.filter(x=>x.w===0).length===1 && done.filter(x=>x.w===1).length===1;
+  ctl.innerHTML=`<button class="roll-btn" id="rollBtn" data-r="${cur}">👆 ${tension?"🔥 마지막 판":`${cur+1}판`} 탭 시작!</button><p class="cd-note" style="text-align:center" id="rollHint">${hint}</p>`;
   document.getElementById("rollBtn").onclick=async ()=>{
     document.getElementById("rollBtn").disabled=true;
-    const done=rounds.slice(0,cur);
-    const tension=done.filter(x=>x.w===0).length===1 && done.filter(x=>x.w===1).length===1;
-    const st=openStage(tension? "🔥 마지막 판!" : `${cur+1}판`, tension);
-    const latest=curMatch()||m, theyRolled=((latest.rolled||{})[other]||0)>cur;
-    restPane(st.them, 0, theyRolled? "✅ 벌써 굴렸어! 두근두근…" : "⏳ 상대가 굴리길 기다려요");
-    await rollPane(st.me, rounds[cur].da, ["-60vw","-40vh"]);
-    document.getElementById("dA").innerHTML=dieSvg(rounds[cur].da);
-    matchRoll(m, me, cur+1);
-    if(!theyRolled && other!=="cpu") closeStage(700); else stageClose=setTimeout(()=>closeStage(), 8000);
+    const n=await TapBattle.play({label: tension? "🔥 마지막 판!" : `${cur+1}판`, who:`${eh((m.who[me]||{}).name||"나")} · ${eh(A.name)}`, power:tapPw(A)});
+    document.getElementById("dA") && (document.getElementById("dA").textContent=`👆${n}`);
+    matchTap(m, me, cur, n);
   };
 }
-
 /* ----- 🎲 주사위 무대 (받아쓰기 프로그램의 3D 주사위) ----- */
 const PIPS={1:[[50,50]],2:[[28,28],[72,72]],3:[[26,26],[50,50],[74,74]],4:[[28,28],[72,28],[28,72],[72,72]],5:[[26,26],[74,26],[50,50],[26,74],[74,74]],6:[[28,24],[72,24],[28,50],[72,50],[28,76],[72,76]]};
 const dieSvg=n=>`<svg viewBox="0 0 100 100" aria-label="${n}"><rect x="5" y="5" width="90" height="90" rx="20" class="die-body"/>${PIPS[n].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="${n===1?13:9}" class="${n===1?"pip one":"pip"}"/>`).join("")}</svg>`;
@@ -556,27 +555,18 @@ async function rollPane(p, value, from){
   if(value===6){ sfx("diceBig"); confetti(); }
   await dwait(800);
 }
-const scoreHow=(P,Q,die,sc)=>{ if(CS && (curMatch()||{}).dice) return `🎲 <b>${die}</b>`; const x=mulOf(P,Q); return `⚡${power(P)} × 🎲${die}${x>1.0001?` × ${+x.toFixed(2)}`:""} = <b>${sc}</b>`; };
+const scoreHow=(P,Q,taps,sc)=>`⚡${tapPw(P)} × 👆${taps} = <b>${sc}</b>`;
 async function revealRound(rounds, i, A, B){
   if(!document.getElementById("arena")) return;
   const r=rounds[i];
-  document.getElementById("dA").innerHTML=dieSvg(r.da);
+  document.getElementById("dA").textContent=`👆${r.ta}`;
+  document.getElementById("dB") && (document.getElementById("dB").textContent=`👆${r.tb}`);
   document.getElementById("nB").textContent="";
-  const before=rounds.slice(0,i);
-  const tension=before.filter(x=>x.w===0).length===1 && before.filter(x=>x.w===1).length===1;
-  const st=openStage(tension? "🔥 마지막 판!" : `${i+1}판`, tension);
-  restPane(st.me, r.da);
-  await rollPane(st.them, r.db, ["60vw","40vh"]);
-  document.getElementById("dB") && (document.getElementById("dB").innerHTML=dieSvg(r.db));
   const win= r.w===-1? null : r.w===0;
-  st.banner.innerHTML=`<b>${win===null?"🤝 비겼어요! 한 번 더!":win?"👍 이 판은 내가 이겼어!":"💥 이 판은 상대가 이겼어!"}</b><small>나 ${scoreHow(A,B,r.da,r.sa)}</small><small>상대 ${scoreHow(B,A,r.db,r.sb)}</small>`;
-  st.banner.className="dice-banner show "+(win===true?"win":win===false?"lose":"tie");
-  const w=win===true? st.me : win===false? st.them : null; if(w) w.root.classList.add("winner");
   sfx(win===true?"roundWin":win===false?"roundLose":"pop");
-  await dwait(1600);
-  await closeStage();
+  await TapBattle.banner(`<b>${win===null?"🤝 비겼어요! 한 번 더!":win?"👍 이 판은 내가 이겼어!":"💥 이 판은 상대가 이겼어!"}</b><small>나 ${scoreHow(A,B,r.ta,r.sa)}</small><small>상대 ${scoreHow(B,A,r.tb,r.sb)}</small>`, win===true?"win":win===false?"lose":"");
   const lines=document.getElementById("bRounds"); if(!lines) return;
-  lines.insertAdjacentHTML("beforeend", `<p class="rd">${i+1}판: ${scoreHow(A,B,r.da,r.sa)} vs ${scoreHow(B,A,r.db,r.sb)} ${r.w===-1?"🤝 비김":r.w===0?"👍 내가 이김":"💥 상대가 이김"}</p>`);
+  lines.insertAdjacentHTML("beforeend", `<p class="rd">${i+1}판: ${scoreHow(A,B,r.ta,r.sa)} vs ${scoreHow(B,A,r.tb,r.sb)} ${r.w===-1?"🤝 비김":r.w===0?"👍 내가 이김":"💥 상대가 이김"}</p>`);
   const won=rounds.slice(0,i+1);
   document.getElementById("bScore").textContent=`${won.filter(x=>x.w===0).length} : ${won.filter(x=>x.w===1).length}`;
   const f= r.w===0? document.getElementById("fA") : r.w===1? document.getElementById("fB") : null;
@@ -702,10 +692,7 @@ async function matchPick(m, c){
       const d=(await t.get(ref)).data();
       if(!d || d.status!=="pick") throw new Error("closed");
       const picks={...(d.picks||{}), [me]:card}, upd={picks, updatedAt:Date.now()};
-      if(picks[d.users[0]] && picks[d.users[1]]){
-        const r=battle(d.seed, picks[d.users[0]], picks[d.users[1]]);
-        Object.assign(upd, {status:"roll", winner:d.users[r.winner], rounds:r.rounds, rolled:{}});
-      }
+      if(picks[d.users[0]] && picks[d.users[1]]) Object.assign(upd, TapBattle.startFields());   // 👆 탭 대결 시작
       t.update(ref, upd);
     });
   }catch(e){
@@ -714,38 +701,40 @@ async function matchPick(m, c){
     throw e;
   }
 }
-// 🤖 연습: 결과는 seed로 이미 정해져서, 고르는 순간 바로 정리해요 (중간에 나가도 같아요)
+// 🤖 연습: 봇과 탭 대결 (봇은 5초에 22~38번)
 async function localPick(m, c, lv){
-  const me=CS.uid, key=keyOf(m), W=CS.wallet;
-  const mineP=pickOf(c, lv), cpu=cpuCard(mineP);
+  const me=CS.uid, mineP=pickOf(c, lv), cpu=cpuCard(mineP);
   m.picks={[me]:mineP, cpu};
-  const r=diceBattle(m.seed);
-  Object.assign(m, {status:"roll", winner:m.users[r.winner], rounds:r.rounds, rolled:{}});
-  const won=m.winner===me, esc=W.escrow[key], note={won, stake:true, local:true};
+  Object.assign(m, TapBattle.startFields());
+  renderCards();
+}
+const botTaps=()=>22+Math.floor(Math.random()*17);
+async function localSettle(m){
+  const me=CS.uid, key=keyOf(m), W=CS.wallet, won=m.winner===me, esc=(W.escrow||{})[key], note={won, stake:true, local:true};
+  if(W.done && W.done[key]) return;
   if(won){
     if(esc) await giveCard(CS.uid, cardById(esc), {lv:esc.lv});
-    const g=await giveCard(CS.uid, cardById(cpu), {lv:cpu.lv}); note.got=g.card;
-  }else note.lost=esc||{name:c.name};
-  delete W.escrow[key]; W.done=W.done||{}; W.done[key]=1;
+    const g=await giveCard(CS.uid, cardById(m.picks.cpu), {lv:m.picks.cpu.lv}); note.got=g.card;
+  }else note.lost=esc||{name:(m.picks[me]||{}).name||"카드"};
+  if(W.escrow) delete W.escrow[key]; W.done=W.done||{}; W.done[key]=1;
   await saveWallet(CS.uid, W);
   CS.notes=CS.notes||{}; CS.notes[key]=note;
   logBattle(m, me, "cpu", won);
-  renderCards();
 }
-function matchRoll(m, who, n){
+// 탭 수 내기 (round: 0부터)
+async function matchTap(m, who, round, n){
   if(m.src==="local"){
-    m.rolled={...(m.rolled||{}), [who]:n, cpu:n};          // 연습 상대는 바로 따라 굴려요
-    if((m.rolled[CS.uid]||0)>=m.rounds.length) m.status="done";
+    let upd=TapBattle.addTaps(m, who, round, n); if(!upd) return;
+    Object.assign(m, upd);
+    if(m.status==="roll"){ upd=TapBattle.addTaps(m, "cpu", round, botTaps()); if(upd) Object.assign(m, upd); }
+    if(m.status==="done") await localSettle(m);
     return rollView(m);
   }
   const ref=refOf(m);
   return dbOf(m).runTransaction(async t=>{
     const d=(await t.get(ref)).data();
-    if(!d || d.status!=="roll") return;
-    const rolled={...(d.rolled||{})}; rolled[who]=Math.max(rolled[who]||0, n);
-    const upd={rolled, updatedAt:Date.now()};
-    if(d.users.every(u=>(rolled[u]||0)>=d.rounds.length)) upd.status="done";
-    t.update(ref, upd);
+    const upd=TapBattle.addTaps(d, who, round, n);
+    if(upd) t.update(ref, upd);
   }).catch(()=>toast("앗, 연결이 끊겼어요. 다시 눌러 봐요","info"));
 }
 // 🤖 봇 카드: 내 카드와 같은 등급 · 같은 강화 단계
@@ -966,9 +955,9 @@ const Cards={
   confirmPick(id){
     const m=curMatch(), c=CS.cards[id]; if(!m||!c) return;
     const dupNote=m.stake && (Number(c.count)||1)>1 && lvOf(c)? `\n(겹친 카드라 +0짜리 한 장을 걸어요)` : "";
-    const msg= m.src==="local"? `'${c.name}' 카드를 걸고 연습할까요?\n같은 등급 · 같은 강화의 봇 카드와 🎲 주사위 숫자로만 겨뤄요.\n이기면 봇 카드를 받고, 지면 이 카드는 사라져요.${dupNote}`
+    const msg= m.src==="local"? `'${c.name}' 카드를 걸고 연습할까요?\n같은 등급 · 같은 강화의 봇 카드와 👆 탭 대결 (5초 동안 탭한 수)\n이기면 봇 카드를 받고, 지면 이 카드는 사라져요.${dupNote}`
       : m.stake? `'${c.name}' (⚡${power(c)}) 카드를 걸까요?\n지면 이 카드가 상대에게 가요.${dupNote}`
-      : `'${c.name}' (⚡${power(c)})로 대결할까요?\n${(FOOD[c.type]||[]).length? `${c.type} 타입이 먹는 것: ${FOOD[c.type].join(" · ")} · ` : ""}${STAGE_NAME[c.stage||1]}`;
+      : `'${c.name}' (⚡${power(c)})로 대결할까요?\n점수 = ⚡${power(c)} × 👆탭 수`;
     if(!confirm(msg)) return;
     sfx("pop");
     matchPick(m, c).catch(e=>{ console.warn(e); toast("대결이 이미 끝났어요","info"); CS.mid=null; renderCards(); });
@@ -981,7 +970,15 @@ const Cards={
     }
     CS.mid=null; CS.local=null; renderCards();
   },
-  leave(){ closeStage(); CS.mid=null; renderCards(); },
+  async leave(){
+    const m=curMatch();
+    if(m && m.src==="local" && m.status==="roll"){       // 연습 중간에 나가면 진 걸로 (건 카드는 사라져요)
+      if(!confirm("지금 나가면 진 것으로 처리돼서 건 카드가 사라져요. 나갈까요?")) return;
+      Object.assign(m, {status:"done", winner:"cpu"}); await localSettle(m);
+    }
+    closeStage(); CS.mid=null; renderCards();
+  },
+  async dropLegacy(){ const m=curMatch(); if(!m) return; await refOf(m).update({status:"cancel", updatedAt:Date.now()}).catch(()=>{}); m.status="cancel"; settleSweep(); CS.mid=null; renderCards(); },
 };
 
 /* ============ 부모 화면: 카드 찾아서 주기 · 카드팩 ============ */
