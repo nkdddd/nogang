@@ -207,24 +207,23 @@ function catchScene(q){
   let ring=1, dir=-1, raf=0, last=0, thrown=false, misses=0, swayT=Math.random()*10000, swayX=0, aim=0, aimT=0, charge=0;
   scene.className=`go-scene g${q.grade}${q.shiny?" shiny":""}${"lms".includes(q.grade)?" legend":""}`;
   scene.innerHTML=`
-    <div class="go-sky"></div><div class="go-mtn m1"></div><div class="go-mtn m2"></div>
-    <div class="go-trees">${GO_TREES.map(([x,sz])=>`<span style="left:${x}%;font-size:${sz*64}px">🌳</span>`).join("")}</div>
-    <div class="go-grass"><span style="left:8%;bottom:14%">🍀</span><span style="left:78%;bottom:22%">🌿</span><span style="left:30%;bottom:6%">🌿</span><span style="left:88%;bottom:5%">🍀</span></div>
+    <div class="go-sky"><i class="go-sun"></i><i class="go-cloud c1"></i><i class="go-cloud c2"></i></div><div class="go-mtn m1"></div><div class="go-mtn m2"></div>
+    <div class="go-hill h1"></div><div class="go-hill h2"></div><div class="go-grass"></div><div class="go-vig"></div>
     <div class="go-top"><span class="go-count" id="goBalls"></span><div class="go-name"><b>${eh(N)}</b>${gradeChip(q.grade,q.shiny)}</div>
       <button class="go-run" id="goRun">도망치기</button></div>
-    <div class="go-mon" id="gm"><div class="go-shadow"></div><div class="go-art" id="target">${artImg(q.m,q.shiny)}</div>
+    <div class="go-mon" id="gm"><div class="go-pad"></div><div class="go-shadow"></div><div class="go-art" id="target">${artImg(q.m,q.shiny)}</div>
       <div class="go-ring" id="ring"><i class="go-ring-out"></i><i class="go-ring-goal" style="transform:scale(${thr})"></i><i class="go-ring-in" style="--rc:${RING_COLOR[q.grade]||"#4ade80"}"></i></div></div>
     <div class="go-banner" id="goBanner"><b>앗! 야생 ${eh(N)}${subj}</b><b>튀어나왔다!</b></div>
     <p class="go-msg" id="goMsg"></p>
     <div class="go-flash"></div><div class="go-burst"></div>
     <div class="go-bottom">
       <div class="go-throw"><div class="go-aim" id="goAim"><i></i></div><button class="go-ball" id="throw" aria-label="${eh(N)}에게 몬스터볼 던지기">${ballSvg}</button></div>
-      <p class="go-hint" id="goHint">${matchMedia("(hover: hover) and (pointer: fine)").matches? "⌨️ 스페이스바를 누르면 화살표가 흔들려요 · 포켓몬을 가리킬 때 떼기!" : "👆 포켓몬 쪽으로 볼을 휙! 고리가 금색 고리 안일 때!"}</p>
+      <p class="go-hint" id="goHint">${matchMedia("(hover: hover) and (pointer: fine)").matches? "⌨️ 스페이스바를 누르고 · 포켓몬을 가리킬 때 떼기" : "👆 고리가 금색 안으로 작아질 때 위로 휙!"}</p>
     </div>
     <div class="go-result" id="goResult" hidden></div><div class="go-wipe"></div>`;
   const $=s=>scene.querySelector(s);
   const ringEl=$("#ring"), ringIn=$(".go-ring-in"), gmEl=$("#gm"), aimEl=$("#goAim"), ball=$("#throw");
-  const paintBalls=()=>{ $("#goBalls").innerHTML=`🔴 ${Number(W().balls)||0}`; };
+  const paintBalls=()=>{ $("#goBalls").innerHTML=`<span class="mini-ball">${ballSvg}</span> ${Number(W().balls)||0}`; };
   paintBalls();
   $("#goRun").onclick=()=>{ cancelAnimationFrame(raf); close(); };
   const halfMs=()=>SWEEP*1.3/R.speed;
@@ -332,8 +331,9 @@ function catchScene(q){
       {transform:"scale(1.08)", filter:"brightness(2) sepia(1) saturate(8) hue-rotate(-40deg)", opacity:1, offset:0.35},
       {transform:`translate(0, ${tr.height*0.05}px) scale(0)`, filter:"brightness(3) sepia(1) saturate(10) hue-rotate(-40deg)", opacity:0},
     ], {duration:650, easing:"ease-in"});
+    const pad=$(".go-pad").getBoundingClientRect();
     $(".go-shadow").classList.add("gone");
-    const ground=tr.height*0.42;
+    const ground=(pad.top+pad.height*0.45-b.height*0.25-(b.top+b.height/2))-dy;   // 볼이 받침대 위에 톡 내려앉아요
     sfx("wobble");
     await run(ball, [
       {transform:`translate(${dx}px, ${dy}px) rotate(-1080deg) scale(.45)`},
@@ -356,12 +356,13 @@ function catchScene(q){
     ball.classList.remove("shaking"); ball.classList.add("locked");
     const burst=$(".go-burst"), bb=ball.getBoundingClientRect(), sb=scene.getBoundingClientRect();
     burst.style.left=`${bb.left-sb.left+bb.width/2}px`; burst.style.top=`${bb.top-sb.top+bb.height/2}px`;
-    burst.innerHTML=`<i class="wave"></i>${[0,72,144,216,288].map(d=>`<span style="--d:${d}deg">⭐</span>`).join("")}`;
+    burst.innerHTML=`<i class="wave"></i>${[0,45,90,135,180,225,270,315].map(d=>`<span class="spk" style="--d:${d}deg"></span>`).join("")}`;
     burst.classList.add("go");
     sfx("catch");
     msg.innerHTML=`<b class="yay-word">${eh(N)}${obj} 잡았다!</b>`;
     confetti();
-    await wait(1100);
+    await wait(1200);
+    msg.classList.add("fade");
     result(true);
   }
   async function result(ok){
@@ -390,7 +391,7 @@ function catchScene(q){
       : `<p class="gr-title miss">💨 ${eh(N)}${subj} 도망쳤어요</p>
       <p class="cd-note" style="margin:0">다음엔 금색 고리 안일 때, 포켓몬을 잘 겨눠서 던져 봐요!</p>
       <div class="gr-btns">${balls>0?`<button class="gr-ok" id="again">🌿 다시 찾기 (볼 ${balls}개)</button>`:""}<button class="gr-ok ${balls>0?"sub":""}" id="done">확인</button></div>`;
-    box.hidden=false;
+    box.hidden=false; scene.classList.add("res");
     requestAnimationFrame(()=>box.classList.add("in"));
     const ev=box.querySelector("#evoNow");
     if(ev) ev.onclick=async ()=>{ ev.remove(); const b2=await evolvePokemon(N); if(b2) box.querySelector(".gr-card").innerHTML=pokeCard(POKE_BY[b2]); };
@@ -398,11 +399,17 @@ function catchScene(q){
     const ag=box.querySelector("#again"); if(ag) ag.onclick=()=>{ sfx("pop"); scene.cleanupKeys(); scene.remove(); catchScene(rollWild()); };
   }
 }
+// 🎊 색종이 (작은 사각형이 흩날려요)
 function confetti(){
   if(reduceMotion) return;
-  const box=document.createElement("div"); box.className="bt-confetti";
-  for(let i=0;i<22;i++){ const s=document.createElement("span"); s.textContent=["⭐","🌟","✨","🎉","💛","🧡"][i%6]; s.style.left=Math.random()*100+"%"; s.style.animationDelay=Math.random()*0.3+"s"; s.style.fontSize=18+Math.random()*22+"px"; box.appendChild(s); }
-  document.body.appendChild(box); setTimeout(()=>box.remove(),2600);
+  const box=document.createElement("div"); box.className="go-confetti";
+  const C=["#fde047","#f97316","#22c55e","#38bdf8","#a78bfa","#f472b6"];
+  for(let i=0;i<40;i++){ const s=document.createElement("i");
+    s.style.left=Math.random()*100+"%"; s.style.background=C[i%C.length];
+    s.style.setProperty("--x",((Math.random()-.5)*160).toFixed(0)+"px"); s.style.setProperty("--r",(360+Math.random()*720).toFixed(0)+"deg");
+    s.style.animationDelay=(Math.random()*.35).toFixed(2)+"s"; s.style.animationDuration=(1.6+Math.random()*1.1).toFixed(2)+"s";
+    box.appendChild(s); }
+  document.body.appendChild(box); setTimeout(()=>box.remove(),3300);
 }
 
 /* ----- 🎬 진화 장면 (포켓몬 · 카드 공용) ----- */
