@@ -701,14 +701,14 @@ async function matchPick(m, c){
     throw e;
   }
 }
-// 🤖 연습: 봇과 탭 대결 (봇은 5초에 22~38번)
+// 🤖 연습: 봇과 탭 대결 (봇은 5초에 41~56번)
 async function localPick(m, c, lv){
   const me=CS.uid, mineP=pickOf(c, lv), cpu=cpuCard(mineP);
   m.picks={[me]:mineP, cpu};
   Object.assign(m, TapBattle.startFields());
   renderCards();
 }
-const botTaps=()=>22+Math.floor(Math.random()*17);
+const botTaps=()=>41+Math.floor(Math.random()*16);   // 41~56
 async function localSettle(m){
   const me=CS.uid, key=keyOf(m), W=CS.wallet, won=m.winner===me, esc=(W.escrow||{})[key], note={won, stake:true, local:true};
   if(W.done && W.done[key]) return;
