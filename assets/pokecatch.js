@@ -187,185 +187,47 @@ function rollWild(){
 const RING_COLOR={c:"#4ade80", r:"#facc15", l:"#fb923c", m:"#f97316", s:"#ef4444"};
 const RING={ c:{thr:0.36,speed:2,acc:0,sway:0.28,swayMs:3200}, r:{thr:0.33,speed:2.4,acc:0.8,sway:0.38,swayMs:2700},
   l:{thr:0.3,speed:2.8,acc:1.5,sway:0.48,swayMs:2300}, m:{thr:0.29,speed:3,acc:1.8,sway:0.52,swayMs:2100}, s:{thr:0.27,speed:3.3,acc:2.2,sway:0.58,swayMs:1900} };
-const AIM_TOL=0.3, RING_MIN=0.16, SWEEP=1300;
-const GO_TREES=[[4,1.2],[14,0.8],[24,1.05],[70,0.9],[82,1.3],[93,0.85]];
+// 던지기 · 포획 장면은 assets/gocatch.js (받아쓰기 프로그램과 같은 파일)
 function explore(){
   if(!(Number(W().balls)>0)){ toast("몬스터볼이 없어요. 오늘 공부를 마치면 받을 수 있어요","info"); return; }
   catchScene(rollWild());
 }
 function catchScene(q){
-  const fast=reduceMotion;
-  const run=(el,frames,opts)=>el.animate(frames,{fill:"forwards", ...opts, duration: fast? 1 : opts.duration}).finished;
   document.querySelectorAll(".go-scene").forEach(x=>x.remove());
   const scene=document.createElement("div");
   document.body.appendChild(scene);
   document.body.classList.add("scene-open");
   scene.addEventListener("touchmove", e=>{ if(!e.target.closest(".go-result")) e.preventDefault(); }, {passive:false});
-  const close=()=>{ scene.cleanupKeys&&scene.cleanupKeys(); document.body.classList.remove("scene-open"); scene.classList.add("out"); setTimeout(()=>scene.remove(),400); A().renderCards(); };
   const N=q.name, obj=josa(N,["을","를"]), subj=josa(N,["이","가"]);
-  const R=RING[q.grade]||RING.c, thr=R.thr-(q.shiny?0.02:0);
-  let ring=1, dir=-1, raf=0, last=0, thrown=false, misses=0, swayT=Math.random()*10000, swayX=0, aim=0, aimT=0, charge=0;
-  scene.className=`go-scene g${q.grade}${q.shiny?" shiny":""}${"lms".includes(q.grade)?" legend":""}`;
+  let g=null;
+  const close=()=>{ if(g) g.stop(); document.body.classList.remove("scene-open"); scene.classList.add("out"); setTimeout(()=>scene.remove(),400); A().renderCards(); };
+  scene.cleanupKeys=()=>{ if(g) g.stop(); };
+  scene.className="go-scene gq-host";
   scene.innerHTML=`
-    <div class="go-sky"><i class="go-sun"></i><i class="go-cloud c1"></i><i class="go-cloud c2"></i></div><div class="go-mtn m1"></div><div class="go-mtn m2"></div>
-    <div class="go-hill h1"></div><div class="go-hill h2"></div><div class="go-grass"></div><div class="go-vig"></div>
     <div class="go-top"><span class="go-count" id="goBalls"></span><div class="go-name"><b>${eh(N)}</b>${gradeChip(q.grade,q.shiny)}</div>
       <button class="go-run" id="goRun">도망치기</button></div>
-    <div class="go-mon" id="gm"><div class="go-pad"></div><div class="go-shadow"></div><div class="go-art" id="target">${artImg(q.m,q.shiny)}</div>
-      <div class="go-ring" id="ring"><i class="go-ring-out"></i><i class="go-ring-goal" style="transform:scale(${thr})"></i><i class="go-ring-in" style="--rc:${RING_COLOR[q.grade]||"#4ade80"}"></i></div></div>
     <div class="go-banner" id="goBanner"><b>앗! 야생 ${eh(N)}${subj}</b><b>튀어나왔다!</b></div>
     <p class="go-msg" id="goMsg"></p>
-    <div class="go-flash"></div><div class="go-burst"></div>
-    <div class="go-bottom">
-      <div class="go-throw"><div class="go-aim" id="goAim"><i></i></div><button class="go-ball" id="throw" aria-label="${eh(N)}에게 몬스터볼 던지기">${ballSvg}</button></div>
-      <p class="go-hint" id="goHint">${matchMedia("(hover: hover) and (pointer: fine)").matches? "⌨️ 스페이스바를 누르고 · 포켓몬을 가리킬 때 떼기" : "👆 고리가 금색 안으로 작아질 때 위로 휙!"}</p>
-    </div>
-    <div class="go-result" id="goResult" hidden></div><div class="go-wipe"></div>`;
+    <p class="go-hint gq-hint" id="goHint">${matchMedia("(hover: hover) and (pointer: fine)").matches? "⌨️ 스페이스바를 누르고 · 화살표가 포켓몬을 가리킬 때 떼기" : "👆 볼을 잡고 포켓몬 쪽으로 휙! 색 고리가 작을 때"}</p>
+    <div class="go-result" id="goResult" hidden></div>`;
   const $=s=>scene.querySelector(s);
-  const ringEl=$("#ring"), ringIn=$(".go-ring-in"), gmEl=$("#gm"), aimEl=$("#goAim"), ball=$("#throw");
   const paintBalls=()=>{ $("#goBalls").innerHTML=`<span class="mini-ball">${ballSvg}</span> ${Number(W().balls)||0}`; };
   paintBalls();
-  $("#goRun").onclick=()=>{ cancelAnimationFrame(raf); close(); };
-  const halfMs=()=>SWEEP*1.3/R.speed;
-  const tick=t=>{
-    if(!last) last=t;
-    const dt=Math.min(t-last,50); last=t;
-    const boost=1+R.acc*(1-ring)*(1-ring);
-    ring+=dir*((1-RING_MIN)*dt/halfMs())*boost;
-    if(ring<=RING_MIN){ ring=RING_MIN+(RING_MIN-ring); dir=1; }
-    if(ring>=1){ ring=1-(ring-1); dir=-1; }
-    ringIn.style.transform=`scale(${ring})`;
-    ringIn.classList.toggle("good", ring<=thr);
-    swayT+=dt;
-    const w=2*Math.PI*swayT/R.swayMs;
-    swayX=R.sway*gmEl.offsetWidth*(0.7*Math.sin(w)+0.3*Math.sin(2.3*w+1));
-    gmEl.style.setProperty("--sway", `${swayX}px`);
-    if(charge){ aimT+=dt; aim=Math.sin(2*Math.PI*aimT/(1500/Math.sqrt(R.speed/2))); showAim(aim*1.3); }
-    raf=requestAnimationFrame(tick);
-  };
+  $("#goRun").onclick=()=>close();
+  g=GoCatch.create(scene, {art:artImg(q.m,q.shiny), grade:q.grade, shiny:q.shiny, legend:"lms".includes(q.grade), ring:RING[q.grade]||RING.c, color:RING_COLOR[q.grade]||"#4ade80",
+    maxThrows:MAX_MISS, canThrow:()=>Number(W().balls)>0,
+    onThrow:()=>{ W().balls=(Number(W().balls)||0)-1; save(); paintBalls(); $("#goHint").classList.add("gone"); },
+    sfx, cry:()=>playCry(q.id)});
+  scene.throwBall=h=>g.throwNow(h&&h.force===false? {power:.5, dir:0} : {power:1.7, auto:true});   // 테스트용
   (async()=>{
-    sfx("lms".includes(q.grade)? "star" : "rustle");
-    await wait(450);
-    $(".go-wipe")&&$(".go-wipe").remove();
-    gmEl.classList.add("in");
-    playCry(q.id);
-    await wait(1500);
-    $("#goBanner")&&$("#goBanner").classList.add("gone");
-    ringEl.classList.add("on");
-    raf=requestAnimationFrame(tick);
+    setTimeout(()=>{ $("#goBanner") && $("#goBanner").classList.add("gone"); }, 1500);
+    const r=await g.start();
+    const msg=$("#goMsg");
+    if(r.caught){ msg.innerHTML=`<b class="yay-word">${eh(N)}${obj} 잡았다!</b>`; await wait(1300); msg.classList.add("fade"); return result(true, r); }
+    msg.innerHTML=`<b class="miss-word">💨 ${eh(N)}${subj} 도망쳤다!</b>`; await wait(900);
+    return result(false, r);
   })();
-  let drag=null;
-  ball.addEventListener("pointerdown", e=>{ if(thrown) return; drag={x:e.clientX, y:e.clientY}; try{ ball.setPointerCapture(e.pointerId); }catch(_){} });
-  const reach=()=>{ const b=ball.getBoundingClientRect(), t=$("#target").getBoundingClientRect(); return {b, t, up:Math.max(60, b.top+b.height/2-(t.top+t.height*0.55))}; };
-  const aimFromDrag=(dx,dy)=>dy<-8? dx/-dy : 0;
-  const showAim=side=>{ const r=reach(); aimEl.classList.add("on"); aimEl.style.transform=`translateX(-50%) rotate(${Math.atan(side*r.t.width/r.up)*57.3}deg)`; };
-  ball.addEventListener("pointermove", e=>{
-    if(!drag||thrown) return;
-    const dx=e.clientX-drag.x, dy=e.clientY-drag.y;
-    ball.style.transform=`translate(${dx*0.6}px, ${Math.min(0,dy)*0.6}px)`;
-    if(dy<-8){ aimEl.classList.add("on"); aimEl.style.transform=`translateX(-50%) rotate(${Math.atan2(dx,-dy)*57.3}deg)`; }
-  });
-  ball.addEventListener("pointerup", e=>{
-    if(!drag||thrown) return;
-    const dy=e.clientY-drag.y, dx=e.clientX-drag.x; drag=null;
-    ball.style.transform=""; aimEl.classList.remove("on");
-    if(dy<-30 || Math.hypot(dx,dy)<12) throwBall({slope:aimFromDrag(dx,dy)});
-  });
-  ball.addEventListener("pointercancel", ()=>{ drag=null; ball.style.transform=""; aimEl.classList.remove("on"); });
-  const keyDown=e=>{ if(!document.body.contains(ball)||thrown) return; if(e.code==="Space"||e.key===" "){ e.preventDefault(); if(!charge){ charge=performance.now(); aimT=Math.random()*1500; ball.classList.add("charging"); sfx("click"); } } };
-  const keyUp=e=>{ if(!(e.code==="Space"||e.key===" ")||!charge) return; e.preventDefault(); charge=0; ball.classList.remove("charging"); aimEl.classList.remove("on"); if(document.body.contains(ball)) throwBall({side:aim*1.3}); };
-  document.addEventListener("keydown", keyDown); document.addEventListener("keyup", keyUp);
-  scene.cleanupKeys=()=>{ document.removeEventListener("keydown", keyDown); document.removeEventListener("keyup", keyUp); };
-  scene.throwBall=h=>throwBall(h||{side:0});   // 테스트용
-
-  async function throwBall(how){
-    if(thrown || !ringEl.classList.contains("on")) return;
-    if(!(Number(W().balls)>0)) return;
-    thrown=true;
-    cancelAnimationFrame(raf);
-    W().balls=(Number(W().balls)||0)-1; save(); paintBalls();
-    const {b:b0, t:t0, up}=reach();
-    const land= how.slope!=null? how.slope*up : how.side*t0.width;
-    const toMon=t0.left+t0.width/2-(b0.left+b0.width/2);
-    const onTarget=Math.abs(land-toMon)<=t0.width*AIM_TOL, ringOk=ring<=thr, hit=(how.force!=null? how.force : ringOk && onTarget);
-    const nice= ring<=thr*0.7? "최고야! Excellent!" : ring<=thr*0.86? "잘했어! Great!" : "좋아! Nice!";
-    $("#goHint").classList.add("gone");
-    ringEl.classList.add(hit?"hit":"miss");
-    const target=$("#target"), msg=$("#goMsg");
-    const b=ball.getBoundingClientRect(), tr=target.getBoundingClientRect();
-    const dx=tr.left+tr.width/2-(b.left+b.width/2), dy=tr.top+tr.height*0.55-(b.top+b.height/2);
-    const curve=Math.max(-1, Math.min(1, (land-toMon)/tr.width));
-    const off= hit? 0 : onTarget? (land>=toMon?1:-1)*(tr.width*0.7) : Math.max(-tr.width*2, Math.min(tr.width*2, land-toMon));
-    sfx("throw");
-    await run(ball, [
-      {transform:"translate(0,0) rotate(0) scale(1)"},
-      {transform:`translate(${(dx+off)*0.45+curve*40}px, ${dy-140}px) rotate(-540deg) scale(.7)`, offset:0.55},
-      {transform:`translate(${dx+off}px, ${dy}px) rotate(-1080deg) scale(.45)`},
-    ], {duration:700, easing:"cubic-bezier(.25,.6,.45,1)"});
-    if(!hit){
-      sfx("miss"); misses++;
-      run(ball, [{transform:`translate(${dx+off}px, ${dy}px) rotate(-1080deg) scale(.45)`, opacity:1},{transform:`translate(${dx+off*2.2}px, ${dy+320}px) rotate(-1400deg) scale(.4)`, opacity:0}], {duration:700, easing:"ease-in"});
-      await run(target, [{transform:"translateY(0)"},{transform:"translateY(-60px) rotate(-8deg)", offset:0.4},{transform:"translateY(0)"}], {duration:520, easing:"ease-out"});
-      paintBalls();
-      if(misses<MAX_MISS && Number(W().balls)>0){
-        msg.innerHTML=`<b class="miss-word">앗, 빗나갔다!</b><small>${onTarget? "고리가 금색 고리 안에 있을 때 던져 봐!" : "포켓몬 쪽으로 정확히 던져 봐!"} · 빗나감 ${misses}/${MAX_MISS} · 남은 볼 ${W().balls}개</small>`;
-        await wait(1100);
-        ball.getAnimations().forEach(a=>a.cancel()); ball.style.opacity=1;
-        msg.innerHTML=""; ringEl.classList.remove("miss"); $("#goHint").classList.remove("gone");
-        thrown=false; last=0; raf=requestAnimationFrame(tick);
-        return;
-      }
-      msg.innerHTML=`<b class="miss-word">앗, 빗나갔다!</b>`;
-      await wait(500);
-      scene.classList.add("puff");
-      await run(gmEl, [{transform:"translateX(0) scale(1)", opacity:1},{transform:`translateX(${off>=0?-260:260}px) scale(.6)`, opacity:0}], {duration:650, easing:"ease-in"});
-      msg.innerHTML=`<b class="miss-word">💨 ${eh(N)}${subj} 도망쳤다!</b>`;
-      await wait(900);
-      return result(false);
-    }
-    msg.innerHTML=`<b class="nice-word">${nice}</b>`;
-    sfx("hit");
-    scene.classList.add("flashing");
-    await run(target, [
-      {transform:"scale(1)", filter:"brightness(1)", opacity:1},
-      {transform:"scale(1.08)", filter:"brightness(2) sepia(1) saturate(8) hue-rotate(-40deg)", opacity:1, offset:0.35},
-      {transform:`translate(0, ${tr.height*0.05}px) scale(0)`, filter:"brightness(3) sepia(1) saturate(10) hue-rotate(-40deg)", opacity:0},
-    ], {duration:650, easing:"ease-in"});
-    const pad=$(".go-pad").getBoundingClientRect();
-    $(".go-shadow").classList.add("gone");
-    const ground=(pad.top+pad.height*0.45-b.height*0.25-(b.top+b.height/2))-dy;   // 볼이 받침대 위에 톡 내려앉아요
-    sfx("wobble");
-    await run(ball, [
-      {transform:`translate(${dx}px, ${dy}px) rotate(-1080deg) scale(.45)`},
-      {transform:`translate(${dx}px, ${dy+ground}px) rotate(-1080deg) scale(.5)`, offset:0.55},
-      {transform:`translate(${dx}px, ${dy+ground-30}px) rotate(-1080deg) scale(.5)`, offset:0.78},
-      {transform:`translate(${dx}px, ${dy+ground}px) rotate(-1080deg) scale(.5)`},
-    ], {duration:520, easing:"ease-in"});
-    msg.innerHTML="";
-    ball.classList.add("shaking");
-    for(let k=1;k<=3;k++){
-      await wait(380); sfx("wobble");
-      await run(ball, [
-        {transform:`translate(${dx}px, ${dy+ground}px) rotate(0deg) scale(.5)`},
-        {transform:`translate(${dx}px, ${dy+ground}px) rotate(-28deg) scale(.5)`, offset:0.3},
-        {transform:`translate(${dx}px, ${dy+ground}px) rotate(24deg) scale(.5)`, offset:0.7},
-        {transform:`translate(${dx}px, ${dy+ground}px) rotate(0deg) scale(.5)`},
-      ], {duration:560, easing:"ease-in-out"});
-    }
-    await wait(300);
-    ball.classList.remove("shaking"); ball.classList.add("locked");
-    const burst=$(".go-burst"), bb=ball.getBoundingClientRect(), sb=scene.getBoundingClientRect();
-    burst.style.left=`${bb.left-sb.left+bb.width/2}px`; burst.style.top=`${bb.top-sb.top+bb.height/2}px`;
-    burst.innerHTML=`<i class="wave"></i>${[0,45,90,135,180,225,270,315].map(d=>`<span class="spk" style="--d:${d}deg"></span>`).join("")}`;
-    burst.classList.add("go");
-    sfx("catch");
-    msg.innerHTML=`<b class="yay-word">${eh(N)}${obj} 잡았다!</b>`;
-    confetti();
-    await wait(1200);
-    msg.classList.add("fade");
-    result(true);
-  }
-  async function result(ok){
+  async function result(ok, info){
     const box=$("#goResult");
     let isNew=false, rel=null;
     if(ok){
@@ -377,7 +239,7 @@ function catchScene(q){
     }
     const balls=Number(W().balls)||0;
     box.innerHTML= ok? `
-      <p class="gr-title">🎉 ${eh(N)}${obj} 잡았다!</p>
+      <p class="gr-title">🎉 ${eh(N)}${obj} 잡았다!</p>${info&&info.quality&&info.quality!=="none"? `<p class="gr-q ${info.quality}">${{nice:"Nice!",great:"Great!",excellent:"Excellent!"}[info.quality]} 던지기</p>`:""}
       <div class="gr-row"><div class="gr-card">${pokeCard(q.m,q.shiny)}</div>${rel? `<div class="gr-tcg">${A().cardFace(rel.card)}<small>${rel.how==="exact"?"🎯 "+eh(N)+" 카드!":rel.how==="family"?"👪 진화 가족 카드!":"✨ 비슷한 포켓몬 카드!"}</small></div>`:""}</div>
       <ul class="gr-list">
         ${isNew?`<li><span>📖 도감 새로 등록</span><b>NEW!</b></li>`:""}
@@ -389,7 +251,7 @@ function catchScene(q){
       ${canEvolve(N)?`<button class="ghost-btn evo-cta" id="evoNow">🧬 ${eh(N)} ${EVO_NEED}마리 모였어요! 눌러서 진화!</button>`:""}
       <div class="gr-btns">${balls>0?`<button class="gr-ok" id="again">🌿 한 마리 더 (볼 ${balls}개)</button>`:""}<button class="gr-ok ${balls>0?"sub":""}" id="done">확인</button></div>`
       : `<p class="gr-title miss">💨 ${eh(N)}${subj} 도망쳤어요</p>
-      <p class="cd-note" style="margin:0">다음엔 금색 고리 안일 때, 포켓몬을 잘 겨눠서 던져 봐요!</p>
+      <p class="cd-note" style="margin:0">볼을 포켓몬 쪽으로 알맞은 세기로 휙! 색 고리가 작을 때 맞히면 Great · Excellent로 더 잘 잡혀요</p>
       <div class="gr-btns">${balls>0?`<button class="gr-ok" id="again">🌿 다시 찾기 (볼 ${balls}개)</button>`:""}<button class="gr-ok ${balls>0?"sub":""}" id="done">확인</button></div>`;
     box.hidden=false; scene.classList.add("res");
     requestAnimationFrame(()=>box.classList.add("in"));
