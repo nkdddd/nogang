@@ -716,11 +716,22 @@ async function localPick(m, c, lv){
   m.picks={[me]:mineP, cpu}; m.status="offer";
   renderCards();
 }
-// 봇 탭 수: 1판은 내 탭 수 ±3을 기준으로, 2판부터는 그 기준에서 0~7번 더하거나 빼요
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+/* 🎯 연습봇 난이도: 아이 승률이 40% 정도 (모의 실험으로 맞춘 값)
+   - 1판: 내 탭 수 −2~+3을 봇 기준값으로 · 2판부터: 기준값에서 0~7번 더하거나(55%) 빼요(45%)
+   - 카드 힘이 달라도 승률이 흔들리지 않게 봇 탭 수를 ⚡힘 비율로 맞춰요 (센 카드면 탭을 덜 해요)
+   - 최근 10판 승률이 50%를 넘으면 조금 더 세게, 30% 아래면 조금 더 약하게 */
+const BOT_HIST="tapBotHist";
+const botHist=()=>{ try{ return JSON.parse(localStorage.getItem(BOT_HIST)||"[]"); }catch(_){ return []; } };
+const botRecord=won=>{ try{ localStorage.setItem(BOT_HIST, JSON.stringify([...botHist(), won?1:0].slice(-10))); }catch(_){} };
 function botTaps(m, round, mine){
-  if(round===0 || m.botBase==null){ m.botBase=Math.max(0, mine+rnd(-3,3)); return m.botBase; }
-  return Math.max(0, m.botBase+(Math.random()<.5? -1 : 1)*rnd(0,7));
+  let raw;
+  if(round===0 || m.botBase==null){
+    const h=botHist(), rate=h.length>=5? h.reduce((a,b)=>a+b,0)/h.length : .4;
+    m.botBase=Math.max(0, mine+rnd(rate>.5? -1 : rate<.3? -3 : -2, 3)); raw=m.botBase;
+  }else raw=Math.max(0, m.botBase+(Math.random()<.55? 1 : -1)*rnd(0,7));
+  const me=Object.keys(m.picks).find(k=>k!=="cpu");
+  return Math.round(raw*TapBattle.power(m.picks[me])/TapBattle.power(m.picks.cpu));
 }
 async function localSettle(m){
   const me=CS.uid, key=keyOf(m), W=CS.wallet, won=m.winner===me, esc=(W.escrow||{})[key], note={won, stake:true, local:true};
@@ -730,6 +741,7 @@ async function localSettle(m){
     const g=await giveCard(CS.uid, cardById(m.picks.cpu), {lv:m.picks.cpu.lv}); note.got=g.card;
   }else note.lost=esc||{name:(m.picks[me]||{}).name||"카드"};
   if(W.escrow) delete W.escrow[key]; W.done=W.done||{}; W.done[key]=1;
+  botRecord(won);
   await saveWallet(CS.uid, W);
   CS.notes=CS.notes||{}; CS.notes[key]=note;
   logBattle(m, me, "cpu", won);
