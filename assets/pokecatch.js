@@ -218,7 +218,7 @@ function catchScene(q){
     maxThrows:MAX_MISS, canThrow:()=>Number(W().balls)>0,
     onThrow:()=>{ W().balls=(Number(W().balls)||0)-1; save(); paintBalls(); $("#goHint").classList.add("gone"); },
     sfx, cry:()=>playCry(q.id)});
-  scene.throwBall=h=>g.throwNow(h&&h.force===false? {power:.5, dir:0} : {power:1.7, auto:true});   // 테스트용
+  scene.throwBall=h=>g.throwNow(h&&h.how? h.how : h&&h.force===false? {power:.5, dir:0} : {power:1.7, auto:true});   // 테스트용
   (async()=>{
     setTimeout(()=>{ $("#goBanner") && $("#goBanner").classList.add("gone"); }, 1500);
     const r=await g.start();
