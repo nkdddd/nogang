@@ -2,6 +2,7 @@
 <html lang="ko" data-app="sentence">
 <head>
 <script src="../assets/device.js"></script>
+<script src="../assets/quizfx.js?v=1"></script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6453117184750039"
      crossorigin="anonymous"></script>
 <meta charset="UTF-8">
@@ -1508,6 +1509,7 @@ function gradeCard(n,correct){
   { const d=new Date(), k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     if(!S.dayStat)S.dayStat={}; const st=S.dayStat[k]||(S.dayStat[k]={ok:0,no:0}); if(correct)st.ok++; else st.no++; }
   try{ if(window.parent!==window) window.parent.postMessage({type:'nogang-answer',app:'sentence',ok:!!correct}, location.origin); }catch(_e){}   // 플래너 용돈 바에 실시간 반영
+  if(window.QuizFX) QuizFX.answer(!!correct);   // 🎉 소리 · 반짝 · 흔들림
   if(correct){c.ok++;c.box=Math.min(c.box+1,5);S.pts+=10; if(c.box>=3)c.weak=false;}
   else{c.no++;c.box=Math.max(c.box-1,0);S.pts+=2; c.weak=true;}
   c.due=Date.now()+INTERVALS[c.box]*DAY;
@@ -1532,6 +1534,7 @@ function renderSession(){
   if(typeof SESSION==='string'&&SESSION.startsWith('done_')){
     const r=JSON.parse(SESSION.slice(5));
     const acc=r.ok+r.no?Math.round(r.ok/(r.ok+r.no)*100):100;
+    if(window.QuizFX && window.__qfxDone!==SESSION){ window.__qfxDone=SESSION; setTimeout(()=>QuizFX.finish(acc),150); }   // 🎺 한 세트 끝 팡파르
     const v=el(`<div class="view result">
       <div class="em pop">${acc>=80?'🎉':acc>=50?'👍':'💪'}</div>
       <h2>학습 완료!</h2><p>오늘도 한 걸음 나아갔어요</p>

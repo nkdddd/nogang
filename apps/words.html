@@ -2,6 +2,7 @@
 <html lang="ko" data-app="words">
 <head>
 <script src="../assets/device.js"></script>
+<script src="../assets/quizfx.js?v=1"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MD 중학 영단어 1800 · 매일 단어</title>
@@ -677,21 +678,23 @@ function renderQuiz(){
     $("#submit").onclick=go;inp.addEventListener("keydown",e=>{if(e.key==="Enter")go();});}
   else $("#opts").addEventListener("click",e=>{const b=e.target.closest(".opt");if(b)checkMCQ(q,b);});
 }
-function gradeAndAdvance(q,correct){answer(q.id,correct);SES.answered++;
+function gradeAndAdvance(q,correct,el){answer(q.id,correct);SES.answered++;
   try{ if(window.parent!==window) window.parent.postMessage({type:'nogang-answer',app:'vocab',ok:!!correct}, location.origin); }catch(_e){}
-  if(correct){SES.correct++;SES.ptsEarned+=SES.newIds.includes(q.id)?6:4;beep("ok");}else{SES.wrongQueue.push(q.id);beep("no");}
+  if(correct){SES.correct++;SES.ptsEarned+=SES.newIds.includes(q.id)?6:4;}else{SES.wrongQueue.push(q.id);}
+  if(window.QuizFX) QuizFX.answer(correct,{el,sound:!!S.settings.sound}); else beep(correct?"ok":"no");   // 🎉 소리 · 반짝 · 흔들림
   setTimeout(()=>{SES.qIdx++;save();renderQuiz();},correct?650:1500);}
 function checkMCQ(q,btn){const opts=$("#opts");if(opts.dataset.locked)return;opts.dataset.locked="1";
   const correct=btn.dataset.v===q.answer;
   [...opts.children].forEach(b=>{if(b.dataset.v===q.answer)b.classList.add("correct");else if(b===btn)b.classList.add("wrong");else b.classList.add("dim");});
   const fb=$("#fb"); if(correct){fb.className="feedback ok";fb.textContent="정답! 👍";}else{fb.className="feedback no";fb.innerHTML=`정답: <span class="ans">${esc(q.answer)}</span>`;}
-  gradeAndAdvance(q,correct);}
+  gradeAndAdvance(q,correct,btn);}
 function checkSpell(q,inp){if(inp.dataset.locked)return;const v=inp.value.trim().toLowerCase();if(!v){inp.focus();return;}
   inp.dataset.locked="1";inp.disabled=true;const correct=v===q.answer.toLowerCase();const fb=$("#fb");
   if(correct){inp.classList.add("correct");fb.className="feedback ok";fb.textContent="정답! 🎯";}else{inp.classList.add("wrong");fb.className="feedback no";fb.innerHTML=`정답: <span class="ans">${esc(q.answer)}</span>`;}
-  if($("#submit"))$("#submit").disabled=true;gradeAndAdvance(q,correct);}
+  if($("#submit"))$("#submit").disabled=true;gradeAndAdvance(q,correct,inp);}
 function renderResult(){
   const total=SES.answered,correct=SES.correct,acc=total?Math.round(correct/total*100):0;
+  if(window.QuizFX && total) setTimeout(()=>QuizFX.finish(acc,{sound:!!S.settings.sound}),150);   // 🎺 한 세트 끝 팡파르
   let bonus=0;const firstToday=S.lastDone!==todayStr();
   if(firstToday)bonus+=20; if(acc>=90)bonus+=15;
   const streakBonus=Math.min(S.streak,10)*2;const earned=SES.ptsEarned+bonus+streakBonus;

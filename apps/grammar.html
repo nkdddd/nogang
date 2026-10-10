@@ -2,6 +2,7 @@
 <html lang="ko" data-app="grammar">
 <head>
 <script src="../assets/device.js"></script>
+<script src="../assets/quizfx.js?v=1"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>그래머 인사이드 트레이너</title>
@@ -15808,6 +15809,7 @@ function problemReason(p){ const t=((p.q||'')+' '+(p.exp||'')).toLowerCase(); if
 function recordAnswer(ok,p){
   const d=todayStats(); d.answered++; if(ok) d.correct++;
   try{ if(window.parent!==window) window.parent.postMessage({type:'nogang-answer',app:'grammar',ok:!!ok}, location.origin); }catch(_e){}
+  if(window.QuizFX) QuizFX.answer(!!ok);   // 🎉 소리 · 반짝 · 흔들림
   if(ok){ S.combo=(S.combo||0)+1; if(S.combo>0&&S.combo%5===0) gainXP(10,'🔥 '+S.combo+' 콤보 보너스'); }
   else { S.combo=0; const k=curUnit&&curUnit.id||'practice'; const x=S.wrongs[k]||(S.wrongs[k]={count:0,reasons:{}}); const reason=problemReason(p); x.count++; x.reasons[reason]=(x.reasons[reason]||0)+1; const id='err_'+k+'_'+(p.q||p.ko||'rule').replace(/[^a-z0-9가-힣]/gi,'').slice(0,28); S.errorCards[id]={id,category:'error',level:curUnit&&curUnit.lv||1,tags:[reason],difficulty:3,f:p.q||p.ko||'오답 문법 규칙',b:p.t==='mc'?p.c[p.a]:(Array.isArray(p.a)?p.a[0]:p.a),desc:'오답 원인: '+reason+(p.exp?' · '+p.exp:''),ex:null}; }
 }
@@ -16188,6 +16190,7 @@ function vUnit(){
   }
   // 결과
   const score=quiz.answers.filter(a=>a).length, need=passNeed(), pass=score>=need;
+  if(window.QuizFX && !quiz.fxDone){ quiz.fxDone=1; setTimeout(()=>QuizFX.finish(quiz.total? Math.round(score/quiz.total*100) : 0),150); }   // 🎺 한 세트 끝 팡파르
   return head+`<div class="wrap"><div class="card">
     <div class="result-big"><div class="score" style="color:${pass?'var(--good)':'var(--bad)'}">${score}/${quiz.total}</div>
     <div class="msg">${pass?(quiz.boss?'보스 클리어! 👑 (+'+PTS_BOSS+' XP)':'통과! 유닛 완료 🎉 (+'+PTS_UNIT+' XP)'):need+'개 이상 맞히면 통과예요. 다시 도전!'}</div></div>
