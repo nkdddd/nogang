@@ -355,7 +355,7 @@ function lobbyHTML(){
       <span class="bt-btns"><button class="fam-btn" ${off} onclick="Cards.practice()">🎴 걸고 연습</button></span></div>
     ${tbHTML(off)}
     ${CS.log&&CS.log.length?`<div class="r-sec">최근 대결</div>${CS.log.map(l=>`<div class="cd-log">${eh(l.a)} ${l.win?"🏆":"·"} vs ${eh(l.b)} ${l.win?"":"🏆"} <small>${eh(l.score)}${l.stake?" · 🎴":""} · ${new Date(l.at).toLocaleDateString()}</small></div>`).join("")}`:""}
-    <div class="cd-note">👆 탭 대결: 한 판 = 5초 동안 휴대폰은 화면을 톡톡, 컴퓨터는 Esc를 뺀 아무 키나 두 손으로 번갈아. 점수 = ⚡카드 파워(등급 10/12/14/17/20 + 강화×2) × 👆탭 수. 3판 2선승<br>
+    <div class="cd-note">👆 탭 대결: 1·2판은 5초 동안 휴대폰은 화면을 톡톡(한 번 = 0.75), 컴퓨터는 Esc를 뺀 아무 키나(한 번 = 4). 점수 = ⚡카드 파워(등급 10/12/14/17/20 + 강화×2) × 👆탭 수. 🧠 3판은 화살표 순서 기억 대결(맞힌 수 × ⚡). 3판 2선승<br>
       🎴 카드 걸기: 이기면 상대 카드를 받고, 지면 내 카드가 상대에게 가요 (겹친 카드는 +0짜리를 걸어요) · 🤝 친선: 카드는 그대로, 이기면 하루 한 번 카드팩 +1</div>`;
 }
 // 🌐 받아쓰기(또박또박) 친구
@@ -463,7 +463,7 @@ function rollView(m){
         <div class="score" id="bScore">0 : 0</div>
         <div class="fighter" id="fB">${cardFace(B,"mid")}<b>${eh(B.name)}</b><span class="pw">⚡${tapPw(B)}</span>${pkLine(B)}<span class="die" id="dB">👆</span><small class="die-how" id="hB"></small><small class="die-note" id="nB"></small></div>
       </div>
-      <p class="cd-note bt-rule">점수 = ⚡카드 힘 × 👆5초 탭 수 · 3판 2선승</p>
+      <p class="cd-note bt-rule">1·2판 ⚡힘 × 👆5초 탭 · 3판 ⚡힘 × 🧠화살표 기억 · 3판 2선승</p>
       <div class="roll-ctl" id="rollCtl"></div><div class="rounds" id="bRounds"></div><div id="bEnd"></div>`);
     root=document.getElementById("arena");
   }
@@ -494,11 +494,12 @@ function rollView(m){
   const hint= theirs>cur? "상대는 벌써 탭했어! 너도 힘껏!" : "";
   if(btn && +btn.dataset.r===cur){ document.getElementById("rollHint").textContent=hint; return; }
   const done=rounds.filter(x=>x.w!==-1), tension=done.filter(x=>x.w===0).length===1 && done.filter(x=>x.w===1).length===1;
-  ctl.innerHTML=`<button class="roll-btn" id="rollBtn" data-r="${cur}">👆 ${tension?"🔥 마지막 판":`${cur+1}판`} 탭 시작!</button><p class="cd-note" style="text-align:center" id="rollHint">${hint}</p>`;
+  const mode=TapBattle.roundMode(cur);                     // 1 · 2판 👆 탭, 3판부터 🧠 화살표 기억
+  ctl.innerHTML=`<button class="roll-btn" id="rollBtn" data-r="${cur}">${mode==="memory"? "🧠" : "👆"} ${tension?"🔥 마지막 판":`${cur+1}판`} ${mode==="memory"? "화살표 기억 대결!" : "탭 시작!"}</button><p class="cd-note" style="text-align:center" id="rollHint">${mode==="memory"? "화살표 순서를 외웠다가 똑같이 눌러요 · 맞힌 개수 × ⚡카드 힘" : ""}${hint? " "+hint : ""}</p>`;
   document.getElementById("rollBtn").onclick=async ()=>{
     document.getElementById("rollBtn").disabled=true;
-    const n=await TapBattle.play({label: tension? "🔥 마지막 판!" : `${cur+1}판`, who:`${eh((m.who[me]||{}).name||"나")} · ${eh(A.name)}`, power:tapPw(A)});
-    document.getElementById("dA") && (document.getElementById("dA").textContent=`👆${n}`);
+    const n=await TapBattle.play({mode, label: tension? "🔥 마지막 판!" : `${cur+1}판`, who:`${eh((m.who[me]||{}).name||"나")} · ${eh(A.name)}`, power:tapPw(A)});
+    document.getElementById("dA") && (document.getElementById("dA").textContent=tapPw(A)*n);
     matchTap(m, me, cur, n);
   };
 }
@@ -580,8 +581,9 @@ async function revealRound(rounds, i, A, B){
   if(!document.getElementById("arena")) return;
   const r=rounds[i];
   // 큰 숫자 = 점수 (⚡카드 힘 × 👆탭 수), 아래에 풀이
-  document.getElementById("dA").textContent=r.sa; document.getElementById("hA").textContent=`⚡${tapPw(A)} × 👆${r.ta}`;
-  if(document.getElementById("dB")){ document.getElementById("dB").textContent=r.sb; document.getElementById("hB").textContent=`⚡${tapPw(B)} × 👆${r.tb}`; }
+  const ic=TapBattle.MODE_ICON[TapBattle.roundMode(i)];
+  document.getElementById("dA").textContent=r.sa; document.getElementById("hA").textContent=`⚡${tapPw(A)} × ${ic}${r.ta}`;
+  if(document.getElementById("dB")){ document.getElementById("dB").textContent=r.sb; document.getElementById("hB").textContent=`⚡${tapPw(B)} × ${ic}${r.tb}`; }
   document.getElementById("nB").textContent="";
   const win= r.w===-1? null : r.w===0;
   sfx(win===true?"roundWin":win===false?"roundLose":"pop");
@@ -747,6 +749,8 @@ function botTaps(m, round, mine){
   if(round===0 || m.botBase==null){
     const bias=(.5-botWinRate(m))/.14;                          // 승률 1%p ≈ 탭 0.07번 (모의 실험)
     m.botBase=Math.max(0, mine+Math.round(Math.random()*6-3+bias)); raw=m.botBase;
+  }else if(TapBattle.roundMode(round)==="memory"){           // 🧠 기억 대결: 내가 맞힌 수 ±3 근처 (같은 승률 보정)
+    raw=Math.max(0, mine+Math.round(Math.random()*6-3+(.5-botWinRate(m))/.14*.5));
   }else raw=Math.max(0, m.botBase+(Math.random()<.5? 1 : -1)*rnd(0,7));
   return Math.round(raw*ratio);                                 // ⚡힘 차이만큼 봇 탭 수를 맞춰요 (위 승률이 되게)
 }
