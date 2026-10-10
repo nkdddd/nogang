@@ -284,7 +284,11 @@
   .allow-total .a{font-size:22px;font-weight:800;color:#0E9F6E;}
   .pay-btn{border:none;background:#0E9F6E;color:#fff;border-radius:10px;padding:10px 16px;font-weight:800;font-size:14px;}
   .paid-badge{background:#EAF7F1;color:#0E9F6E;border:1px solid #BFE8D6;border-radius:9px;padding:8px 13px;font-weight:700;font-size:13px;}
-  .pay-hist{display:flex;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin-bottom:7px;font-size:13px;}
+  .pay-hist{display:flex;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin-bottom:7px;font-size:13px;width:100%;font:inherit;font-size:13px;text-align:left;cursor:pointer;color:inherit;align-items:center;gap:8px}
+  .pay-hist small{color:#94A3B8;font-weight:600}.pay-hist.on{border-color:#6A58E6;background:#F4F2FE}
+  .allow-nav{display:flex;align-items:center;gap:8px;margin:0 0 10px}.allow-nav button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;font-weight:800;cursor:pointer;color:#4B3FA6;white-space:nowrap}
+  .allow-nav button:disabled{opacity:.35;cursor:default}.allow-nav .w{flex:1;text-align:center;display:flex;flex-direction:column;line-height:1.25}.allow-nav .w b{font-size:14.5px}.allow-nav .w small{font-size:11.5px;color:#94A3B8;font-weight:700}
+  .allow-now{display:block;margin:-4px auto 10px;border:0;background:none;color:#6A58E6;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
   .crit-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
   .crit-grid .fld-lbl{font-size:11.5px;}
   .pay-ctrl{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px;background:#F8FAFC;border-radius:10px;padding:11px;}
@@ -4778,7 +4782,7 @@ function openDaySheet(ds){
 let drawerTab="settings-main", catTab="subjects";
 function openDrawer(kind){
   if(kind==="settings") drawSettings();
-  else if(kind==="allowance") drawAllowance();
+  else if(kind==="allowance"){ state.allowOff=0; drawAllowance(); }
   else drawDashboard();
 }
 function closeDrawer(){ document.getElementById("drawerRoot").innerHTML=""; }
@@ -5302,7 +5306,7 @@ function allowanceMetricsHTML(r,crit){
     </div>
     <div class="pay-break">
       <div class="pb-head">📚 학습앱 정답률 보너스 <span>최대 ${wonFmt(r.appBonusMax)}</span></div>
-      ${A.total? row("🎯",`정답률 ${pctTxt(A.acc)} (${A.correct}/${A.total}문제)`, "") : row("🎯","이번 주 학습앱에서 푼 문제가 없어요","")}
+      ${A.total? row("🎯",`정답률 ${pctTxt(A.acc)} (${A.correct}/${A.total}문제)`, "") : row("🎯",`${allowWkName()} 학습앱에서 푼 문제가 없어요`,"")}
       ${appParts? `<div class="pb-sub">${appParts}</div>` : ""}
       ${A.total && !r.appOk? `<div class="pb-sub warn">주 ${r.appMinAnswers}문제 이상 풀어야 보너스가 나와요 (지금 ${A.total}문제)</div>` : ""}
       <div class="pb-total"><span>${Math.round(r.accFloor*100)}% 이하 0원 · ${Math.round(r.accFull*100)}% 이상 최대</span><b>+${wonFmt(r.appBonus)}</b></div>
@@ -5310,13 +5314,13 @@ function allowanceMetricsHTML(r,crit){
     <div class="pay-break">
       <div class="pb-head">📝 주간 모의고사 보너스 <span>최대 ${wonFmt(r.mockBonusMax)}</span></div>
       ${r.mock? row("✅",`${r.mock.correct}/${r.mock.total} 맞음 · 정답률 ${pctTxt(r.mockAcc)}`,"") : row("⏳","아직 점수가 없어요 — 부모님이 입력해요","")}
-      <div class="pb-total"><span>이번 주 공부한 범위로 시험</span><b>+${wonFmt(r.mockBonus)}</b></div>
+      <div class="pb-total"><span>${allowWkName()} 공부한 범위로 시험</span><b>+${wonFmt(r.mockBonus)}</b></div>
     </div>
     <div class="pb-ref">참고 (금액에는 넣지 않아요) · 계획 완료 ${r.done}/${r.planned} · 학습일 ${r.studyDays}일 · 복습 ${r.reviews}회</div>`;
 }
 function mockRangeHTML(tasks, days){
   const wk=tasks.filter(t=>days.includes(t.date) && t.done);
-  if(!wk.length) return `<div class="pb-sub">이번 주 완료한 학습이 아직 없어요.</div>`;
+  if(!wk.length) return `<div class="pb-sub">${allowWkName()} 완료한 학습이 아직 없어요.</div>`;
   const by={};
   wk.forEach(t=>{ const su=subjById(t.subjectId), tb=tbById(t.textbookId), key=su?su.name:"기타";
     (by[key]=by[key]||new Set()).add([tb?tb.name:"", t.unit||t.method||""].filter(Boolean).join(" · ")); });
@@ -5359,20 +5363,20 @@ function payControlsHTML(uid, r, cap, payout, editable){
   const formula=`<div class="pb-formula">시간 ${wonFmt(amount-r.appBonus-r.mockBonus)} + 학습앱 ${wonFmt(r.appBonus)} + 모의고사 ${wonFmt(r.mockBonus)}</div>`;
   if(!editable){
     return `${formula}<div class="allow-total">
-      <div><div style="font-size:11.5px;color:#94A3B8">이번 주 예상 용돈</div><div class="a">${wonFmt(amount)}</div></div>
+      <div><div style="font-size:11.5px;color:#94A3B8">${allowWkName()} 예상 용돈</div><div class="a">${wonFmt(amount)}</div></div>
       <span style="font-size:12px;color:#94A3B8">부모님이 지급</span></div>`;
   }
   return `
     <div class="pay-ctrl">
       <div><label class="fld-lbl">1시간당 금액(원)</label><input class="inp" type="number" step="100" min="0" value="${r.rate}" onchange="onRateChange('${uid}',this.value)"></div>
-      <div><label class="fld-lbl">이번 주 시간 상한(원)</label><input class="inp" type="number" step="1000" min="0" value="${shownCap}" onchange="onCapChange('${uid}',this.value)"></div>
+      <div><label class="fld-lbl">${allowWkName()} 시간 상한(원)</label><input class="inp" type="number" step="1000" min="0" value="${shownCap}" onchange="onCapChange('${uid}',this.value)"></div>
     </div>
     ${mockEntryHTML(uid, r, allowCache[uid]? allowCache[uid].weekId : "")}
     ${formula}
     <div class="allow-total">
       <div style="flex:1;min-width:0"><div style="font-size:11.5px;color:#94A3B8">지급액 (직접 고칠 수 있어요)</div>
         <input class="inp amt-inp" id="amt-${uid}" type="number" step="100" min="0" value="${amount}" oninput="onAmtChange('${uid}')"></div>
-      <button class="pay-btn" onclick="payAllowanceUI('${uid}')">이번 주 지급</button>
+      <button class="pay-btn" onclick="payAllowanceUI('${uid}')">${allowWkName()} 지급</button>
     </div>`;
 }
 function onAmtChange(uid){
@@ -5428,8 +5432,8 @@ function popupHTML(title, body, foot){
 function requestAllowance(){
   const c=allowCache[state.ownerUid]; if(!c) return;
   const items=c.items||[], amt=c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap);
-  if(!items.length){ popupHTML("💌 용돈 요청", `<div class="pop-empty">이번 주에 완료한 학습이 아직 없어요.<br><small>학습을 완료한 뒤 요청해 주세요.</small></div>`, `<button class="tm-btn save" onclick="closeModal()">확인</button>`); return; }
-  popupHTML("💌 이번 주 용돈 요청", `
+  if(!items.length){ popupHTML("💌 용돈 요청", `<div class="pop-empty">${allowWkName()}에 완료한 학습이 아직 없어요.<br><small>학습을 완료한 뒤 요청해 주세요.</small></div>`, `<button class="tm-btn save" onclick="closeModal()">확인</button>`); return; }
+  popupHTML(`💌 ${allowWkName()} 용돈 요청`, `
     <div class="pop-amt"><small>${esc(c.label)}</small><b>${wonFmt(amt)}</b></div>
     <div class="pop-sec">📒 부모님께 함께 보여 드릴 학습 내용</div>${weekStudyHTML(items)}`,
     `<button class="tm-btn" onclick="closeModal()">취소</button><button class="tm-btn save" onclick="sendAllowanceRequest()">💌 요청 보내기</button>`);
@@ -5463,8 +5467,27 @@ function payReqBannerHTML(req, isParent){
   if(req.status==="paid") return `<div class="preq paid">💌 용돈 요청 → ✅ 지급 완료</div>`;
   return `<div class="preq">💌 ${isParent? `<b>${esc(req.name||"자녀")}</b>이(가) 용돈 ${wonFmt(req.amount)}을 요청했어요` : `용돈 ${wonFmt(req.amount)} 요청함 · 부모님 확인 기다리는 중`} <small>${when}</small></div>`;
 }
+/* 📅 용돈 정산은 주 단위로 넘겨 볼 수 있어요 (state.allowOff: 0 = 이번 주, -1 = 지난주 …) */
+const allowWkName=()=>{ const o=state.allowOff||0; return o===0? "이번 주" : o===-1? "지난주" : o<0? `${-o}주 전` : `${o}주 뒤`; };
+function allowNav(d){ state.allowOff=Math.min(0,(state.allowOff||0)+d); drawAllowance(); }
+function allowGoto(weekId){
+  const cur=parseD(allowanceWeekDays(state.cursor)[6]), w=parseD(weekId);
+  state.allowOff=Math.min(0, Math.round((w-cur)/(7*86400000))); drawAllowance();
+}
+function allowNavHTML(label){
+  const o=state.allowOff||0;
+  return `<div class="allow-nav"><button onclick="allowNav(-1)">‹ 지난주</button><div class="w"><b>${label}</b><small>${allowWkName()}</small></div>
+    <button onclick="allowNav(1)" ${o>=0?"disabled":""}>다음 주 ›</button></div>${o<0?`<button class="allow-now" onclick="allowNav(${-o})">↩ 이번 주로</button>`:""}`;
+}
+// 📜 주별 지급 내역 (지급한 용돈 = 부모 지출). 누르면 그 주로 가요
+function payHistHTML(list, curWeekId, title){
+  if(!list.length) return `<div class="dash-section">${title||"📜 주별 지급 내역"}</div><div class="cd-note" style="margin:0 0 8px">아직 지급한 용돈이 없어요.</div>`;
+  const rows=list.slice().sort((a,b)=>a.id<b.id?1:-1), total=rows.reduce((a,h)=>a+(Number(h.amount)||0),0);
+  return `<div class="dash-section">${title||"📜 주별 지급 내역"} <small style="font-weight:700;color:#94A3B8">${rows.length}주 · 합계 ${wonFmt(total)}</small></div>
+    ${rows.map(h=>`<button class="pay-hist ${h.id===curWeekId?"on":""}" onclick="allowGoto('${h.id}')"><span>${esc(h.weekLabel||h.id)}${h.rate!=null?` · ${hmFmt(h.payMin||0)} × ${wonFmt(h.rate)}`:(h.percent!=null?` · ${h.percent}%`:"")}${h.paidAt?` <small>· ${new Date(h.paidAt).getMonth()+1}/${new Date(h.paidAt).getDate()} 지급</small>`:""}</span><b style="color:#0E9F6E">${wonFmt(h.amount)}</b></button>`).join("")}`;
+}
 async function drawAllowance(){
-  const days=allowanceWeekDays(state.cursor), weekId=days[6], label=weekLabelOf(days);
+  const days=allowanceWeekDays(addDays(parseD(fmt(state.cursor||new Date())), 7*(state.allowOff||0))), weekId=days[6], label=weekLabelOf(days), wk=allowWkName();
   document.getElementById("drawerRoot").innerHTML=`<div class="overlay"><div class="drawer wide">
     <div class="drawer-head"><h3>💰 용돈 정산</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
     <div class="drawer-body"><div class="empty">불러오는 중…</div></div></div></div>`;
@@ -5477,9 +5500,11 @@ async function drawAllowance(){
   if(overview){
     let cards=""; let sum=0;
     for(const ch of state.children){
-      const [tasks,crit,payout,capOv,exd,req]=await Promise.all([
-        fetchWeekTasks(ch.uid,days), fetchAllowanceCrit(ch.uid), fetchPayout(ch.uid,weekId), fetchWeekCap(ch.uid,weekId), fetchExtData(ch.uid), fetchPayReq(ch.uid,weekId)
+      const [tasks,crit,payout,capOv,exd,req,histSnap]=await Promise.all([
+        fetchWeekTasks(ch.uid,days), fetchAllowanceCrit(ch.uid), fetchPayout(ch.uid,weekId), fetchWeekCap(ch.uid,weekId), fetchExtData(ch.uid), fetchPayReq(ch.uid,weekId),
+        db.collection("planner").doc(ch.uid).collection("payouts").get().catch(()=>({docs:[]}))
       ]);
+      const chHist=histSnap.docs.map(d=>({id:d.id,...d.data()}));
       const r=computeAllowance(tasks,days,crit,exd);
       const cap = capOv!=null? capOv : null;
       allowCache[ch.uid]={r,crit,cap,weekId,label,name:ch.name};
@@ -5490,14 +5515,15 @@ async function drawAllowance(){
         ${payReqBannerHTML(req, true)}
         ${payTermsRowHTML(ch.uid, crit)}
         ${allowanceMetricsHTML(r,crit)}
-        <details class="mock-det" ${req&&req.status!=="paid"?"open":""}><summary>📒 이번 주 학습한 내용</summary>${weekStudyHTML(weekStudyItems(tasks, days))}</details>
-        <details class="mock-det"><summary>📝 이번 주 모의고사 범위 (완료한 학습)</summary>${mockRangeHTML(tasks, days)}</details>
+        <details class="mock-det" ${req&&req.status!=="paid"?"open":""}><summary>📒 ${wk} 학습한 내용</summary>${weekStudyHTML(weekStudyItems(tasks, days))}</details>
+        <details class="mock-det"><summary>📝 ${wk} 모의고사 범위 (완료한 학습)</summary>${mockRangeHTML(tasks, days)}</details>
         ${payControlsHTML(ch.uid, r, cap, payout, true)}
+        <details class="mock-det"><summary>📜 ${esc(ch.name)} 주별 지급 내역 (${chHist.length}주)</summary>${payHistHTML(chHist, weekId, " ")}</details>
       </div>`;
     }
-    body=`<div class="allow-hero"><div class="wk">${label} · 이번 주 정산</div><div class="amt">${wonFmt(sum)}</div><div class="cap">자녀 ${state.children.length}명 합계</div></div>
+    body=`${allowNavHTML(label)}<div class="allow-hero"><div class="wk">${label} · ${wk} 정산</div><div class="amt">${wonFmt(sum)}</div><div class="cap">자녀 ${state.children.length}명 합계</div></div>
       ${cards}
-      <div class="share-note">📌 주간 용돈 = <b>⏱ 공부 시간 × 1시간당 금액</b>(자녀마다 ⚙️ 기준에서 평소 · 시험기간 최대를 정해요) + <b>📚 학습앱 정답률 보너스</b> + <b>📝 모의고사 보너스</b>. 모의고사는 위 “이번 주 범위”로 시험을 본 뒤 점수를 입력하세요.</div>`;
+      <div class="share-note">📌 주간 용돈 = <b>⏱ 공부 시간 × 1시간당 금액</b>(자녀마다 ⚙️ 기준에서 평소 · 시험기간 최대를 정해요) + <b>📚 학습앱 정답률 보너스</b> + <b>📝 모의고사 보너스</b>. 모의고사는 위 “${wk} 범위”로 시험을 본 뒤 점수를 입력하세요. 위 ‹ 지난주 버튼으로 지난 정산도 주 단위로 볼 수 있어요.</div>`;
   } else {
     // 단일 대상(내 플래너 또는 특정 자녀 열람 중)
     const uid=state.ownerUid;
@@ -5514,19 +5540,19 @@ async function drawAllowance(){
     const canPay = isParent && state.viewingChild; // 부모가 자녀를 열람 중일 때만 지급
     const termsRow = canPay? payTermsRowHTML(uid, crit) : "";
     const shownAmt = payout? payout.amount : payAmount(r, cap);
-    const hist=histSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.paidAt||0)-(a.paidAt||0)).slice(0,8);
-    body=`<div class="allow-hero"><div class="wk">${label} · ${esc(state.ownerName)}</div><div class="amt">${wonFmt(shownAmt)}</div><div class="cap">⏱ ${wonFmt(payAmount(r,cap)-r.appBonus-r.mockBonus)} + 📚 ${wonFmt(r.appBonus)} + 📝 ${wonFmt(r.mockBonus)}${r.boost?" · 🚀 시험기간":""}</div></div>
+    const hist=histSnap.docs.map(d=>({id:d.id,...d.data()}));
+    body=`${allowNavHTML(label)}<div class="allow-hero"><div class="wk">${label} · ${wk} · ${esc(state.ownerName)}</div><div class="amt">${wonFmt(shownAmt)}</div><div class="cap">⏱ ${wonFmt(payAmount(r,cap)-r.appBonus-r.mockBonus)} + 📚 ${wonFmt(r.appBonus)} + 📝 ${wonFmt(r.mockBonus)}${r.boost?" · 🚀 시험기간":""}</div></div>
       <div class="allow-card">
         ${payReqBannerHTML(req, isParent)}
         ${termsRow}
         ${allowanceMetricsHTML(r,crit)}
-        <details class="mock-det" ${(isParent && req && req.status!=="paid")?"open":""}><summary>📒 이번 주 학습한 내용 (${items.length}개)</summary>${weekStudyHTML(items)}</details>
-        <details class="mock-det"><summary>📝 이번 주 모의고사 범위 (완료한 학습)</summary>${mockRangeHTML(tasks, days)}</details>
+        <details class="mock-det" ${(isParent && req && req.status!=="paid")?"open":""}><summary>📒 ${wk} 학습한 내용 (${items.length}개)</summary>${weekStudyHTML(items)}</details>
+        <details class="mock-det"><summary>📝 ${wk} 모의고사 범위 (완료한 학습)</summary>${mockRangeHTML(tasks, days)}</details>
         ${payControlsHTML(uid, r, cap, payout, canPay)}
-        ${(!isParent && !payout && !req)? `<button class="pay-btn" style="width:100%;margin-top:10px" onclick="requestAllowance()">💌 이번 주 용돈 요청하기</button>
-          <div class="cd-note" style="text-align:center;margin-top:6px">이번 주 학습한 내용이 부모님께 함께 보여요</div>` : ""}
+        ${(!isParent && !payout && !req)? `<button class="pay-btn" style="width:100%;margin-top:10px" onclick="requestAllowance()">💌 ${wk} 용돈 요청하기</button>
+          <div class="cd-note" style="text-align:center;margin-top:6px">${wk} 학습한 내용이 부모님께 함께 보여요</div>` : ""}
       </div>
-      ${hist.length?`<div class="dash-section">지급 내역</div>${hist.map(h=>`<div class="pay-hist"><span>${esc(h.weekLabel||h.id)}${h.rate!=null?` · ${hmFmt(h.payMin||0)} × ${wonFmt(h.rate)}`:(h.percent!=null?` · ${h.percent}%`:"")}</span><b style="color:#0E9F6E">${wonFmt(h.amount)}</b></div>`).join("")}`:""}`;
+      ${payHistHTML(hist, weekId)}`;
   }
   const root=document.querySelector("#drawerRoot .drawer-body");
   if(root) root.innerHTML=body;
