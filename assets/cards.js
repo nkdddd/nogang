@@ -355,7 +355,7 @@ function lobbyHTML(){
       <span class="bt-btns"><button class="fam-btn" ${off} onclick="Cards.practice()">🎴 걸고 연습</button></span></div>
     ${tbHTML(off)}
     ${CS.log&&CS.log.length?`<div class="r-sec">최근 대결</div>${CS.log.map(l=>`<div class="cd-log">${eh(l.a)} ${l.win?"🏆":"·"} vs ${eh(l.b)} ${l.win?"":"🏆"} <small>${eh(l.score)}${l.stake?" · 🎴":""} · ${new Date(l.at).toLocaleDateString()}</small></div>`).join("")}`:""}
-    <div class="cd-note">👆 탭 대결: 1판은 5초 동안 휴대폰은 화면을 톡톡(한 번 = 0.75), 컴퓨터는 Esc를 뺀 아무 키나(한 번 = 4). 점수 = ⚡카드 파워(등급 10/12/14/17/20 + 강화×2) × 👆탭 수. 🃏 2판은 카드 짝 맞추기(9장을 0.2초 보고, 틀리면 끝). 🧠 3판은 화살표 순서 기억 대결(맞힌 수 × ⚡). 3판 2선승<br>
+    <div class="cd-note">👆 탭 대결: 1판은 5초 동안 휴대폰은 화면을 톡톡(한 번 = 0.75), 컴퓨터는 Esc를 뺀 아무 키나(한 번 = 4). 점수 = ⚡카드 파워(등급 10/12/14/17/20 + 강화×2) × 👆탭 수. 🃏 2판은 카드 짝 맞추기(포켓몬 카드 9장을 0.5초 보고, 틀리면 끝). 🧠 3판은 화살표 순서 기억 대결(맞힌 수 × ⚡). 3판 2선승<br>
       🎴 카드 걸기: 이기면 상대 카드를 받고, 지면 내 카드가 상대에게 가요 (겹친 카드는 +0짜리를 걸어요) · 🤝 친선: 카드는 그대로, 이기면 하루 한 번 카드팩 +1</div>`;
 }
 // 🌐 받아쓰기(또박또박) 친구
@@ -495,7 +495,7 @@ function rollView(m){
   if(btn && +btn.dataset.r===cur){ document.getElementById("rollHint").textContent=hint; return; }
   const done=rounds.filter(x=>x.w!==-1), tension=done.filter(x=>x.w===0).length===1 && done.filter(x=>x.w===1).length===1;
   const mode=TapBattle.roundMode(cur);                     // 1판 👆 탭 · 2판 🃏 카드 짝 · 3판부터 🧠 화살표 기억
-  const MODE_TXT={tap:["탭 시작!",""], pairs:["카드 짝 맞추기!","9장을 0.2초 보고 짝 찾기 · 틀리면 끝 · (짝 × 10 + 시간 보너스) × ⚡카드 힘"], memory:["화살표 기억 대결!","화살표 10개를 한 번 보고 순서대로 · 처음 틀리기 전까지 맞힌 수 × ⚡카드 힘"]}[mode];
+  const MODE_TXT={tap:["탭 시작!",""], pairs:["카드 짝 맞추기!","포켓몬 카드 9장을 0.5초 보고 짝 찾기 · 틀리면 끝 · (짝 × 10 + 시간 보너스) × ⚡카드 힘"], memory:["화살표 기억 대결!","화살표 10개를 한 번 보고 순서대로 · 처음 틀리기 전까지 맞힌 수 × ⚡카드 힘"]}[mode];
   ctl.innerHTML=`<button class="roll-btn" id="rollBtn" data-r="${cur}">${TapBattle.MODE_ICON[mode]} ${tension?"🔥 마지막 판":`${cur+1}판`} ${MODE_TXT[0]}</button><p class="cd-note" style="text-align:center" id="rollHint">${MODE_TXT[1]}${hint? " "+hint : ""}</p>`;
   document.getElementById("rollBtn").onclick=async ()=>{
     document.getElementById("rollBtn").disabled=true;
