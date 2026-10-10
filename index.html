@@ -2,7 +2,13 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<!-- 🔒 잘못 터치해도 화면이 확대되지 않게 (두 번 톡 · 두 손가락 벌리기) -->
+<style>html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+<script>(function(){var no=function(e){e.preventDefault();};
+  ["gesturestart","gesturechange","gestureend"].forEach(function(t){document.addEventListener(t,no,{passive:false});});
+  document.addEventListener("touchmove",function(e){if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});})();</script>
+
 <title>우리집 학습플래너</title>
 <!-- iOS PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1047,7 +1053,7 @@
 <script src="assets/sfx.js"></script>
 <script src="assets/fx.js"></script>
 <script src="assets/tapbattle.js?v=2"></script>
-<script src="assets/cards.js?v=8"></script>
+<script src="assets/cards.js?v=9"></script>
 <script src="assets/ttobak.js"></script>
 <script src="assets/gcal.js"></script>
 <script src="assets/pokedex.js"></script>
