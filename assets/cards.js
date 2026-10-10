@@ -355,7 +355,7 @@ function lobbyHTML(){
       <span class="bt-btns"><button class="fam-btn" ${off} onclick="Cards.practice()">🎴 걸고 연습</button></span></div>
     ${tbHTML(off)}
     ${CS.log&&CS.log.length?`<div class="r-sec">최근 대결</div>${CS.log.map(l=>`<div class="cd-log">${eh(l.a)} ${l.win?"🏆":"·"} vs ${eh(l.b)} ${l.win?"":"🏆"} <small>${eh(l.score)}${l.stake?" · 🎴":""} · ${new Date(l.at).toLocaleDateString()}</small></div>`).join("")}`:""}
-    <div class="cd-note">👆 탭 대결: 1판은 5초 동안 휴대폰은 화면을 톡톡(한 번 = 0.75), 컴퓨터는 Esc를 뺀 아무 키나(한 번 = 4). 점수 = ⚡카드 파워(등급 10/12/14/17/20 + 강화×2) × 👆탭 수. 🃏 2판은 카드 짝 맞추기(포켓몬 카드 9장을 1.5초 보고, 틀려도 계속 · 먼저 다 찾을수록 이겨요). 🧠 3판은 화살표 순서 기억 대결(맞힌 수 × ⚡). 3판 2선승<br>
+    <div class="cd-note">👆 탭 대결: 1판은 5초 동안 휴대폰은 화면을 톡톡(한 번 = 1), 컴퓨터는 Esc를 뺀 아무 키나 · 클릭(한 번 = 2). 점수 = ⚡카드 파워(등급 10/12/14/17/20 + 강화×2) × 👆탭 수. 🃏 2판은 카드 짝 맞추기(포켓몬 카드 9장을 1.5초 보고, 틀려도 계속 · 먼저 다 찾을수록 이겨요). 🧠 3판은 화살표 순서 기억 대결(맞힌 수 × ⚡). 3판 2선승<br>
       🎴 카드 걸기: 이기면 상대 카드를 받고, 지면 내 카드가 상대에게 가요 (겹친 카드는 +0짜리를 걸어요) · 🤝 친선: 카드는 그대로, 이기면 하루 한 번 카드팩 +1</div>`;
 }
 // 🌐 받아쓰기(또박또박) 친구
