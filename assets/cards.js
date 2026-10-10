@@ -388,10 +388,10 @@ function foodHTML(){
 /* ----- 대결 방 화면 ----- */
 function arenaShell(m, inner){
   const me=meOf(m), other=otherOf(m), A=m.who[me]||{name:"나"}, B=m.who[other]||{name:"상대"};
-  hubShell("⚔️ 카드 대결", `<div class="bt-top"><button class="ghost-btn" style="padding:6px 12px" onclick="Cards.leave()">‹ 목록</button> ${srcTag(m)}${modeTag(m)}</div>
+  hubShell("⚔️ 카드 대결", `<div class="bt-arena"><div class="bt-top"><button class="ghost-btn" style="padding:6px 12px" onclick="Cards.leave()">‹ 목록</button> ${srcTag(m)}${modeTag(m)}</div>
     <div class="vs"><span class="vs-kid"><span class="bt-av">${eh((A.name||"나").slice(0,1))}</span><b>${eh(A.name)}</b></span><span class="vs-x">VS</span>
       <span class="vs-kid"><span class="bt-av ${other==="cpu"?"cpu":""}">${other==="cpu"?"🤖":eh(B.avatar||(B.name||"?").slice(0,1))}</span><b>${eh(B.name)}</b></span></div>
-    <div id="arenaBody">${inner}</div>`);
+    <div id="arenaBody">${inner}</div></div>`);
 }
 function renderMatch(){
   const m=curMatch();
@@ -426,7 +426,7 @@ function renderMatch(){
     if(CS.ask && CS.ask.mid===CS.mid && CS.cards[CS.ask.id]){
       const c=CS.cards[CS.ask.id], opts=TapBattle.partners(c, myCatches()), base=TapBattle.basePower({cls:c.cls, lv:m.stake && (Number(c.count)||1)>1? 0 : lvOf(c)});   // 겹친 카드를 걸면 +0짜리가 나가요
       return arenaShell(m, `<p class="bt-say">🐾 짝꿍 포켓몬과 함께 나갈까? <small>카드와 맞는 포켓몬만 나갈 수 있어요 · 같은 포켓몬 ⚡+${TapBattle.PARTNER.same} · 진화 가족 ⚡+${TapBattle.PARTNER.family}${m.stake? " · 카드 걸기라 짝꿍도 함께 걸어요 (이기면 상대 짝꿍을 받고, 지면 내 짝꿍 한 마리가 가요)" : " · 친선 대결이라 포켓몬은 그대로예요"}</small></p>
-        <div class="bt-pick">${cardFace(c,"mid")}<p><b>${eh(c.name)}</b> · ⚡${base}</p></div>
+        <div class="bt-pick bt-ask">${cardFace(c,"mid")}<p><b>${eh(c.name)}</b> · ⚡${base}</p></div>
         <div class="bt-pks">${opts.map(o=>`<button class="bt-pkbtn ${o.m}" onclick="Cards.pickWith('${c.id}','${eh(o.name)}')"><b>🐾 ${eh(o.name)}</b><small>${pmName(o.m)} · ⚡${base} → ⚡${base+TapBattle.PARTNER[o.m]} · ${o.n}마리</small></button>`).join("")}
           <button class="bt-pkbtn none" onclick="Cards.pickWith('${c.id}','')"><b>카드만</b><small>⚡${base}</small></button></div>
         <div class="bt-row"><button class="ghost-btn" onclick="Cards.cancelAsk()">다른 카드 고르기</button></div>`);
@@ -463,7 +463,7 @@ function rollView(m){
         <div class="score" id="bScore">0 : 0</div>
         <div class="fighter" id="fB">${cardFace(B,"mid")}<b>${eh(B.name)}</b><span class="pw">⚡${tapPw(B)}</span>${pkLine(B)}<span class="die" id="dB">👆</span><small class="die-how" id="hB"></small><small class="die-note" id="nB"></small></div>
       </div>
-      <p class="cd-note" style="text-align:center;margin-top:4px">한 판 점수 = ⚡카드 파워 × 👆5초 동안 탭한 수 (컴퓨터는 스페이스바) · 3판 2선승</p>
+      <p class="cd-note bt-rule">점수 = ⚡카드 힘 × 👆5초 탭 수 · 3판 2선승</p>
       <div class="roll-ctl" id="rollCtl"></div><div class="rounds" id="bRounds"></div><div id="bEnd"></div>`);
     root=document.getElementById("arena");
   }
@@ -587,7 +587,7 @@ async function revealRound(rounds, i, A, B){
   sfx(win===true?"roundWin":win===false?"roundLose":"pop");
   await TapBattle.banner(`<b>${win===null?"🤝 비겼어요! 한 번 더!":win?"👍 이 판은 내가 이겼어!":"💥 이 판은 상대가 이겼어!"}</b><small>나 ${scoreHow(A,B,r.ta,r.sa)}</small><small>상대 ${scoreHow(B,A,r.tb,r.sb)}</small>`, win===true?"win":win===false?"lose":"");
   const lines=document.getElementById("bRounds"); if(!lines) return;
-  lines.insertAdjacentHTML("beforeend", `<p class="rd">${i+1}판: ${scoreHow(A,B,r.ta,r.sa)} vs ${scoreHow(B,A,r.tb,r.sb)} ${r.w===-1?"🤝 비김":r.w===0?"👍 내가 이김":"💥 상대가 이김"}</p>`);
+  lines.insertAdjacentHTML("beforeend", `<span class="rd ${r.w===0?"w":r.w===1?"l":""}">${i+1}판 <b>${r.sa}</b> : <b>${r.sb}</b> ${r.w===-1?"🤝":r.w===0?"👍":"💥"}</span>`);
   const won=rounds.slice(0,i+1);
   document.getElementById("bScore").textContent=`${won.filter(x=>x.w===0).length} : ${won.filter(x=>x.w===1).length}`;
   const f= r.w===0? document.getElementById("fA") : r.w===1? document.getElementById("fB") : null;
@@ -1217,7 +1217,22 @@ const css=`
 .roll-btn:disabled{opacity:.6;animation:none}
 @media (prefers-reduced-motion:reduce){.roll-btn,.dice-stage.tension .dice-label,.bt-rays,.pk.c-u::after,.pk.c-s::after{animation:none}}
 @keyframes btPop{50%{transform:scale(1.06)}}
-.rounds .rd{font-size:12.5px;color:#475569;margin:6px 0;line-height:1.5}
+.rounds{display:flex;flex-wrap:wrap;gap:4px 6px;justify-content:center;margin-top:6px}
+.rounds .rd{font-size:12px;color:#475569;background:#F1F5F9;border-radius:999px;padding:2px 9px;line-height:1.5}.rounds .rd.w{background:#FEF3C7;color:#92400E}.rounds .rd.l{background:#F1F5F9;color:#64748B}
+/* 📱 대결 화면은 휴대폰 한 화면 안에 (세로로 넘기지 않게) */
+.bt-arena .bt-top{margin-bottom:2px}
+.bt-arena .vs{gap:10px;margin:0 0 6px}.bt-arena .vs-kid{flex-direction:row;gap:6px}.bt-arena .vs-kid .bt-av{width:28px;height:28px;font-size:13px}.bt-arena .vs-kid b{font-size:13.5px}.bt-arena .vs-x{font-size:18px}
+.bt-arena .bt-say{margin:0 0 6px;font-size:14px}.bt-arena .bt-say small{font-size:11.5px;line-height:1.4}
+.bt-arena .pk.mid{width:min(26vw,15vh,120px)}.bt-arena .bt-ask .pk.mid{width:min(22vw,12vh,100px)}
+.bt-arena .fighter .pk{width:min(100%,26vw,17vh,130px)}
+.bt-arena .fighter b{font-size:12.5px;line-height:1.25}
+.bt-arena .die{width:auto;height:auto;min-height:34px;font-size:30px;font-weight:900;font-variant-numeric:tabular-nums}
+.bt-arena .bt-pks{gap:6px;margin:6px 0}.bt-arena .bt-pkbtn{padding:7px 11px}.bt-arena .bt-pkbtn b{font-size:14px}
+.bt-arena .bt-pick{gap:3px}.bt-arena .bt-pick p{margin:0;font-size:13px}
+.bt-arena .roll-ctl{margin-top:6px}.bt-arena .roll-btn{padding:11px 20px;font-size:16px}
+.bt-arena .bt-row{margin-top:8px}.bt-arena .bt-result{margin:6px 0 0;font-size:18px}
+.bt-arena .bt-rule{text-align:center;margin:4px 0 0;font-size:11.5px}
+.bt-arena .bt-wait{padding:10px 8px}
 .bt-result{text-align:center;font-weight:900;font-size:20px;margin:14px 0 4px}.bt-result.win{color:#B45309}.bt-result.lose{color:#64748B}
 .dice-stage{--s:min(24vw,34vh,170px);position:fixed;inset:0;z-index:95;overflow:hidden;display:grid;grid-template:"label label label" auto "me vs them" 1fr / 1fr auto 1fr;background:#0b1026;opacity:0;transition:opacity .25s}
 @media (max-aspect-ratio:1/1){.dice-stage{--s:min(34vw,19vh,150px);grid-template:"label" auto "me" 1fr "vs" auto "them" 1fr / 1fr}}
