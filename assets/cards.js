@@ -495,7 +495,7 @@ function rollView(m){
   if(btn && +btn.dataset.r===cur){ document.getElementById("rollHint").textContent=hint; return; }
   const done=rounds.filter(x=>x.w!==-1), tension=done.filter(x=>x.w===0).length===1 && done.filter(x=>x.w===1).length===1;
   const mode=TapBattle.roundMode(cur);                     // 1 · 2판 👆 탭, 3판부터 🧠 화살표 기억
-  ctl.innerHTML=`<button class="roll-btn" id="rollBtn" data-r="${cur}">${mode==="memory"? "🧠" : "👆"} ${tension?"🔥 마지막 판":`${cur+1}판`} ${mode==="memory"? "화살표 기억 대결!" : "탭 시작!"}</button><p class="cd-note" style="text-align:center" id="rollHint">${mode==="memory"? "화살표 15개를 한 번 보고 순서대로 · 처음 틀리기 전까지 맞힌 수 × ⚡카드 힘" : ""}${hint? " "+hint : ""}</p>`;
+  ctl.innerHTML=`<button class="roll-btn" id="rollBtn" data-r="${cur}">${mode==="memory"? "🧠" : "👆"} ${tension?"🔥 마지막 판":`${cur+1}판`} ${mode==="memory"? "화살표 기억 대결!" : "탭 시작!"}</button><p class="cd-note" style="text-align:center" id="rollHint">${mode==="memory"? "화살표 10개를 한 번 보고 순서대로 · 처음 틀리기 전까지 맞힌 수 × ⚡카드 힘" : ""}${hint? " "+hint : ""}</p>`;
   document.getElementById("rollBtn").onclick=async ()=>{
     document.getElementById("rollBtn").disabled=true;
     const n=await TapBattle.play({mode, label: tension? "🔥 마지막 판!" : `${cur+1}판`, who:`${eh((m.who[me]||{}).name||"나")} · ${eh(A.name)}`, power:tapPw(A)});
