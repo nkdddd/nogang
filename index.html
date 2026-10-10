@@ -692,6 +692,7 @@
   .fab{width:62px;height:62px;border-radius:50%;border:none;flex:0 0 auto;color:#fff;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(circle at 30% 25%,#A597FF,#6A58E6 60%,#5646D0);box-shadow:0 8px 22px rgba(106,88,230,.45);}
   .fab svg{width:26px;height:26px;}
+  .time-tag.by-parent{color:#92400E;background:#FEF3C7;border:1px solid #FCD34D;font-weight:800}
   .fab:active{transform:scale(.96);}
   .toast-wrap{bottom:calc(92px + env(safe-area-inset-bottom));}
   .toast{border-radius:999px;background:var(--ink);}
@@ -2743,6 +2744,11 @@ function subscribeCategories(){
 }
 async function saveTask(t){
   try{ monGainCheck(state.tasksMap[t.id], t); }catch(_){}
+  // 👑 새 계획을 누가 세웠는지: 부모가 자녀 플래너를 보면서 추가하면 그 부모의 닉네임을 남겨요 (부모가 여럿이어도 구분)
+  if(!state.tasksMap[t.id]){
+    if(state.viewingChild && state.profile.role==="parent") t.byParent={uid:state.user.uid, name:state.profile.name||"부모님"};
+    else delete t.byParent;                                            // 아이가 복사해서 만든 계획은 아이 계획
+  }
   await plannerRef().collection("tasks").doc(t.id).set(t);
   if(window.GCal) GCal.onSave(state.ownerUid, t);
 }
@@ -2896,7 +2902,7 @@ function renderHeader(){
   const banner=document.getElementById("childBanner");
   if(state.viewingChild){
     banner.classList.remove("hidden");
-    banner.innerHTML=`<span>👀 <b>${esc(state.ownerName)}</b> 님의 플래너를 보고 있어요 (코멘트·확인 가능)</span>
+    banner.innerHTML=`<span>👀 <b>${esc(state.ownerName)}</b> 님의 플래너를 보고 있어요 (계획 세우기·코멘트·확인 가능 · 세운 계획엔 👑 ${esc(state.profile.name||"부모님")} 표시)</span>
       <button onclick="backToSelf()" style="white-space:nowrap">내 플래너로</button>`;
   }else{
     banner.classList.add("hidden");
@@ -4337,6 +4343,7 @@ function renderTaskRow(t){
           ${tb?`<span class="tb-tag">${esc(tb.name)}</span>`:""}
           ${m?`<span class="method-tag">${esc(m.name)}${t.episode?" "+esc(t.episode):""}</span>`:""}
           <span class="time-tag">${t.plannedMin||0}분</span>
+          ${t.byParent?`<span class="time-tag by-parent" title="${esc(t.byParent.name)}님이 세운 계획">👑 ${esc(t.byParent.name)} 계획</span>`:""}
           ${scoreTag}
         </div>
         <div class="task-title" onclick="toggleTaskOpen('${t.id}')">${esc(t.unit||(su?su.name:"학습"))}</div>
