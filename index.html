@@ -696,6 +696,7 @@
   .fab{width:62px;height:62px;border-radius:50%;border:none;flex:0 0 auto;color:#fff;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(circle at 30% 25%,#A597FF,#6A58E6 60%,#5646D0);box-shadow:0 8px 22px rgba(106,88,230,.45);}
   .fab svg{width:26px;height:26px;}
+  .time-tag.carry{color:#1D4ED8;background:#EFF6FF;border:1px solid #BFDBFE;font-weight:800}
   .time-tag.by-parent{color:#92400E;background:#FEF3C7;border:1px solid #FCD34D;font-weight:800}
   .fab:active{transform:scale(.96);}
   .toast-wrap{bottom:calc(92px + env(safe-area-inset-bottom));}
@@ -2721,7 +2722,36 @@ function subscribeTasks(){
       state.tasksMap={}; state.tasks.forEach(t=>state.tasksMap[t.id]=t);
       if(window.GCal) GCal.onTasks(state.ownerUid, state.tasks, start, end);
       render();
+      weeklyCarry();
     }, err=>console.error("tasks",err));
+}
+/* ↪ 주간 이월: 토요일 18시 마감 기준으로 월~토에 못 한 계획을 일요일에 한꺼번에 복사해요
+ *  - 지난주 계획은 그대로 남기고(기록) '↪ 일요일로 넘김' 표시, 일요일엔 '↪ 지난주 ○/○ 계획' 복사본
+ *  - 일요일이 지나서 열었다면 오늘로 넣어요 · 주마다 한 번만 (meta/carry.last) · 복사본 id가 정해져 있어 기기 여러 대여도 안 겹쳐요 */
+const carryRun={};
+async function weeklyCarry(){
+  const uid=state.ownerUid; if(!uid) return;
+  const sat=lastClosedSaturday(new Date()), key=uid+":"+sat;
+  if(carryRun[key]) return; carryRun[key]=1;
+  try{
+    const ref=plannerRef().collection("meta").doc("carry"), m=await ref.get();
+    if(m.exists && m.data().last>=sat) return;
+    const satD=parseD(sat), mon=fmt(addDays(satD,-5)), sun=fmt(addDays(satD,1)), today=fmt(new Date());
+    const target= today>sun? today : sun;
+    const snap=await plannerRef().collection("tasks").where("date",">=",mon).where("date","<=",sat).get();
+    const undone=snap.docs.map(d=>({id:d.id,...d.data()})).filter(t=>!t.done && !t.carriedTo);
+    let n=0;
+    for(const t of undone){
+      const {id, done, doneAt, actualMin, timerMin, focusMin, score, rating, understood, parentComment, creditRate, ...rest}=t;
+      const copy={...rest, id:"cr_"+id, date:target, done:false, actualMin:"", timerMin:0, score:"", carriedFrom:{id, date:t.date}, order:(Number(t.order)||Date.now())};
+      await plannerRef().collection("tasks").doc(copy.id).set(copy);
+      await plannerRef().collection("tasks").doc(id).set({carriedTo:target},{merge:true});
+      if(window.GCal) try{ GCal.onSave(uid, copy); }catch(_){}
+      n++;
+    }
+    await ref.set({last:sat, at:Date.now(), count:n, target},{merge:true});
+    if(n) toast(`↪ 지난주(월~토) 못 한 계획 ${n}개를 ${target===sun?"일요일":"오늘"}로 옮겼어요`,"info");
+  }catch(e){ console.warn("주간 이월", e); delete carryRun[key]; }
 }
 function subscribeCategories(){
   if(state._catUnsub) state._catUnsub();
@@ -4348,6 +4378,8 @@ function renderTaskRow(t){
           ${m?`<span class="method-tag">${esc(m.name)}${t.episode?" "+esc(t.episode):""}</span>`:""}
           <span class="time-tag">${t.plannedMin||0}분</span>
           ${t.byParent?`<span class="time-tag by-parent" title="${esc(t.byParent.name)}님이 세운 계획">👑 ${esc(t.byParent.name)} 계획</span>`:""}
+          ${t.carriedFrom?`<span class="time-tag carry" title="지난주에 못 해서 넘어온 계획">↪ 지난주 ${parseD(t.carriedFrom.date).getMonth()+1}/${parseD(t.carriedFrom.date).getDate()} 계획</span>`:""}
+          ${t.carriedTo && !t.done?`<span class="time-tag carry">↪ ${parseD(t.carriedTo).getMonth()+1}/${parseD(t.carriedTo).getDate()}로 넘김</span>`:""}
           ${scoreTag}
         </div>
         <div class="task-title" onclick="toggleTaskOpen('${t.id}')">${esc(t.unit||(su?su.name:"학습"))}</div>
