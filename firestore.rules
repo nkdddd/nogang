@@ -147,6 +147,32 @@ service cloud.firestore {
                     && cid == request.auth.uid + '_' + request.resource.data.day + '_' + request.resource.data.sticker;
     }
 
+    // ===== 🏆 이번 주 공부 순위 (전체) — 본인 점수만 쓰고, 다른 사람은 👍만 (한 번씩) =====
+    function rankOk(d) {
+      return d.nick is string && d.nick.size() >= 1 && d.nick.size() <= 12
+        && d.min is int && d.min >= 0 && d.min <= 2520            // 하루 6시간 × 7일
+        && d.stage is int && d.stage >= 0 && d.stage <= 9
+        && d.el is string && d.el.size() <= 10 && d.at is number;
+    }
+    function notParent(uid) { return get(/databases/$(database)/documents/users/$(uid)).data.role != 'parent'; }
+    match /ranks/{wk}/entries/{uid} {
+      allow read: if signedIn();
+      allow create: if isMe(uid) && notParent(uid) && rankOk(request.resource.data) && request.resource.data.likes == 0
+                    && request.resource.data.keys().hasOnly(['nick', 'el', 'stage', 'min', 'likes', 'at']);
+      allow update: if (isMe(uid) && changed().hasOnly(['nick', 'el', 'stage', 'min', 'at']) && rankOk(request.resource.data))
+                    || (signedIn() && request.auth.uid != uid && changed().hasOnly(['likes'])
+                        && request.resource.data.likes == resource.data.likes + 1
+                        && !exists(/databases/$(database)/documents/ranks/$(wk)/entries/$(uid)/likes/$(request.auth.uid))
+                        && existsAfter(/databases/$(database)/documents/ranks/$(wk)/entries/$(uid)/likes/$(request.auth.uid)));
+      allow delete: if isMe(uid) || isParentOf(uid);
+      match /likes/{liker} {
+        allow read: if signedIn();
+        allow create: if isMe(liker) && liker != uid && request.resource.data.keys().hasOnly(['at'])
+                      && getAfter(/databases/$(database)/documents/ranks/$(wk)/entries/$(uid)).data.likes
+                         == get(/databases/$(database)/documents/ranks/$(wk)/entries/$(uid)).data.likes + 1;
+      }
+    }
+
     // MD영단어 예문 캐시 (모든 사용자 공용)
     match /sentences/{id} {
       allow read, write: if signedIn();
