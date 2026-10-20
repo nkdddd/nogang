@@ -84,7 +84,7 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
-    // ===== 🤝 친구 응원 (스티커만 · 양쪽 부모 승인) =====
+    // ===== 🤝 친구 응원 (👍만 · 양쪽 부모 승인) =====
     function pairOf(a, b) { return a < b ? a + '_' + b : b + '_' + a; }
     function friendsOk(a, b) {
       let f = get(/databases/$(database)/documents/friends/$(pairOf(a, b))).data;
@@ -137,12 +137,12 @@ service cloud.firestore {
                    && request.resource.data.nick is string && request.resource.data.nick.size() <= 12;
     }
 
-    // 응원 스티커: 친구만, 정해진 스티커만, 스티커마다 하루 한 번 (문서 id = 보낸uid_날짜_스티커)
+    // 👍 응원: 친구만, 하루 한 번 (문서 id = 보낸uid_날짜_like)
     match /planner/{uid}/cheers/{cid} {
       allow create: if signedIn() && request.auth.uid != uid && friendsOk(request.auth.uid, uid)
                     && request.resource.data.from == request.auth.uid
                     && request.resource.data.keys().hasOnly(['from', 'sticker', 'day', 'at'])
-                    && request.resource.data.sticker in ['clap', 'fire', 'strong', 'star', 'together', 'party', 'book', 'smile']
+                    && request.resource.data.sticker == 'like'
                     && request.resource.data.day is string && request.resource.data.day.size() == 10
                     && cid == request.auth.uid + '_' + request.resource.data.day + '_' + request.resource.data.sticker;
     }
@@ -152,14 +152,15 @@ service cloud.firestore {
       return d.nick is string && d.nick.size() >= 1 && d.nick.size() <= 12
         && d.min is int && d.min >= 0 && d.min <= 2520            // 하루 6시간 × 7일
         && d.stage is int && d.stage >= 0 && d.stage <= 9
-        && d.el is string && d.el.size() <= 10 && d.at is number;
+        && d.el is string && d.el.size() <= 10 && d.at is number
+        && d.fam is list && d.fam.size() <= 4;                     // 연결된 부모님 uid (🏠 우리 가족 보기)
     }
     function notParent(uid) { return get(/databases/$(database)/documents/users/$(uid)).data.role != 'parent'; }
     match /ranks/{wk}/entries/{uid} {
       allow read: if signedIn();
       allow create: if isMe(uid) && notParent(uid) && rankOk(request.resource.data) && request.resource.data.likes == 0
-                    && request.resource.data.keys().hasOnly(['nick', 'el', 'stage', 'min', 'likes', 'at']);
-      allow update: if (isMe(uid) && changed().hasOnly(['nick', 'el', 'stage', 'min', 'at']) && rankOk(request.resource.data))
+                    && request.resource.data.keys().hasOnly(['nick', 'el', 'stage', 'min', 'fam', 'likes', 'at']);
+      allow update: if (isMe(uid) && changed().hasOnly(['nick', 'el', 'stage', 'min', 'fam', 'at']) && rankOk(request.resource.data))
                     || (signedIn() && request.auth.uid != uid && changed().hasOnly(['likes'])
                         && request.resource.data.likes == resource.data.likes + 1
                         && !exists(/databases/$(database)/documents/ranks/$(wk)/entries/$(uid)/likes/$(request.auth.uid))
@@ -173,12 +174,11 @@ service cloud.firestore {
       }
     }
 
-    // ===== 🏅 명예의 장 — 66일 도전자(D-n) · 명예의 전당. 본인 기록만 쓰고, 다른 사람은 👍만 (한 번씩) =====
+    // ===== 🏅 명예의 장 — 캐릭터 66일 공부 도전(D-n) · 명예의 전당. 본인 기록만 쓰고, 다른 사람은 👍만 (한 번씩) =====
     function hallOk(d) {
       return d.uid == request.auth.uid && d.nick is string && d.nick.size() >= 1 && d.nick.size() <= 12
-        && d.el is string && d.el.size() <= 10 && d.stage is int && d.stage >= 0 && d.stage <= 9
-        && d.emo in ['🌱', '📖', '📝', '🔁', '✏️', '📚', '🧘']
-        && d.label in ['아침에 영단어 10개', '공부 전에 오늘 계획 쓰기', '자기 전 10분 복습', '문제집 하루 한 장', '책 20분 읽기', '공부 전 1분 숨 고르기', '나만의 습관']
+        && d.el in ['fire', 'water', 'leaf', 'bolt', 'shadow'] && d.stage is int && d.stage >= 0 && d.stage <= 9
+        && d.rule in ['trust', 'app', 'parent']
         && d.start is string && d.start.size() == 10
         && d.count is int && d.count >= 0 && d.count <= 66 && d.left == 66 - d.count
         && d.status in ['active', 'done'] && (d.status == 'active' || d.count == 66)
@@ -186,12 +186,12 @@ service cloud.firestore {
     }
     match /hall/{hid} {
       allow read: if signedIn();
-      allow create: if signedIn() && hid.matches('^' + request.auth.uid + '_[A-Za-z0-9]+$') && notParent(request.auth.uid)
+      allow create: if signedIn() && hid.matches('^' + request.auth.uid + '_c[0-9]+$') && notParent(request.auth.uid)
                     && hallOk(request.resource.data) && request.resource.data.likes == 0
-                    && request.resource.data.keys().hasOnly(['uid', 'nick', 'el', 'stage', 'emo', 'label', 'start', 'count', 'left', 'status', 'doneAt', 'likes', 'at']);
+                    && request.resource.data.keys().hasOnly(['uid', 'nick', 'el', 'stage', 'rule', 'start', 'count', 'left', 'status', 'doneAt', 'likes', 'at']);
       allow update: if (signedIn() && resource.data.uid == request.auth.uid && hallOk(request.resource.data)
-                        && changed().hasOnly(['nick', 'el', 'stage', 'emo', 'label', 'count', 'left', 'status', 'doneAt', 'at'])
-                        && (resource.data.status != 'done' || request.resource.data.status == 'done'))
+                        && changed().hasOnly(['nick', 'el', 'stage', 'rule', 'count', 'left', 'status', 'doneAt', 'at'])
+                        && resource.data.status != 'done')
                     || (signedIn() && request.auth.uid != resource.data.uid && changed().hasOnly(['likes'])
                         && request.resource.data.likes == resource.data.likes + 1
                         && !exists(/databases/$(database)/documents/hall/$(hid)/likes/$(request.auth.uid))
@@ -204,6 +204,12 @@ service cloud.firestore {
                       && getAfter(/databases/$(database)/documents/hall/$(hid)).data.likes
                          == get(/databases/$(database)/documents/hall/$(hid)).data.likes + 1;
       }
+    }
+
+    // 🐣 지킨 날 인정 방법 · 부모님 확인한 날: 자녀는 보기만, 연결된 부모님만 정해요
+    match /parentConf/{child} {
+      allow read: if isMe(child) || isParentOf(child);
+      allow write: if isParentOf(child);
     }
 
     // MD영단어 예문 캐시 (모든 사용자 공용)
