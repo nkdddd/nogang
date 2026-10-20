@@ -3,7 +3,7 @@
  *  각 앱의 원래 스타일 뒤에 불러와 색·글꼴·모서리·아래쪽 메뉴를 덮어씁니다.
  *  <html data-app="sentence|words|grammar"> 로 앱을 구분합니다.
  * ===================================================================== */
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+@import url('fonts/pretendard/pretendard.css');   /* Pretendard (프로젝트 안에 있는 파일) */
 
 :root{
   --ui-bg:#F3F2F7; --ui-surface:#FFFFFF; --ui-surface2:#E9E8F0; --ui-line:#E4E2EC;
@@ -12,7 +12,8 @@
   --ui-good:#0E9F6E; --ui-bad:#E5484D;
   --ui-hero:linear-gradient(135deg,#8F80FF,#6A58E6 60%,#5646D0);
   --ui-shadow:0 10px 30px rgba(20,16,50,.10);
-  --ui-font:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --ui-font:"Pretendard Variable","Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+  --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700;
   color-scheme:light;
 }
 
@@ -33,7 +34,7 @@ html[data-app="grammar"]{
 }
 
 /* ---------- 기본 ---------- */
-html[data-app] body{font-family:var(--ui-font);background:var(--ui-bg);color:var(--ui-ink);}
+html[data-app] body{font-family:var(--ui-font);font-weight:var(--fw-regular);background:var(--ui-bg);color:var(--ui-ink);}
 html[data-app] input, html[data-app] textarea, html[data-app] select, html[data-app] button{font-family:inherit;}
 
 /* 머리글: 플래너처럼 굵고 큰 제목 */
@@ -78,7 +79,7 @@ html[data-app] .nav{
 html[data-app] .nav button{
   flex:1;height:50px;min-width:0;padding:0;border-radius:999px;background:transparent;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  color:var(--ui-muted2);font-size:10.5px;font-weight:700;
+  color:var(--ui-muted2);font-size:10.5px;font-weight:var(--fw-semibold);
 }
 html[data-app] .nav button span:not(.ic){font-size:10.5px;}
 html[data-app] .nav button.on{background:var(--ui-surface2);color:var(--ui-ink);}
@@ -96,3 +97,8 @@ html[data-device="pc"][data-app="grammar"] #app{max-width:760px;}
 html[data-device="pc"][data-app="grammar"] .nav{max-width:none;}
 html[data-device="pc"][data-app] .appbar{padding-top:22px;}
 html[data-device="pc"][data-app] .nav button:hover{background:var(--ui-bg);color:var(--ui-ink);}
+
+/* ---------- 🔤 글꼴 역할: 버튼 600 · 화면 제목 700 · 시간 · 점수 숫자는 고정폭 ---------- */
+html[data-app] button:not(:has(*)){font-weight:var(--fw-semibold);}
+html[data-app] h1, html[data-app] h2{font-weight:var(--fw-bold);}
+html[data-app] :is(.timer,.time,.clock,.score,.stat,.num,.count,.big-num,.prog,.progress){font-variant-numeric:tabular-nums;}

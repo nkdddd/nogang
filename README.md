@@ -11,6 +11,7 @@
 | `apps/words.html` | MD 중학영단어 1800 (단어장 · 어근) |
 | `apps/grammar.html` | 그래머 인사이드 트레이너 (레벨 1~3) |
 | `assets/theme.css`, `assets/theme.js` | 공용 디자인 — 세 학습앱의 색·글꼴·카드·아래쪽 메뉴를 플래너와 같게 |
+| `assets/fonts/pretendard/` | 🔤 Pretendard 가변 글꼴(동적 서브셋, SIL OFL 1.1) — 필요한 글자 묶음만 내려받아요. 글꼴 토큰 `--font-sans`(플래너) · `--ui-font`(학습앱), 굵기 `--fw-regular 400 · --fw-semibold 600 · --fw-bold 700` |
 | `assets/family.js` | 공용 가족 연결 (이메일 신청 → 승인) |
 | `assets/device.js` | 사용 환경(PC · 모바일) 판별 → `<html data-device>` 설정, 네 화면 공용 |
 | `assets/push-config.js` · `firebase-messaging-sw.js` · `manifest.webmanifest` | 휴대폰 푸시(웹 푸시 키) · 푸시 수신 서비스 워커 · 홈 화면 설치 정보 |
