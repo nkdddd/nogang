@@ -368,6 +368,66 @@
   .carry-row .cr-t{flex:1;min-width:0;font-weight:800;font-size:13.5px;display:flex;flex-direction:column}
   .carry-row .cr-t small{font-size:11.5px;color:#94A3B8;font-weight:700}
   /* 🐣 내 캐릭터 */
+  /* ⭕ 공부 링 · 🌱 66일 습관 · 🏅 뱃지 */
+  .rg-card{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface,#fff);border:1px solid var(--line,#E4E4EA);border-radius:16px;padding:12px 8px 10px;margin:0 0 12px}
+  .rg-card.full{border-color:#A7E3C8;background:linear-gradient(180deg,#F2FBF6,var(--surface,#fff))}
+  .rg{display:flex;flex-direction:column;align-items:center;gap:1px}
+  .rg-svg{width:58px;height:58px}
+  .rg b{font-size:13px}
+  .rg small{font-size:11px;color:var(--muted2,#94A3B8);font-weight:700}
+  .rg-msg{grid-column:1/-1;text-align:center;font-size:11.5px;color:var(--muted2,#64748B);margin-top:6px;font-weight:600}
+  .rg-card.full .rg-msg{color:#0E9F6E;font-weight:800}
+  .hb-card{background:var(--surface,#fff);border:1px solid var(--line,#E4E4EA);border-radius:16px;padding:10px 12px;margin:0 0 12px}
+  .hb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13.5px}
+  .hb-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+  .hb-row+.hb-row{border-top:1px dashed var(--line,#E4E4EA)}
+  .hb-chk{width:34px;height:34px;border-radius:50%;border:2.5px solid #22C55E;background:transparent;color:#fff;font-size:18px;font-weight:900;flex:0 0 auto;cursor:pointer}
+  .hb-chk.on{background:#22C55E}
+  .hb-chk:disabled{opacity:.6;cursor:default}
+  .hb-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;cursor:pointer}
+  .hb-t b{font-size:13.5px}
+  .hb-t small{font-size:11.5px;color:var(--muted2,#94A3B8);font-weight:700}
+  .hb-bar,.bd-bar{display:block;height:6px;border-radius:99px;background:#ECEFF4;overflow:hidden}
+  .hb-bar i,.bd-bar i{display:block;height:100%;background:#22C55E;border-radius:99px}
+  .hb-new{width:100%;border:1.5px dashed #BDE5CB;background:transparent;border-radius:14px;padding:10px;font:inherit;font-weight:800;font-size:13px;color:#15803D;margin:0 0 12px;cursor:pointer}
+  .hb-new span{color:#94A3B8;font-weight:600}
+  .hb-box{border:1px solid var(--line,#E4E4EA);border-radius:16px;padding:12px;margin-bottom:10px;background:var(--surface,#fff)}
+  .hb-top{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}
+  .hb-top b{font-size:15px}.hb-top small{font-size:12px;color:var(--muted2,#94A3B8);font-weight:700}
+  .hb-grid{display:grid;grid-template-columns:repeat(11,1fr);gap:4px}
+  .hb-grid i{aspect-ratio:1;border-radius:5px;background:#EEF1F5}
+  .hb-grid i.on{background:#22C55E}
+  .hb-grid i.mile{outline:2px solid #F5A524;outline-offset:-2px}
+  .hb-phases{display:flex;justify-content:space-between;font-size:10.5px;color:#94A3B8;font-weight:700;margin-top:6px}
+  .hb-phases span.on{color:#15803D}
+  .hb-keep{font-size:12.5px;color:#15803D;font-weight:700;background:#EFFAF3;border-radius:10px;padding:8px 10px}
+  .hb-note{font-size:12px;color:#3B4F7A;background:#F3F7FF;border-radius:10px;padding:7px 10px;margin-top:8px}
+  .hb-acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+  .hb-acts>button{flex:1;min-width:30%;margin:0;padding:10px 8px;font-size:13px}
+  .hb-ideas{display:flex;flex-wrap:wrap;gap:6px}
+  .hb-ideas button{border:1px solid var(--line,#E4E4EA);background:var(--surface,#fff);border-radius:999px;padding:6px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;color:inherit}
+  .hb-past{display:flex;flex-direction:column;padding:8px 0;border-bottom:1px solid var(--line,#E4E4EA);font-size:13px;font-weight:700}
+  .hb-past small{font-size:11.5px;color:#94A3B8}
+  .hb-cert{text-align:center;border:2px solid #F2C14E;border-radius:18px;padding:16px;background:linear-gradient(180deg,#FFFBEA,var(--surface,#fff))}
+  .hb-cert img{width:110px;height:110px;object-fit:contain}
+  .hb-cert .hc-k{font-size:12px;font-weight:800;color:#B07F12;letter-spacing:.1em}
+  .hb-cert .hc-n{font-size:20px;font-weight:900;margin-top:4px}
+  .hb-cert .hc-d{font-size:12.5px;color:#64748B;font-weight:700;margin-top:2px}
+  .hb-cert .hc-m{font-size:13px;margin-top:8px;line-height:1.5}
+  .bd-sum{font-size:14px;font-weight:700}.bd-sum b{font-size:22px;color:var(--accent,#6A58E6)}.bd-sum span{font-size:12px;color:#94A3B8}
+  .bd-best,.bd-month{margin-top:10px;border:1px solid var(--line,#E4E4EA);border-radius:14px;padding:10px 12px;font-size:13px;background:var(--surface,#fff)}
+  .bd-best b{font-size:16px;color:#F59E0B}
+  .bd-month small{font-size:11.5px;color:#94A3B8;font-weight:700}
+  .bd-month .bd-bar{margin:6px 0 3px}
+  .bd-months{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.bd-months span{font-size:11px;font-weight:800;background:#EFFAF3;color:#15803D;border-radius:99px;padding:3px 8px}
+  .bd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px}
+  .bd{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;border:1px solid var(--line,#E4E4EA);border-radius:12px;padding:9px 5px;background:var(--surface,#fff)}
+  .bd .bd-e{font-size:24px;line-height:1.1}
+  .bd b{font-size:11.5px;line-height:1.25}
+  .bd small{font-size:10.5px;color:#94A3B8;font-weight:700}
+  .bd .bd-bar{width:80%}
+  .bd:not(.ok){opacity:.75}.bd:not(.ok) .bd-e{filter:grayscale(1);opacity:.6}
+  .bd.ok{border-color:#F2D58A;background:linear-gradient(180deg,#FFFBEA,var(--surface,#fff))}
   .tb-ch{width:40px;height:40px;border-radius:50%;border:1px solid var(--line,#E4E4EA);background:var(--surface,#fff);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex:0 0 auto;box-shadow:0 1px 2px rgba(20,16,50,.06);font-size:20px}
   .tb-ch img{width:34px;height:34px;object-fit:contain}
 
@@ -1413,6 +1473,8 @@ async function loadCharTotals(){
   try{
     const snap=await plannerRef().collection("tasks").where("done","==",true).get();
     snap.docs.forEach(d=>{ pts+=20+(creditedMin(d.data())||0); });
+    const H=await loadHabits();
+    H.list.forEach(h=>{ pts+=habitCount(h)*HABIT_PTS; });              // 🌱 습관 체크 1번 = +10
   }catch(e){ console.warn("캐릭터 포인트", e); }
   state.charTotals[uid]={pts};
   return state.charTotals[uid];
@@ -1423,8 +1485,12 @@ function charGainCheck(prev, next){
   const tot=charReady(); if(!tot) return;
   const was=!!(prev&&prev.done), now=!!next.done;
   if(was===now) return;
+  charAddPts(now? 20+(creditedMin(next)||0) : -(20+(creditedMin(prev)||0)));
+}
+function charAddPts(delta){
+  const tot=charReady(); if(!tot) return;
   const before=charCalc(tot.pts).stage;
-  tot.pts+= now? 20+(creditedMin(next)||0) : -(20+(creditedMin(prev)||0));
+  tot.pts+=delta;
   const after=charCalc(tot.pts).stage;
   const ch=charOf();
   if(after>before && ch.el && !state.viewingChild) setTimeout(()=>charGrowShow(ch, after), 600);
@@ -1507,6 +1573,244 @@ async function saveCharacter(){
   const name=((document.getElementById("charName")||{}).value||"").trim().slice(0,12);
   await saveSettings({...state.settings, character:{el, name}});
   charPickEl=""; toast("캐릭터를 저장했어요","good"); drawCharacter(); render(); updateCharBtn();
+}
+/* ============================================================
+ *  🌱 66일 습관 · ⭕ 오늘의 공부 링 · 🏅 나의 뱃지
+ *  - 재촉하지 않아요: 하루 빠져도 괜찮고, 약속은 "이틀 연속만 안 빠지기"
+ *  - 습관은 아이가 스스로 정해요 (부모님 화면은 보기만) · 습관 체크 1번 = 캐릭터 포인트 +10
+ * ============================================================ */
+const HABIT_DAYS=66, HABIT_MAX=3, HABIT_PTS=10;
+const HABIT_PHASE=[{to:21,name:"뿌리 내리기",emo:"🌱"},{to:44,name:"줄기 자라기",emo:"🌿"},{to:66,name:"열매 맺기",emo:"🍎"}];
+const HABIT_MILES={7:"일주일을 해냈어요",21:"뿌리를 내렸어요",44:"줄기가 튼튼해졌어요"};
+const HABIT_IDEAS=[["📖","아침에 영단어 10개"],["📝","공부 전에 오늘 계획 쓰기"],["🔁","자기 전 10분 복습"],["✏️","문제집 하루 한 장"],["📚","책 20분 읽기"],["🧘","공부 전 1분 숨 고르기"]];
+async function loadHabits(){
+  const uid=state.ownerUid;
+  if(state.habits && state.habits.uid===uid) return state.habits;
+  let list=[];
+  try{ const d=await plannerRef().collection("meta").doc("habits").get(); if(d.exists) list=d.data().list||[]; }catch(e){ console.warn("습관", e); }
+  state.habits={uid, list};
+  return state.habits;
+}
+async function saveHabits(){ if(state.habits) await plannerRef().collection("meta").doc("habits").set({list:state.habits.list}); }
+const habitCount=h=>Object.keys(h.checks||{}).length;
+const habitsReady=()=> state.habits && state.habits.uid===state.ownerUid ? state.habits : null;
+const habitActive=()=>{ const H=habitsReady(); return H? H.list.filter(h=>h.status!=="done") : []; };
+const habitPhase=n=>HABIT_PHASE.find(p=>n<=p.to)||HABIT_PHASE[2];
+// 어제 · 그저께 둘 다 빠졌는지 (오늘 아직 안 했을 때만 살짝 알려 줘요)
+function habitWobble(h){
+  const c=h.checks||{}, t=fmt(new Date()), y=fmt(addDays(new Date(),-1)), y2=fmt(addDays(new Date(),-2));
+  return !c[t] && !c[y] && !c[y2] && h.start<=y2;
+}
+function habitSub(h){
+  const n=habitCount(h);
+  if(h.status==="keep") return `유지 모드 · 지금까지 ${n}일`;
+  const P=habitPhase(n);
+  return `${P.emo} ${P.name} · ${Math.min(n,HABIT_DAYS)}/${HABIT_DAYS}일`;
+}
+async function toggleHabit(id, ds){
+  if(state.viewingChild) return;
+  const H=await loadHabits(), h=H.list.find(x=>x.id===id); if(!h) return;
+  ds=ds||fmt(new Date());
+  h.checks=h.checks||{};
+  const was=!!h.checks[ds];
+  if(was) delete h.checks[ds]; else h.checks[ds]=1;
+  const n=habitCount(h);
+  let finished=false;
+  if(!was && h.status!=="keep" && n>=HABIT_DAYS && !h.doneAt){ h.doneAt=fmt(new Date()); finished=true; }
+  try{ await saveHabits(); }catch(e){ toast("저장하지 못했어요","info"); return; }
+  charAddPts(was? -HABIT_PTS : HABIT_PTS);
+  render();
+  if(document.querySelector(".hb-drawer")) drawHabits();
+  if(was) return;
+  try{ window.SFX && SFX.play("ok"); }catch(_){}
+  if(finished) setTimeout(()=>habitDoneShow(h.id), 400);
+  else if(h.status!=="keep" && HABIT_MILES[n]) toast(`${h.emo} ${esc(h.name)} ${n}일째! ${HABIT_MILES[n]}`,"cheer");
+  else toast(`${h.emo} 체크! ${h.status==="keep"? `유지 ${n}일` : `${n}/${HABIT_DAYS}일`}`,"good");
+}
+async function addHabit(name, emo){
+  name=(name||"").trim().slice(0,24); if(!name){ toast("어떤 습관인지 적어 주세요","info"); return; }
+  const H=await loadHabits();
+  if(habitActive().length>=HABIT_MAX){ toast(`습관은 한 번에 ${HABIT_MAX}개까지예요`,"info"); return; }
+  H.list.push({id:"h"+Date.now().toString(36), name, emo:emo||"🌱", start:fmt(new Date()), checks:{}, status:"active"});
+  await saveHabits(); toast(`🌱 '${esc(name)}' 시작! 오늘이 1일째예요`,"good");
+  drawHabits(); render();
+}
+async function habitStop(id){
+  const H=await loadHabits(), h=H.list.find(x=>x.id===id); if(!h) return;
+  if(!confirm(`'${h.name}' 습관을 쉬어 갈까요? 지금까지 한 ${habitCount(h)}일은 기록장에 남아요.`)) return;
+  h.status="done"; h.stopped=true; h.endAt=fmt(new Date());
+  await saveHabits(); drawHabits(); render();
+}
+// 66일을 채우면: 축하 · 인증서 → 계속 지키기 / 한 단계 올리기 / 다른 습관 / 기록장에 남기기
+function habitDoneShow(id){
+  const H=habitsReady(), h=H&&H.list.find(x=>x.id===id); if(!h) return;
+  const ch=charOf();
+  document.getElementById("drawerRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeDrawer()">
+    <div class="drawer hb-drawer">
+      <div class="drawer-head"><h3>🎉 66일 완주!</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
+      <div class="drawer-body">
+        <div class="hb-cert">
+          ${ch.el? `<img src="${charImg(ch.el, charCalc((charReady()||{pts:0}).pts).stage)}" alt="">` : `<div style="font-size:54px">🏅</div>`}
+          <div class="hc-k">습관 완주 인증</div>
+          <div class="hc-n">${h.emo} ${esc(h.name)}</div>
+          <div class="hc-d">${h.start.replace(/-/g,".")} ~ ${h.doneAt.replace(/-/g,".")} · ${habitCount(h)}일</div>
+          <div class="hc-m">${esc(state.ownerName||state.profile.name||"")} 님은 66일 동안 스스로 약속을 지켰어요. 이제 이 습관은 내 것이에요!</div>
+        </div>
+        <div class="section-lbl" style="margin-top:14px">이제 어떻게 할까요?</div>
+        <button class="hub-item" onclick="habitAfter('${h.id}','keep')"><span class="hub-emo">🔁</span><span class="hub-txt"><b>계속 지키기</b><span>목표 없이 편하게 이어 가요 (유지 모드)</span></span><span class="hub-arr">›</span></button>
+        <button class="hub-item" style="margin-top:8px" onclick="habitAfter('${h.id}','up')"><span class="hub-emo">⬆️</span><span class="hub-txt"><b>한 단계 올리기</b><span>예: 영단어 10개 → 20개, 새 66일 시작</span></span><span class="hub-arr">›</span></button>
+        <button class="hub-item" style="margin-top:8px" onclick="habitAfter('${h.id}','swap')"><span class="hub-emo">✨</span><span class="hub-txt"><b>다른 습관 시작</b><span>이 습관은 기록장에 남기고 새로 골라요</span></span><span class="hub-arr">›</span></button>
+        <button class="hub-item" style="margin-top:8px" onclick="habitAfter('${h.id}','rest')"><span class="hub-emo">📜</span><span class="hub-txt"><b>기록장에 남기고 쉬기</b><span>잠깐 쉬어도 괜찮아요</span></span><span class="hub-arr">›</span></button>
+      </div></div></div>`;
+  try{ window.SFX && SFX.play("star"); }catch(_){}
+}
+async function habitAfter(id, how){
+  const H=await loadHabits(), h=H.list.find(x=>x.id===id); if(!h) return;
+  if(how==="keep"){ h.status="keep"; }
+  else{
+    h.status="done"; h.endAt=fmt(new Date());
+    if(how==="up"){
+      const nm=prompt("한 단계 올린 습관을 적어 주세요", h.name);
+      if(nm && nm.trim()) H.list.push({id:"h"+Date.now().toString(36), name:nm.trim().slice(0,24), emo:h.emo, start:fmt(new Date()), checks:{}, status:"active", from:h.id});
+    }
+  }
+  await saveHabits(); render(); drawHabits();
+}
+function habitGrid(h){
+  const n=habitCount(h);
+  return `<div class="hb-grid">${Array.from({length:HABIT_DAYS},(_,i)=>`<i class="${i<n?"on":""}${[6,20,43,65].includes(i)?" mile":""}"></i>`).join("")}</div>
+    <div class="hb-phases">${HABIT_PHASE.map((p,i)=>`<span class="${n>(i?HABIT_PHASE[i-1].to:0)?"on":""}">${p.emo} ${p.name}</span>`).join("")}</div>`;
+}
+function drawHabits(){
+  const H=habitsReady();
+  if(!H){ hubShell("🌱 66일 습관", `<div class="empty">불러오는 중…</div>`); loadHabits().then(drawHabits); return; }
+  const ro=state.viewingChild, t=fmt(new Date()), y=fmt(addDays(new Date(),-1));
+  const act=habitActive(), past=H.list.filter(h=>h.status==="done");
+  const cards=act.map(h=>{
+    const c=h.checks||{};
+    return `<div class="hb-box">
+      <div class="hb-top"><b>${h.emo} ${esc(h.name)}</b><small>${habitSub(h)} · ${h.start.slice(5).replace("-","/")} 시작</small></div>
+      ${h.status==="keep"? `<div class="hb-keep">🏅 66일 완주한 습관이에요 · 편하게 이어 가요</div>` : habitGrid(h)}
+      ${habitWobble(h)? `<div class="hb-note">이틀 쉬었네요. 괜찮아요, 오늘 한 번이면 다시 이어져요 🙂</div>` : ""}
+      ${ro? "" : `<div class="hb-acts">
+        <button class="${c[t]?"ghost-btn":"btn-primary"}" onclick="toggleHabit('${h.id}')">${c[t]?"✓ 오늘 했어요 (취소)":"오늘 했어요"}</button>
+        ${h.start<=y && !c[y]? `<button class="ghost-btn" onclick="toggleHabit('${h.id}','${y}')">어제도 했어요</button>` : ""}
+        <button class="ghost-btn" onclick="habitStop('${h.id}')">쉬어 가기</button></div>`}
+    </div>`;
+  }).join("");
+  const add= ro || act.length>=HABIT_MAX ? "" : `
+    <div class="section-lbl" style="margin-top:16px">새 습관 ${act.length? "더하기" : "정하기"} <span style="font-weight:600;color:#94A3B8">(최대 ${HABIT_MAX}개 · 작게 시작할수록 오래가요)</span></div>
+    <div class="hb-ideas">${HABIT_IDEAS.map(([e,n])=>`<button onclick="document.getElementById('hbName').value='${n}';document.getElementById('hbEmo').value='${e}'">${e} ${n}</button>`).join("")}</div>
+    <div style="display:flex;gap:6px;margin-top:8px"><input class="inp" id="hbEmo" value="🌱" maxlength="2" style="width:52px;text-align:center"><input class="inp" id="hbName" maxlength="24" placeholder="예: 아침에 영단어 10개" style="flex:1"></div>
+    <button class="btn-primary" style="margin-top:8px" onclick="addHabit(document.getElementById('hbName').value, document.getElementById('hbEmo').value)">🌱 66일 시작하기</button>`;
+  const book= past.length? `<div class="section-lbl" style="margin-top:18px">📜 습관 기록장</div>
+    ${past.slice().reverse().map(h=>`<div class="hb-past"><span>${h.emo} ${esc(h.name)}</span><small>${h.start.slice(2).replace(/-/g,".")} ~ ${(h.endAt||h.doneAt||"").slice(2).replace(/-/g,".")} · ${habitCount(h)}일 ${h.doneAt? "🏅 완주" : "· 쉬어 감"}</small></div>`).join("")}` : "";
+  document.getElementById("drawerRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeDrawer()">
+    <div class="drawer wide hb-drawer">
+      <div class="drawer-head"><h3>🌱 66일 습관${ro?` · ${esc(state.ownerName)}`:""}</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
+      <div class="drawer-body">
+        <div class="share-note" style="margin:0 0 12px">🌱 하나의 습관이 몸에 붙는 데 약 66일이 걸려요. <b>하루 빠져도 괜찮아요 — 이틀 연속만 빠지지 않기!</b><br>
+          1~21일 뿌리 내리기 · 22~44일 줄기 자라기 · 45~66일 열매 맺기 · 체크할 때마다 캐릭터 포인트 +${HABIT_PTS}${ro? "<br>👀 습관은 아이가 스스로 정하고 체크해요. 부모님은 응원해 주세요." : ""}</div>
+        ${cards || `<div class="empty" style="padding:16px">${ro? "아직 정한 습관이 없어요." : "아직 습관이 없어요. 아주 작은 것 하나로 시작해 봐요!"}</div>`}
+        ${add}${book}
+      </div></div></div>`;
+}
+// 오늘 화면의 작은 습관 카드
+function habitTodayHTML(){
+  const H=habitsReady();
+  if(!H){ loadHabits().then(()=>{ if(state.view==="day") render(); }); return ""; }
+  const act=habitActive(), t=fmt(new Date()), ro=state.viewingChild;
+  if(!act.length) return ro? "" : `<button class="hb-new" onclick="drawHabits()">🌱 66일 습관 하나 만들어 볼까요? <span>(선택)</span></button>`;
+  return `<div class="hb-card">
+    <div class="hb-head"><b>🌱 66일 습관</b><button class="link-btn" onclick="drawHabits()">자세히</button></div>
+    ${act.map(h=>{ const on=!!(h.checks||{})[t], n=habitCount(h);
+      return `<div class="hb-row"><button class="hb-chk${on?" on":""}" ${ro?"disabled":""} onclick="toggleHabit('${h.id}')" aria-label="${esc(h.name)} 오늘 체크">${on?"✓":""}</button>
+        <div class="hb-t" onclick="drawHabits()"><b>${h.emo} ${esc(h.name)}</b><small>${habitSub(h)}${habitWobble(h)?" · 오늘 한 번이면 다시 이어져요":""}</small>
+        ${h.status==="keep"? "" : `<span class="hb-bar"><i style="width:${Math.min(100,Math.round(n/HABIT_DAYS*100))}%"></i></span>`}</div></div>`; }).join("")}
+  </div>`;
+}
+
+/* ----- ⭕ 오늘의 공부 링: 계획(완료한 비율) · 집중(목표시간) · 복기(완료한 것 중 메모 · 이해도 남긴 비율) ----- */
+async function loadRings(){
+  const uid=state.ownerUid;
+  if(state.ringDays && state.ringDays.uid===uid) return state.ringDays;
+  let days={};
+  try{ const d=await plannerRef().collection("meta").doc("rings").get(); if(d.exists) days=d.data().days||{}; }catch(_){}
+  state.ringDays={uid, days};
+  return state.ringDays;
+}
+function ringSvg(v, color, emo){
+  const r=21, C=2*Math.PI*r, p=Math.max(0,Math.min(1,v));
+  return `<svg viewBox="0 0 56 56" class="rg-svg" aria-hidden="true"><circle cx="28" cy="28" r="${r}" fill="none" stroke="var(--rg-track,#ECEAF6)" stroke-width="7"/>
+    <circle cx="28" cy="28" r="${r}" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(C*p).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 28 28)"/>
+    <text x="28" y="33" text-anchor="middle" font-size="16">${p>=1?"✓":emo}</text></svg>`;
+}
+function ringsHTML(ts, actMin, goal){
+  const ds=fmt(state.cursor);
+  const done=ts.filter(t=>t.done), rev=done.filter(t=>hasText(t.understood,5)||t.underStars!=null);
+  const R=[
+    {emo:"📋", name:"계획", v:ts.length? done.length/ts.length : 0, txt:`${done.length}/${ts.length}개`, c:"#7C6CF0"},
+    {emo:"⏱", name:"집중", v:goal>0? actMin/goal : 0, txt:`${actMin}/${goal}분`, c:"#F59E0B"},
+    {emo:"🧠", name:"복기", v:done.length? rev.length/done.length : 0, txt:`메모 ${rev.length}/${done.length}`, c:"#10B981"},
+  ];
+  const full=ts.length>0 && R.every(r=>r.v>=1);
+  if(full && !state.viewingChild) ringMark(ds);
+  return `<div class="rg-card${full?" full":""}">
+    ${R.map(r=>`<div class="rg">${ringSvg(r.v,r.c,r.emo)}<b>${r.name}</b><small>${r.txt}</small></div>`).join("")}
+    <div class="rg-msg">${full? "⭕ 세 링 완성! 오늘 공부를 끝까지 챙겼어요" : "계획한 걸 하고 · 목표시간을 채우고 · 한 줄 메모로 복기하면 링이 차요"}</div>
+  </div>`;
+}
+async function ringMark(ds){
+  const R=await loadRings(); if(R.days[ds]) return;
+  R.days[ds]=true;
+  try{ await plannerRef().collection("meta").doc("rings").set({days:R.days}); }catch(_){ return; }
+  toast("⭕ 오늘 세 링을 모두 채웠어요!","cheer");
+}
+
+/* ----- 🏅 나의 뱃지: 처음 해 본 것 · 꾸준함 · 쌓인 것 · 나의 최고 기록 · 이달의 도전 ----- */
+async function drawBadges(){
+  hubShell("🏅 나의 뱃지", `<div class="empty">불러오는 중…</div>`);
+  let all=[];
+  try{ all=(await plannerRef().collection("tasks").get()).docs.map(d=>d.data()); }catch(e){ console.warn(e); }
+  const H=await loadHabits(), RG=await loadRings();
+  const done=all.filter(t=>t.done);
+  const totalMin=done.reduce((a,t)=>a+creditedMin(t),0);
+  const byDay={}; done.forEach(t=>{ byDay[t.date]=(byDay[t.date]||0)+creditedMin(t); });
+  const planned={}; all.forEach(t=>{ (planned[t.date]=planned[t.date]||[]).push(t); });
+  const perfect=Object.values(planned).filter(a=>a.length && a.every(t=>t.done)).length;
+  const best=Object.entries(byDay).sort((a,b)=>b[1]-a[1])[0]||["",0];
+  const habitMax=Math.max(0,...H.list.map(habitCount)), habitFull=H.list.filter(h=>h.doneAt).length;
+  const ringN=Object.keys(RG.days).length;
+  const now=new Date(), ym=fmt(now).slice(0,7);
+  const monthDays=m=>Object.keys(byDay).filter(d=>d.startsWith(m)).length;
+  const MONTH_GOAL=15;
+  const months=[...new Set(Object.keys(byDay).map(d=>d.slice(0,7)))].filter(m=>monthDays(m)>=MONTH_GOAL).sort();
+  const B=[
+    ["🌱 처음 해 본 것", [
+      ["👣","첫 완료",done.length,1],["⏱","첫 타이머",done.filter(t=>Number(t.timerMin)>0).length,1],["🧠","첫 복기 메모",done.filter(t=>hasText(t.understood,5)).length,1],
+      ["🌱","첫 습관 시작",H.list.length,1],["⭕","첫 세 링 완성",ringN,1]]],
+    ["🔥 꾸준함 (66일 습관)", [
+      ["🌱","습관 7일",habitMax,7],["🌿","습관 21일",habitMax,21],["🌳","습관 44일",habitMax,44],["🍎","66일 완주",habitFull,1],["🏆","66일 두 번 완주",habitFull,2]]],
+    ["📚 쌓인 공부", [
+      ["📗","완료 10개",done.length,10],["📘","완료 50개",done.length,50],["📙","완료 100개",done.length,100],["📕","완료 300개",done.length,300],["📚","완료 1000개",done.length,1000]]],
+    ["⏳ 쌓인 시간", [
+      ["⏳","10시간",Math.floor(totalMin/60),10],["⌛","50시간",Math.floor(totalMin/60),50],["🕰️","100시간",Math.floor(totalMin/60),100],["🗿","300시간",Math.floor(totalMin/60),300]]],
+    ["⭕ 공부 링 · 완벽한 하루", [
+      ["⭕","세 링 7일",ringN,7],["💫","세 링 30일",ringN,30],["🌟","완벽한 하루 5일",perfect,5],["✨","완벽한 하루 20일",perfect,20]]],
+    ["📈 나의 최고 기록", [
+      ["⏱","하루 1시간",best[1],60],["🔥","하루 2시간",best[1],120],["🚀","하루 3시간",best[1],180]]],
+  ];
+  let got=0, tot=0;
+  const groups=B.map(([title,items])=>`<div class="section-lbl" style="margin-top:14px">${title}</div><div class="bd-grid">${items.map(([e,n,cur,goal])=>{ tot++; const ok=cur>=goal; if(ok) got++;
+    return `<div class="bd ${ok?"ok":""}"><div class="bd-e">${ok?e:"🔒"}</div><b>${n}</b>${ok?"":`<span class="bd-bar"><i style="width:${Math.min(100,Math.round(cur/goal*100))}%"></i></span><small>${goal>=60&&title.includes("최고")? `${cur}/${goal}분` : `${Math.min(cur,goal)}/${goal}`}</small>`}</div>`; }).join("")}</div>`).join("");
+  const md=monthDays(ym);
+  hubShell("🏅 나의 뱃지"+(state.viewingChild?` · ${esc(state.ownerName)}`:""), `
+    <div class="bd-sum"><b>${got}</b> / ${tot}개 <span>· 남과 비교하지 않고, 어제의 나와 비교해요</span></div>
+    <div class="bd-best">📈 나의 하루 최고 기록 <b>${best[1]}분</b>${best[0]? ` <small>(${best[0].slice(5).replace("-","/")})</small>` : ""}</div>
+    <div class="bd-month"><div><b>🗓️ ${now.getMonth()+1}월의 도전</b> · 이번 달 ${MONTH_GOAL}일 공부하기</div>
+      <span class="bd-bar"><i style="width:${Math.min(100,Math.round(md/MONTH_GOAL*100))}%"></i></span><small>${md}/${MONTH_GOAL}일${md>=MONTH_GOAL?" · 완주! 🎉":""}</small>
+      ${months.length? `<div class="bd-months">${months.map(m=>`<span>🗓️ ${+m.slice(5)}월 완주</span>`).join("")}</div>` : ""}</div>
+    ${groups}`);
 }
 function cheerFor(planned, done){
   const rate = planned? done/planned : -1;
@@ -2656,7 +2960,7 @@ function hubShell(title, body){
 function drawStatus(){
   hubShell("📊 학습 현황", `
     <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">지금까지의 학습을 확인합니다.</div>
-    ${hubItem("📊","대시보드","이행률·연속 학습·과목별 시간·성취 뱃지","openDrawer('dash')")}
+    ${hubItem("📊","대시보드","이행률·연속 학습·과목별 시간","openDrawer('dash')")}
     ${hubItem("📋","주간 마감 리포트","이번 주 요약 · 부족한 과목 점검","drawWeekReport()")}
     ${hubItem("📚","학습 다이어리","주간·월간 기록과 복기 내용 되돌아보기","drawArchive()")}
   `);
@@ -2682,11 +2986,12 @@ function drawManage(){
       ${hubItem("👨‍👩‍👦","자녀 계정 관리","자녀 코드 등록 · 연결 해제","openDrawer('settings')")}
     `);
   }else{
-    hubShell("🏅 내 등급 · 보상", `
-      <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">이번 주 등급과 보상을 확인합니다.</div>
+    hubShell("🐣 내 캐릭터 · 습관 · 뱃지", `
+      <div style="font-size:12.5px;color:#64748B;margin-bottom:12px">해낸 만큼 쌓여요. 남과 비교하지 않아도 돼요.</div>
       ${renderCharCard()}
       <div style="margin-top:12px">
-        ${hubItem("🏅","성취 뱃지","연속 학습·완벽한 하루 기록","openDrawer('dash')")}
+        ${hubItem("🌱","66일 습관","작은 습관 하나를 66일 동안","drawHabits()")}
+        ${hubItem("🏅","나의 뱃지","처음 해 본 것 · 꾸준함 · 나의 최고 기록","drawBadges()")}
       </div>
     `);
   }
@@ -3458,8 +3763,11 @@ function renderRecord(){
     </div>`;
   return `${isParent? noticeCardsHTML() : ""}<div class="rec-grid"><div>${stats}
     ${renderCharCard()}</div><div>
+    <div class="r-sec">성장</div>
+    ${hubItem("🌱","66일 습관","작은 습관 하나를 66일 동안 · 하루 빠져도 괜찮아요","drawHabits()")}
+    ${hubItem("🏅","나의 뱃지","처음 해 본 것 · 꾸준함 · 쌓인 공부 · 나의 최고 기록","drawBadges()")}
     <div class="r-sec">학습 현황</div>
-    ${hubItem("📊","대시보드","이행률·연속 학습·과목별 시간·성취 뱃지","openDrawer('dash')")}
+    ${hubItem("📊","대시보드","이행률·연속 학습·과목별 시간","openDrawer('dash')")}
     ${hubItem("📋","주간 마감 리포트","이번 주 요약 · 부족한 과목 점검","drawWeekReport()")}
     ${hubItem("📚", isParent?"학습 다이어리 (자녀별)":"학습 다이어리","주간·월간 기록과 복기 내용 되돌아보기","drawArchive()")}
     ${isParent? hubItem("📈","자녀 학습 리포트","일·주·월 평균 학습시간과 과목·단원","drawReport()") : ""}
@@ -3488,7 +3796,7 @@ function openMenu(){
       ${kids || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 자녀가 없어요. 아래 <b>가족 연결</b>에서 자녀의 이메일로 신청하세요.</div>`}`:""}
     <div class="r-sec">관리</div>
     ${hubItem("👨‍👩‍👧", "가족 연결"+(state.familyPending?` <span class="badge-dot">${state.familyPending}</span>`:""), isParent?"자녀에게 연결 신청 · 받은 신청 승인":"부모님께 연결 신청 · 받은 신청 승인","drawFamily()")}
-    ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🏅","내 등급 · 보상","주간 등급 · 카드 · 뱃지","drawManage()")}
+    ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🐣","내 캐릭터 · 습관 · 뱃지","해낸 만큼 자라는 캐릭터 · 66일 습관 · 뱃지","drawManage()")}
     ${isParent? hubItem("🔔","용돈 알림","토요일 18시 · 휴대폰 푸시 · 이메일","drawNotify()") : ""}
     ${hubItem("⚙️","설정","계정 · 목표시간 · 방학 · 과목/교재 · 템플릿","openDrawer('settings')")}
     ${hubItem("🔗","학습앱 인정 시간","천문장 · 영단어 · 문법 환산과 상한","drawExtApps()")}
@@ -4398,7 +4706,7 @@ function renderDay(){
       </div>
     </aside>
     <section class="day-list">
-      ${isToday? nextUpHTML(ts, actMin, dGoal, done) : ""}
+      ${isToday? nextUpHTML(ts, actMin, dGoal, done)+ringsHTML(ts, actMin, dGoal)+habitTodayHTML() : ""}
       ${recoveryHTML()}
       <div class="dl-head">
         <h2>${isToday? (undoneCount>0? `오늘 남은 학습 ${undoneCount}개` : (ts.length? "오늘 학습 모두 완료" : "오늘의 학습"))
@@ -5264,24 +5572,6 @@ async function drawDashboard(){
   const subjRows=rows.length? rows.map(r=>`<div class="subj-bar-row"><span class="subj-tag" style="background:${r.s.color};min-width:52px;text-align:center">${esc(r.s.name)}</span><div class="subj-bar-track"><div class="subj-bar-fill" style="width:${r.min/maxMin*100}%;background:${r.s.color}"></div></div><span class="subj-bar-num">${r.min}분</span></div>`).join("")
     : `<div class="empty">아직 완료된 학습이 없어요.</div>`;
 
-  // 성취 뱃지
-  const byDate={}; my.forEach(t=>{(byDate[t.date]=byDate[t.date]||[]).push(t);});
-  const perfectDays=Object.values(byDate).filter(arr=>arr.length>0 && arr.every(t=>t.done)).length;
-  const highScores=done.filter(t=>Number(t.scoreTotal)>0 && (Number(t.score)/Number(t.scoreTotal))>=0.9).length;
-  const totalActualH=totalMin/60;
-  const BADGES=[
-    {emo:"🔥",name:"3일 연속",ok:streak>=3},
-    {emo:"🔥",name:"7일 연속",ok:streak>=7},
-    {emo:"🏆",name:"14일 연속",ok:streak>=14},
-    {emo:"🌟",name:"완벽한 하루 5일",ok:perfectDays>=5},
-    {emo:"📚",name:"10개 완료",ok:done.length>=10},
-    {emo:"📖",name:"50개 완료",ok:done.length>=50},
-    {emo:"💯",name:"고득점 5회",ok:highScores>=5},
-    {emo:"⏱",name:"누적 10시간",ok:totalActualH>=10},
-  ];
-  const earned=BADGES.filter(b=>b.ok).length;
-  const badgesHTML=BADGES.map(b=>`<div class="badge ${b.ok?"":"locked"}"><div class="b-emo">${b.ok?b.emo:"🔒"}</div><div class="b-name">${b.name}</div></div>`).join("");
-
   // 챔피언 인증카드
   let certHTML="";
   try{
@@ -5305,8 +5595,11 @@ async function drawDashboard(){
           <div class="dash-stat"><div class="ic">📚</div><div class="big">${done.length}</div><div class="l">완료 학습 수</div></div>
         </div>
         ${certHTML}
-        <div class="dash-section">성취 뱃지 <span style="color:#94A3B8;font-weight:600">${earned}/${BADGES.length}</span></div>
-        <div class="badges">${badgesHTML}</div>
+        <div class="dash-section">성장</div>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <button class="ghost-btn" style="flex:1" onclick="drawBadges()">🏅 나의 뱃지</button>
+          <button class="ghost-btn" style="flex:1" onclick="drawHabits()">🌱 66일 습관</button>
+        </div>
         <div class="dash-section">바로가기</div>
         <div style="display:flex;gap:6px;margin-bottom:6px">
           <button class="ghost-btn" style="flex:1" onclick="drawArchive()">📚 학습 다이어리</button>
