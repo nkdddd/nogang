@@ -173,6 +173,39 @@ service cloud.firestore {
       }
     }
 
+    // ===== 🏅 명예의 장 — 66일 도전자(D-n) · 명예의 전당. 본인 기록만 쓰고, 다른 사람은 👍만 (한 번씩) =====
+    function hallOk(d) {
+      return d.uid == request.auth.uid && d.nick is string && d.nick.size() >= 1 && d.nick.size() <= 12
+        && d.el is string && d.el.size() <= 10 && d.stage is int && d.stage >= 0 && d.stage <= 9
+        && d.emo in ['🌱', '📖', '📝', '🔁', '✏️', '📚', '🧘']
+        && d.label in ['아침에 영단어 10개', '공부 전에 오늘 계획 쓰기', '자기 전 10분 복습', '문제집 하루 한 장', '책 20분 읽기', '공부 전 1분 숨 고르기', '나만의 습관']
+        && d.start is string && d.start.size() == 10
+        && d.count is int && d.count >= 0 && d.count <= 66 && d.left == 66 - d.count
+        && d.status in ['active', 'done'] && (d.status == 'active' || d.count == 66)
+        && d.doneAt is string && d.doneAt.size() <= 10 && d.at is number;
+    }
+    match /hall/{hid} {
+      allow read: if signedIn();
+      allow create: if signedIn() && hid.matches('^' + request.auth.uid + '_[A-Za-z0-9]+$') && notParent(request.auth.uid)
+                    && hallOk(request.resource.data) && request.resource.data.likes == 0
+                    && request.resource.data.keys().hasOnly(['uid', 'nick', 'el', 'stage', 'emo', 'label', 'start', 'count', 'left', 'status', 'doneAt', 'likes', 'at']);
+      allow update: if (signedIn() && resource.data.uid == request.auth.uid && hallOk(request.resource.data)
+                        && changed().hasOnly(['nick', 'el', 'stage', 'emo', 'label', 'count', 'left', 'status', 'doneAt', 'at'])
+                        && (resource.data.status != 'done' || request.resource.data.status == 'done'))
+                    || (signedIn() && request.auth.uid != resource.data.uid && changed().hasOnly(['likes'])
+                        && request.resource.data.likes == resource.data.likes + 1
+                        && !exists(/databases/$(database)/documents/hall/$(hid)/likes/$(request.auth.uid))
+                        && existsAfter(/databases/$(database)/documents/hall/$(hid)/likes/$(request.auth.uid)));
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isParentOf(resource.data.uid));
+      match /likes/{liker} {
+        allow read: if signedIn();
+        allow create: if isMe(liker) && liker != get(/databases/$(database)/documents/hall/$(hid)).data.uid
+                      && request.resource.data.keys().hasOnly(['at'])
+                      && getAfter(/databases/$(database)/documents/hall/$(hid)).data.likes
+                         == get(/databases/$(database)/documents/hall/$(hid)).data.likes + 1;
+      }
+    }
+
     // MD영단어 예문 캐시 (모든 사용자 공용)
     match /sentences/{id} {
       allow read, write: if signedIn();
