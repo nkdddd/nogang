@@ -389,6 +389,43 @@
   /* 🐣 내 캐릭터 */
   .ver-bar{white-space:nowrap;position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));z-index:9500;display:flex;align-items:center;gap:10px;background:#1E2A4A;color:#fff;border-radius:999px;padding:8px 8px 8px 16px;font-size:13.5px;font-weight:var(--fw-semibold);box-shadow:0 8px 24px rgba(0,0,0,.25)}
   .ver-bar button{white-space:nowrap;border:none;background:#fff;color:#1E2A4A;border-radius:999px;padding:6px 12px;font:inherit;font-weight:var(--fw-bold);cursor:pointer}
+  /* 기록 탭 (요약 · 큰 카드 4개 · 4묶음 한 줄 목록) */
+  .rx-hero{display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r,18px);padding:12px 14px;margin:0 0 12px}
+  .rx-me{display:flex;align-items:center;gap:12px;min-width:0;border:none;background:none;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+  .rx-me img{width:56px;height:56px;object-fit:contain;flex:0 0 auto}.rx-egg{font-size:40px;width:56px;text-align:center}
+  .rx-mt{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+  .rx-mt b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rx-mt b em{font-style:normal;font-size:12px;color:var(--cc,var(--accent));margin-left:4px}
+  .rx-mt small{font-size:11.5px;color:var(--muted2);font-variant-numeric:tabular-nums}
+  .rx-chip{border:none;background:var(--accent-soft,#EFECFD);color:var(--accent,#6A58E6);border-radius:14px;padding:8px 10px;font:inherit;font-size:11.5px;font-weight:var(--fw-semibold);display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer}
+  .rx-chip b{font-size:17px;font-variant-numeric:tabular-nums}
+  .rx-nums{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:9px;font-size:11.5px;color:var(--muted2)}
+  .rx-nums span{flex:1;min-width:0;text-align:center;white-space:nowrap}.rx-nums b{color:var(--ink);font-size:13.5px;font-variant-numeric:tabular-nums}
+  .rx-kids{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
+  .rx-kids button{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px 5px 5px;font:inherit;font-size:13px;font-weight:var(--fw-semibold);cursor:pointer;color:inherit}
+  .rx-kids button span{width:24px;height:24px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .rx-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 14px}
+  .rx-tile{display:flex;flex-direction:column;align-items:center;gap:2px;border:none;border-radius:18px;padding:12px 4px 10px;font:inherit;color:var(--ink);cursor:pointer;text-align:center;min-width:0}
+  .rx-tile .rx-te{font-size:28px;line-height:1.1}.rx-tile b{font-size:13px;white-space:nowrap}.rx-tile small{font-size:10.5px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .rx-tile.t1{background:#EEEBFF}.rx-tile.t2{background:#FFF6DC}.rx-tile.t3{background:#E7F7EE}.rx-tile.t4{background:#FDECEF}
+  .rx-seg{margin:0 0 10px}.rx-seg button{position:relative;font-size:12.5px;white-space:nowrap}
+  .rx-dot{position:absolute;top:5px;right:8px;width:7px;height:7px;border-radius:50%;background:#E5484D}
+  .rx-g{display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r,18px);padding:4px 4px}
+  .rx-g.on{display:block}.rx-g h3{display:none;font-size:13px;color:var(--muted2);margin:8px 10px 4px}
+  .rx-row{display:flex;align-items:center;gap:10px;width:100%;border:none;background:none;padding:10px 10px;border-radius:12px;font:inherit;color:inherit;text-align:left;cursor:pointer}
+  .rx-row+.rx-row{border-top:1px solid var(--line2,#EDF0F5);border-radius:0}
+  .rx-row:active{background:var(--surface2)}
+  .rx-e{font-size:20px;width:26px;text-align:center;flex:0 0 auto}
+  .rx-t{flex:1;min-width:0;display:flex;flex-direction:column}.rx-t b{font-size:14px}.rx-t small{font-size:11.5px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rx-go{color:var(--muted);font-size:18px}
+  html[data-device="pc"] .rx-seg{display:none}
+  html[data-device="pc"] .rx-groups{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  html[data-device="pc"] .rx-g{display:block}html[data-device="pc"] .rx-g h3{display:block}
+  @media(max-width:360px){.rx-tile small{display:none}.rx-seg button{font-size:11.5px}}
+  /* 빠른 계획 버튼: 휴대폰에선 할 일 · 일정 탭에서만, 조금 작게 */
+  html:not([data-device="pc"]) .fab{width:54px;height:54px}
+  html:not([data-device="pc"])[data-tab="learn"] .fab, html:not([data-device="pc"])[data-tab="timer"] .fab, html:not([data-device="pc"])[data-tab="stats"] .fab{display:none}
+  /* 위쪽 용돈 칸: 좁은 화면에선 금액만 */
+  @media(max-width:420px){.paybar .pb-today{display:none}}
   /* 🏅 지킨 날 인정 */
   .pick.on{background:#1E2A4A;color:#fff;border-color:#1E2A4A}
   .kp-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -2631,7 +2668,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.10.20-3";
+const APP_VER="2026.10.20-4";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -4265,8 +4302,9 @@ function render(){
   if(!state.profile) return;
   const main=document.getElementById("main"), head=document.getElementById("pageHead");
   document.querySelectorAll(".bnav-pill button").forEach(b=>b.classList.toggle("on", b.dataset.tab===state.tab));
+  document.documentElement.dataset.tab=state.tab;                       // 빠른 계획 버튼은 할 일 · 일정 탭에서만
   if(state.tab==="learn"){ head.innerHTML=pageHead("학습", state.viewingChild? `${esc(state.ownerName)} 님의 학습앱` : "천문장 · 영단어 · 문법"); main.innerHTML=renderLearn(); }
-  else if(state.tab==="stats"){ head.innerHTML=pageHead("기록", "성장 · 보상 · 리포트"); main.innerHTML=renderRecord(); }
+  else if(state.tab==="stats"){ head.innerHTML=pageHead("기록", "성장 · 소통 · 분석 · 용돈"); main.innerHTML=renderRecord(); }
   else if(state.tab==="timer"){ head.innerHTML=pageHead("포커스", "집중 타이머"); main.innerHTML=renderFocus(); bindFocusDial(); }
   else if(state.tab==="plan"){ head.innerHTML=planHead(); main.innerHTML= state.view==="month"? renderMonth() : renderWeek(); }
   else { head.innerHTML=todoHead(); main.innerHTML=renderDay(); }
@@ -4520,39 +4558,58 @@ function closeLearnApp(silent){
 Device.onChange(()=>{ if(state.profile) render(); });
 window.addEventListener("popstate", ()=>{ if(document.getElementById("learnApp")) closeLearnApp(); });
 
-/* ----- 기록 탭 ----- */
+/* ----- 기록 탭: 위에는 자주 쓰는 큰 카드 4개, 아래는 4묶음(성장 · 소통 · 분석 · 용돈)을 골라 보는 한 줄 목록 ----- */
+const REC_GROUPS=[["grow","🌱","성장과 보상"],["comm","💬","가족과 소통"],["anal","📊","학습 분석"],["money","💰","용돈 관리"]];
+let recGroup=(()=>{ try{ return localStorage.getItem("rec_group")||"grow"; }catch(_){ return "grow"; } })();
+function recSetGroup(g){ recGroup=g; try{ localStorage.setItem("rec_group",g); }catch(_){} render(); }
+const recRow=(e,t,d,fn,dot)=>`<button class="rx-row" onclick="${fn}"><span class="rx-e">${e}</span><span class="rx-t"><b>${t}${dot? ` <span class="badge-dot">${dot}</span>` : ""}</b><small>${d}</small></span><span class="rx-go">›</span></button>`;
 function renderRecord(){
-  const isParent=state.profile.role==="parent";
+  const isParent=state.profile.role==="parent", kidView=!isParent || state.viewingChild;
   const tot=monReady();
   if(!tot) loadMonTotals().then(()=>{ if(state.tab==="stats") render(); });
   if(!state.extCache || state.extCache.uid!==state.ownerUid) loadExtAll().then(()=>{ if(state.tab==="stats") render(); });
-  const wkDays=charWeekDays();
-  const extMin=extWeekMin(wkDays);
-  const stats=`<div class="r-grid">
-      <div class="r-stat"><div class="e">🏅</div><b>${charReady()? keptMonth() : "–"}</b><span>이번 달 지킨 날</span></div>
-      <div class="r-stat"><div class="e">✅</div><b>${tot?tot.count:"–"}</b><span>이번 주 완료</span></div>
-      <div class="r-stat"><div class="e">⏱</div><b>${tot? tot.min+extMin : "–"}</b><span>이번 주 학습(분)</span></div>
-    </div>`;
-  return `${isParent? noticeCardsHTML() : ""}<div class="rec-grid"><div>${stats}
-    ${renderCharCard()}</div><div>
-    <div class="r-sec">🌱 성장</div>
-    ${hubItem("🐣","내 캐릭터 · 66일 공부 도전","지킨 날 66일이면 전설 · 명예의 전당","drawCharacter()")}
-    ${hubItem("🏅","명예의 장","66일 도전자 D-n · 명예의 전당 · 👍 응원","drawHall('active')")}
-    ${hubItem("🏆","이번 주 공부 순위","전체 · 우리 가족 · 👍 응원","drawRanks()")}
-    ${hubItem("🎖","나의 뱃지","처음 해 본 것 · 지킨 날 · 쌓인 시간 · 최고 기록","drawBadges()")}
-    ${hubItem("🌱","66일 습관 (나만 보기)","작은 습관 하나를 66일 동안 체크해요","drawHabits()")}
-    <div class="r-sec">💬 소통</div>
-    ${hubItem("💬","가족 대화"+commDot(state.chatUnread), isParent?"자녀와 글 · 응원 주고받기":"부모님과 글 주고받기","drawChat()")}
-    ${isParent? hubItem("🤝","자녀 친구 관리"+commDot(state.friendPending),"친구 신청 승인 · 끊기","drawKidFriends()") : hubItem("🤝","친구 응원"+commDot(state.friendPending),"친구 코드 · 👍 응원","drawFriends()")}
-    <div class="r-sec">📊 기록</div>
-    ${hubItem("📊","대시보드","이행률 · 이번 달 지킨 날 · 과목별 시간","openDrawer('dash')")}
-    ${hubItem("📋","주간 마감 리포트","이번 주 요약 · 부족한 과목 점검","drawWeekReport()")}
-    ${hubItem("📚", isParent?"학습 다이어리 (자녀별)":"학습 다이어리","주간·월간 기록과 복기 내용 되돌아보기","drawArchive()")}
-    ${isParent? hubItem("📈","자녀 학습 리포트","일·주·월 평균 학습시간과 과목·단원","drawReport()") : ""}
-    ${isParent? hubItem("✅","지킨 날 인정 · 확인","아이를 믿기 · 앱 확인 · 부모님 확인","drawKeptRule()") : ""}
-    <div class="r-sec">💰 용돈</div>
-    ${hubItem("💰","용돈 정산","이번 주 달성도와 지급액 확인","openDrawer('allowance')")}
-    ${hubItem("🚀","부스터 모드",`시험 D-day · 목표시간 상향 · 시간 용돈 상한 ${wonFmt(payTermsOf(null,state.payTermsRaw).boostCap)}`,"drawBooster()")}</div></div>`;
+  const extMin=extWeekMin(charWeekDays());
+  const ct=charReady(); if(!ct) loadCharTotals().then(()=>{ if(state.tab==="stats") render(); });
+  const ch=charOf(), c=charNow(), E=ch.el? charElOf(ch.el) : null;
+  const left=Math.max(0, 66-Math.min(66,c.pts));
+  // ① 요약: 캐릭터 · 66일 도전 · 이번 주 숫자
+  const hero= kidView? `<div class="rx-hero"${E?` style="--cc:${E.c}"`:""}>
+      <button class="rx-me" onclick="drawCharacter()">${E? `<img src="${charImg(ch.el,c.stage)}" alt="">` : `<span class="rx-egg">🥚</span>`}
+        <span class="rx-mt"><b>${E? `${esc(ch.name||E.name)} <em>Lv${c.stage+1} · ${CHAR_STAGE_NAME[c.stage]}</em>` : "캐릭터를 골라 보세요"}</b>
+          ${E? `<span class="cc-bar"><i style="width:${c.pct}%"></i></span><small>지킨 날 ${c.pts}/66 · ${c.next? `다음까지 ${c.toNext}일` : "전설 🏆"}</small>` : `<small>66일을 지키면 전설까지 자라요</small>`}</span></button>
+      ${E? `<button class="rx-chip" onclick="drawHall('active')">🌱 66일 도전<b>${left? `D-${left}` : "완주"}</b></button>` : ""}
+      <div class="rx-nums"><span>🏅 이번 달 지킨 날 <b>${ct? keptMonth() : "–"}</b></span><span>✅ 이번 주 완료 <b>${tot? tot.count : "–"}</b></span><span>⏱ 이번 주 <b>${tot? tot.min+extMin : "–"}</b>분</span></div>
+    </div>` : `<div class="rx-hero"><div class="rx-mt" style="padding:4px 2px"><b>자녀를 골라 함께 봐요</b><small>⋯ 메뉴 → 자녀 플래너에서 열 수 있어요</small></div>
+      <div class="rx-kids">${state.children.filter(k=>k.exists!==false).map((k,i)=>`<button onclick="viewChild(state.children[${state.children.indexOf(k)}].uid,state.children[${state.children.indexOf(k)}].name)"><span style="background:${k.color}">${esc((k.name||"?").slice(0,1))}</span>${esc(k.name)}</button>`).join("")}</div></div>`;
+  // ② 자주 쓰는 큰 카드 4개
+  const tile=(e,t,d,fn,cls)=>`<button class="rx-tile ${cls}" onclick="${fn}"><span class="rx-te">${e}</span><b>${t}</b><small>${d}</small></button>`;
+  const quick=`<div class="rx-quick">
+    ${tile("📚","오늘 공부하기","할 일 바로 시작","setTab('todo')","t1")}
+    ${tile("🏅","명예의 장","66일 도전 · 순위","drawHall('active')","t2")}
+    ${tile("📊","학습 기록","대시보드","openDrawer('dash')","t3")}
+    ${tile("💰","용돈","이번 주 정산","openDrawer('allowance')","t4")}</div>`;
+  // ③ 4묶음 — 휴대폰은 하나씩 골라 보고, PC는 한꺼번에
+  const G={
+    grow:[recRow("🐣","66일 공부 도전 · 내 캐릭터","지킨 날로 자라요 · 바꾸기 한 번","drawCharacter()"),
+      recRow("🏅","명예의 장","도전자 D-n · 명예의 전당 · 👍","drawHall('active')"),
+      recRow("🏆","이번 주 공부 순위","전체 · 우리 가족 · 앱이 잰 시간","drawRanks()"),
+      recRow("🎖","나의 뱃지","처음 해 본 것 · 지킨 날 · 최고 기록","drawBadges()"),
+      recRow("🌱","66일 습관","나만 보는 작은 약속","drawHabits()")],
+    comm:[recRow("💬","가족 대화",isParent? "칭찬 · 응원 · 학습 피드백" : "부모님과 글 주고받기","drawChat()",state.chatUnread),
+      isParent? recRow("🤝","자녀 친구 관리","친구 신청 승인 · 끊기","drawKidFriends()",state.friendPending) : recRow("🤝","친구 응원","친구 코드 · 👍","drawFriends()",state.friendPending),
+      recRow("🔔","새 소식","대화 · 친구 · 응원 소식 모아 보기","drawNews()",newsTotal())],
+    anal:[recRow("📊","학습 대시보드","전체 누적 · 이행률 · 과목별 시간","openDrawer('dash')"),
+      recRow("📋","주간 마감 리포트","이번 주 돌아보기 · 부족한 과목","drawWeekReport()"),
+      recRow("📚","학습 다이어리","주간 · 월간 복기 기록","drawArchive()"),
+      isParent? recRow("📈","자녀 학습 리포트","일 · 주 · 월 평균, 자녀별 비교","drawReport()") : "",
+      recRow("✅", isParent? "지킨 날 인정 · 확인" : "지킨 날 확인", isParent? "인정 방법 고르기 · 날마다 확인" : "부모님이 정한 방법 · 최근 14일","drawKeptRule()")],
+    money:[recRow("💰","용돈 정산","이번 주 달성도 · 지급 내역","openDrawer('allowance')"),
+      recRow("🚀","부스터 모드",`시험 D-day · 시간 용돈 상한 ${wonFmt(payTermsOf(null,state.payTermsRaw).boostCap)}`,"drawBooster()")],
+  };
+  const dotOf=g=> g==="comm"? (state.chatUnread||0)+(state.friendPending||0) : 0;
+  const seg=`<div class="seg rx-seg">${REC_GROUPS.map(([k,e,t])=>`<button class="${recGroup===k?"on":""}" onclick="recSetGroup('${k}')">${e} ${t.split(" ")[0].replace("과","")}${dotOf(k)? `<i class="rx-dot"></i>` : ""}</button>`).join("")}</div>`;
+  const groups=`<div class="rx-groups">${REC_GROUPS.map(([k,e,t])=>`<section class="rx-g${recGroup===k?" on":""}"><h3>${e} ${t}</h3>${G[k].join("")}</section>`).join("")}</div>`;
+  return `${isParent? noticeCardsHTML() : ""}${hero}${quick}${seg}${groups}`;
 }
 
 /* ----- ⋯ 메뉴 ----- */
