@@ -389,6 +389,30 @@
   /* 🐣 내 캐릭터 */
   .ver-bar{white-space:nowrap;position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));z-index:9500;display:flex;align-items:center;gap:10px;background:#1E2A4A;color:#fff;border-radius:999px;padding:8px 8px 8px 16px;font-size:13.5px;font-weight:var(--fw-semibold);box-shadow:0 8px 24px rgba(0,0,0,.25)}
   .ver-bar button{white-space:nowrap;border:none;background:#fff;color:#1E2A4A;border-radius:999px;padding:6px 12px;font:inherit;font-weight:var(--fw-bold);cursor:pointer}
+  /* 할 일 탭 '오늘' 카드 */
+  .td-hero{background:var(--surface);border:1px solid var(--line);border-radius:var(--r,18px);padding:13px 14px;margin:0 0 12px}
+  .td-hero.full{border-color:#A7E3C8;background:linear-gradient(180deg,#F2FBF6,var(--surface))}
+  .td-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .td-min{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .td-min small{font-size:12px;color:var(--muted2);font-weight:var(--fw-semibold)}
+  .td-min b{font-size:28px;font-weight:var(--fw-bold);letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+  .td-min b span{font-size:14px;color:var(--muted);font-weight:var(--fw-semibold)}
+  .td-goal{align-self:flex-start;border:none;background:var(--surface2);border-radius:999px;padding:4px 10px;font:inherit;font-size:11.5px;font-weight:var(--fw-semibold);color:var(--muted2);cursor:pointer;margin-top:4px;white-space:nowrap}
+  .td-rings{display:flex;gap:4px;flex:0 0 auto}
+  .td-rings>div{display:flex;flex-direction:column;align-items:center;gap:0}
+  .td-rings .rg-svg{width:44px;height:44px}
+  .td-rings small{font-size:10.5px;color:var(--muted2);font-weight:var(--fw-semibold)}
+  .td-hero .bar-track{margin-top:10px}
+  .td-meta{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--muted2);margin-top:6px;font-variant-numeric:tabular-nums}
+  .td-meta span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+  .td-hero.full .td-meta span:last-child{color:#0E9F6E;font-weight:var(--fw-bold)}
+  .td-next{border-top:1px dashed var(--line);margin-top:11px;padding-top:10px}
+  .td-next>small{font-size:11.5px;color:var(--muted2);font-weight:var(--fw-semibold)}
+  .td-nrow{display:flex;align-items:center;gap:8px;margin:4px 0 8px}
+  .td-nt{flex:1;min-width:0;display:flex;flex-direction:column}.td-nt b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.td-nt small{font-size:11.5px;color:var(--muted2)}
+  .gs-type{flex:1;padding:10px;border-radius:12px;font:inherit;font-size:13.5px;font-weight:var(--fw-semibold);cursor:pointer}
+  /* 휴대폰: 옆 칸(캐릭터 · 목표 카드)은 위쪽 캐릭터 버튼 · '오늘' 카드로 옮겼어요 */
+  html:not([data-device="pc"]) .day-side{display:none}
   /* 기록 탭 (요약 · 큰 카드 4개 · 4묶음 한 줄 목록) */
   .rx-hero{display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r,18px);padding:12px 14px;margin:0 0 12px}
   .rx-me{display:flex;align-items:center;gap:12px;min-width:0;border:none;background:none;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
@@ -798,7 +822,8 @@
   /* 하루틀처럼 할 일 목록을 맨 위로, 응원·다이어리 같은 안내 카드는 그 아래로 */
   .day-list{display:flex;flex-direction:column;}
   .day>*,.day-list>*{min-width:0;max-width:100%;}
-  .day-list>.next-up{order:-5;}
+  .day-list>.next-up,.day-list>.td-hero{order:-5;}
+  .day-list>.kp-banner{order:-6;}
   .day-list>.dl-head{order:-3;}
   .day-list>.task,.day-list>.empty{order:-2;}
   .day-list>.add-task-btn{order:-1;margin:0 0 16px;}
@@ -2010,6 +2035,51 @@ function ringSvg(v, color, emo){
     <circle cx="28" cy="28" r="${r}" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(C*p).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 28 28)"/>
     <text x="28" y="33" text-anchor="middle" font-size="16">${p>=1?"✓":emo}</text></svg>`;
 }
+/* ----- 할 일 탭 맨 위 '오늘' 카드: 공부 시간 · 세 링 · 목표 · 다음 할 일을 한곳에 ----- */
+function ringsData(ts, actMin, goal){
+  const done=ts.filter(t=>t.done), rev=done.filter(t=>hasText(t.understood,5)||t.underStars!=null);
+  const R=[
+    {emo:"📋", name:"계획", v:ts.length? done.length/ts.length : 0, c:"#7C6CF0"},
+    {emo:"⏱", name:"집중", v:goal>0? actMin/goal : 0, c:"#F59E0B"},
+    {emo:"🧠", name:"복기", v:done.length? rev.length/done.length : 0, c:"#10B981"},
+  ];
+  return {R, full:ts.length>0 && R.every(r=>r.v>=1)};
+}
+function todayHeroHTML(ts, actMin, goal, done, ds, dType, isToday){
+  const {R, full}=ringsData(ts, actMin, goal);
+  if(full && isToday && !state.viewingChild) ringMark(ds);
+  const pct=goal>0? Math.min(100, Math.round(actMin/goal*100)) : 0;
+  const nx=isToday? ts.filter(t=>!t.done).sort((a,b)=>(a.order||0)-(b.order||0))[0] : null;
+  let next="";
+  if(nx){ const su=subjById(nx.subjectId), m=methodByName(nx.method), tb=tbById(nx.textbookId);
+    next=`<div class="td-next"><small>다음 할 일</small>
+      <div class="td-nrow"><span class="subj-tag" style="background:${su?su.color:"#94A3B8"}">${esc(su?su.name:"과목")}</span>
+        <div class="td-nt"><b>${esc(nx.unit||(tb?tb.name:"")||(su?su.name:"학습"))}</b><small>${[tb?tb.name:"", m?m.name+(nx.episode?" "+nx.episode:""):"", (nx.plannedMin||0)+"분"].filter(Boolean).map(esc).join(" · ")}</small></div></div>
+      <div class="task-quick">${appBtnHTML(nx)||timerBtnHTML(nx)}<button class="done-btn" onclick="toggleDone('${nx.id}')">완료</button></div></div>`; }
+  return `<div class="td-hero${full?" full":""}">
+    <div class="td-row">
+      <div class="td-min"><small>${isToday? "오늘 공부" : `${ds.slice(5).replace("-","/")} 공부`}</small><b>${actMin}<span> / ${goal}분</span></b>
+        <button class="td-goal" onclick="drawGoalSheet('${ds}')">🎯 ${dType==="free"?"자율학습일":"등교일"} · 목표 ${goal}분 ›</button></div>
+      <div class="td-rings">${R.map(r=>`<div>${ringSvg(r.v,r.c,r.emo)}<small>${r.name}</small></div>`).join("")}</div>
+    </div>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;${goal>0&&actMin>=goal?"background:#0E9F6E":""}"></div></div>
+    <div class="td-meta"><span>완료 ${done}/${ts.length}</span><span>${full? "⭕ 세 링 완성!" : "📋 계획 · ⏱ 집중 · 🧠 한 줄 복기로 링을 채워요"}</span></div>
+    ${next}
+  </div>`;
+}
+// 🎯 목표시간 (등교일 · 자율학습일 · 분) — 작은 창에서
+function drawGoalSheet(ds){
+  const dType=effDayType(ds), dGoal=effDayGoal(ds), b=(on,c1,c2,c3)=>`border:1.5px solid ${on?c1:"#E2E8F0"};background:${on?c2:"#fff"};color:${on?c3:"#94A3B8"}`;
+  hubShell("🎯 목표시간", `
+    <div class="section-lbl">${ds===fmt(new Date())? "오늘" : ds.slice(5).replace("-","/")}은 어떤 날인가요?</div>
+    <div style="display:flex;gap:6px">
+      <button class="gs-type" style="${b(dType==="school","#6A58E6","#EFECFD","#4B3FA6")}" onclick="setDayType('${ds}','school').then(()=>drawGoalSheet('${ds}'))">🏫 등교일</button>
+      <button class="gs-type" style="${b(dType==="free","#F5A524","#FFF7E8","#8A6516")}" onclick="setDayType('${ds}','free').then(()=>drawGoalSheet('${ds}'))">🏖 자율학습일</button></div>
+    <div class="section-lbl" style="margin-top:16px">목표 <b style="color:var(--ink)">${dGoal}분</b> <span style="font-weight:400;color:#94A3B8">· ${dType==="free"?"자율":"등교"} 기본 ${dayTypeGoal(ds)}분</span></div>
+    <div class="chip-wrap">${[60,90,120,180,240].map(m=>`<button class="pick${dGoal===m?" on":""}" onclick="setDayGoal('${ds}',${m}).then(()=>drawGoalSheet('${ds}'))">${m}분</button>`).join("")}
+      <button class="pick" onclick="closeDrawer();promptDayGoal('${ds}')">직접 입력</button></div>
+    <div style="font-size:11.5px;color:#94A3B8;margin-top:10px;line-height:1.5">평일은 등교일, 토·일 · 방학은 자율학습일로 자동으로 정해져요. 기본 목표는 ⚙️ 설정에서 바꿀 수 있어요.</div>`);
+}
 function ringsHTML(ts, actMin, goal){
   const ds=fmt(state.cursor);
   const done=ts.filter(t=>t.done), rev=done.filter(t=>hasText(t.understood,5)||t.underStars!=null);
@@ -2668,7 +2738,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.10.20-4";
+const APP_VER="2026.10.20-5";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -5542,7 +5612,7 @@ function renderDay(){
     </aside>
     <section class="day-list">
       ${keptDayBanner(ds)}
-      ${isToday? nextUpHTML(ts, actMin, dGoal, done)+ringsHTML(ts, actMin, dGoal)+habitTodayHTML() : ""}
+      ${todayHeroHTML(ts, actMin, dGoal, done, ds, dType, isToday)}
       <div class="dl-head">
         <h2>${isToday? (undoneCount>0? `오늘 남은 학습 ${undoneCount}개` : (ts.length? "오늘 학습 모두 완료" : "오늘의 학습"))
                      : `${ds.slice(5).replace("-",".")} 학습 ${ts.length}개`}</h2>
@@ -5553,6 +5623,7 @@ function renderDay(){
       ${window.GCal? GCal.dayHTML(ds) : ""}
       ${rows}
       <button class="add-task-btn" onclick="openTask(null,'${ds}')">+ 학습 추가</button>
+      ${isToday? habitTodayHTML() : ""}
       ${weakHintHTML()}
       ${todayDiaryHTML(ds)}
     </section>
