@@ -387,6 +387,16 @@
   .carry-row .cr-t{flex:1;min-width:0;font-weight:var(--fw-bold);font-size:13.5px;display:flex;flex-direction:column}
   .carry-row .cr-t small{font-size:11.5px;color:#94A3B8;font-weight:var(--fw-bold)}
   /* 🐣 내 캐릭터 */
+  /* 🏅 명예의 장 */
+  .hl-card{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line,#E4E4EA);border-radius:14px;margin-bottom:6px;background:var(--surface,#fff)}
+  .hl-card.me{border-color:var(--accent,#6A58E6);background:#F7F6FE}
+  .hl-card.done{border-color:#F2D58A;background:linear-gradient(180deg,#FFFBEA,var(--surface,#fff))}
+  .hl-card img{width:44px;height:44px;object-fit:contain}.hl-egg{font-size:30px;width:44px;text-align:center}
+  .hl-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.hl-t b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hl-t small{font-size:12px;color:#64748B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hl-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:0 0 auto}
+  .hl-d{font-size:18px;font-weight:var(--fw-bold);color:#E5484D;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .hl-d.done{font-size:13px;color:#B07F12;background:#FFF1C4;border-radius:99px;padding:2px 8px}
   /* 🏆 이번 주 공부 순위 */
   .rk-week{font-size:12px;color:#94A3B8;font-weight:var(--fw-semibold)}
   .rk-me{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:14px;border-radius:16px;background:linear-gradient(135deg,#8F80FF,#6A58E6);color:#fff}
@@ -1728,7 +1738,7 @@ async function loadHabits(){
   state.habits={uid, list};
   return state.habits;
 }
-async function saveHabits(){ if(state.habits) await plannerRef().collection("meta").doc("habits").set({list:state.habits.list}); }
+async function saveHabits(){ if(state.habits){ await plannerRef().collection("meta").doc("habits").set({list:state.habits.list}); hallSyncSoon(); } }   // 🏅 명예의 장도 맞춰요
 const habitCount=h=>Object.keys(h.checks||{}).length;
 const habitsReady=()=> state.habits && state.habits.uid===state.ownerUid ? state.habits : null;
 const habitActive=()=>{ const H=habitsReady(); return H? H.list.filter(h=>h.status!=="done") : []; };
@@ -1742,7 +1752,7 @@ function habitSub(h){
   const n=habitCount(h);
   if(h.status==="keep") return `유지 모드 · 지금까지 ${n}일`;
   const P=habitPhase(n);
-  return `${P.emo} ${P.name} · ${Math.min(n,HABIT_DAYS)}/${HABIT_DAYS}일`;
+  return `${P.emo} ${P.name} · ${Math.min(n,HABIT_DAYS)}/${HABIT_DAYS}일 · D-${Math.max(0,HABIT_DAYS-n)}`;
 }
 async function toggleHabit(id, ds){
   if(state.viewingChild) return;
@@ -1849,6 +1859,7 @@ function drawHabits(){
         <div class="share-note" style="margin:0 0 12px">🌱 하나의 습관이 몸에 붙는 데 약 66일이 걸려요. <b>하루 빠져도 괜찮아요 — 이틀 연속만 빠지지 않기!</b><br>
           1~21일 뿌리 내리기 · 22~44일 줄기 자라기 · 45~66일 열매 맺기 · 체크한 날은 캐릭터의 <b>지킨 날</b>이 돼요${ro? "<br>👀 습관은 아이가 스스로 정하고 체크해요. 부모님은 응원해 주세요." : ""}</div>
         ${cards || `<div class="empty" style="padding:16px">${ro? "아직 정한 습관이 없어요." : "아직 습관이 없어요. 아주 작은 것 하나로 시작해 봐요!"}</div>`}
+        <button class="hub-item" style="margin-top:4px" onclick="drawHall('active')"><span class="hub-emo">🏅</span><span class="hub-txt"><b>명예의 장</b><span>도전하면 D-n이 공개되고 👍 응원을 받아요 · 66일 완주자는 명예의 전당</span></span><span class="hub-arr">›</span></button>
         ${add}${book}
       </div></div></div>`;
 }
@@ -2329,7 +2340,7 @@ async function drawRanks(keep){
     ${(isP && !state.viewingChild)? "" : `<div class="section-lbl" style="margin-top:14px">설정</div>
       <div class="rk-set"><label>순위표 별명 <small>(진짜 이름은 쓰지 마세요)</small></label>
         <div style="display:flex;gap:6px"><input class="inp" id="rkNick" maxlength="12" value="${esc(rankNick())}" style="flex:1"><button class="ghost-btn" style="width:auto;padding:0 14px" onclick="rankSave({nick:document.getElementById('rkNick').value.trim()})">저장</button></div>
-        <button class="ghost-btn" style="width:100%;margin-top:8px;padding:10px" onclick="rankSave({off:${off?"false":"true"}})">${off? "🏆 순위표에 참여하기" : "순위표에서 빠지기"}</button>
+        <button class="ghost-btn" style="width:100%;margin-top:8px;padding:10px" onclick="rankSave({off:${off?"false":"true"}})">${off? "🏆 순위표 · 명예의 장에 참여하기" : "순위표 · 명예의 장에서 빠지기"}</button>
         ${isP? `<small style="display:block;margin-top:4px;color:#94A3B8">부모님이 자녀의 참여를 끄고 켤 수 있어요.</small>` : ""}</div>`}`);
   if(st){ const b=document.querySelector(".drawer-body"); if(b) b.scrollTop=st; }
 }
@@ -2337,9 +2348,111 @@ async function rankSave(patch){
   const cur=state.settings.rank||{};
   if(patch.nick!=null && !patch.nick) patch.nick="";
   await saveSettings({...state.settings, rank:{...cur, ...patch}});
-  if(patch.off===true){ await rankCol().doc(state.ownerUid).delete().catch(()=>{}); toast("순위표에서 빠졌어요","info"); }
-  else { if(!state.viewingChild) await rankPublish().catch(()=>{}); toast("저장했어요","good"); }
+  if(patch.off===true){
+    await rankCol().doc(state.ownerUid).delete().catch(()=>{});
+    try{ const m=await hallMine(); await Promise.all(m.map(e=>db.collection("hall").doc(e.id).delete().catch(()=>{}))); }catch(_){}
+    toast("순위표 · 명예의 장에서 빠졌어요","info");
+  }
+  else { if(!state.viewingChild){ await rankPublish().catch(()=>{}); await hallSync(); } toast("저장했어요","good"); }
   drawRanks();
+}
+/* ============================================================
+ *  🏅 명예의 장 — 66일 습관에 도전하면 "도전자"로 올라가 D-n(남은 날)이 보이고, 👍 응원을 받아요
+ *  - 66일을 채우면 🏅 명예의 전당으로 · 글 · 쪽지 없이 👍(사람마다 한 번)만
+ *  - 공개되는 것: 순위표 별명 · 캐릭터 · 습관 아이콘과 이름(추천 습관만, 직접 쓴 습관은 "나만의 습관") · 남은 날 · 👍 수
+ *  - 순위표 참여를 끄면 명예의 장에서도 빠져요 · 부모님 계정은 올라가지 않아요
+ *  - hall/{uid_습관id} {uid, nick, el, stage, emo, label, start, count, left, status:'active'|'done', doneAt, likes, at} · …/likes/{누른 uid}
+ * ============================================================ */
+const HALL_EMO=["🌱",...HABIT_IDEAS.map(x=>x[0])];
+const HALL_LABEL=[...HABIT_IDEAS.map(x=>x[1]),"나만의 습관"];
+const hallId=h=>`${state.user.uid}_${h.id}`;
+function hallBody(h){
+  const ch=charOf(), n=Math.min(HABIT_DAYS, habitCount(h)), preset=HABIT_IDEAS.find(x=>x[1]===h.name);
+  return {uid:state.user.uid, nick:rankNick(), el:ch.el||"", stage:charNow().stage|0,
+    emo:HALL_EMO.includes(h.emo)? h.emo : "🌱", label:preset? preset[1] : "나만의 습관",
+    start:h.start, count:n, left:HABIT_DAYS-n, status:h.doneAt? "done" : "active", doneAt:h.doneAt||"", at:Date.now()};
+}
+// 내 습관을 명예의 장에 맞춰요 (도전 시작 · 체크 · 완주 · 쉬어 가기)
+async function hallSync(){
+  if(!state.user || isParentUser() || state.viewingChild || state.ownerUid!==state.user.uid) return;
+  const H=habitsReady(); if(!H) return;
+  for(const h of H.list){
+    const ref=db.collection("hall").doc(hallId(h));
+    const gone=!rankOn() || (h.status==="done" && !h.doneAt);      // 참여 끔 · 쉬어 간 습관은 내려요
+    try{
+      if(gone){ await ref.delete().catch(()=>{}); continue; }
+      const body=hallBody(h), d=await ref.get().catch(()=>null);
+      if(d && d.exists){ const o=d.data(); if(["nick","el","stage","emo","label","count","status"].every(k=>o[k]===body[k])) continue; await ref.update(body); }
+      else await ref.set({...body, likes:0});
+    }catch(e){ console.warn("명예의 장", e); }
+  }
+}
+let hallT=0;
+function hallSyncSoon(){ clearTimeout(hallT); hallT=setTimeout(()=>hallSync(), 1500); }
+async function hallMine(){
+  if(isParentUser() && !state.viewingChild) return [];
+  const s=await db.collection("hall").where("uid","==",state.ownerUid).get();
+  return s.docs.map(d=>({id:d.id,...d.data()}));
+}
+// 앱을 열 때: 새로 받은 👍가 있으면 조용히 한 번
+async function hallCheckLikes(){
+  if(isParentUser()) return;
+  try{
+    const mine=await hallMine(), n=mine.reduce((a,e)=>a+(e.likes||0),0), k="hallLikes_"+state.user.uid;
+    let seen=0; try{ seen=Number(localStorage.getItem(k))||0; }catch(_){}
+    if(n>seen) toast(`🏅 명예의 장에서 응원 👍 ${n-seen}개를 받았어요!`,"cheer");
+    try{ localStorage.setItem(k, n); }catch(_){}
+  }catch(_){}
+}
+async function hallLike(id){
+  const ref=db.collection("hall").doc(id);
+  try{
+    const b=db.batch();
+    b.set(ref.collection("likes").doc(state.user.uid),{at:Date.now()});
+    b.update(ref,{likes:firebase.firestore.FieldValue.increment(1)});
+    await b.commit();
+    try{ window.SFX && SFX.play("ok"); }catch(_){}
+    drawHall(hallTab, true);
+  }catch(e){ toast("이미 응원했어요","info"); }
+}
+let hallTab="active";
+async function drawHall(tab, keep){
+  hallTab=tab||hallTab;
+  const prev=keep && document.querySelector(".drawer-body"), st=prev? prev.scrollTop : 0;
+  if(!keep) hubShell("🏅 명예의 장", `<div class="empty">불러오는 중…</div>`);
+  await hallSync();
+  let act=[], done=[], mine=[], liked={};
+  try{
+    const [a,d,m]=await Promise.all([
+      db.collection("hall").where("status","==","active").limit(60).get(),
+      db.collection("hall").where("status","==","done").limit(60).get(),
+      hallMine()]);
+    act=a.docs.map(x=>({id:x.id,...x.data()})).sort((x,y)=>x.left-y.left || (y.likes||0)-(x.likes||0));
+    done=d.docs.map(x=>({id:x.id,...x.data()})).sort((x,y)=>(y.doneAt||"").localeCompare(x.doneAt||""));
+    mine=m;
+    const list=hallTab==="active"? act : done;
+    if(!isParentUser()) await Promise.all(list.slice(0,40).filter(e=>e.uid!==state.user.uid).map(async e=>{ try{ liked[e.id]=(await db.collection("hall").doc(e.id).collection("likes").doc(state.user.uid).get()).exists; }catch(_){} }));
+  }catch(e){ hubShell("🏅 명예의 장", `<div class="share-note">불러오지 못했어요.<br>${esc(firestoreDiag(e))}</div>`); return; }
+  const me=state.ownerUid;
+  const card=e=>{ const isMe=e.uid===me, pct=Math.round((e.count||0)/HABIT_DAYS*100);
+    return `<div class="hl-card${isMe?" me":""}${e.status==="done"?" done":""}">
+      ${e.el? `<img src="${charImg(e.el,e.stage||0)}" alt="">` : `<span class="hl-egg">🥚</span>`}
+      <div class="hl-t"><b>${esc(e.nick||"")}${isMe?" (나)":""}</b><small>${e.emo} ${esc(e.label||"")}</small>
+        ${e.status==="done"? `<small>🏅 ${String(e.doneAt||"").replace(/-/g,".")} 66일 완주</small>` : `<span class="hb-bar"><i style="width:${pct}%"></i></span>`}</div>
+      <div class="hl-r">${e.status==="done"? `<span class="hl-d done">완주</span>` : `<span class="hl-d">D-${e.left}</span>`}
+        ${isMe||isParentUser()? `<span class="rk-like">👍 ${e.likes||0}</span>` : `<button class="rk-like${liked[e.id]?" on":""}" ${liked[e.id]?"disabled":""} onclick="hallLike('${e.id}')">👍 ${e.likes||0}</button>`}</div></div>`; };
+  const list=hallTab==="active"? act : done;
+  const mineAct=mine.filter(e=>e.status==="active");
+  const off=!rankOn();
+  hubShell("🏅 명예의 장", `
+    <div class="share-note" style="margin:0 0 10px">🌱 66일 습관에 도전하면 <b>도전자</b>로 올라가요. 남은 날(D-n)이 보이고, 모두가 👍로 응원할 수 있어요. 66일을 채우면 <b>명예의 전당</b>에 이름이 남아요.<br>
+      공개되는 것: 별명 · 캐릭터 · 습관 아이콘과 이름(추천 습관만) · 남은 날 · 👍 수. 글 · 쪽지는 없어요.</div>
+    ${!isParentUser() && off? `<div class="share-note" style="background:#FFF6E5;color:#8A5A00;margin:0 0 10px">순위표 · 명예의 장 참여를 꺼 두었어요. 🏆 이번 주 공부 순위 → 설정에서 켤 수 있어요.</div>` : ""}
+    ${mineAct.length? `<div class="section-lbl">${isParentUser()? esc(state.ownerName)+"의 도전" : "나의 도전"}</div>${mineAct.map(card).join("")}` :
+      (!isParentUser() && !off? `<button class="hb-new" onclick="drawHabits()">🌱 66일 습관에 도전하고 명예의 장에 올라가기</button>` : "")}
+    <div class="seg" style="margin:12px 0 10px"><button class="${hallTab==="active"?"on":""}" onclick="drawHall('active')">🔥 도전 중 ${act.length}</button><button class="${hallTab==="done"?"on":""}" onclick="drawHall('done')">🏅 명예의 전당 ${done.length}</button></div>
+    ${list.length? list.map(card).join("") : `<div class="empty" style="padding:16px">${hallTab==="active"? "아직 도전자가 없어요. 첫 도전자가 되어 볼까요?" : "아직 66일을 완주한 사람이 없어요."}</div>`}`);
+  if(st){ const b=document.querySelector(".drawer-body"); if(b) b.scrollTop=st; }
 }
 function cheerFor(planned, done){
   const rate = planned? done/planned : -1;
@@ -3520,6 +3633,7 @@ function drawManage(){
       ${renderCharCard()}
       <div style="margin-top:12px">
         ${hubItem("🌱","66일 습관","작은 습관 하나를 66일 동안","drawHabits()")}
+        ${hubItem("🏅","명예의 장","66일 도전자 D-n · 명예의 전당","drawHall('active')")}
         ${hubItem("🏅","나의 뱃지","처음 해 본 것 · 꾸준함 · 나의 최고 기록","drawBadges()")}
       </div>
     `);
@@ -3658,6 +3772,7 @@ function boot(){
     showApp(true);
     checkFamilyRequests().then(()=>{ refreshCommBadge(); checkNewCheers(); });
     setTimeout(rankPublishSoon, 3000);
+    setTimeout(()=>{ loadHabits().then(()=>{ hallSync(); hallCheckLikes(); }); }, 3500);
     focusLoad();
     checkAllowanceNotices();
     scheduleSnap();
@@ -4299,6 +4414,7 @@ function renderRecord(){
     ${isParent? hubItem("🤝","자녀 친구 관리"+commDot(state.friendPending),"친구 신청 승인 · 끊기","drawKidFriends()") : hubItem("🤝","친구 응원"+commDot(state.friendPending),"친구 코드 · 응원 스티커","drawFriends()")}
     <div class="r-sec">성장</div>
     ${hubItem("🏆","이번 주 공부 순위","전체 TOP 5 · 내 순위 · 👍 응원","drawRanks()")}
+    ${hubItem("🏅","명예의 장","66일 도전자 D-n · 명예의 전당 · 👍 응원","drawHall('active')")}
     ${hubItem("🌱","66일 습관","작은 습관 하나를 66일 동안 · 하루 빠져도 괜찮아요","drawHabits()")}
     ${hubItem("🏅","나의 뱃지","처음 해 본 것 · 꾸준함 · 쌓인 공부 · 나의 최고 기록","drawBadges()")}
     <div class="r-sec">학습 현황</div>
@@ -4333,6 +4449,7 @@ function openMenu(){
     ${hubItem("💬","가족 대화"+commDot(state.chatUnread), isParent?"자녀와 글 · 응원 주고받기":"부모님과 글 · 스티커 주고받기","drawChat()")}
     ${isParent? hubItem("🤝","자녀 친구 관리"+commDot(state.friendPending),"친구 신청 승인 · 끊기","drawKidFriends()") : hubItem("🤝","친구 응원"+commDot(state.friendPending),"친구 코드 · 응원 스티커","drawFriends()")}
     ${hubItem("🏆","이번 주 공부 순위","전체 TOP 5 · 내 순위 · 👍 응원","drawRanks()")}
+    ${hubItem("🏅","명예의 장","66일 도전자 D-n · 명예의 전당","drawHall('active')")}
     <div class="r-sec">관리</div>
     ${hubItem("👨‍👩‍👧", "가족 연결"+(state.familyPending?` <span class="badge-dot">${state.familyPending}</span>`:""), isParent?"자녀에게 연결 신청 · 받은 신청 승인":"부모님께 연결 신청 · 받은 신청 승인","drawFamily()")}
     ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🐣","내 캐릭터 · 습관 · 뱃지","해낸 만큼 자라는 캐릭터 · 66일 습관 · 뱃지","drawManage()")}
