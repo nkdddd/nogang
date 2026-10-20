@@ -2595,11 +2595,11 @@ async function keptSetRule(rule, appMin){
   try{ await keptWrite(appMin? {rule, appMin} : {rule}); toast("인정 방법을 바꿨어요","good"); drawKeptRule(keptKid); }
   catch(e){ toast("저장하지 못했어요: "+firestoreDiag(e),"info"); }
 }
-async function keptToggle(ds, on){
+async function keptToggle(ds, on, quiet){
   try{
     const d=await db.collection("parentConf").doc(keptKid).get(); const ok={...((d.exists&&d.data().ok)||{})};
     if(on) ok[ds]=true; else delete ok[ds];
-    await keptWrite({ok}); drawKeptRule(keptKid);
+    await keptWrite({ok}); if(!quiet) drawKeptRule(keptKid);
   }catch(e){ toast("저장하지 못했어요: "+firestoreDiag(e),"info"); }
 }
 // 부모님이 자녀의 하루를 보고 있을 때: 그날 바로 확인
@@ -2607,7 +2607,7 @@ function keptDayBanner(ds){
   if(!isParentUser() || !state.viewingChild) return "";
   const c=pconf(), ok=!!(c.ok&&c.ok[ds]), k=keptOn(ds);
   return `<div class="kp-banner${ok?" on":""}"><span>${ok? "✅ 이 날 공부를 확인했어요" : k? "✓ 지킨 날로 인정돼요" : "이 날을 지킨 날로 인정할까요?"}</span>
-    <button onclick="keptKid=state.ownerUid;keptToggle('${ds}',${ok?"false":"true"}).then(()=>{closeDrawer();render();})">${ok? "확인 취소" : "✅ 확인"}</button></div>`;
+    <button onclick="keptKid=state.ownerUid;keptToggle('${ds}',${ok?"false":"true"},true).then(()=>{ toast(${ok?"'확인을 취소했어요'":"'✅ 지킨 날로 확인했어요'"},'good'); render(); })">${ok? "확인 취소" : "✅ 확인"}</button></div>`;
 }
 /* ----- 🔔 새 소식: 앱을 열 때 한 번만 알려 줘요 (푸시 없음) ----- */
 function newsItems(){
