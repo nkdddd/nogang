@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>그래머 인사이드 트레이너</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="../assets/fonts/pretendard/pretendard.css">
 <script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -19,18 +19,18 @@
  --line:#E4E8F2; --r:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:Pretendard,-apple-system,sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.55}
+body{font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic','맑은 고딕',system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.55}
 button{font-family:inherit;border:none;cursor:pointer;background:none}
 input{font-family:inherit}
 #app{max-width:560px;margin:0 auto;min-height:100vh;padding-bottom:76px}
 .eng{font-family:Georgia,'Times New Roman',serif}
-mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%);padding:0 2px;font-weight:700;color:var(--ink)}
+mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%);padding:0 2px;font-weight:var(--fw-bold);color:var(--ink)}
 .top{padding:18px 18px 8px}
-.top h1{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.top h1{font-size:20px;font-weight:var(--fw-bold);letter-spacing:-.3px}
 .top .sub{color:var(--ink2);font-size:13px;margin-top:2px}
 .wrap{padding:10px 16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
-.btn{display:block;width:100%;background:var(--ink);color:#fff;font-weight:700;font-size:15px;padding:14px;border-radius:12px;text-align:center;transition:opacity .15s}
+.btn{display:block;width:100%;background:var(--ink);color:#fff;font-weight:var(--fw-semibold);font-size:15px;padding:14px;border-radius:12px;text-align:center;transition:opacity .15s}
 .btn:active{opacity:.85}
 .btn.ghost{background:var(--card);color:var(--ink);border:1.5px solid var(--ink)}
 .btn.yellow{background:var(--hl);color:var(--ink)}
@@ -41,16 +41,16 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 .muted{color:var(--ink2);font-size:12.5px}
 /* nav */
 .nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;max-width:560px;margin:0 auto;z-index:50}
-.nav button{flex:1;padding:9px 0 max(9px,env(safe-area-inset-bottom));font-size:10.5px;color:#8F8D9B;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav button{flex:1;padding:9px 0 max(9px,env(safe-area-inset-bottom));font-size:10.5px;color:#8F8D9B;font-weight:var(--fw-semibold);display:flex;flex-direction:column;align-items:center;gap:3px}
 .nav button.on{color:var(--ink)}
 .nav .ic{font-size:19px;line-height:1}
 /* auth */
 .auth{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:28px 24px}
-.auth .logo{font-size:26px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
-.auth .logo .hl{font-weight:900}
+.auth .logo{font-size:26px;font-weight:var(--fw-bold);letter-spacing:-.5px;margin-bottom:4px}
+.auth .logo .hl{font-weight:var(--fw-bold)}
 .auth p{color:var(--ink2);margin-bottom:26px;font-size:14px}
 .field{margin-bottom:12px}
-.field label{display:block;font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:5px}
+.field label{display:block;font-size:12px;font-weight:var(--fw-bold);color:var(--ink2);margin-bottom:5px}
 .field input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;background:var(--card)}
 .field input:focus{outline:none;border-color:var(--blue)}
 .aerr{color:var(--bad);font-size:13px;margin:8px 0;min-height:18px}
@@ -59,7 +59,7 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 /* home */
 .hero{background:var(--ink);color:#fff;border-radius:18px;padding:20px;margin-bottom:12px;position:relative;overflow:hidden}
 .hero::after{content:'';position:absolute;right:-30px;top:-30px;width:130px;height:130px;border-radius:50%;background:rgba(255,227,77,.16)}
-.hero .hi{font-size:17px;font-weight:800}
+.hero .hi{font-size:17px;font-weight:var(--fw-bold)}
 .hero .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
 .hero .st{min-width:0}.hero .st span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hero .st b{font-size:21px;display:block;white-space:nowrap}
@@ -67,7 +67,7 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 .prog-line{height:8px;background:#E9EDF7;border-radius:5px;overflow:hidden}
 .prog-line i{display:block;height:100%;background:var(--ink);border-radius:5px;transition:width .3s}
 .prog-line.yellow i{background:var(--hl)}
-.sect{font-size:14px;font-weight:800;margin:18px 2px 8px}
+.sect{font-size:14px;font-weight:var(--fw-bold);margin:18px 2px 8px}
 .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .badge{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 4px;text-align:center;font-size:10.5px;color:#B9C1D4}
 .badge .bi{font-size:21px;display:block;margin-bottom:3px;filter:grayscale(1);opacity:.4}
@@ -75,13 +75,13 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 .badge.got .bi{filter:none;opacity:1}
 /* level tabs & chapters */
 .ltabs{display:flex;gap:8px;margin-bottom:14px}
-.ltabs button{flex:1;padding:10px 0;border-radius:11px;background:var(--card);border:1.5px solid var(--line);font-weight:800;font-size:13.5px;color:var(--ink2)}
+.ltabs button{flex:1;padding:10px 0;border-radius:11px;background:var(--card);border:1.5px solid var(--line);font-weight:var(--fw-semibold);font-size:13.5px;color:var(--ink2)}
 .ltabs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .ltabs button.lock{opacity:.5}
 .chap{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
 .chap-h{display:flex;align-items:center;gap:12px;padding:14px 14px;cursor:pointer}
-.chap-no{width:34px;height:34px;border-radius:9px;background:var(--ink);color:var(--hl);font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.chap-h .t{font-weight:800;font-size:14.5px}
+.chap-no{width:34px;height:34px;border-radius:9px;background:var(--ink);color:var(--hl);font-weight:var(--fw-bold);font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chap-h .t{font-weight:var(--fw-bold);font-size:14.5px}
 .chap-h .m{font-size:11.5px;color:var(--ink2)}
 .chap-h .arr{margin-left:auto;color:#B9C1D4;transition:transform .2s}
 .chap.open .arr{transform:rotate(90deg)}
@@ -97,7 +97,7 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 /* unit view */
 .uhead{display:flex;align-items:center;gap:10px;padding:14px 16px 6px}
 .back{font-size:21px;color:var(--ink2);padding:4px 8px 4px 0}
-.uhead .t{font-weight:800;font-size:16px}
+.uhead .t{font-weight:var(--fw-bold);font-size:16px}
 .uhead .c{font-size:11.5px;color:var(--ink2)}
 .steps{display:flex;gap:6px;padding:8px 16px 4px}
 .steps span{flex:1;height:5px;border-radius:3px;background:var(--line)}
@@ -108,7 +108,7 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 .con-sec h3::before{content:'';display:inline-block;width:8px;height:8px;background:var(--hl);border-radius:2px;margin-right:7px}
 .con-sec .body{font-size:14px;color:#2C3A58;margin-bottom:8px}
 .gtable{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}
-.gtable th{background:var(--blue-soft);color:var(--ink);padding:7px 8px;border:1px solid var(--line);font-weight:700}
+.gtable th{background:var(--blue-soft);color:var(--ink);padding:7px 8px;border:1px solid var(--line);font-weight:var(--fw-bold)}
 .gtable td{padding:7px 8px;border:1px solid var(--line)}
 .ex{border-left:3px solid var(--hl);padding:6px 10px;margin:8px 0;background:#FDFCF5;border-radius:0 8px 8px 0}
 .ex .en{font-size:14.5px}
@@ -116,15 +116,15 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 .ex b{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%);padding:0 1px}
 /* quiz */
 .qcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 16px;margin-bottom:12px}
-.qno{font-size:11.5px;font-weight:800;color:var(--blue);margin-bottom:6px}
+.qno{font-size:11.5px;font-weight:var(--fw-bold);color:var(--blue);margin-bottom:6px}
 .qtext{font-size:15px;font-weight:600;margin-bottom:14px;line-height:1.5}
 .choices button{display:block;width:100%;text-align:left;padding:12px 14px;border:1.5px solid var(--line);border-radius:11px;margin-bottom:8px;font-size:14px;background:var(--card)}
-.choices button.sel{border-color:var(--ink);background:var(--blue-soft);font-weight:700}
-.choices button.ok{border-color:var(--good);background:var(--good-soft);font-weight:700}
+.choices button.sel{border-color:var(--ink);background:var(--blue-soft);font-weight:var(--fw-semibold)}
+.choices button.ok{border-color:var(--good);background:var(--good-soft);font-weight:var(--fw-semibold)}
 .choices button.no{border-color:var(--bad);background:var(--bad-soft)}
 .chips,.built{display:flex;flex-wrap:wrap;gap:8px}
 .built{min-height:46px;border:1.5px dashed var(--line);border-radius:11px;padding:8px;margin-bottom:10px;background:#FBFCFE}
-.chip{padding:8px 13px;border-radius:9px;background:var(--card);border:1.5px solid var(--ink);font-weight:600;font-size:14px}
+.chip{padding:8px 13px;border-radius:9px;background:var(--card);border:1.5px solid var(--ink);font-weight:var(--fw-semibold);font-size:14px}
 .built .chip{background:var(--hl-soft);border-color:var(--hl)}
 .chip.used{opacity:.25;pointer-events:none}
 .winput{width:100%;padding:13px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;margin-bottom:10px}
@@ -133,16 +133,16 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 .fb.ok{background:var(--good-soft);color:#19603E}
 .fb.no{background:var(--bad-soft);color:#8F3320}
 .result-big{text-align:center;padding:26px 0 10px}
-.result-big .score{font-size:44px;font-weight:900}
+.result-big .score{font-size:44px;font-weight:var(--fw-bold)}
 .result-big .msg{color:var(--ink2);margin-top:4px;font-size:14px}
 /* memorize */
 .deck-card{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:10px;cursor:pointer}
 .deck-card .ic{font-size:26px}
-.deck-card .t{font-weight:800;font-size:14.5px}
+.deck-card .t{font-weight:var(--fw-bold);font-size:14.5px}
 .deck-card .m{font-size:12px;color:var(--ink2)}
 .flash{background:var(--card);border:1.5px solid var(--ink);border-radius:18px;min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;margin-bottom:14px;cursor:pointer}
-.flash .front{font-size:19px;font-weight:800}
-.flash .back{font-size:18px;color:var(--blue);font-weight:800;margin-top:12px}
+.flash .front{font-size:19px;font-weight:var(--fw-bold)}
+.flash .back{font-size:18px;color:var(--blue);font-weight:var(--fw-bold);margin-top:12px}
 .flash .desc{font-size:13px;color:var(--ink2);font-weight:500;margin-top:10px;line-height:1.55}
 .flash .cex{font-size:13.5px;margin-top:12px;padding:8px 10px;background:#FDFCF5;border-left:3px solid var(--hl);border-radius:0 8px 8px 0;width:100%;box-sizing:border-box}
 .flash .cex .en{font-family:Georgia,serif}
@@ -157,12 +157,12 @@ mark,.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,
 /* rank */
 .lb-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
 .lb-row.me{border-color:var(--hl);background:var(--hl-soft)}
-.lb-rank{font-weight:900;font-size:16px;width:26px;text-align:center}
-.lb-name{font-weight:700;font-size:14px}
+.lb-rank{font-weight:var(--fw-bold);font-size:16px;width:26px;text-align:center}
+.lb-name{font-weight:var(--fw-bold);font-size:14px}
 .lb-sub{font-size:11.5px;color:var(--ink2)}
-.lb-pts{margin-left:auto;font-weight:800;font-size:14px}
+.lb-pts{margin-left:auto;font-weight:var(--fw-bold);font-size:14px}
 .code-box{background:var(--ink);color:#fff;border-radius:14px;padding:16px;text-align:center;margin-bottom:12px}
-.code-box .code{font-size:26px;font-weight:900;letter-spacing:5px;color:var(--hl);margin:6px 0}
+.code-box .code{font-size:26px;font-weight:var(--fw-bold);letter-spacing:5px;color:var(--hl);margin:6px 0}
 .code-box .m{font-size:12px;opacity:.75}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 20px;border-radius:22px;font-size:13.5px;font-weight:600;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
@@ -16076,7 +16076,7 @@ function vHome(){
         return `<div class="row" style="margin-bottom:6px${lv===2?';margin-top:12px':''}"><b style="font-size:14px">Level ${lv}</b><span class="muted">${d}/${tt} 유닛</span><span class="grow"></span><b style="font-size:14px">${pc}%</b></div>
         <div class="prog-line ${lv===2?'yellow':''}" style="${lv===3?'--ink:#6A58E6':''}"><i style="width:${pc}%"></i></div>`;}).join('')}
     </div>
-    ${nu?`<button class="btn yellow" id="go-next">▶ 이어서 학습 — Ch.${nu.chId} ${esc(nu.title)}</button>`:`<div class="card" style="text-align:center;font-weight:800">🏆 Level 1 완주! 대단합니다.</div>`}
+    ${nu?`<button class="btn yellow" id="go-next">▶ 이어서 학습 — Ch.${nu.chId} ${esc(nu.title)}</button>`:`<div class="card" style="text-align:center;font-weight:var(--fw-bold)">🏆 Level 1 완주! 대단합니다.</div>`}
     <div class="card" style="margin-top:12px"><div class="row"><div><b>🧠 오늘 복습 ${due}장</b><div class="muted" style="margin-top:4px">1일 · 3일 · 7일 · 14일 간격으로 자동 복습</div></div><span class="grow"></span><button class="btn small" id="go-review">복습하기</button></div></div>
     <div class="card" style="margin-top:12px"><div class="row"><div><b>📊 약점 분석</b><div class="muted" style="margin-top:4px">오답 유형과 다시 풀 문제를 확인해요</div></div><span class="grow"></span><button class="btn small ghost" id="go-insight">보기</button></div></div>
     <div class="sect">배지</div>
