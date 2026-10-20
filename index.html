@@ -387,6 +387,44 @@
   .carry-row .cr-t{flex:1;min-width:0;font-weight:var(--fw-bold);font-size:13.5px;display:flex;flex-direction:column}
   .carry-row .cr-t small{font-size:11.5px;color:#94A3B8;font-weight:var(--fw-bold)}
   /* 🐣 내 캐릭터 */
+  /* 💬 가족 대화 · 🤝 친구 응원 */
+  .chat-drawer{display:flex;flex-direction:column;max-height:92vh}
+  .chat-drawer .drawer-head{flex:0 0 auto}
+  .chat-note{font-size:11.5px;color:#94A3B8;text-align:center;padding:6px 12px 0}
+  .chat-list{flex:1;min-height:240px;max-height:52vh;overflow:auto;padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+  .chat-day{align-self:center;font-size:11px;color:#94A3B8;background:var(--surface2,#F1F2F6);border-radius:99px;padding:2px 10px;margin:6px 0}
+  .chat-msg{display:flex;flex-direction:column;align-items:flex-start;max-width:80%}
+  .chat-msg.me{align-self:flex-end;align-items:flex-end}
+  .cm-who{font-size:11px;color:#64748B;font-weight:var(--fw-semibold);margin:0 0 2px 4px}
+  .cm-bub{background:var(--surface2,#F1F2F6);border-radius:16px 16px 16px 4px;padding:8px 12px;font-size:14px;line-height:1.5;word-break:break-word}
+  .chat-msg.par:not(.me) .cm-bub{background:#FFF6DC}
+  .chat-msg.me .cm-bub{background:var(--accent,#6A58E6);color:#fff;border-radius:16px 16px 4px 16px}
+  .cm-meta{font-size:10.5px;color:#94A3B8;margin:2px 4px 0}.cm-meta a{color:#94A3B8}
+  .chat-quick{display:flex;gap:6px;overflow-x:auto;padding:6px 12px;flex:0 0 auto}
+  .chat-quick button{flex:0 0 auto;border:1px solid var(--line,#E4E4EA);background:var(--surface,#fff);border-radius:99px;padding:6px 10px;font:inherit;font-size:12.5px;cursor:pointer;color:inherit}
+  .chat-input{display:flex;gap:8px;padding:8px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line,#E4E4EA);flex:0 0 auto}
+  .chat-input textarea{flex:1;resize:none;border:1px solid var(--line,#E4E4EA);border-radius:18px;padding:9px 12px;font:inherit;font-size:16px;line-height:1.4;outline:none;max-height:110px}
+  .chat-send{width:42px;height:42px;border-radius:50%;border:none;background:var(--accent,#6A58E6);color:#fff;font-size:17px;flex:0 0 auto;cursor:pointer}
+  .fr-code{display:flex;align-items:center;gap:10px;justify-content:space-between;border:1.5px dashed #CFC8F5;border-radius:14px;padding:10px 12px;background:#F7F6FE}
+  .fr-code small{display:block;font-size:11px;color:#8F8D9B}
+  .fr-code b{display:block;font-size:24px;letter-spacing:.18em;color:var(--accent,#6A58E6);font-variant-numeric:tabular-nums}
+  .fr-code span{font-size:11px;color:#94A3B8}
+  .fr-code .ghost-btn{flex:0 0 auto;width:auto;padding:8px 12px}
+  .fr-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 2px;border-bottom:1px solid var(--line,#E4E4EA);font-size:13.5px}
+  .fr-row small{display:block;font-size:11.5px;color:#94A3B8}
+  .fr-row span{display:flex;gap:6px;flex:0 0 auto}
+  .fr-card{border:1px solid var(--line,#E4E4EA);border-radius:16px;padding:10px 12px;margin-bottom:8px;background:var(--surface,#fff)}
+  .fr-top{display:flex;align-items:center;gap:10px}
+  .fr-top img{width:48px;height:48px;object-fit:contain}.fr-egg{font-size:34px;width:48px;text-align:center}
+  .fr-t{flex:1;min-width:0}.fr-t b{display:block;font-size:14.5px}.fr-t small{font-size:11.5px;color:#94A3B8}
+  .fr-x{border:none;background:none;font-size:18px;color:#94A3B8;cursor:pointer;padding:4px 6px}
+  .fr-stk{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+  .fr-stk button{border:1px solid var(--line,#E4E4EA);background:var(--surface,#fff);border-radius:12px;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;font:inherit;color:inherit}
+  .fr-stk button span{font-size:20px}.fr-stk button small{font-size:10.5px;color:#64748B}
+  .fr-stk button.sent{background:#EFFAF3;border-color:#BDE5CB}.fr-stk button.sent small{color:#15803D}
+  .fr-got{display:flex;flex-direction:column;gap:4px}
+  .fr-got div{display:flex;align-items:center;gap:6px;font-size:13px;padding:6px 2px;border-bottom:1px dashed var(--line,#E4E4EA)}
+  .fr-got div span{font-size:18px}.fr-got div small{margin-left:auto;font-size:11px;color:#94A3B8}
   /* ⭕ 공부 링 · 🌱 66일 습관 · 🏅 뱃지 */
   .rg-card{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface,#fff);border:1px solid var(--line,#E4E4EA);border-radius:16px;padding:12px 8px 10px;margin:0 0 12px}
   .rg-card.full{border-color:#A7E3C8;background:linear-gradient(180deg,#F2FBF6,var(--surface,#fff))}
@@ -471,7 +509,16 @@
   .char-gal{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
   .cgal{border-radius:12px;background:var(--surface2,#F6F6FA);padding:6px 2px;text-align:center;font-size:10.5px;font-weight:var(--fw-bold);color:var(--muted2,#64748B)}
   .cgal img{width:100%;aspect-ratio:1;object-fit:contain;display:block}
-  .cgal.lock img{filter:brightness(0);opacity:.16}
+  .cgal.lock img{filter:brightness(0);opacity:.55}
+  .cgal.lock{background:var(--surface2,#F1F2F6)}
+  .char-els button.shadow img{filter:brightness(0);opacity:.55}
+  .char-els button.shadow{background:var(--surface2,#F1F2F6)}
+  .char-els button:disabled{cursor:default}
+  .char-hero.is-shadow img{filter:brightness(0);opacity:.6}
+  .char-rule{font-size:12px;color:#64748B;margin-top:8px;line-height:1.5}
+  .char-done{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+  .char-done div{display:flex;flex-direction:column;align-items:center;border:1.5px solid #F2D58A;border-radius:14px;padding:6px;background:linear-gradient(180deg,#FFFBEA,var(--surface,#fff))}
+  .char-done img{width:64px;height:64px;object-fit:contain}.char-done b{font-size:12px}.char-done small{font-size:10.5px;color:#94A3B8}
   .cgal.now{outline:2px solid var(--accent,#6A58E6)}
   .char-grow{position:fixed;inset:0;z-index:9000;background:rgba(15,12,40,.55);display:flex;align-items:center;justify-content:center;padding:16px;animation:cgIn .25s ease-out}
   .cg-card{background:var(--surface,#fff);border-radius:22px;padding:20px 18px 16px;width:min(340px,100%);text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)}
@@ -1465,9 +1512,9 @@ function monGainCheck(prev, next){
   if(after.stage>before.stage) setTimeout(()=>toast(`이번 주 등급 ${tierName(after.stage)} 달성`,"cheer"),700);
 }
 /* ============================================================
- *  🐣 내 캐릭터 — 지금까지 쌓은 포인트만큼 자라요 (줄어들지 않아요)
- *  포인트 = 완료한 할 일 1개 20점 + 인정 공부시간 1분 1점 (전체 기간 누적)
- *  매일 들어오라고 재촉하지 않아요: 쉬어도 그대로, 한 만큼만 자라요.
+ *  🐣 내 캐릭터 — 66일을 지키면 10단계(전설)까지 자라요
+ *  지킨 날 = 할 일을 하나라도 끝냈거나 🌱 습관을 체크한 날 (이 캐릭터를 시작한 날부터)
+ *  7일 · 14일 · 21일 … 66일마다 한 단계씩. 하루 쉬어도 줄어들지 않아요: 지킨 날만큼만 자라요.
  * ============================================================ */
 const CHAR_ELS=[
   {id:"fire",  name:"불꽃",  emo:"🔥", c:"#F97316"},
@@ -1476,10 +1523,18 @@ const CHAR_ELS=[
   {id:"bolt",  name:"번개",  emo:"⚡", c:"#EAB308"},
   {id:"shadow",name:"그림자", emo:"🌙", c:"#8B5CF6"},
 ];
-const CHAR_PTS=[0,300,800,1600,3000,5000,8000,12000,17000,24000];
+const CHAR_PTS=[0,7,14,21,28,35,44,52,59,66];   // 단계마다 필요한 지킨 날 (21 뿌리 · 44 줄기 · 66 열매와 맞춰요)
 const CHAR_STAGE_NAME=["꼬물이","아기","꼬마","새내기","씩씩이","단짝","용사","고수","영웅","전설"];
 const CHAR_MAX=CHAR_PTS.length-1;
-function charOf(){ const c=state.settings.character||{}; return {el:CHAR_ELS.some(e=>e.id===c.el)? c.el : "", name:c.name||""}; }
+// 캐릭터: {el, name, changes(속성 바꾼 횟수, 1번까지), start(이 캐릭터를 시작한 날), done:[다 키운 캐릭터]}
+function charOf(){ const c=state.settings.character||{}; return {el:CHAR_ELS.some(e=>e.id===c.el)? c.el : "", name:c.name||"", changes:c.changes|0, start:c.start||"", done:Array.isArray(c.done)? c.done : []}; }
+const CHAR_CHANGES=1;
+// 이 캐릭터를 시작한 날부터 지킨 날 수 (새 캐릭터는 0일부터)
+function charKeptDays(){
+  const tot=charReady(), st=charOf().start; if(!tot) return 0;
+  return Object.keys(tot.days).filter(d=>tot.days[d]>0 && (!st || d>=st)).length;
+}
+function charNow(){ return charCalc(charKeptDays()); }
 function charElOf(id){ return CHAR_ELS.find(e=>e.id===id)||CHAR_ELS[0]; }
 function charImg(el,stage){ return `assets/chars/${el}${(stage|0)+1}.webp`; }
 function charCalc(pts){
@@ -1489,18 +1544,18 @@ function charCalc(pts){
   const pct= next? Math.min(100, Math.round((pts-CHAR_PTS[s])/(next-CHAR_PTS[s])*100)) : 100;
   return {pts, stage:s, next, toNext: next? next-pts : 0, pct};
 }
-// ownerUid → {pts} (전체 기간 완료한 할 일)
+// ownerUid → {days:{날짜: 그날 끝낸 할 일 + 습관 체크 수}}
 async function loadCharTotals(){
   const uid=state.ownerUid;
   if(state.charTotals[uid]) return state.charTotals[uid];
-  let pts=0;
+  const days={};
   try{
     const snap=await plannerRef().collection("tasks").where("done","==",true).get();
-    snap.docs.forEach(d=>{ pts+=20+(creditedMin(d.data())||0); });
+    snap.docs.forEach(d=>{ const t=d.data(); if(t.date) days[t.date]=(days[t.date]||0)+1; });
     const H=await loadHabits();
-    H.list.forEach(h=>{ pts+=habitCount(h)*HABIT_PTS; });              // 🌱 습관 체크 1번 = +10
-  }catch(e){ console.warn("캐릭터 포인트", e); }
-  state.charTotals[uid]={pts};
+    H.list.forEach(h=>Object.keys(h.checks||{}).forEach(ds=>{ days[ds]=(days[ds]||0)+1; }));
+  }catch(e){ console.warn("캐릭터 지킨 날", e); }
+  state.charTotals[uid]={days};
   return state.charTotals[uid];
 }
 function charReady(){ return state.charTotals[state.ownerUid]||null; }
@@ -1509,13 +1564,14 @@ function charGainCheck(prev, next){
   const tot=charReady(); if(!tot) return;
   const was=!!(prev&&prev.done), now=!!next.done;
   if(was===now) return;
-  charAddPts(now? 20+(creditedMin(next)||0) : -(20+(creditedMin(prev)||0)));
+  charAddDay(next.date, now? 1 : -1);
 }
-function charAddPts(delta){
-  const tot=charReady(); if(!tot) return;
-  const before=charCalc(tot.pts).stage;
-  tot.pts+=delta;
-  const after=charCalc(tot.pts).stage;
+// 그날 한 일이 생기거나(+1) 없어질 때(-1) — 지킨 날이 늘면 자라요
+function charAddDay(ds, delta){
+  const tot=charReady(); if(!tot || !ds) return;
+  const before=charNow().stage;
+  tot.days[ds]=Math.max(0,(tot.days[ds]||0)+delta);
+  const after=charNow().stage;
   const ch=charOf();
   if(after>before && ch.el && !state.viewingChild) setTimeout(()=>charGrowShow(ch, after), 600);
   updateCharBtn();
@@ -1528,7 +1584,7 @@ function charGrowShow(ch, stage){
     <div class="cg-sub">${nm}${josaIGa(ch.name||E.name)} 자랐어요!</div>
     <div class="cg-pic"><img src="${charImg(ch.el,stage-1)}" class="old" alt=""><img src="${charImg(ch.el,stage)}" class="new" alt=""></div>
     <div class="cg-lv">Lv${stage+1} · ${CHAR_STAGE_NAME[stage]}</div>
-    <div class="cg-msg">꾸준히 해 온 만큼 자랐어요. 스스로 해낸 거예요 👏</div>
+    <div class="cg-msg">${stage>=CHAR_MAX? "66일을 지켜서 전설이 됐어요! 🏆 이제 새 캐릭터도 키울 수 있어요." : `지킨 날 ${CHAR_PTS[stage]}일! 스스로 해낸 거예요 👏`}</div>
     <button class="cg-ok" onclick="this.closest('.char-grow').remove()">좋아요</button></div>`;
   box.addEventListener("click", e=>{ if(e.target===box) box.remove(); });
   document.body.appendChild(box);
@@ -1539,7 +1595,7 @@ function updateCharBtn(){
   const b=document.getElementById("chBtn"); if(!b) return;
   const tot=charReady(), ch=charOf();
   if(!tot){ loadCharTotals().then(updateCharBtn); return; }
-  const st=charCalc(tot.pts).stage;
+  const st=charNow().stage;
   b.innerHTML= ch.el? `<img src="${charImg(ch.el,st)}" alt="">` : `<span>🥚</span>`;
   b.title= ch.el? `${ch.name||charElOf(ch.el).name} · Lv${st+1}` : "내 캐릭터 고르기";
 }
@@ -1551,57 +1607,98 @@ function renderCharCard(){
     loadCharTotals().then(()=>render());
     return `<div class="char-card"><div style="font-size:12px;color:#94A3B8">불러오는 중…</div></div>`;
   }
-  const ch=charOf(), c=charCalc(tot.pts);
+  const ch=charOf(), c=charNow();
   if(!ch.el) return `<button class="char-card pick" onclick="drawCharacter()">
-    <span class="cc-egg">🥚</span><span class="cc-txt"><b>내 캐릭터를 골라 보세요</b><span>공부한 만큼 자라요 · 지금 ${c.pts.toLocaleString()}점</span></span><span class="hub-arr">›</span></button>`;
+    <span class="cc-egg">🥚</span><span class="cc-txt"><b>내 캐릭터를 골라 보세요</b><span>66일을 지키면 전설까지 자라요</span></span><span class="hub-arr">›</span></button>`;
   const E=charElOf(ch.el);
   return `<button class="char-card" onclick="drawCharacter()" style="--cc:${E.c}">
     <img class="cc-img" src="${charImg(ch.el,c.stage)}" alt="">
     <span class="cc-txt"><b>${esc(ch.name||E.name)} <small>Lv${c.stage+1} · ${CHAR_STAGE_NAME[c.stage]}</small></b>
       <span class="cc-bar"><i style="width:${c.pct}%"></i></span>
-      <span>${c.next? `다음 성장까지 ${c.toNext.toLocaleString()}점` : "최고 단계까지 자랐어요"} · 모은 포인트 ${c.pts.toLocaleString()}</span></span></button>`;
+      <span>지킨 날 ${c.pts}/66일 · ${c.next? `다음 모습까지 ${c.toNext}일` : "전설이 됐어요 🏆"}</span></span></button>`;
 }
 // ⚙️ 설정 → 🐣 내 캐릭터
+//  - 처음 한 번 고르고, 속성은 한 번만 바꿀 수 있어요 (포인트는 그대로)
+//  - 10단계(전설)까지 키우면 새 캐릭터를 골라 처음부터 키워요 · 다 키운 캐릭터는 컬렉션에 남아요
+//  - 아직 내 것이 아닌 캐릭터는 그림자로 보여요
 let charPickEl="";
 function drawCharacter(){
   const tot=charReady();
   if(!tot){ hubShell("🐣 내 캐릭터", `<div class="empty">불러오는 중…</div>`); loadCharTotals().then(drawCharacter); return; }
-  const ch=charOf(), c=charCalc(tot.pts);
-  const el=charPickEl||ch.el||"fire", E=charElOf(el);
-  const who=state.viewingChild? `${esc(state.ownerName||"자녀")}의 캐릭터` : "내 캐릭터";
+  const ch=charOf(), c=charNow(), ro=state.viewingChild;
+  const maxed=!!ch.el && c.stage>=CHAR_MAX;
+  const doneEls=ch.done.map(d=>d.el);
+  const canChange=!!ch.el && !maxed && ch.changes<CHAR_CHANGES;
+  const pickable=e=>!ro && !doneEls.includes(e) && e!==ch.el && (!ch.el || maxed || canChange);
+  const el=(charPickEl && (pickable(charPickEl) || charPickEl===ch.el))? charPickEl : (ch.el||charPickEl||"fire"), E=charElOf(el);
+  const preview=!!ch.el && el!==ch.el;             // 다른 캐릭터를 눌러 본 상태 (그림자로)
   const gallery=CHAR_PTS.map((p,i)=>{
-    const open=i<=c.stage;
-    return `<div class="cgal ${open?"":"lock"} ${i===c.stage?"now":""}"><img src="${charImg(el,i)}" alt="" loading="lazy"><span>${open? `Lv${i+1} ${CHAR_STAGE_NAME[i]}` : `${p.toLocaleString()}점`}</span></div>`;
+    const open=!preview && !!ch.el && i<=c.stage;
+    return `<div class="cgal ${open?"":"lock"} ${!preview && ch.el && i===c.stage?"now":""}"><img src="${charImg(el,i)}" alt="" loading="lazy"><span>${open? `Lv${i+1} ${CHAR_STAGE_NAME[i]}` : `${p}일`}</span></div>`;
   }).join("");
-  hubShell("🐣 "+who, `
-    <div class="char-hero" style="--cc:${E.c}">
-      <img src="${charImg(el,c.stage)}" alt="">
-      <div class="ch-name">${esc(ch.name||E.name)}</div>
-      <div class="ch-lv">Lv${c.stage+1} · ${CHAR_STAGE_NAME[c.stage]} · 모은 포인트 <b>${c.pts.toLocaleString()}</b></div>
-      <div class="cc-bar big"><i style="width:${c.pct}%"></i></div>
-      <div class="ch-next">${c.next? `다음 모습까지 <b>${c.toNext.toLocaleString()}점</b>` : "최고 단계 · 전설이 됐어요!"}</div>
+  // 고르기 칸: 내 캐릭터 · 다 키운 캐릭터는 색, 나머지는 그림자 (처음 고를 때만 모두 색)
+  const elBtn=e=>{
+    const done=ch.done.find(d=>d.el===e.id), mine=e.id===ch.el, lit=mine || !!done || !ch.el;
+    const st= mine? c.stage : done? CHAR_MAX : 0;
+    const can=pickable(e.id) || (mine && preview);
+    return `<button class="${e.id===el?"on":""} ${lit?"":"shadow"}" style="--cc:${e.c}" ${can? `onclick="charPickEl='${e.id}';drawCharacter()"` : "disabled"}>
+      <img src="${charImg(e.id, st)}" alt=""><span>${lit? `${e.emo} ${e.name}` : "？"}${done?" 🏆":""}</span></button>`;
+  };
+  let rule;
+  if(!ch.el) rule="함께 자랄 캐릭터를 골라요. 고른 뒤에는 <b>한 번만</b> 바꿀 수 있어요.";
+  else if(maxed) rule="🏆 전설까지 키웠어요! 이제 <b>새 캐릭터</b>를 골라 처음부터 키울 수 있어요. 지금 캐릭터는 컬렉션에 남아요.";
+  else if(canChange) rule="속성은 <b>한 번만</b> 바꿀 수 있어요 (지킨 날은 그대로). 다른 캐릭터는 지금 캐릭터를 10단계까지 키우면 만날 수 있어요.";
+  else rule="속성 바꾸기를 이미 썼어요. 지금 캐릭터를 <b>10단계(전설)</b>까지 키우면 새 캐릭터를 고를 수 있어요.";
+  let action="";
+  if(!state.viewingChild){
+    if(!ch.el) action=`<button class="btn-primary" style="margin-top:10px" onclick="saveCharacter('start')">이 캐릭터로 시작</button>`;
+    else if(preview && maxed) action=`<button class="btn-primary" style="margin-top:10px" onclick="saveCharacter('new')">🐣 이 캐릭터 새로 키우기</button>`;
+    else if(preview) action=`<button class="btn-primary" style="margin-top:10px" onclick="saveCharacter('change')">이 캐릭터로 바꾸기 (한 번만)</button><button class="ghost-btn" style="width:100%;margin-top:6px;padding:10px" onclick="charPickEl='';drawCharacter()">그대로 둘래요</button>`;
+    else action=`<button class="btn-primary" style="margin-top:10px" onclick="saveCharacter('name')">이름 저장</button>`;
+  }
+  const collection= ch.done.length? `<div class="section-lbl" style="margin-top:18px">🏆 다 키운 캐릭터</div>
+    <div class="char-done">${ch.done.map(d=>`<div><img src="${charImg(d.el,CHAR_MAX)}" alt=""><b>${esc(d.name||charElOf(d.el).name)}</b><small>${(d.at||"").slice(0,10).replace(/-/g,".")}</small></div>`).join("")}</div>` : "";
+  hubShell("🐣 "+(ro? `${esc(state.ownerName||"자녀")}의 캐릭터` : "내 캐릭터"), `
+    <div class="char-hero ${preview?"is-shadow":""}" style="--cc:${E.c}">
+      <img src="${charImg(el, preview? 0 : (ch.el? c.stage : 0))}" alt="">
+      <div class="ch-name">${preview? (maxed? `${E.emo} 새 친구` : "？？？") : esc(ch.name||E.name)}</div>
+      <div class="ch-lv">${preview? (maxed? "Lv1부터 새로 시작해요" : "바꾸면 어떤 모습일까요?") : `Lv${c.stage+1} · ${CHAR_STAGE_NAME[c.stage]} · 지킨 날 <b>${c.pts}</b>/66일`}</div>
+      ${preview? "" : `<div class="cc-bar big"><i style="width:${c.pct}%"></i></div>
+      <div class="ch-next">${c.next? `다음 모습까지 <b>${c.toNext}일</b>` : "66일을 지켜 전설이 됐어요!"}</div>`}
     </div>
-    <div class="section-lbl" style="margin-top:16px">속성 고르기 <span style="font-weight:600;color:#94A3B8">(언제 바꿔도 포인트는 그대로)</span></div>
-    <div class="char-els">${CHAR_ELS.map(e=>`<button class="${e.id===el?"on":""}" style="--cc:${e.c}" onclick="charPickEl='${e.id}';drawCharacter()"><img src="${charImg(e.id,Math.min(c.stage,2))}" alt=""><span>${e.emo} ${e.name}</span></button>`).join("")}</div>
-    <div class="section-lbl" style="margin-top:14px">이름</div>
-    <input class="inp" id="charName" maxlength="12" placeholder="${E.name}" value="${esc(ch.name)}">
-    <button class="btn-primary" style="margin-top:10px" onclick="saveCharacter()">${ch.el? "저장" : "이 캐릭터로 시작"}</button>
+    <div class="section-lbl" style="margin-top:16px">캐릭터</div>
+    <div class="char-els">${CHAR_ELS.map(elBtn).join("")}</div>
+    <div class="char-rule">${rule}</div>
+    ${ro? "" : `<div class="section-lbl" style="margin-top:14px">이름</div>
+    <input class="inp" id="charName" maxlength="12" placeholder="${E.name}" value="${esc(preview? "" : ch.name)}">`}
+    ${action}
     <div class="section-lbl" style="margin-top:18px">자라는 모습</div>
     <div class="char-gal">${gallery}</div>
-    <div class="share-note" style="margin-top:14px">🌱 <b>포인트 모으는 법</b> — 할 일 1개 완료 <b>20점</b> · 공부 1분 <b>1점</b>.<br>
-      포인트는 줄어들지 않아요. 하루 쉬어도 괜찮아요. 해낸 만큼 차곡차곡 쌓여서 자라요.</div>
+    ${collection}
+    <div class="share-note" style="margin-top:14px">🌱 <b>66일 지키기</b> — 할 일을 하나라도 끝내거나 🌱 습관을 체크하면 그날은 <b>지킨 날</b>이에요.<br>
+      7일 · 14일 · 21일 … 지킨 날이 쌓일 때마다 한 단계씩, <b>66일이면 전설(10단계)</b>! 하루 쉬어도 줄어들지 않아요.</div>
   `);
 }
-async function saveCharacter(){
-  const el=charPickEl||charOf().el||"fire";
+async function saveCharacter(how){
+  const ch=charOf(), tot=charReady(), el=charPickEl||ch.el||"fire";
   const name=((document.getElementById("charName")||{}).value||"").trim().slice(0,12);
-  await saveSettings({...state.settings, character:{el, name}});
-  charPickEl=""; toast("캐릭터를 저장했어요","good"); drawCharacter(); render(); updateCharBtn();
+  let next={el:ch.el, name:ch.name, changes:ch.changes, start:ch.start, done:ch.done};
+  if(how==="start") next={el, name, changes:0, start:ch.start||fmt(new Date()), done:ch.done};
+  else if(how==="change"){
+    if(ch.changes>=CHAR_CHANGES || charNow().stage>=CHAR_MAX) return;
+    if(!confirm(`${charElOf(el).name}(으)로 바꿀까요? 바꾸기는 한 번만 할 수 있어요.`)) return;
+    next={...next, el, name:name||ch.name, changes:ch.changes+1};
+  }else if(how==="new"){
+    if(charNow().stage<CHAR_MAX) return;
+    next={el, name, changes:0, start:fmt(addDays(new Date(),1)), done:[...ch.done, {el:ch.el, name:ch.name, at:new Date().toISOString()}]};   // 새 캐릭터는 내일부터 0일
+  }else next.name=name;
+  await saveSettings({...state.settings, character:next});
+  charPickEl=""; toast(how==="new"? "🐣 새 캐릭터를 키우기 시작했어요!" : "캐릭터를 저장했어요","good"); drawCharacter(); render(); updateCharBtn();
 }
 /* ============================================================
  *  🌱 66일 습관 · ⭕ 오늘의 공부 링 · 🏅 나의 뱃지
  *  - 재촉하지 않아요: 하루 빠져도 괜찮고, 약속은 "이틀 연속만 안 빠지기"
- *  - 습관은 아이가 스스로 정해요 (부모님 화면은 보기만) · 습관 체크 1번 = 캐릭터 포인트 +10
+ *  - 습관은 아이가 스스로 정해요 (부모님 화면은 보기만) · 체크한 날은 캐릭터의 '지킨 날'
  * ============================================================ */
 const HABIT_DAYS=66, HABIT_MAX=3, HABIT_PTS=10;
 const HABIT_PHASE=[{to:21,name:"뿌리 내리기",emo:"🌱"},{to:44,name:"줄기 자라기",emo:"🌿"},{to:66,name:"열매 맺기",emo:"🍎"}];
@@ -1642,7 +1739,7 @@ async function toggleHabit(id, ds){
   let finished=false;
   if(!was && h.status!=="keep" && n>=HABIT_DAYS && !h.doneAt){ h.doneAt=fmt(new Date()); finished=true; }
   try{ await saveHabits(); }catch(e){ toast("저장하지 못했어요","info"); return; }
-  charAddPts(was? -HABIT_PTS : HABIT_PTS);
+  charAddDay(ds, was? -1 : 1);
   render();
   if(document.querySelector(".hb-drawer")) drawHabits();
   if(was) return;
@@ -1674,7 +1771,7 @@ function habitDoneShow(id){
       <div class="drawer-head"><h3>🎉 66일 완주!</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
       <div class="drawer-body">
         <div class="hb-cert">
-          ${ch.el? `<img src="${charImg(ch.el, charCalc((charReady()||{pts:0}).pts).stage)}" alt="">` : `<div style="font-size:54px">🏅</div>`}
+          ${ch.el? `<img src="${charImg(ch.el, charNow().stage)}" alt="">` : `<div style="font-size:54px">🏅</div>`}
           <div class="hc-k">습관 완주 인증</div>
           <div class="hc-n">${h.emo} ${esc(h.name)}</div>
           <div class="hc-d">${h.start.replace(/-/g,".")} ~ ${h.doneAt.replace(/-/g,".")} · ${habitCount(h)}일</div>
@@ -1734,7 +1831,7 @@ function drawHabits(){
       <div class="drawer-head"><h3>🌱 66일 습관${ro?` · ${esc(state.ownerName)}`:""}</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
       <div class="drawer-body">
         <div class="share-note" style="margin:0 0 12px">🌱 하나의 습관이 몸에 붙는 데 약 66일이 걸려요. <b>하루 빠져도 괜찮아요 — 이틀 연속만 빠지지 않기!</b><br>
-          1~21일 뿌리 내리기 · 22~44일 줄기 자라기 · 45~66일 열매 맺기 · 체크할 때마다 캐릭터 포인트 +${HABIT_PTS}${ro? "<br>👀 습관은 아이가 스스로 정하고 체크해요. 부모님은 응원해 주세요." : ""}</div>
+          1~21일 뿌리 내리기 · 22~44일 줄기 자라기 · 45~66일 열매 맺기 · 체크한 날은 캐릭터의 <b>지킨 날</b>이 돼요${ro? "<br>👀 습관은 아이가 스스로 정하고 체크해요. 부모님은 응원해 주세요." : ""}</div>
         ${cards || `<div class="empty" style="padding:16px">${ro? "아직 정한 습관이 없어요." : "아직 습관이 없어요. 아주 작은 것 하나로 시작해 봐요!"}</div>`}
         ${add}${book}
       </div></div></div>`;
@@ -1835,6 +1932,296 @@ async function drawBadges(){
       <span class="bd-bar"><i style="width:${Math.min(100,Math.round(md/MONTH_GOAL*100))}%"></i></span><small>${md}/${MONTH_GOAL}일${md>=MONTH_GOAL?" · 완주! 🎉":""}</small>
       ${months.length? `<div class="bd-months">${months.map(m=>`<span>🗓️ ${+m.slice(5)}월 완주</span>`).join("")}</div>` : ""}</div>
     ${groups}`);
+}
+/* ============================================================
+ *  💬 소통 — 가족 대화(글 · 스티커) · 🤝 친구 응원(스티커만)
+ *  - 가족 대화: planner/{자녀uid}/chat/{id} {from, name, role, text, at} — 자녀와 연결된 부모님만 (기존 규칙 그대로)
+ *    읽은 시각: planner/{자녀uid}/meta/chatRead {uid: at}
+ *  - 친구: 직접 만나 친구 코드를 주고받고 → 받은 친구가 수락 → 양쪽 부모님이 승인해야 친구가 돼요
+ *    friendCodes/{코드} {uid, nick} · friends/{작은uid_큰uid} {users, from, to, names, parents, status, okFrom, okTo}
+ *    friendCards/{uid} 친구에게 보이는 작은 카드 (별명 · 캐릭터 · 이번 주 공부한 날 · 습관 일수)
+ *    planner/{받는uid}/cheers/{보낸uid_날짜_스티커} — 정해진 스티커만, 스티커마다 하루 한 번
+ *  - 푸시 알림은 보내지 않아요. 앱을 열 때만 조용히 보여요.
+ * ============================================================ */
+const CHAT_QUICK={
+  parent:["👏 잘했어!","💪 힘내!","❤️ 사랑해","🍀 오늘도 화이팅","🎉 축하해!","☕ 쉬엄쉬엄 해"],
+  child:["📚 공부 시작해요","✅ 오늘 계획 끝!","🙏 도와주세요","📝 계획 같이 봐 주세요","❤️ 고마워요","😊 다녀왔어요"],
+};
+const CHEERS=[["clap","👏","대단해!"],["fire","🔥","불타오른다!"],["strong","💪","힘내!"],["star","🌟","최고야!"],["together","🤝","같이 하자!"],["party","🎉","축하해!"],["book","📚","나도 공부할게!"],["smile","😊","응원해!"]];
+const cheerOf=k=>CHEERS.find(c=>c[0]===k)||CHEERS[0];
+const pairOf=(a,b)=>a<b? a+"_"+b : b+"_"+a;
+const isParentUser=()=>state.profile && state.profile.role==="parent";
+// 자녀 계정: 나와 연결된 부모님 uid (가족 연결 신청 기준)
+function myParentUids(){
+  const L=familyList; if(!L) return [];
+  const out=new Set();
+  L.sent.filter(r=>r.status==="accepted" && r.fromRole!=="parent" && r.toUid).forEach(r=>out.add(r.toUid));
+  L.received.filter(r=>r.status==="accepted" && r.fromRole==="parent").forEach(r=>out.add(r.fromUid));
+  return [...out];
+}
+const ago=at=>{ const m=Math.round((Date.now()-at)/60000); if(m<1) return "방금"; if(m<60) return m+"분 전"; const h=Math.round(m/60); if(h<24) return h+"시간 전"; const d=new Date(at); return `${d.getMonth()+1}/${d.getDate()}`; };
+
+/* ---------- 💬 가족 대화 ---------- */
+let chatKid="", chatUnsub=null, chatMsgs=[], chatReadAt=0;
+function chatKidsList(){
+  if(!isParentUser()) return [{uid:state.user.uid, name:state.profile.name||"나"}];
+  return state.children.filter(c=>c.exists!==false).map(c=>({uid:c.uid, name:c.name}));
+}
+const chatRef=kid=>db.collection("planner").doc(kid).collection("chat");
+async function chatUnreadFor(kid){
+  try{
+    const r=await db.collection("planner").doc(kid).collection("meta").doc("chatRead").get();
+    const last=(r.exists && r.data()[state.user.uid])||0;
+    const s=await chatRef(kid).where("at",">",last).get();
+    return s.docs.filter(d=>d.data().from!==state.user.uid).length;
+  }catch(_){ return 0; }
+}
+async function refreshCommBadge(){
+  if(!state.user) return;
+  let n=0;
+  for(const k of chatKidsList()) n+=await chatUnreadFor(k.uid);
+  state.chatUnread=n;
+  let f=0;
+  try{ f=await friendPendingCount(); }catch(_){}
+  state.friendPending=f;
+  const mb=document.getElementById("menuBtn"); if(mb && (n||f)) mb.classList.add("has-dot");
+  if(n && !refreshCommBadge.told){ refreshCommBadge.told=1; toast(`💬 가족 대화에 새 글 ${n}개 · ⋯ 메뉴 → 소통`,"info"); }
+}
+function commDot(n){ return n? ` <span class="badge-dot">${n}</span>` : ""; }
+function drawChat(kid){
+  const kids=chatKidsList();
+  if(!kids.length){ hubShell("💬 가족 대화", `<div class="empty" style="padding:18px">먼저 <b>가족 연결</b>로 자녀와 연결해 주세요.</div>${hubItem("👨‍👩‍👧","가족 연결","자녀 이메일로 신청","drawFamily()")}`); return; }
+  chatKid= kid || (state.viewingChild && kids.some(k=>k.uid===state.ownerUid)? state.ownerUid : (kids.some(k=>k.uid===chatKid)? chatKid : kids[0].uid));
+  const role=isParentUser()? "parent" : "child";
+  const parents= role==="child"? myParentUids() : [];
+  document.getElementById("drawerRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeChat()">
+    <div class="drawer wide chat-drawer">
+      <div class="drawer-head"><h3>💬 가족 대화</h3><button class="icon-btn sm" onclick="closeChat()">✕</button></div>
+      ${kids.length>1? `<div class="tab-row">${kids.map(k=>`<button class="tab ${k.uid===chatKid?"on":""}" onclick="drawChat('${k.uid}')">${esc(k.name)}</button>`).join("")}</div>` : ""}
+      <div class="chat-note">${role==="child"? (parents.length? "부모님과 나만 보는 대화예요." : "부모님과 <b>가족 연결</b>을 하면 대화할 수 있어요.") : `${esc((kids.find(k=>k.uid===chatKid)||{}).name||"")}와(과) 부모님만 보는 대화예요.`}</div>
+      <div class="chat-list" id="chatList"><div class="empty">불러오는 중…</div></div>
+      <div class="chat-quick">${CHAT_QUICK[role].map(q=>`<button onclick="chatSend(${JSON.stringify(q).replace(/"/g,"&quot;")})">${esc(q)}</button>`).join("")}</div>
+      <div class="chat-input"><textarea id="chatTxt" rows="1" maxlength="300" placeholder="${role==="child"?"부모님께 하고 싶은 말":"아이에게 하고 싶은 말"}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,110)+'px'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();chatSend()}"></textarea><button class="chat-send" onclick="chatSend()" aria-label="보내기">➤</button></div>
+    </div></div>`;
+  if(chatUnsub) chatUnsub();
+  chatReadAt=0;
+  chatUnsub=chatRef(chatKid).orderBy("at","desc").limit(150).onSnapshot(s=>{
+    chatMsgs=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.at-b.at);
+    chatPaint();
+    const newest=chatMsgs.length? chatMsgs[chatMsgs.length-1].at : 0;
+    if(newest>chatReadAt){ chatReadAt=newest; db.collection("planner").doc(chatKid).collection("meta").doc("chatRead").set({[state.user.uid]:Date.now()},{merge:true}).catch(()=>{}); }
+  }, e=>{ const el=document.getElementById("chatList"); if(el) el.innerHTML=`<div class="empty">대화를 불러오지 못했어요.<br>${esc(firestoreDiag(e))}</div>`; });
+}
+function chatPaint(){
+  const el=document.getElementById("chatList"); if(!el) return;
+  if(!chatMsgs.length){ el.innerHTML=`<div class="empty" style="padding:24px 10px">아직 대화가 없어요.<br>아래 버튼이나 글로 먼저 말을 걸어 보세요 🙂</div>`; return; }
+  let lastDay="";
+  el.innerHTML=chatMsgs.map(m=>{
+    const mine=m.from===state.user.uid, d=new Date(m.at), day=fmt(d);
+    const sep= day!==lastDay? `<div class="chat-day">${d.getMonth()+1}월 ${d.getDate()}일</div>` : ""; lastDay=day;
+    return `${sep}<div class="chat-msg ${mine?"me":""} ${m.role==="parent"?"par":"kid"}">
+      ${mine? "" : `<div class="cm-who">${m.role==="parent"?"👑 ":""}${esc(m.name||"")}</div>`}
+      <div class="cm-bub">${esc(m.text).replace(/\n/g,"<br>")}</div>
+      <div class="cm-meta">${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}${mine? ` · <a href="#" onclick="chatDel('${m.id}');return false">지우기</a>` : ""}</div></div>`;
+  }).join("");
+  el.scrollTop=el.scrollHeight;
+}
+async function chatSend(text){
+  const ta=document.getElementById("chatTxt");
+  text=(text!=null? text : (ta? ta.value : "")).trim().slice(0,300);
+  if(!text || !chatKid) return;
+  if(!isParentUser() && !myParentUids().length){ toast("부모님과 가족 연결을 먼저 해 주세요","info"); return; }
+  const m={from:state.user.uid, name:state.profile.name||"", role:isParentUser()?"parent":"child", text, at:Date.now()};
+  try{ await chatRef(chatKid).doc(m.at.toString(36)+"_"+state.user.uid.slice(0,6)).set(m); if(ta && text===ta.value.trim()){ ta.value=""; ta.style.height="auto"; } }
+  catch(e){ toast("보내지 못했어요: "+firestoreDiag(e),"info"); }
+}
+async function chatDel(id){
+  if(!confirm("이 글을 지울까요?")) return;
+  try{ await chatRef(chatKid).doc(id).delete(); }catch(e){ toast("지우지 못했어요","info"); }
+}
+function closeChat(){ if(chatUnsub){ chatUnsub(); chatUnsub=null; } closeDrawer(); refreshCommBadge(); }
+
+/* ---------- 🤝 친구 응원 (스티커만) ---------- */
+const FRIEND_MAX=20;
+const CODE_ABC="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const newCode=()=>Array.from({length:6},()=>CODE_ABC[Math.floor(Math.random()*CODE_ABC.length)]).join("");
+const friendMetaRef=()=>db.collection("planner").doc(state.user.uid).collection("meta").doc("friend");
+async function myFriendMeta(regen){
+  let m={};
+  try{ const d=await friendMetaRef().get(); if(d.exists) m=d.data(); }catch(_){}
+  const nick=(m.nick||state.profile.name||"친구").slice(0,12);
+  if(!m.code || regen){
+    if(m.code) await db.collection("friendCodes").doc(m.code).delete().catch(()=>{});
+    let code=newCode();
+    for(let i=0;i<5;i++){ try{ const d=await db.collection("friendCodes").doc(code).get(); if(!d.exists) break; }catch(_){ break; } code=newCode(); }
+    await db.collection("friendCodes").doc(code).set({uid:state.user.uid, nick, at:Date.now()});
+    m={...m, code, nick}; await friendMetaRef().set(m,{merge:true});
+  }
+  return {...m, nick};
+}
+async function myFriendships(){
+  const s=await db.collection("friends").where("users","array-contains",state.user.uid).get();
+  return s.docs.map(d=>({id:d.id,...d.data()})).filter(f=>f.status!=="ended");
+}
+async function kidsFriendships(){        // 부모: 내 자녀들의 친구 관계
+  const s=await db.collection("friends").where("parents","array-contains",state.user.uid).get();
+  return s.docs.map(d=>({id:d.id,...d.data()})).filter(f=>f.status!=="ended");
+}
+const friendActive=f=>f.status==="accepted" && f.okFrom && f.okTo;
+async function friendPendingCount(){
+  if(isParentUser()){
+    const mine=new Set(state.children.map(c=>c.uid));
+    return (await kidsFriendships()).filter(f=>f.status==="accepted" && ((mine.has(f.from)&&!f.okFrom)||(mine.has(f.to)&&!f.okTo))).length;
+  }
+  return (await myFriendships()).filter(f=>f.status==="pending" && f.to===state.user.uid).length;
+}
+// 친구에게 보이는 내 카드 (하루 한 번 새로)
+async function publishFriendCard(force){
+  if(isParentUser()) return;
+  const day=fmt(new Date()), key="fcard_"+state.user.uid;
+  try{ if(!force && localStorage.getItem(key)===day) return; }catch(_){}
+  const tot=state.charTotals[state.user.uid], ch=state.ownerUid===state.user.uid? charOf() : {el:""};
+  const wk=charWeekDays(); let wkDays=0;
+  try{ const s=await db.collection("planner").doc(state.user.uid).collection("tasks").where("date",">=",wk[0]).where("date","<=",wk[6]).get();
+    wkDays=new Set(s.docs.map(d=>d.data()).filter(t=>t.done).map(t=>t.date)).size; }catch(_){}
+  const H=habitsReady(), habitN=H? Math.max(0,...habitActive().map(habitCount)) : 0;
+  const meta=await myFriendMeta();
+  await db.collection("friendCards").doc(state.user.uid).set({nick:meta.nick, el:ch.el||"", stage:tot? charNow().stage : 0, wkDays, habitN, at:Date.now()});
+  try{ localStorage.setItem(key, day); }catch(_){}
+}
+const sentKey=()=>"cheersent_"+state.user.uid+"_"+fmt(new Date());
+const sentToday=()=>{ try{ return JSON.parse(localStorage.getItem(sentKey())||"{}"); }catch(_){ return {}; } };
+async function sendCheer(to, k){
+  const day=fmt(new Date()), id=`${state.user.uid}_${day}_${k}`;
+  const S=sentToday(); if(S[to+k]){ toast("이 스티커는 오늘 이미 보냈어요","info"); return; }
+  try{
+    await db.collection("planner").doc(to).collection("cheers").doc(id).set({from:state.user.uid, sticker:k, day, at:Date.now()});
+    S[to+k]=1; try{ localStorage.setItem(sentKey(), JSON.stringify(S)); }catch(_){}
+    const c=cheerOf(k); toast(`${c[1]} '${c[2]}' 응원을 보냈어요`,"good"); try{ window.SFX && SFX.play("ok"); }catch(_){}
+    drawFriends(true);
+  }catch(e){ toast("보내지 못했어요 (오늘 이미 보냈거나 아직 친구 승인 전이에요)","info"); }
+}
+async function friendRequest(){
+  const inp=document.getElementById("frCode"), code=(inp? inp.value : "").trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(code.length!==6){ toast("친구 코드 6자리를 넣어 주세요","info"); return; }
+  if(!myParentUids().length){ toast("친구는 부모님과 가족 연결을 한 뒤에 맺을 수 있어요","info"); return; }
+  try{
+    const d=await db.collection("friendCodes").doc(code).get();
+    if(!d.exists){ toast("그런 코드가 없어요. 다시 확인해 주세요","info"); return; }
+    const {uid:to, nick}=d.data();
+    if(to===state.user.uid){ toast("내 코드예요 🙂","info"); return; }
+    const list=await myFriendships();
+    if(list.length>=FRIEND_MAX){ toast(`친구는 ${FRIEND_MAX}명까지예요`,"info"); return; }
+    if(list.some(f=>f.users.includes(to))){ toast("이미 신청했거나 친구예요","info"); return; }
+    const me=await myFriendMeta();
+    await db.collection("friends").doc(pairOf(state.user.uid,to)).set({users:[state.user.uid,to], from:state.user.uid, to,
+      names:{[state.user.uid]:me.nick, [to]:nick}, parents:myParentUids(), status:"pending", okFrom:false, okTo:false, at:Date.now()});
+    toast(`🤝 ${esc(nick)}에게 친구 신청을 보냈어요`,"good"); drawFriends();
+  }catch(e){ toast("신청하지 못했어요: "+firestoreDiag(e),"info"); }
+}
+async function friendAccept(id){
+  const ref=db.collection("friends").doc(id);
+  try{ const d=await ref.get(), f=d.data();
+    await ref.update({status:"accepted", parents:[...new Set([...(f.parents||[]), ...myParentUids()])], acceptedAt:Date.now()});
+    toast("수락했어요! 양쪽 부모님이 승인하면 친구가 돼요","good"); drawFriends();
+  }catch(e){ toast("수락하지 못했어요: "+firestoreDiag(e),"info"); }
+}
+async function friendEnd(id, ask){
+  if(ask && !confirm(ask)) return;
+  try{ await db.collection("friends").doc(id).update({status:"ended", endedBy:state.user.uid, endedAt:Date.now()}); toast("정리했어요","info"); isParentUser()? drawKidFriends() : drawFriends(); }
+  catch(e){ toast("하지 못했어요: "+firestoreDiag(e),"info"); }
+}
+async function friendApprove(id, side){
+  try{ await db.collection("friends").doc(id).update({[side]:true}); toast("승인했어요","good"); drawKidFriends(); }
+  catch(e){ toast("승인하지 못했어요: "+firestoreDiag(e),"info"); }
+}
+// 새 부모님이 연결되면 내 친구 관계에도 넣어 줘요 (부모님이 보고 승인할 수 있게)
+async function friendSyncParents(list){
+  const ps=myParentUids(); if(!ps.length) return;
+  for(const f of list){ const miss=ps.filter(p=>!(f.parents||[]).includes(p)); if(miss.length) await db.collection("friends").doc(f.id).update({parents:[...(f.parents||[]), ...miss]}).catch(()=>{}); }
+}
+async function loadCheers(){
+  const s=await db.collection("planner").doc(state.user.uid).collection("cheers").orderBy("at","desc").limit(40).get();
+  return s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.at-a.at);
+}
+async function drawFriends(keepScroll){
+  if(isParentUser()){ drawKidFriends(); return; }
+  const prev=keepScroll && document.querySelector(".drawer-body"), st=prev? prev.scrollTop : 0;
+  if(!keepScroll) hubShell("🤝 친구 응원", `<div class="empty">불러오는 중…</div>`);
+  let me, list, cheers=[], cards={};
+  try{
+    if(!familyList) familyList=await Family.listMine(db, state.user);
+    [me, list]=await Promise.all([myFriendMeta(), myFriendships()]);
+    friendSyncParents(list);
+    cheers=await loadCheers().catch(()=>[]);
+    const act=list.filter(friendActive);
+    await Promise.all(act.map(async f=>{ const o=f.users.find(u=>u!==state.user.uid); try{ const d=await db.collection("friendCards").doc(o).get(); if(d.exists) cards[o]=d.data(); }catch(_){} }));
+    publishFriendCard();
+    db.collection("planner").doc(state.user.uid).collection("meta").doc("cheerRead").set({at:Date.now()},{merge:true}).catch(()=>{});
+  }catch(e){ hubShell("🤝 친구 응원", `<div class="share-note" style="color:#A5323A;background:#FFF5F6">친구 정보를 불러오지 못했어요.<br>${esc(firestoreDiag(e))}</div>`); return; }
+  const other=f=>f.users.find(u=>u!==state.user.uid), nm=f=>(f.names||{})[other(f)]||"친구";
+  const hasParent=myParentUids().length>0, S=sentToday();
+  const reqIn=list.filter(f=>f.status==="pending" && f.to===state.user.uid);
+  const waiting=list.filter(f=>!friendActive(f) && !(f.status==="pending" && f.to===state.user.uid));
+  const act=list.filter(friendActive);
+  const nameById={}; list.forEach(f=>{ nameById[other(f)]=nm(f); });
+  const friendCard=f=>{ const o=other(f), c=cards[o]||{};
+    return `<div class="fr-card">
+      <div class="fr-top">${c.el? `<img src="${charImg(c.el,c.stage||0)}" alt="">` : `<span class="fr-egg">🥚</span>`}
+        <div class="fr-t"><b>${esc(nm(f))}</b><small>${c.at? `이번 주 공부한 날 ${c.wkDays||0}일${c.habitN? ` · 🌱 습관 ${c.habitN}일째` : ""}` : "아직 카드가 없어요"}</small></div>
+        <button class="fr-x" onclick="friendEnd('${f.id}','${esc(nm(f))}와(과) 친구를 끊을까요?')" aria-label="친구 끊기">⋯</button></div>
+      <div class="fr-stk">${CHEERS.map(([k,e,t])=>`<button class="${S[o+k]?"sent":""}" onclick="sendCheer('${o}','${k}')" title="${t}"><span>${e}</span><small>${t}</small></button>`).join("")}</div></div>`; };
+  const body=`
+    <div class="share-note" style="margin:0 0 12px">🤝 친구에게는 <b>응원 스티커</b>만 보낼 수 있어요 (스티커마다 하루 한 번). 남과 비교하는 곳이 아니라 서로 힘이 되는 곳이에요.</div>
+    ${hasParent? "" : `<div class="share-note" style="background:#FFF6E5;color:#8A5A00;margin:0 0 12px">친구는 <b>부모님과 가족 연결</b>을 한 뒤에 맺을 수 있어요. ⋯ 메뉴 → 가족 연결</div>`}
+    <div class="fr-code"><div><small>내 친구 코드</small><b>${esc(me.code)}</b><span>친구를 직접 만났을 때 이 코드를 알려 주세요</span></div>
+      <button class="ghost-btn" onclick="if(confirm('새 코드를 만들까요? 예전 코드로는 더 신청할 수 없어요.'))myFriendMeta(true).then(()=>drawFriends())">새 코드</button></div>
+    <div style="display:flex;gap:6px;margin:10px 0 4px"><input class="inp" id="frCode" maxlength="6" placeholder="친구 코드 6자리" style="flex:1;text-transform:uppercase;letter-spacing:.15em"><button class="btn-primary" style="width:auto;margin:0;padding:0 16px" onclick="friendRequest()">신청</button></div>
+    ${reqIn.length? `<div class="section-lbl" style="margin-top:14px">받은 친구 신청</div>${reqIn.map(f=>`<div class="fr-row"><b>${esc(nm(f))}</b><span><button class="fam-btn" onclick="friendAccept('${f.id}')">수락</button><button class="fam-btn ghost" onclick="friendEnd('${f.id}')">거절</button></span></div>`).join("")}` : ""}
+    ${waiting.length? `<div class="section-lbl" style="margin-top:14px">기다리는 중</div>${waiting.map(f=>`<div class="fr-row"><b>${esc(nm(f))}</b><small>${f.status==="pending"? "친구가 수락하기를 기다려요" : `부모님 승인 기다리는 중 · 우리 ${(f.from===state.user.uid?f.okFrom:f.okTo)?"✓":"…"} · 친구네 ${(f.from===state.user.uid?f.okTo:f.okFrom)?"✓":"…"}`}</small></div>`).join("")}` : ""}
+    <div class="section-lbl" style="margin-top:16px">내 친구 ${act.length}명</div>
+    ${act.length? act.map(friendCard).join("") : `<div class="empty" style="padding:14px">아직 친구가 없어요.</div>`}
+    <div class="section-lbl" style="margin-top:16px">받은 응원</div>
+    ${cheers.length? `<div class="fr-got">${cheers.map(c=>{ const s=cheerOf(c.sticker); return `<div><span>${s[1]}</span><b>${esc(nameById[c.from]||"친구")}</b> ${s[2]}<small>${ago(c.at)}</small></div>`; }).join("")}</div>` : `<div class="empty" style="padding:12px">아직 받은 응원이 없어요.</div>`}`;
+  hubShell("🤝 친구 응원", body);
+  if(st){ const b=document.querySelector(".drawer-body"); if(b) b.scrollTop=st; }
+}
+// 부모: 자녀 친구 승인 · 관리
+async function drawKidFriends(){
+  hubShell("🤝 자녀 친구 관리", `<div class="empty">불러오는 중…</div>`);
+  let list=[];
+  try{ list=await kidsFriendships(); }catch(e){ hubShell("🤝 자녀 친구 관리", `<div class="share-note">불러오지 못했어요.<br>${esc(firestoreDiag(e))}</div>`); return; }
+  const mine=new Set(state.children.map(c=>c.uid));
+  const kidName=u=>(state.children.find(c=>c.uid===u)||{}).name||"";
+  const rows=list.map(f=>{
+    const myKid=mine.has(f.from)? f.from : f.to, side=myKid===f.from? "okFrom" : "okTo", other=f.users.find(u=>u!==myKid);
+    const mineOk=f[side], theirOk=f[side==="okFrom"?"okTo":"okFrom"];
+    const state_= f.status==="pending"? "친구가 수락하기 전" : friendActive(f)? "✅ 친구" : `부모님 승인 · 우리 ${mineOk?"✓":"…"} · 상대 ${theirOk?"✓":"…"}`;
+    return `<div class="fr-row"><div><b>${esc(kidName(myKid))} ↔ ${esc((f.names||{})[other]||"친구")}</b><small>${state_}</small></div>
+      <span>${f.status==="accepted" && !mineOk? `<button class="fam-btn" onclick="friendApprove('${f.id}','${side}')">승인</button>` : ""}<button class="fam-btn ghost" onclick="friendEnd('${f.id}','이 친구 관계를 끊을까요?')">끊기</button></span></div>`;
+  }).join("");
+  hubShell("🤝 자녀 친구 관리", `
+    <div class="share-note" style="margin:0 0 12px">자녀가 친구 코드로 신청하고 친구가 수락하면, <b>양쪽 부모님이 모두 승인</b>해야 친구가 돼요.<br>친구끼리는 정해진 <b>응원 스티커</b>만 주고받아요 (글 · 사진 없음). 언제든 끊을 수 있어요.</div>
+    ${rows || `<div class="empty" style="padding:16px">아직 자녀의 친구 신청이 없어요.</div>`}`);
+}
+// 소통 모음 (⋯ 메뉴 · 기록 탭)
+function drawComm(){
+  const isP=isParentUser();
+  hubShell("💬 소통", `
+    ${hubItem("💬","가족 대화"+commDot(state.chatUnread), isP?"자녀와 글 · 응원 주고받기":"부모님과 글 · 스티커 주고받기","drawChat()")}
+    ${isP? hubItem("🤝","자녀 친구 관리"+commDot(state.friendPending),"친구 신청 승인 · 끊기","drawKidFriends()") : hubItem("🤝","친구 응원"+commDot(state.friendPending),"친구 코드 · 응원 스티커 주고받기","drawFriends()")}
+  `);
+}
+// 앱을 열 때: 새 응원이 있으면 조용히 한 번 알려 줘요
+async function checkNewCheers(){
+  if(isParentUser()) return;
+  try{
+    const r=await db.collection("planner").doc(state.user.uid).collection("meta").doc("cheerRead").get();
+    const last=(r.exists && r.data().at)||0;
+    const s=await db.collection("planner").doc(state.user.uid).collection("cheers").where("at",">",last).get();
+    if(s.size) toast(`🤝 친구들이 응원 스티커 ${s.size}개를 보냈어요 · ⋯ 메뉴 → 소통`,"cheer");
+  }catch(_){}
 }
 function cheerFor(planned, done){
   const rate = planned? done/planned : -1;
@@ -3151,7 +3538,7 @@ function boot(){
     if(weekPhase().phase==="planning"){ state.cursor=activeWeekStart(new Date()); state.tab="plan"; state.view="week"; }
     try{ await loadChildren(); }catch(e){ console.error("자녀 로드 실패", e); }
     showApp(true);
-    checkFamilyRequests();
+    checkFamilyRequests().then(()=>{ refreshCommBadge(); checkNewCheers(); });
     focusLoad();
     checkAllowanceNotices();
     scheduleSnap();
@@ -3787,6 +4174,9 @@ function renderRecord(){
     </div>`;
   return `${isParent? noticeCardsHTML() : ""}<div class="rec-grid"><div>${stats}
     ${renderCharCard()}</div><div>
+    <div class="r-sec">소통</div>
+    ${hubItem("💬","가족 대화"+commDot(state.chatUnread), isParent?"자녀와 글 · 응원 주고받기":"부모님과 글 · 스티커 주고받기","drawChat()")}
+    ${isParent? hubItem("🤝","자녀 친구 관리"+commDot(state.friendPending),"친구 신청 승인 · 끊기","drawKidFriends()") : hubItem("🤝","친구 응원"+commDot(state.friendPending),"친구 코드 · 응원 스티커","drawFriends()")}
     <div class="r-sec">성장</div>
     ${hubItem("🌱","66일 습관","작은 습관 하나를 66일 동안 · 하루 빠져도 괜찮아요","drawHabits()")}
     ${hubItem("🏅","나의 뱃지","처음 해 본 것 · 꾸준함 · 쌓인 공부 · 나의 최고 기록","drawBadges()")}
@@ -3818,6 +4208,9 @@ function openMenu(){
     ${isParent?`<div class="r-sec">자녀 플래너</div>
       ${state.viewingChild? hubItem("🏠","내 플래너로 돌아가기","", "backToSelf()") : ""}
       ${kids || `<div style="font-size:12.5px;color:#8F8D9B;margin:0 2px 8px">아직 연결된 자녀가 없어요. 아래 <b>가족 연결</b>에서 자녀의 이메일로 신청하세요.</div>`}`:""}
+    <div class="r-sec">소통</div>
+    ${hubItem("💬","가족 대화"+commDot(state.chatUnread), isParent?"자녀와 글 · 응원 주고받기":"부모님과 글 · 스티커 주고받기","drawChat()")}
+    ${isParent? hubItem("🤝","자녀 친구 관리"+commDot(state.friendPending),"친구 신청 승인 · 끊기","drawKidFriends()") : hubItem("🤝","친구 응원"+commDot(state.friendPending),"친구 코드 · 응원 스티커","drawFriends()")}
     <div class="r-sec">관리</div>
     ${hubItem("👨‍👩‍👧", "가족 연결"+(state.familyPending?` <span class="badge-dot">${state.familyPending}</span>`:""), isParent?"자녀에게 연결 신청 · 받은 신청 승인":"부모님께 연결 신청 · 받은 신청 승인","drawFamily()")}
     ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 대결 · 자녀 계정","drawManage()") : hubItem("🐣","내 캐릭터 · 습관 · 뱃지","해낸 만큼 자라는 캐릭터 · 66일 습관 · 뱃지","drawManage()")}
@@ -5305,7 +5698,7 @@ function openDrawer(kind){
   else if(kind==="allowance"){ state.allowOff=0; drawAllowance(); }
   else drawDashboard();
 }
-function closeDrawer(){ document.getElementById("drawerRoot").innerHTML=""; }
+function closeDrawer(){ if(typeof chatUnsub==="function" && chatUnsub){ chatUnsub(); chatUnsub=null; } document.getElementById("drawerRoot").innerHTML=""; }
 
 /* 💰 용돈 기준 (부모 계정에서 자녀별로) — payTerms/{자녀uid} */
 const PT_CACHE={};                       // 자녀 uid → 용돈 기준 (부모 화면에서 불러온 것)

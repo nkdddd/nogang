@@ -19,7 +19,7 @@ service cloud.firestore {
       allow write: if isMe(uid);
     }
 
-    // 플래너 · 학습앱 기록 전체 (tasks, meta, diary, apps/*, focus, payouts …)
+    // 플래너 · 학습앱 기록 전체 (tasks, meta, diary, apps/*, focus, payouts, 💬 chat …)
     // 부모는 연결된 자녀의 기록을 보고, 코멘트 · 용돈 지급 · 카드 지급 등을 기록합니다.
     match /planner/{uid}/{document=**} {
       allow read, write: if isMe(uid) || isParentOf(uid);
@@ -82,6 +82,69 @@ service cloud.firestore {
     match /codes/{code} {
       allow read: if signedIn();
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // ===== 🤝 친구 응원 (스티커만 · 양쪽 부모 승인) =====
+    function pairOf(a, b) { return a < b ? a + '_' + b : b + '_' + a; }
+    function friendsOk(a, b) {
+      let f = get(/databases/$(database)/documents/friends/$(pairOf(a, b))).data;
+      return f.status == 'accepted' && f.okFrom == true && f.okTo == true;
+    }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function newFriendReq(fid) {
+      let d = request.resource.data;
+      return d.from == request.auth.uid && d.to is string && d.from != d.to
+        && fid == pairOf(d.from, d.to) && d.users == [d.from, d.to]
+        && d.status == 'pending' && d.okFrom == false && d.okTo == false
+        && d.parents is list && d.parents.size() <= 6 && d.names is map
+        && d.keys().hasOnly(['users', 'from', 'to', 'names', 'parents', 'status', 'okFrom', 'okTo', 'at']);
+    }
+
+    // 친구 코드: 정확한 코드로만 찾기 (목록 보기 불가)
+    match /friendCodes/{code} {
+      allow get: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.keys().hasOnly(['uid', 'nick', 'at'])
+                    && request.resource.data.nick is string && request.resource.data.nick.size() <= 12;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // 친구 관계: 두 아이 + 그 부모님만 봐요
+    match /friends/{fid} {
+      allow read: if signedIn() && (request.auth.uid in resource.data.users || request.auth.uid in resource.data.parents);
+      allow create: if signedIn() && newFriendReq(fid);
+      allow update: if signedIn() && (
+        // 끝난 사이에 다시 신청
+        (resource.data.status == 'ended' && request.auth.uid in resource.data.users && newFriendReq(fid))
+        // 받은 아이가 수락 (자기 부모님을 더해요)
+        || (request.auth.uid == resource.data.to && resource.data.status == 'pending'
+            && request.resource.data.status == 'accepted' && changed().hasOnly(['status', 'parents', 'acceptedAt']))
+        // 아이가 새로 연결된 부모님을 더함
+        || (request.auth.uid in resource.data.users && changed().hasOnly(['parents']) && request.resource.data.parents.size() <= 6)
+        // 각자 부모님 승인
+        || (isParentOf(resource.data.from) && changed().hasOnly(['okFrom']) && request.resource.data.okFrom == true)
+        || (isParentOf(resource.data.to) && changed().hasOnly(['okTo']) && request.resource.data.okTo == true)
+        // 끊기 · 거절 (아이나 부모님 누구나)
+        || ((request.auth.uid in resource.data.users || isParentOf(resource.data.from) || isParentOf(resource.data.to))
+            && request.resource.data.status == 'ended' && changed().hasOnly(['status', 'endedBy', 'endedAt']))
+      );
+    }
+
+    // 친구에게 보이는 작은 카드 (별명 · 캐릭터 · 공부한 날 수 · 습관 일수)
+    match /friendCards/{uid} {
+      allow read: if isMe(uid) || isParentOf(uid) || (signedIn() && friendsOk(request.auth.uid, uid));
+      allow write: if isMe(uid) && request.resource.data.keys().hasOnly(['nick', 'el', 'stage', 'wkDays', 'habitN', 'at'])
+                   && request.resource.data.nick is string && request.resource.data.nick.size() <= 12;
+    }
+
+    // 응원 스티커: 친구만, 정해진 스티커만, 스티커마다 하루 한 번 (문서 id = 보낸uid_날짜_스티커)
+    match /planner/{uid}/cheers/{cid} {
+      allow create: if signedIn() && request.auth.uid != uid && friendsOk(request.auth.uid, uid)
+                    && request.resource.data.from == request.auth.uid
+                    && request.resource.data.keys().hasOnly(['from', 'sticker', 'day', 'at'])
+                    && request.resource.data.sticker in ['clap', 'fire', 'strong', 'star', 'together', 'party', 'book', 'smile']
+                    && request.resource.data.day is string && request.resource.data.day.size() == 10
+                    && cid == request.auth.uid + '_' + request.resource.data.day + '_' + request.resource.data.sticker;
     }
 
     // MD영단어 예문 캐시 (모든 사용자 공용)
