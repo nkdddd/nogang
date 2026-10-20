@@ -387,6 +387,8 @@
   .carry-row .cr-t{flex:1;min-width:0;font-weight:var(--fw-bold);font-size:13.5px;display:flex;flex-direction:column}
   .carry-row .cr-t small{font-size:11.5px;color:#94A3B8;font-weight:var(--fw-bold)}
   /* 🐣 내 캐릭터 */
+  .ver-bar{white-space:nowrap;position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));z-index:9500;display:flex;align-items:center;gap:10px;background:#1E2A4A;color:#fff;border-radius:999px;padding:8px 8px 8px 16px;font-size:13.5px;font-weight:var(--fw-semibold);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .ver-bar button{white-space:nowrap;border:none;background:#fff;color:#1E2A4A;border-radius:999px;padding:6px 12px;font:inherit;font-weight:var(--fw-bold);cursor:pointer}
   /* 🏅 지킨 날 인정 */
   .pick.on{background:#1E2A4A;color:#fff;border-color:#1E2A4A}
   .kp-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -1743,11 +1745,11 @@ function drawCharacter(){
   }).join("");
   // 고르기 칸: 내 캐릭터 · 다 키운 캐릭터는 색, 나머지는 그림자 (처음 고를 때만 모두 색)
   const elBtn=e=>{
-    const done=ch.done.find(d=>d.el===e.id), mine=e.id===ch.el, lit=mine || !!done || !ch.el;
+    const done=ch.done.find(d=>d.el===e.id), mine=e.id===ch.el, lit=mine || !!done;     // 아직 얻지 않은 캐릭터는 고르기 전에도 그림자
     const st= mine? c.stage : done? CHAR_MAX : 0;
     const can=pickable(e.id) || (mine && preview);
     return `<button class="${e.id===el?"on":""} ${lit?"":"shadow"}" style="--cc:${e.c}" ${can? `onclick="charPickEl='${e.id}';drawCharacter()"` : "disabled"}>
-      <img src="${charImg(e.id, st)}" alt=""><span>${lit? `${e.emo} ${e.name}` : "？"}${done?" 🏆":""}</span></button>`;
+      <img src="${charImg(e.id, st)}" alt=""><span>${lit || !ch.el? `${e.emo} ${e.name}` : "？"}${done?" 🏆":""}</span></button>`;
   };
   let rule;
   if(!ch.el) rule="함께 자랄 캐릭터를 골라요. 고른 뒤에는 <b>한 번만</b> 바꿀 수 있어요.";
@@ -1764,11 +1766,11 @@ function drawCharacter(){
   const collection= ch.done.length? `<div class="section-lbl" style="margin-top:18px">🏆 다 키운 캐릭터</div>
     <div class="char-done">${ch.done.map(d=>`<div><img src="${charImg(d.el,CHAR_MAX)}" alt=""><b>${esc(d.name||charElOf(d.el).name)}</b><small>${(d.at||"").slice(0,10).replace(/-/g,".")}</small></div>`).join("")}</div>` : "";
   hubShell("🐣 "+(ro? `${esc(state.ownerName||"자녀")}의 캐릭터` : "내 캐릭터"), `
-    <div class="char-hero ${preview?"is-shadow":""}" style="--cc:${E.c}">
+    <div class="char-hero ${preview || !ch.el?"is-shadow":""}" style="--cc:${E.c}">
       <img src="${charImg(el, preview? 0 : (ch.el? c.stage : 0))}" alt="">
-      <div class="ch-name">${preview? (maxed? `${E.emo} 새 친구` : "？？？") : esc(ch.name||E.name)}</div>
-      <div class="ch-lv">${preview? (maxed? "Lv1부터 새로 시작해요" : "바꾸면 어떤 모습일까요?") : `Lv${c.stage+1} · ${CHAR_STAGE_NAME[c.stage]} · 지킨 날 <b>${c.pts}</b>/66일`}</div>
-      ${preview? "" : `<div class="cc-bar big"><i style="width:${c.pct}%"></i></div>
+      <div class="ch-name">${!ch.el? `${E.emo} ${E.name}` : preview? (maxed? `${E.emo} 새 친구` : "？？？") : esc(ch.name||E.name)}</div>
+      <div class="ch-lv">${!ch.el? "어떤 친구가 태어날까요? 고르면 모습이 보여요" : preview? (maxed? "Lv1부터 새로 시작해요" : "바꾸면 어떤 모습일까요?") : `Lv${c.stage+1} · ${CHAR_STAGE_NAME[c.stage]} · 지킨 날 <b>${c.pts}</b>/66일`}</div>
+      ${preview || !ch.el? "" : `<div class="cc-bar big"><i style="width:${c.pct}%"></i></div>
       <div class="ch-next">${c.next? `다음 모습까지 <b>${c.toNext}일</b>` : "66일을 지켜 전설이 됐어요!"}</div>`}
     </div>
     ${!preview && ch.floor && charKeptDays()<CHAR_PTS[ch.floor]? `<div class="char-rule">📌 예전에 키운 단계(Lv${ch.floor+1})는 그대로 지켜 줘요. 지금 기준으로 지킨 날 ${charKeptDays()}일 — ${CHAR_PTS[ch.floor]}일이 넘으면 이어서 자라요.</div>` : ""}
@@ -2628,6 +2630,21 @@ function drawNews(){
   const L=newsItems();
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
+/* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
+const APP_VER="2026.10.20-3";
+async function checkAppVersion(){
+  try{
+    const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
+    const m=(await r.text()).match(/const APP_VER="([^"]+)"/);
+    if(m && m[1]!==APP_VER && !document.getElementById("verBar")){
+      const b=document.createElement("div"); b.id="verBar"; b.className="ver-bar";
+      b.innerHTML=`<span>🔄 새 버전이 있어요</span><button onclick="location.reload()">새로고침</button>`;
+      document.body.appendChild(b);
+    }
+  }catch(_){}
+}
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") checkAppVersion(); });
+setTimeout(checkAppVersion, 4000);
 function cheerFor(planned, done){
   const rate = planned? done/planned : -1;
   const tip = TIPS[dayIndex()%TIPS.length];
