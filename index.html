@@ -50,7 +50,7 @@
 
   /* ===== AUTH ===== */
   #auth{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;}
-  .yt-banners{width:100%;max-width:390px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .yt-banners{width:100%;max-width:390px;display:grid;grid-template-columns:1fr;gap:10px;}
   .yt-banner{display:flex;align-items:center;gap:8px;min-width:0;padding:11px 10px;border-radius:16px;background:var(--surface);border:1px solid var(--line);box-shadow:0 4px 16px rgba(30,42,74,.06);color:var(--ink);text-decoration:none;}
   .yt-banner:active{transform:scale(.98);}
   .yt-banner svg{width:26px;height:19px;flex:0 0 auto;}
@@ -1282,8 +1282,7 @@
   </div>
   <!-- ▶ 유튜브 채널 배너 (새 창으로 열려요) -->
   <div class="yt-banners">
-    <a class="yt-banner" href="https://www.youtube.com/@gainre4838" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 28 20" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#FF0000"/><path d="M11 5.5v9l8-4.5z" fill="#fff"/></svg><span class="yt-t"><b>@gainre4838</b><small>유튜브 채널</small></span><span class="yt-go">›</span></a>
-    <a class="yt-banner" href="https://www.youtube.com/@%EC%8A%AC%EC%83%9D-u8k" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 28 20" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#FF0000"/><path d="M11 5.5v9l8-4.5z" fill="#fff"/></svg><span class="yt-t"><b>@슬생-u8k</b><small>유튜브 채널</small></span><span class="yt-go">›</span></a>
+    <a class="yt-banner" href="https://www.youtube.com/@%ED%98%84%EB%8C%80%EC%82%AC_%EC%86%8D%EC%82%AC%EC%A0%95" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 28 20" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#FF0000"/><path d="M11 5.5v9l8-4.5z" fill="#fff"/></svg><span class="yt-t"><b>@현대사_속사정</b><small>유튜브 채널</small></span><span class="yt-go">›</span></a>
   </div>
 </div>
 
@@ -2738,7 +2737,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.10.20-5";
+const APP_VER="2026.10.24-1";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
