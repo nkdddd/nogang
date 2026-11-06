@@ -1397,20 +1397,41 @@ const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const parseD=s=>{const[y,m,dd]=s.split("-").map(Number);return new Date(y,m-1,dd);};
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
 const startOfWeek=d=>addDays(d,-d.getDay());   // 학습 주간은 일요일 시작
-// 학습 주간: 일요일 시작, 토요일 18시 마감. 토 18시 이후엔 다음 주로 전환(계획 모드)
+// 학습 주간: 일요일 시작 ~ 토요일. 자동 마감은 없고, 학생이 「🏁 이번 주 종료」를 누르면 정산돼요.
+// 종료한 주는 payRequests/{토요일}(또는 지급 기록 payouts/{토요일})이 있는 주 → 다음 주 계획 모드로 전환
+const weekSatOf=d=>fmt(addDays(startOfWeek(d||new Date()),6));
+function weekClosed(uid, weekId){ const m=state.weekClose&&state.weekClose[uid]; return !!(m && m[weekId]); }
 function activeWeekStart(now){
   now=now||new Date();
   const sun=startOfWeek(now);
-  if(now.getDay()===6 && now.getHours()>=18) return addDays(sun,7);
+  if(weekClosed(state.ownerUid, fmt(addDays(sun,6)))) return addDays(sun,7);
   return sun;
 }
-function charWeekDays(now){ const s=activeWeekStart(now); return Array.from({length:7},(_,i)=>fmt(addDays(s,i))); }
+// 순위 · 캐릭터 · 통계는 달력 주(일~토) 기준 — 종료 여부와 상관없이 모두 같은 주를 써요
+function charWeekDays(now){ const s=startOfWeek(now||new Date()); return Array.from({length:7},(_,i)=>fmt(addDays(s,i))); }
 function weekPhase(now){
   now=now||new Date();
-  const planning=(now.getDay()===6 && now.getHours()>=18);
+  const planning=weekClosed(state.ownerUid, weekSatOf(now));
   const ws=activeWeekStart(now), we=addDays(ws,6);
   return {phase:planning?"planning":"study", weekStart:ws, weekEnd:we,
     label:`${ws.getMonth()+1}.${ws.getDate()}~${we.getMonth()+1}.${we.getDate()}`};
+}
+// 🏁 이번 주 · 지난주가 종료됐는지 불러와요 (용돈 요청 또는 지급 기록이 있으면 종료한 주)
+const weekCloseJumped={};
+async function loadWeekClose(uid){
+  if(!uid) return;
+  const now=new Date(), cur=weekSatOf(now), prev=fmt(addDays(parseD(cur),-7)), m={};
+  try{
+    await Promise.all([cur,prev].map(async w=>{
+      const [q,po]=await Promise.all([payReqRef(uid,w).get(), db.collection("planner").doc(uid).collection("payouts").doc(w).get()]);
+      if(q.exists || po.exists) m[w]=true;
+    }));
+  }catch(e){ console.warn("주간 종료 확인", e); return; }
+  state.weekClose[uid]=m;
+  if(uid!==state.ownerUid) return;
+  // 이번 주를 이미 종료했으면 처음 한 번은 다음 주 계획 화면으로
+  if(m[cur] && !weekCloseJumped[uid+":"+cur]){ weekCloseJumped[uid+":"+cur]=1; state.cursor=activeWeekStart(now); if(state.tab==="todo"){ state.tab="plan"; state.view="week"; } }
+  render(); updateWeekBanner();
 }
 const isSameDay=(a,b)=>fmt(a)===fmt(b);
 const WD=["일","월","화","수","목","금","토"];
@@ -2737,7 +2758,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.10.24-1";
+const APP_VER="2026.11.06-1";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -2768,6 +2789,7 @@ const state = {
   user:null, profile:null,
   ownerUid:null, ownerName:"", ownerRole:"child", // 현재 보고 있는 플래너의 주인
   viewingChild:false,
+  weekClose:{},          // 🏁 종료한 주 {uid: {토요일: true}}
   children:[],           // 부모가 등록한 자녀 [{uid,name,code,color}]
   tab:"todo",            // 하단 메뉴: todo | plan | learn | stats
   view:"day", planView:"week", cursor:new Date(),
@@ -3083,7 +3105,7 @@ async function drawWeekReport(){
   const targets = isParent && state.children.length
     ? state.children.filter(c=>c.exists!==false).map(c=>({uid:c.uid,name:c.name,color:c.color}))
     : [{uid:state.ownerUid,name:state.ownerName,color:"#6A58E6"}];
-  let body=`<div style="font-size:12.5px;color:#64748B;margin-bottom:12px">${label} · 일요일~토요일 18시 마감 기준</div>`;
+  let body=`<div style="font-size:12.5px;color:#64748B;margin-bottom:12px">${label} · 일요일~토요일 기준 (🏁 종료하면 정산)</div>`;
   for(const who of targets){
     let tasks=[], cats={subjects:[]}, crit=defaultSettings().allowance;
     try{
@@ -3157,52 +3179,64 @@ async function drawWeekReport(){
 }
 
 /* ============================================================
- *  ③ 시험 / 목표 기간 모드 (D-day + 목표시간 상향)
+ *  ③ 🚀 부스터 모드 — 학생이 직접 켜요 (시험 대비)
+ *  - 켜면 그 기간 동안 하루 최대 인정 시간이 늘어나요 (부모가 ⚙️ 용돈 기준에서 정함, 기본 등교일 6시간 · 자율학습일 10시간)
+ *  - 주간 시간 용돈 최대도 시험기간 금액(boostCap)으로 올라가요 · 1시간당 금액은 그대로
+ *  - 한 번에 최대 14일 · 시험 날짜까지 · 끄면 어제까지만 부스터로 남아요 (지난 기록은 그대로)
+ *  - settings.exams: [{name, date(시험 날짜), from(시작), end(끈 날), by}]
  * ============================================================ */
-function examList(){ return state.settings.exams||[]; }
-// 해당 날짜가 시험 대비 기간에 속하면 그 시험 정보 반환
-function examFor(ds){
-  for(const e of examList()){
-    if(!e||!e.date) continue;
-    const start=fmt(addDays(parseD(e.date), -(Number(e.prepDays)||14)));
-    if(ds>=start && ds<=e.date) return e;
-  }
+const BOOST_MAX_DAYS=14;
+function examList(){ return (state.settings && state.settings.exams)||[]; }
+function boostRange(e){
+  if(!e||!e.date) return null;
+  const from=e.from || fmt(addDays(parseD(e.date), -(Number(e.prepDays)||14)));
+  const to=(e.end && e.end<e.date)? e.end : e.date;
+  return from<=to? {from, to} : null;
+}
+// 그 날짜에 켜져 있는 부스터 (목록을 주면 그 목록 기준 — 용돈 계산은 자녀 설정으로)
+function examFor(ds, list){
+  for(const e of (list||examList())){ const g=boostRange(e); if(g && ds>=g.from && ds<=g.to) return e; }
   return null;
 }
 function examDday(e, from){
   return Math.round((parseD(e.date)-parseD(from||fmt(new Date())))/86400000);
 }
 function activeExam(){ return examFor(fmt(new Date())); }
-async function addExam(){
+async function boostOn(){
+  if(state.profile.role==="parent" || state.viewingChild) return alert("부스터는 학생이 직접 켜요.");
+  if(activeExam()) return alert("이미 부스터가 켜져 있어요.");
   const name=((document.getElementById("examName")||{}).value||"").trim()||"시험";
   const date=(document.getElementById("examDate")||{}).value;
-  const prepDays=Number((document.getElementById("examPrep")||{}).value)||14;
-  const boost=Number((document.getElementById("examBoost")||{}).value)||150;
-  const rate=Number((document.getElementById("examRate")||{}).value)||1.5;
-  if(!date){ alert("시험 날짜를 선택해 주세요."); return; }
-  const E=[...examList(), {name,date,prepDays,boost,rate}];
+  const today=fmt(new Date());
+  if(!date || date<today) return alert("시험 날짜를 골라 주세요.");
+  const left=examDday({date}, today);
+  const from= left>BOOST_MAX_DAYS-1? fmt(addDays(parseD(date), -(BOOST_MAX_DAYS-1))) : today;
+  const E=[...examList(), {name, date, from, by:"child", at:Date.now()}];
   await saveSettings({...state.settings, exams:E});
-  state.dayGoals={}; drawBooster(); render();
-  toast(`🚀 ${name} 부스터 기간 설정 완료 (D-${prepDays}부터 · 용돈 ×${rate})`,"cheer");
+  drawBooster(); render();
+  toast(from===today? `🚀 부스터 ON! ${name}까지 하루 최대 인정 시간이 늘어나요` : `🚀 ${name} 부스터 예약 · ${parseD(from).getMonth()+1}/${parseD(from).getDate()}부터 켜져요`,"cheer");
 }
-async function removeExam(i){
-  const E=[...examList()]; if(!E[i]) return;
-  if(!confirm(`'${E[i].name||"시험"}' 일정을 삭제할까요?`)) return;
-  E.splice(i,1);
+// 끄기: 오늘부터 꺼져요 (어제까지 부스터로 인정한 시간은 그대로) · 아직 시작 전이면 지워요
+async function boostOff(i){
+  const E=[...examList()], e=E[i]; if(!e) return;
+  if(!confirm(`🚀 '${e.name||"시험"}' 부스터를 끌까요?\n오늘부터 하루 최대 인정 시간이 평소대로 돌아가요.`)) return;
+  const g=boostRange(e), today=fmt(new Date());
+  if(!g || g.from>=today) E.splice(i,1);
+  else E[i]={...e, end:fmt(addDays(new Date(),-1)), endBy:state.profile.role};
   await saveSettings({...state.settings, exams:E});
-  state.dayGoals={}; drawBooster(); render();
+  drawBooster(); render();
 }
 function examListHTML(){
-  const E=examList();
-  if(!E.length) return `<div style="font-size:12.5px;color:#94A3B8">등록된 시험이 없어요.</div>`;
-  const today=fmt(new Date());
-  return E.map((e,i)=>{
-    const dd=examDday(e,today);
-    return `<div style="display:flex;align-items:center;gap:8px;background:#FFF5F6;border:1px solid #FADADD;border-radius:9px;padding:8px 11px;margin-bottom:6px;font-size:12.5px;color:#A5323A">
-      📚 <b>${esc(e.name||"시험")}</b>
-      <span style="color:#94A3B8">${esc(e.date)} · D-${e.prepDays||14}부터 목표 +${e.boost||150}분 · 용돈 ×${Number(e.rate)||1.5}</span>
-      <span style="margin-left:auto;font-weight:var(--fw-bold)">${dd>0?`D-${dd}`:dd===0?"D-DAY":"종료"}</span>
-      <button class="icon-btn sm" onclick="removeExam(${i})">🗑️</button>
+  const E=examList(), today=fmt(new Date());
+  const rows=E.map((e,i)=>({e,i,g:boostRange(e)})).filter(x=>x.g && x.g.to>=fmt(addDays(new Date(),-30)));
+  if(!rows.length) return `<div style="font-size:12.5px;color:#94A3B8">아직 켠 부스터가 없어요.</div>`;
+  return rows.reverse().map(({e,i,g})=>{
+    const live=today>=g.from && today<=g.to, wait=today<g.from, f=parseD(g.from), t=parseD(g.to);
+    return `<div style="display:flex;align-items:center;gap:8px;background:${live?"#FFF5F6":"#F8FAFC"};border:1px solid ${live?"#FADADD":"var(--line)"};border-radius:9px;padding:8px 11px;margin-bottom:6px;font-size:12.5px;color:${live?"#A5323A":"#64748B"}">
+      🚀 <b>${esc(e.name||"시험")}</b>
+      <span style="color:#94A3B8">${f.getMonth()+1}/${f.getDate()}~${t.getMonth()+1}/${t.getDate()}${e.end?" · 끔":""}</span>
+      <span style="margin-left:auto;font-weight:var(--fw-bold)">${live?"ON":wait?"예약":"끝"}</span>
+      ${(live||wait)? `<button class="fam-btn" onclick="boostOff(${i})">끄기</button>` : ""}
     </div>`;
   }).join("");
 }
@@ -3210,8 +3244,8 @@ function examBannerHTML(){
   const e=activeExam(); if(!e) return "";
   const dd=examDday(e);
   return `<div class="week-banner" style="background:#FFF5F6;border-bottom:1px solid #FADADD;color:#A5323A">
-    📚 <b>${esc(e.name||"시험")} ${dd>0?`D-${dd}`:dd===0?"D-DAY!":""}</b>
-    <span style="color:#8A6516">· 시험 대비 기간이라 목표 학습시간이 <b>+${e.boost||150}분</b> 상향됐어요</span>
+    🚀 <b>부스터 ON · ${esc(e.name||"시험")} ${dd>0?`D-${dd}`:dd===0?"D-DAY!":""}</b>
+    <span style="color:#8A6516">· 하루 최대 인정 시간이 늘어났어요</span>
   </div>`;
 }
 
@@ -3767,55 +3801,49 @@ async function drawExtApps(){
   if(root) root.innerHTML=body;
 }
 // 할 일 화면용 요약 배너
-/* ----- 부스터(시험 대비) 모드 — 메인 진입 ----- */
-// 해당 주에 부스터 기간이 하루라도 포함되면 그 배율 적용(최댓값)
-function examBoostRateFor(days){
-  let r=1;
-  (days||[]).forEach(ds=>{ const e=examFor(ds); if(e) r=Math.max(r, Number(e.rate)||1.5); });
-  return r;
-}
-function examBoostRate(){
-  const e=activeExam();
-  return e? (Number(e.rate)||1.5) : 1;   // 부스터 기간 용돈 배율
+/* ----- 🚀 부스터 모드 화면 (학생이 켜고, 부모님은 보고 끌 수 있어요) ----- */
+function boostLimitsHTML(P){
+  const h=m=>hmFmt(Number(m)||0);
+  return `<div class="pay-terms" style="margin:0 0 12px">
+      <div><span>🏫 등교일 하루 최대 인정</span><b>${h(P.dailyMaxMin)} → ${h(P.boostDayMaxMin)}</b></div>
+      <div><span>🏖 자율학습일 하루 최대 인정</span><b>${h(P.dailyMaxFreeMin)} → ${h(P.boostDayMaxFreeMin)}</b></div>
+      <div><span>💰 주간 시간 용돈 최대</span><b>${wonFmt(P.cap)} → ${wonFmt(P.boostCap)}</b></div>
+    </div>`;
 }
 async function drawBooster(){
-  const e=activeExam();
-  const today=fmt(new Date());
-  const list=examListHTML();
+  const e=activeExam(), today=fmt(new Date());
+  const P=payTermsOf(null, state.payTermsRaw);
+  const student=state.profile.role!=="parent" && !state.viewingChild;
+  const waiting=examList().find(x=>{ const g=boostRange(x); return g && g.from>today; });
   const banner = e
     ? `<div style="background:linear-gradient(135deg,#FFF1F2,#FFE4E6);border:2px solid #FADADD;border-radius:14px;padding:16px;text-align:center;margin-bottom:14px">
         <div style="font-size:30px">🚀</div>
-        <div style="font-weight:var(--fw-bold);font-size:16px;color:#A5323A;margin-top:2px">${esc(e.name||"시험")} ${examDday(e)>0?`D-${examDday(e)}`:"D-DAY!"}</div>
-        <div style="font-size:12.5px;color:#8A6516;margin-top:6px;line-height:1.6">
-          부스터 모드 작동 중 · 일일 목표 <b>+${e.boost||150}분</b><br>
-          이 기간 <b style="color:#A5323A">시간 용돈 최대 ${wonFmt(payTermsOf(null,state.payTermsRaw).boostCap)}</b> (1시간당 금액은 그대로)
-        </div>
+        <div style="font-weight:var(--fw-bold);font-size:16px;color:#A5323A;margin-top:2px">부스터 ON · ${esc(e.name||"시험")} ${examDday(e)>0?`D-${examDday(e)}`:"D-DAY!"}</div>
+        <div style="font-size:12.5px;color:#8A6516;margin-top:6px;line-height:1.6">하루에 더 많이 공부해도 그만큼 인정돼요 (1시간당 금액은 그대로)</div>
       </div>`
     : `<div style="background:#F8FAFC;border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;margin-bottom:14px;color:#64748B">
         <div style="font-size:28px">🎯</div>
         <div style="font-weight:var(--fw-bold);font-size:14.5px;margin-top:4px">지금은 평상 모드예요</div>
-        <div style="font-size:12.5px;margin-top:5px;line-height:1.55">시험 날짜를 등록하면 그 기간 동안<br>목표시간이 올라가고 <b>시간 용돈 상한이 ${wonFmt(payTermsOf(null,state.payTermsRaw).boostCap)}</b>으로 오릅니다.</div>
+        <div style="font-size:12.5px;margin-top:5px;line-height:1.55">${student? "시험 공부로 평소보다 오래 해야 할 때<br>부스터를 켜면 <b>하루 최대 인정 시간</b>이 늘어나요." : "부스터는 자녀가 시험 공부할 때 직접 켜요.<br>켜지면 <b>하루 최대 인정 시간</b>이 늘어나요."}</div>
       </div>`;
+  const form = student && !e && !waiting ? `
+      <div class="dash-section" style="margin-top:16px">🚀 부스터 켜기</div>
+      <div class="crit-grid">
+        <div><label class="fld-lbl">시험 이름</label><input class="inp" id="examName" placeholder="예: 2학기 기말고사"></div>
+        <div><label class="fld-lbl">시험 날짜</label><input class="inp" type="date" id="examDate" min="${today}"></div>
+      </div>
+      <button class="add-btn" style="width:100%;margin-top:10px" onclick="boostOn()">🚀 부스터 켜기</button>
+      <div class="cd-note" style="margin-top:8px;line-height:1.6">오늘부터 시험 날짜까지 켜져요 (최대 ${BOOST_MAX_DAYS}일 · 시험이 더 멀면 D-${BOOST_MAX_DAYS-1}부터). 언제든 끌 수 있어요.</div>` : "";
   document.getElementById("drawerRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeDrawer()"><div class="drawer wide">
     <div class="drawer-head"><h3>🚀 부스터 모드</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
     <div class="drawer-body">
       ${banner}
-      <div class="dash-section">등록된 시험 · 목표 기간</div>
-      <div id="examList">${list}</div>
-      <div class="dash-section" style="margin-top:16px">새 기간 추가</div>
-      <div class="crit-grid">
-        <div><label class="fld-lbl">이름</label><input class="inp" id="examName" placeholder="예: 2학기 중간고사"></div>
-        <div><label class="fld-lbl">시험 날짜</label><input class="inp" type="date" id="examDate" min="${today}"></div>
-        <div><label class="fld-lbl">대비 시작 (D-)</label><input class="inp" type="number" id="examPrep" value="14"></div>
-        <div><label class="fld-lbl">일일 목표 상향(분)</label><input class="inp" type="number" id="examBoost" value="150"></div>
-      </div>
-      <button class="add-btn" style="width:100%;margin-top:10px" onclick="addExam()">🚀 부스터 기간 추가</button>
-      <div style="font-size:12px;color:#64748B;margin-top:12px;line-height:1.6;background:#F8FAFC;border-radius:9px;padding:11px">
-        <b>부스터 모드가 켜지면</b><br>
-        · 일일·주간 목표 학습시간이 자동으로 올라갑니다<br>
-        · 그 주 용돈이 <b>설정한 배율(기본 1.5배)</b>로 지급됩니다 (상한도 함께 상향)<br>
-        · 상단에 D-day 배너가 표시되어 남은 기간을 알 수 있습니다
-      </div>
+      <div class="dash-section">부스터를 켜면 이렇게 늘어나요</div>
+      ${boostLimitsHTML(P)}
+      ${state.profile.role==="parent"? `<div class="cd-note" style="margin:-4px 0 12px">늘어나는 시간과 금액은 ⚙️ 용돈 기준 → 자세한 기준에서 바꿔요.${state.viewingChild? "" : " 자녀가 켠 부스터는 자녀 플래너를 열면 보이고, 끌 수도 있어요."}</div>` : ""}
+      <div class="dash-section">최근 부스터</div>
+      <div id="examList">${examListHTML()}</div>
+      ${form}
     </div></div></div>`;
 }
 
@@ -4005,8 +4033,6 @@ function boot(){
     }
     state.ownerUid=user.uid; state.ownerName=state.profile.name; state.ownerRole=state.profile.role;
     state.viewingChild=false;
-    // 토요일 18시 마감 이후면 다음 주 계획 모드로 시작
-    if(weekPhase().phase==="planning"){ state.cursor=activeWeekStart(new Date()); state.tab="plan"; state.view="week"; }
     try{ await loadChildren(); }catch(e){ console.error("자녀 로드 실패", e); }
     showApp(true);
     checkFamilyRequests().then(async()=>{ await refreshCommBadge(); await checkNewCheers(); await hallCheckLikes(); newsAnnounce(); });
@@ -4070,7 +4096,7 @@ function subscribeTasks(){
       weeklyCarry();
     }, err=>console.error("tasks",err));
 }
-/* ↪ 주간 이월: 토요일 18시 마감 뒤, 월~토에 못 한 계획을 "골라 담기"로 보여 줘요
+/* ↪ 주간 이월: 한 주가 끝나면(🏁 종료했거나 일요일이 되면), 월~토에 못 한 계획을 "골라 담기"로 보여 줘요
  *  - 자동으로 옮기지 않아요: 아이가 이번 주에 가져갈 것만 골라요 (안 골라도 괜찮아요)
  *  - 고른 것만 일요일(일요일이 지났으면 오늘)로 복사 · 지난주 계획엔 '↪ 넘김' 표시
  *  - 주마다 한 번만 (meta/carry.last) · 복사본 id가 정해져 있어 기기 여러 대여도 안 겹쳐요 */
@@ -4149,6 +4175,7 @@ function subscribeCategories(){
     if(!d.exists && !state.viewingChild) plannerRef().collection("meta").doc("settings").set(state.settings);
     else if(d.exists && mig.changed) plannerRef().collection("meta").doc("settings").set({allowance:state.settings.allowance},{merge:true}).catch(()=>{});
     fetchPayTerms(state.ownerUid).then(pt=>{ state.payTermsRaw=pt; render(); });
+    loadWeekClose(state.ownerUid);
     render();
   });
 }
@@ -4210,8 +4237,7 @@ function dayTypeGoal(ds){
   const base = effDayType(ds)==="free"
     ? (s.dailyGoalFree!=null? s.dailyGoalFree : 240)
     : (s.dailyGoalSchool!=null? s.dailyGoalSchool : (s.dailyGoalMin||120));
-  const e=examFor(ds);                       // 시험 대비 기간이면 목표 상향
-  return base + (e? (Number(e.boost)||150) : 0);
+  return base;                               // 🚀 부스터는 목표가 아니라 '하루 최대 인정 시간'을 늘려요
 }
 async function loadDayTypes(days){
   const need=days.filter(ds=>state.dayTypes[ds]===undefined);
@@ -4447,10 +4473,11 @@ async function computeWeekPay(uid){
   }
   return {r, amount:payout? Number(payout.amount)||0 : now, timePay:now-r.appBonus-r.mockBonus, today, days, paid:!!payout};
 }
-function payDeadline(days){
-  const end=parseD(days[6]); end.setHours(18,0,0,0);
-  const ms=end-new Date(), d=Math.floor(ms/86400000);
-  return ms<=0? "마감" : d===0? "오늘 18시 마감" : `D-${d}`;
+// 자동 마감은 없어요 — 학생이 🏁 종료하면 정산 (그 전엔 토요일까지 남은 날)
+function payDeadline(days, uid){
+  if(uid && weekClosed(uid, days[6])) return "🏁 종료";
+  const d=Math.round((parseD(days[6])-parseD(fmt(new Date())))/86400000);
+  return d>0? `종료까지 D-${d}` : d===0? "오늘 종료하기" : "종료 전";
 }
 function payBarHTML(P){
   const r=P.r, won=n=>"₩"+Math.round(n).toLocaleString();
@@ -4458,7 +4485,7 @@ function payBarHTML(P){
   const w=n=>Math.max(0,Math.min(100, n/max*100)).toFixed(1)+"%";
   const td=Math.round(P.today), tdTxt=td===0? "오늘 ₩0" : `오늘 ${td>0?"+":"−"}₩${Math.abs(td).toLocaleString()}`;
   return `<div class="pb-top"><b class="pb-amt">${won(P.amount)}</b><span class="pb-today ${td>0?"up":td<0?"down":""}">${tdTxt}</span>
-      <span class="pb-dl">${P.paid?"지급완료":payDeadline(P.days)}</span></div>
+      <span class="pb-dl">${P.paid?"지급완료":payDeadline(P.days, state.ownerUid)}</span></div>
     <div class="pb-track" aria-hidden="true"><i style="width:${w(P.timePay)};background:#6A58E6"></i><i style="width:${w(r.appBonus)};background:#0E9F6E"></i><i style="width:${w(r.mockBonus)};background:#E0A100"></i></div>
     <div class="pb-lbl"><span>⏱ ${won(P.timePay)}</span><span>📚 ${won(r.appBonus)}</span><span>📝 ${r.mock? won(r.mockBonus) : "–"}</span></div>`;
 }
@@ -4673,7 +4700,7 @@ function renderRecord(){
       isParent? recRow("📈","자녀 학습 리포트","일 · 주 · 월 평균, 자녀별 비교","drawReport()") : "",
       recRow("✅", isParent? "지킨 날 인정 · 확인" : "지킨 날 확인", isParent? "인정 방법 고르기 · 날마다 확인" : "부모님이 정한 방법 · 최근 14일","drawKeptRule()")],
     money:[recRow("💰","용돈 정산","이번 주 달성도 · 지급 내역","openDrawer('allowance')"),
-      recRow("🚀","부스터 모드",`시험 D-day · 시간 용돈 상한 ${wonFmt(payTermsOf(null,state.payTermsRaw).boostCap)}`,"drawBooster()")],
+      recRow("🚀","부스터 모드",activeExam()? "ON · 하루 최대 인정 시간 늘어남" : "시험 공부할 때 켜요 · 하루 최대 인정 시간 ↑","drawBooster()")],
   };
   const dotOf=g=> g==="comm"? (state.chatUnread||0)+(state.friendPending||0) : 0;
   const seg=`<div class="seg rx-seg">${REC_GROUPS.map(([k,e,t])=>`<button class="${recGroup===k?"on":""}" onclick="recSetGroup('${k}')">${e} ${t.split(" ")[0].replace("과","")}${dotOf(k)? `<i class="rx-dot"></i>` : ""}</button>`).join("")}</div>`;
@@ -4705,7 +4732,7 @@ function openMenu(){
     <div class="r-sec">관리</div>
     ${hubItem("👨‍👩‍👧", "가족 연결"+(state.familyPending?` <span class="badge-dot">${state.familyPending}</span>`:""), isParent?"자녀에게 연결 신청 · 받은 신청 승인":"부모님께 연결 신청 · 받은 신청 승인","drawFamily()")}
     ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 지킨 날 확인 · 자녀 계정","drawManage()") : hubItem("🐣","내 캐릭터 · 성장","66일 공부 도전 · 명예의 장 · 순위 · 뱃지","drawManage()")}
-    ${isParent? hubItem("🔔","용돈 알림","토요일 18시 · 휴대폰 푸시 · 이메일","drawNotify()") : ""}
+    ${isParent? hubItem("🔔","용돈 알림","자녀가 이번 주를 종료하면 · 푸시 · 이메일","drawNotify()") : ""}
     ${hubItem("⚙️","설정","계정 · 목표시간 · 방학 · 과목/교재 · 템플릿","openDrawer('settings')")}
     ${hubItem("🔗","학습앱 인정 시간","천문장 · 영단어 · 문법 환산과 상한","drawExtApps()")}
     <div class="r-sec">화면 보기</div>
@@ -4997,15 +5024,16 @@ function focusKeepAwake(on){ F.keepAwake=!!on; focusSave(); focusWake(); render(
 function focusVol(v){ F.vol=Number(v)/100; FocusSound.setVolume(F.vol); focusSave(); }
 
 /* ============================================================
- *  💰 토요일 18시 용돈 알림
+ *  💰 용돈 정산 알림 — 학생이 🏁 이번 주 종료를 누르면
  *  - 스냅샷: 학생 플래너가 열려 있을 때(또는 부모가 볼 때) 이번 주 정산 결과를
- *    planner/{자녀uid}/allowanceSnap/{토요일 날짜} 에 저장합니다. (마감 전까지 계속 갱신)
- *  - 발송: GitHub Actions(tools/weekly-allowance.mjs)가 매주 토 18시(한국 시간)에
- *    스냅샷을 모아 부모에게 휴대폰 푸시 · 이메일을 보내고 planner/{부모uid}/notices/{토요일} 에 남깁니다.
+ *    planner/{자녀uid}/allowanceSnap/{토요일 날짜} 에 저장합니다. (종료하면 closed:true 로 고정)
+ *  - 종료: planner/{자녀uid}/payRequests/{토요일} (용돈 요청) — 부모 앱을 열면 바로 보여요
+ *  - 발송: GitHub Actions(tools/weekly-allowance.mjs)가 매시간 새로 종료된 주를 찾아
+ *    부모에게 휴대폰 푸시 · 이메일을 보내고 planner/{부모uid}/notices/{토요일} 에 남깁니다.
  *  - 앱 안: 부모가 앱을 열면 읽지 않은 정산서를 알려 줍니다. (예약 발송이 설정되지 않았어도 앱이 직접 만듦)
  * ============================================================ */
 const NOTIFY_DEFAULT={push:true, email:true, emailTo:""};
-// 이번 학습 주간(일~토, 토 18시 마감)의 날짜들
+// 이번 학습 주간(일~토)의 날짜들
 function snapWeekDays(){ return charWeekDays(); }
 let snapTimer=null;
 function scheduleSnap(){
@@ -5016,8 +5044,10 @@ function scheduleSnap(){
     if(state.profile.role!=="parent") saveAllowanceSnap(state.user.uid, state.profile.name).catch(e=>console.warn("용돈 스냅샷",e));
   }, 4000);
 }
-async function saveAllowanceSnap(uid, name){
-  const days=snapWeekDays(), weekId=days[6];
+async function saveAllowanceSnap(uid, name, weekDays, closing){
+  const days=weekDays||snapWeekDays(), weekId=days[6];
+  const sref=db.collection("planner").doc(uid).collection("allowanceSnap").doc(weekId);
+  if(!closing){ try{ const o=await sref.get(); if(o.exists && o.data().closed) return o.data(); }catch(_){} }   // 🏁 종료한 주는 그대로
   const [tasks, crit, capOv, payout, exd]=await Promise.all([
     fetchWeekTasks(uid,days), fetchAllowanceCrit(uid), fetchWeekCap(uid,weekId), fetchPayout(uid,weekId), fetchExtData(uid)
   ]);
@@ -5031,16 +5061,15 @@ async function saveAllowanceSnap(uid, name){
     payMin:r.payMin||0, rate:r.rate||0, earned:r.earned||0, timerMin:r.timerMin||0, focusMin:r.focusMin||0,
     timePay:payAmount(r,cap)-r.appBonus-r.mockBonus, timerBonus:r.timerBonus, appBonus:r.appBonus, mockBonus:r.mockBonus,
     appAcc:r.appAcc.acc, appAnswered:r.appAcc.total, mockAcc:r.mockAcc, boost:r.boost};
-  await db.collection("planner").doc(uid).collection("allowanceSnap").doc(weekId).set(snap);
+  if(closing){ snap.closed=true; snap.closedAt=Date.now(); }
+  await sref.set(snap);
   return snap;
 }
-// 가장 최근에 마감된 주의 토요일(YYYY-MM-DD) — 지금이 토 18시 이후면 오늘
+// 가장 최근에 끝난 주의 토요일(YYYY-MM-DD) — 이번 주를 🏁 종료했으면 이번 주, 아니면 지난주
 function lastClosedSaturday(now){
   now=now||new Date();
-  const d=new Date(now); d.setHours(0,0,0,0);
-  let back=(d.getDay()+1)%7;                 // 토요일까지 거슬러 올라갈 날 수
-  if(back===0 && now.getHours()<18) back=7;  // 오늘이 토요일인데 아직 18시 전이면 지난주 토요일
-  return fmt(addDays(d,-back));
+  const cur=weekSatOf(now);
+  return weekClosed(state.ownerUid, cur)? cur : fmt(addDays(parseD(cur),-7));
 }
 // 부모: 자녀들의 스냅샷으로 정산서 만들기
 async function buildAllowanceNotice(weekId){
@@ -5060,20 +5089,12 @@ async function checkAllowanceNotices(){
   if(!state.profile || state.profile.role!=="parent") return;
   const ref=db.collection("planner").doc(state.user.uid).collection("notices");
   try{
-    // 예약 발송이 아직 안 됐으면(또는 설정 전이면) 앱이 직접 정산서를 만듦
-    const wk=lastClosedSaturday();
+    // 정산서는 자녀가 🏁 이번 주 종료(= 💌 용돈 요청)를 누르면 만들어져요 (예약 알림이 휴대폰 푸시 · 이메일도 보내요)
     // 이번 주 스냅샷이 아직 없는 자녀는 부모 기기에서 채워 둠 (자녀 기기에서 계산한 값이 있으면 그대로)
     const cw=snapWeekDays()[6];
     for(const ch of state.children){
       db.collection("planner").doc(ch.uid).collection("allowanceSnap").doc(cw).get()
         .then(d=>{ if(!d.exists) return saveAllowanceSnap(ch.uid, ch.name); }).catch(()=>{});
-    }
-    if(state.children.length){
-      const cur=await ref.doc(wk).get();
-      if(!cur.exists){
-        const nt=await buildAllowanceNotice(wk);
-        if(nt.items.some(i=>i.amount!=null)) await ref.doc(wk).set(nt);   // 그 주 기록이 있을 때만
-      }
     }
     const snap=await ref.where("read","==",false).get();
     state.notices=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.weekId<a.weekId?-1:1);
@@ -5086,7 +5107,7 @@ async function checkAllowanceNotices(){
       q.docs.forEach(d=>reqs.push({...d.data(), uid:ch.uid, name:ch.name, weekId:d.id}));
     }
     state.payReqs=reqs.sort((a,b)=>b.at-a.at);
-    if(reqs.length) toast(`💌 ${reqs[0].name}이(가) 용돈을 요청했어요${reqs.length>1?` 외 ${reqs.length-1}건`:""}`,"info");
+    if(reqs.length) toast(`🏁 ${reqs[0].name}이(가) 이번 주를 종료하고 용돈을 요청했어요${reqs.length>1?` 외 ${reqs.length-1}건`:""}`,"info");
   }catch(e){ console.warn("용돈 요청 확인", e); }
   const n=state.notices.length;
   const b=document.getElementById("menuBtn"); if(b && n) b.classList.add("has-dot");
@@ -5100,7 +5121,7 @@ function noticeCardsHTML(){
   if(!state.notices || !state.notices.length) return reqs;
   return reqs+state.notices.map(nt=>`<div class="notice-card" onclick="openNotice('${nt.id}')">
       <div class="nc-top"><span class="nc-emo">💰</span><div style="flex:1;min-width:0"><b>${esc(nt.label)} 용돈 정산서</b>
-        <span>토요일 18시 마감 · ${nt.items.length}명 · 합계 ${wonFmt(nt.total)}</span></div><span class="nc-new">NEW</span></div>
+        <span>🏁 주간 종료 · ${nt.items.length}명 · 합계 ${wonFmt(nt.total)}</span></div><span class="nc-new">NEW</span></div>
       <div class="nc-rows">${nt.items.map(i=>`<div><span>${esc(i.name)}</span><b>${i.amount==null?"기록 없음":wonFmt(i.amount)}</b>${i.pct!=null?`<em>달성 ${i.pct}% · ${i.weekMin}분</em>`:""}</div>`).join("")}</div>
     </div>`).join("");
 }
@@ -5144,7 +5165,7 @@ async function drawNotify(){
   else pushState=`<span>아직 이 기기에서 켜지 않았어요</span>`;
   const body=`
     <div style="font-size:12.5px;color:#6D6B7A;line-height:1.6;margin-bottom:12px">
-      매주 <b>토요일 18시</b>(학습 주간 마감)에 자녀별로 이번 주 학습 결과에 따라 책정된 <b>용돈</b>을 알려 드려요.
+      자녀가 <b>🏁 이번 주 종료</b>를 누르면 그 주 학습 결과에 따라 책정된 <b>용돈</b>을 알려 드려요. (보통 1시간 안에 도착)
       금액은 자녀 플래너가 계산해 둔 값이며, 앱을 열면 정산서도 확인할 수 있어요.
     </div>
     <div class="fo-card">
@@ -5155,13 +5176,13 @@ async function drawNotify(){
         ${nTok?`<button class="fam-btn ghost" onclick="disablePush()">이 기기 끄기</button>`:""}
         <button class="fam-btn ghost" onclick="testLocalNotice()">알림 미리 보기</button>
       </div>
-      <label class="fo-awake"><input type="checkbox" ${p.push?"checked":""} onchange="saveNotifyPrefs({push:this.checked})"> 토요일 푸시 받기</label>
+      <label class="fo-awake"><input type="checkbox" ${p.push?"checked":""} onchange="saveNotifyPrefs({push:this.checked})"> 정산 푸시 받기</label>
     </div>
     <div class="fo-card">
       <div class="fo-card-h">✉️ 이메일 <span>정산서를 메일로</span></div>
       <div class="fam-send"><input class="inp" id="notifyEmail" type="email" value="${esc(email)}" placeholder="받을 이메일">
         <button class="fam-btn" onclick="saveNotifyPrefs({emailTo:document.getElementById('notifyEmail').value.trim()}).then(()=>toast('저장했어요','good'))">저장</button></div>
-      <label class="fo-awake"><input type="checkbox" ${p.email?"checked":""} onchange="saveNotifyPrefs({email:this.checked})"> 토요일 이메일 받기</label>
+      <label class="fo-awake"><input type="checkbox" ${p.email?"checked":""} onchange="saveNotifyPrefs({email:this.checked})"> 정산 이메일 받기</label>
     </div>
     <div class="fo-hint">푸시·이메일 발송은 사이트 관리자가 GitHub Actions 예약 실행을 설정해야 동작해요 (README 참고). 예약 실행은 몇 분 늦게 도착할 수 있어요.</div>`;
   const root=document.querySelector("#drawerRoot .drawer-body"); if(root) root.innerHTML=body;
@@ -5393,14 +5414,23 @@ async function quickSave(){
 function updateWeekBanner(){
   const el=document.getElementById("weekBanner"); if(!el) return;
   const now=new Date(), wp=weekPhase(now);
+  // 🏁 종료는 학생 본인만 눌러요 (부모가 자녀 플래너를 볼 때는 안내 없음)
+  const mine=state.profile && state.profile.role!=="parent" && !state.viewingChild;
+  const loaded=!!state.weekClose[state.ownerUid];
+  const prevSat=fmt(addDays(parseD(weekSatOf(now)),-7)), prevLbl=weekLabelOf(allowanceWeekDays(parseD(prevSat)));
   if(wp.phase==="planning"){
     el.className="week-banner plan";
-    el.innerHTML=`📅 이번 주 학습이 마감됐어요. <b>다음 주(${wp.label})</b> 계획을 세워보세요!
+    el.innerHTML=`✅ 이번 주를 종료했어요. <b>다음 주(${wp.label})</b> 계획을 세워보세요!
       <button onclick="drawWeekReport()" style="background:#0E9F6E">📋 이번 주 결산</button>
       <button onclick="goPlanNextWeek()">다음 주 계획하기</button>`;
-  } else if(now.getDay()===6){ // 토요일 마감 전
+  } else if(mine && loaded && now.getDay()<=2 && !weekClosed(state.ownerUid, prevSat)){ // 일~화: 지난주를 아직 안 끝냈어요
     el.className="week-banner soon";
-    el.innerHTML=`⏰ 오늘 <b>18시</b>에 이번 주 학습이 마감돼요. 남은 계획을 마무리해볼까요?`;
+    el.innerHTML=`🏁 지난주(${prevLbl})를 아직 종료하지 않았어요. 종료하면 용돈이 정산돼요.
+      <button onclick="weekCloseAsk('${prevSat}')">지난주 종료하기</button>`;
+  } else if(mine && loaded && now.getDay()>=5){ // 금 · 토: 다 했으면 종료
+    el.className="week-banner soon";
+    el.innerHTML=`🏁 이번 주 공부를 다 했으면 <b>「이번 주 종료」</b>를 눌러 용돈을 정산해요.
+      <button onclick="weekCloseAsk('${weekSatOf(now)}')">이번 주 종료</button>`;
   } else {
     el.className="week-banner hidden";
   }
@@ -6196,7 +6226,7 @@ function payTermsSummaryHTML(P){
   return `<div class="pay-terms">
         <div><span>⏱ 공부 1시간당</span><b>${wonFmt(P.hourlyRate)}</b></div>
         <div><span>⏱ 타이머로 재면</span><b>+${Math.round(P.timerBonusRate*100)}%</b></div>
-        <div><span>시간 용돈 최대 (평소 / 시험기간)</span><b>${wonFmt(P.cap)} / ${wonFmt(P.boostCap)}</b></div>
+        <div><span>시간 용돈 최대 (평소 / 🚀 부스터)</span><b>${wonFmt(P.cap)} / ${wonFmt(P.boostCap)}</b></div>
         <div><span>📚 학습앱 정답률 보너스</span><b>최대 ${wonFmt(P.appBonusMax)}</b></div>
         <div><span>📝 모의고사 보너스</span><b>최대 ${wonFmt(P.mockBonusMax)}</b></div>
       </div>`;
@@ -6212,13 +6242,15 @@ function payTermsEditorHTML(uid, P, after){
   return `<div class="pt-edit">
       ${quick("⏱ 공부 1시간당","hourlyRate","원")}
       ${quick("💰 시간 용돈 최대 · 평소","cap","원/주")}
-      ${quick("🚀 시간 용돈 최대 · 시험기간","boostCap","원/주")}
+      ${quick("🚀 시간 용돈 최대 · 부스터","boostCap","원/주")}
       <div class="pt-hint">평소 최대를 채우려면 한 주에 <b>${hmFmt(weekly)}</b> 공부해야 해요 (${wonFmt(P.hourlyRate)} × ${Math.round(weekly/6)/10}시간 = ${wonFmt(P.cap)})${Number(P.cap)? "" : " · 최대 0원 = 상한 없음"}</div>
-      <details class="pt-more"><summary>자세한 기준 (타이머 · 하루 인정 시간 · 보너스)</summary>
+      <details class="pt-more"><summary>자세한 기준 (타이머 · 하루 인정 시간 · 🚀 부스터 · 보너스)</summary>
         <div class="crit-grid" style="margin-top:10px">
           ${inp("⏱ 타이머 보너스(%)","timerBonusRate",Math.round(P.timerBonusRate*100),5,"Math.min(1,Math.max(0,Number(this.value)||0)/100)")}
           ${inp("🏫 등교일 하루 최대 인정(분, 0=제한 없음)","dailyMaxMin",P.dailyMaxMin,30)}
           ${inp("🏖 자율학습일 하루 최대 인정(분, 0=제한 없음)","dailyMaxFreeMin",P.dailyMaxFreeMin,30)}
+          ${inp("🚀 부스터 · 등교일 하루 최대 인정(분)","boostDayMaxMin",P.boostDayMaxMin,30)}
+          ${inp("🚀 부스터 · 자율학습일 하루 최대 인정(분)","boostDayMaxFreeMin",P.boostDayMaxFreeMin,30)}
           ${inp("📚 학습앱 정답률 보너스 최대(원)","appBonusMax",P.appBonusMax,500)}
           ${inp("📝 모의고사 보너스 최대(원)","mockBonusMax",P.mockBonusMax,500)}
           ${inp("보너스 0원 기준 정답률(%)","accFloor",Math.round(P.accFloor*100),5,"Math.min(0.99,Math.max(0,Number(this.value)||0)/100)")}
@@ -6248,7 +6280,7 @@ async function redrawKeepScroll(fn){
 }
 async function copyPayTermsAll(uid){
   const P=payTermsOf(null, PT_CACHE[uid]), others=state.children.filter(c=>c.uid!==uid && c.exists!==false);
-  if(!others.length || !confirm(`${others.map(c=>c.name).join(", ")}에게도 같은 용돈 기준을 적용할까요?\n(1시간당 ${wonFmt(P.hourlyRate)} · 최대 ${wonFmt(P.cap)} / 시험기간 ${wonFmt(P.boostCap)})`)) return;
+  if(!others.length || !confirm(`${others.map(c=>c.name).join(", ")}에게도 같은 용돈 기준을 적용할까요?\n(1시간당 ${wonFmt(P.hourlyRate)} · 최대 ${wonFmt(P.cap)} / 부스터 ${wonFmt(P.boostCap)})`)) return;
   const pick=({mocks, updatedAt, updatedBy, ...rest})=>rest;
   for(const c of others){ if(await savePayTerms(c.uid, pick(P))) PT_CACHE[c.uid]={...(PT_CACHE[c.uid]||{}), ...pick(P)}; }
   toast("모든 자녀에게 적용했어요","good"); redrawKeepScroll(drawSettings);
@@ -6257,7 +6289,7 @@ function payTermsBlockHTML(){
   const isParent=state.profile.role==="parent";
   const note=`<div style="font-size:12px;color:#64748B;margin-top:10px;line-height:1.55;background:#F8FAFC;border-radius:9px;padding:11px">
       <b>주간 용돈 = ⏱ 시간 용돈 + 📚 학습앱 보너스 + 📝 모의고사 보너스</b><br>
-      · 시간 용돈 = 공부한 시간 × 1시간당 금액 (평소 · 🚀 시험기간 최대까지 — 1시간당 금액은 같아서 더 오래 공부해야 채워요)<br>
+      · 시간 용돈 = 공부한 시간 × 1시간당 금액 (평소 · 🚀 부스터 최대까지 — 부스터는 학생이 켜고, 하루 최대 인정 시간이 늘어나요)<br>
       · ⏱ 타이머 보너스: 시간 용돈 중 타이머로 잰 부분에 더 줘요 (상한과 별도)<br>
       · 정답률 보너스: 기준 정답률 이하 0원 → 최대 기준 이상이면 최대, 그 사이는 비례 · 학습앱이 직접 채점한 기록<br>
       · 모의고사는 기록 → 용돈 정산에 나오는 <b>이번 주 공부 범위</b>로 시험을 보고 점수를 입력해 주세요<br>
@@ -6324,7 +6356,7 @@ function drawSettings(){
           </button>
           ${isParent? `<button class="hub-item" style="margin-top:8px" onclick="document.getElementById('payTermsSec').scrollIntoView({behavior:'smooth'})">
             <span class="hub-emo">💰</span>
-            <span class="hub-txt"><b>용돈 기준 조정</b><span>자녀별 1시간당 금액 · 주간 최대(평소 / 시험기간)</span></span>
+            <span class="hub-txt"><b>용돈 기준 조정</b><span>자녀별 1시간당 금액 · 주간 최대(평소 / 부스터)</span></span>
             <span class="hub-arr">›</span></button>` : ""}
           ${childrenBlock}
           <div class="section-lbl" style="margin-top:22px">학습 목표 (등교일 / 자율학습일)</div>
@@ -6358,7 +6390,7 @@ function drawSettings(){
 
           <div class="section-lbl" style="margin-top:22px">🚀 부스터 모드 (시험 D-day)</div>
           <button class="ghost-btn" style="width:100%;padding:11px" onclick="closeDrawer();drawBooster()">🚀 부스터 모드 열기</button>
-          <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">시험 기간을 등록하면 목표시간이 올라가고 <b>시간 용돈 상한이 시험기간 금액</b>으로 오릅니다(더 오래 공부해야 채워져요 · 금액은 아래 용돈 기준에서). <b>기록</b> 탭에서도 열 수 있어요.</div>
+          <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;line-height:1.5">부스터는 <b>학생이 직접 켜요</b>. 켜진 날은 <b>하루 최대 인정 시간</b>이 늘어나고 주간 시간 용돈 최대도 부스터 금액으로 올라가요(늘어나는 시간 · 금액은 아래 용돈 기준에서). <b>기록</b> 탭에서도 열 수 있어요.</div>
 
 
           <div class="section-lbl" id="gcalSec" style="margin-top:22px">📅 구글 캘린더</div>
@@ -6513,13 +6545,14 @@ async function drawDashboard(){
 /* ============================================================
  *  10-b) 용돈 정산 (주 상한 + 이행률·문제점수·복습 종합)
  * ============================================================ */
-// 정산·대결 주간도 캐릭터/계획과 동일하게 일요일 시작(일~토, 토 18시 마감)
+// 정산 주간도 캐릭터/계획과 동일하게 일요일 시작(일~토) · 🏁 학생이 종료하면 정산
 function allowanceWeekDays(d){ const s=startOfWeek(d||new Date()); return Array.from({length:7},(_,i)=>fmt(addDays(s,i))); }
 function weekLabelOf(days){ const s=parseD(days[0]),e=parseD(days[6]); return `${s.getMonth()+1}.${s.getDate()}~${e.getMonth()+1}.${e.getDate()}`; }
 
 /* ============================================================
  *  💰 주간 용돈 = ⏱ 시간 용돈 + 📚 학습앱 정답률 보너스 + 📝 모의고사 정답률 보너스
  *  - 시간 용돈: 공부한 시간 × 1시간당 금액 (평소 · 시험기간(부스터) 최대 — 부모가 자녀별로 정해요, 기본 1만 원 · 2만 원)
+ *    🚀 부스터(학생이 켬) 날은 하루 최대 인정 시간이 늘어나요 (기본 등교일 4→6시간 · 자율학습일 8→10시간)
  *    + 타이머 보너스: 그중 타이머로 잰 부분의 10% (상한과 별도)
  *    → 1시간당 금액은 그대로라 시험기간 상한을 채우려면 공부 시간이 두 배 필요
  *  - 학습앱 보너스: 영단어 · 그래머 인사이드 · 천문장이 직접 채점한 그 주 정답률 (최대 5천 원)
@@ -6527,7 +6560,7 @@ function weekLabelOf(days){ const s=parseD(days[0]),e=parseD(days[6]); return `$
  *  - 정답률 → 보너스: 60% 이하 0원, 95% 이상 최대, 그 사이 비례 (100원 단위)
  *  - 기준은 payTerms/{자녀uid} 에 저장 → 보안 규칙상 연결된 부모만 바꿀 수 있음
  * ============================================================ */
-const PAY_DEFAULT={hourlyRate:1000, timerBonusRate:0.1, cap:10000, boostCap:20000, dailyMaxMin:240, dailyMaxFreeMin:480, includeApps:true,
+const PAY_DEFAULT={hourlyRate:1000, timerBonusRate:0.1, cap:10000, boostCap:20000, dailyMaxMin:240, dailyMaxFreeMin:480, boostDayMaxMin:360, boostDayMaxFreeMin:600, includeApps:true,
   appBonusMax:5000, mockBonusMax:5000, accFloor:0.6, accFull:0.95, appMinAnswers:30, mocks:{}};
 function payTermsOf(allowance, pt){ return {...PAY_DEFAULT, ...(pt||{})}; }
 async function fetchPayTerms(uid){
@@ -6563,11 +6596,10 @@ function appAccuracy(days, X){
   const c=per.sentence.c+per.vocab.c+per.grammar.c, t=per.sentence.t+per.vocab.t+per.grammar.t;
   return {correct:c, total:t, acc:t? c/t : null, per};
 }
-// 시험기간(부스터) 주인가 — 계산 대상 자녀의 시험 목록 기준
+// 시험기간(부스터) 주인가 — 계산 대상 자녀의 부스터 목록 기준
 function isBoostWeek(days, exams){
   const list=Array.isArray(exams)? exams : examList();
-  return (days||[]).some(ds=>list.some(e=>{ if(!e||!e.date) return false;
-    const start=fmt(addDays(parseD(e.date), -(Number(e.prepDays)||14))); return ds>=start && ds<=e.date; }));
+  return (days||[]).some(ds=>!!examFor(ds, list));
 }
 // 용돈 계산용 등교일/자율학습일 판정 — 계산 대상 자녀의 설정(방학 · 날짜별 지정) 기준
 function payDayType(ds, T){
@@ -6594,8 +6626,11 @@ function computeAllowance(tasks, days, crit, exd){
   const rate=Math.max(0, Number(T.hourlyRate)||0);
   const dayMaxSchool=Math.max(0, Number(T.dailyMaxMin)||0), dayMaxFree=Math.max(0, Number(T.dailyMaxFreeMin)||0);
   const dayMax=dayMaxSchool;
+  const exams=Array.isArray(T.exams)? T.exams : examList();
   const byDay=days.map(ds=>{
-    const type=payDayType(ds, T), cap=type==="free"? dayMaxFree : dayMaxSchool;  // 등교일 / 자율학습일(주말·방학) 하루 최대
+    const type=payDayType(ds, T), boosted=!!examFor(ds, exams);
+    // 등교일 / 자율학습일(주말·방학) 하루 최대 — 🚀 부스터 날은 늘어난 최대
+    const cap=boosted? Math.max(0, Number(type==="free"? T.boostDayMaxFreeMin : T.boostDayMaxMin)||0) : (type==="free"? dayMaxFree : dayMaxSchool);
     const dt=wk.filter(t=>t.date===ds && !t.appLinked);   // 학습앱 할 일은 앱이 잰 시간으로 인정
     const task=dt.reduce((a,t)=>a+verifiedMin(t),0);                            // 과제에 기록한 시간 (직접 적은 시간 포함)
     const taskTimed=dt.reduce((a,t)=>a+timedMin(t),0);                         // 그중 타이머로 잰 시간
@@ -6603,7 +6638,7 @@ function computeAllowance(tasks, days, crit, exd){
     const app=(T.includeApps!==false)? extCreditedOn(ds, X).total : 0;          // 학습앱이 잰 시간
     const raw=task+focus+app, paid=cap>0? Math.min(raw, cap) : raw;
     const timedPaid=Math.min(taskTimed+focus, paid);                           // 인정 시간 중 타이머 몫
-    return {ds, type, cap, task, timer:taskTimed, focus, app, raw, paid, timedPaid};
+    return {ds, type, boosted, cap, task, timer:taskTimed, focus, app, raw, paid, timedPaid};
   });
   const sum=k=>byDay.reduce((a,d)=>a+d[k],0);
   const taskMin=sum("task"), timerMin=sum("timer"), focusMin=sum("focus"), appMin=sum("app"), rawMin=sum("raw"), payMin=sum("paid"), timedPaidMin=sum("timedPaid");
@@ -6680,7 +6715,7 @@ function allowanceMetricsHTML(r,crit){
   const appParts=[["📘 천문장",P.sentence],["🔤 영단어",P.vocab],["📗 문법",P.grammar]].filter(([,x])=>x.t>0)
     .map(([n,x])=>`${n} ${x.c}/${x.t}`).join(" · ");
   return `<div class="pay-break">
-      <div class="pb-head">⏱ 시간 용돈 <span>${r.boost?"🚀 시험기간 · ":""}최대 ${wonFmt(r.timeCap)}</span></div>
+      <div class="pb-head">⏱ 시간 용돈 <span>${r.boost?"🚀 부스터 · ":""}최대 ${wonFmt(r.timeCap)}</span></div>
       ${row("📝","과제 공부 시간",hmFmt(r.taskMin)+(r.timerMin>0?` <em>(⏱ ${hmFmt(r.timerMin)})</em>`:""))}
       ${r.focusMin>0? row("🎯","포커스 타이머 (과제 없이)",hmFmt(r.focusMin)) : ""}
       ${r.includeApps? row("📚","학습앱 공부 시간",hmFmt(r.appMin)) : ""}
@@ -6730,7 +6765,7 @@ async function saveMock(uid, weekId){
   if(await savePayTerms(uid, {mocks})){
     toast(`📝 모의고사 ${c}/${t} 저장했어요`,"good");
     const ch=state.children.find(x=>x.uid===uid);
-    saveAllowanceSnap(uid, ch? ch.name : state.ownerName).catch(()=>{});   // 토요일 알림 금액도 갱신
+    saveAllowanceSnap(uid, ch? ch.name : state.ownerName).catch(()=>{});   // 정산 알림 금액도 갱신
     drawAllowance();
   }
 }
@@ -6813,23 +6848,33 @@ function popupHTML(title, body, foot){
     <div class="modal-head"><h3>${title}</h3><button class="icon-btn sm" onclick="closeModal()">✕</button></div>
     <div class="modal-body">${body}</div><div class="modal-foot tm-foot">${foot}</div></div></div>`;
 }
+// 🏁 이번 주 종료 = 그 주 용돈 정산을 부모님께 요청 (토요일 18시 자동 마감 대신 학생이 직접 눌러요)
 function requestAllowance(){
   const c=allowCache[state.ownerUid]; if(!c) return;
   const items=c.items||[], amt=c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap);
-  if(!items.length){ popupHTML("💌 용돈 요청", `<div class="pop-empty">${allowWkName()}에 완료한 학습이 아직 없어요.<br><small>학습을 완료한 뒤 요청해 주세요.</small></div>`, `<button class="tm-btn save" onclick="closeModal()">확인</button>`); return; }
-  popupHTML(`💌 ${allowWkName()} 용돈 요청`, `
-    <div class="pop-amt"><small>${esc(c.label)}</small><b>${wonFmt(amt)}</b></div>
-    <div class="pop-sec">📒 부모님께 함께 보여 드릴 학습 내용</div>${weekStudyHTML(items)}`,
-    `<button class="tm-btn" onclick="closeModal()">취소</button><button class="tm-btn save" onclick="sendAllowanceRequest()">💌 요청 보내기</button>`);
+  const early=c.weekId>fmt(new Date()) && new Date().getDay()!==6;   // 토요일 전에 끝내려는 경우
+  popupHTML(`🏁 ${allowWkName()} 종료하고 정산`, `
+    <div class="pop-amt"><small>${esc(c.label)} · 이번 정산 금액</small><b>${wonFmt(amt)}</b></div>
+    <div class="cd-note" style="margin:0 0 10px;line-height:1.6">종료하면 부모님께 <b>용돈 정산 요청</b>이 가고, 다음 주 계획으로 넘어가요.${early?`<br>⚠️ 아직 ${WD_FULL[6]}이 아니에요. 남은 요일도 공부할 거면 나중에 종료해요.`:""}</div>
+    ${items.length? `<div class="pop-sec">📒 부모님께 함께 보여 드릴 학습 내용</div>${weekStudyHTML(items)}` : `<div class="pop-empty">${allowWkName()}에 완료한 학습이 없어요.<br><small>그래도 종료할 수 있어요.</small></div>`}`,
+    `<button class="tm-btn" onclick="closeModal()">취소</button><button class="tm-btn save" onclick="sendAllowanceRequest()">🏁 종료하기</button>`);
 }
 async function sendAllowanceRequest(){
   const c=allowCache[state.ownerUid]; if(!c) return;
-  const amt=c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap);
+  const uid=state.ownerUid, amt=c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap);
   try{
-    await payReqRef(state.ownerUid, c.weekId).set({weekId:c.weekId, label:c.label, name:state.ownerName||state.profile.name||"", amount:amt,
-      payMin:c.r.payMin, items:c.items||[], status:"pending", at:Date.now()});
-    closeModal(); toast("💌 용돈을 요청했어요. 부모님이 학습 내용을 보고 지급해요","good"); drawAllowance();
-  }catch(e){ console.error(e); alert("요청하지 못했어요.\n"+firestoreDiag(e)); }
+    await payReqRef(uid, c.weekId).set({weekId:c.weekId, label:c.label, name:state.ownerName||state.profile.name||"", amount:amt,
+      payMin:c.r.payMin, items:c.items||[], status:"pending", at:Date.now(), closed:true});
+    state.weekClose[uid]={...(state.weekClose[uid]||{}), [c.weekId]:true};
+    saveAllowanceSnap(uid, state.ownerName, c.days, true).catch(e=>console.warn("정산 스냅샷", e));
+    closeModal(); toast("🏁 이번 주를 종료했어요! 부모님이 학습 내용을 보고 용돈을 지급해요","good");
+    weeklyCarry(); updateWeekBanner(); render(); drawAllowance();
+  }catch(e){ console.error(e); alert("종료하지 못했어요.\n"+firestoreDiag(e)); }
+}
+// 배너 버튼: 그 주 용돈 정산 화면을 열고 종료 확인 창 띄우기
+async function weekCloseAsk(weekId){
+  if(state.profile.role==="parent" || state.viewingChild) return;
+  allowGoto(weekId); await drawAllowanceDone; requestAllowance();
 }
 // 부모: 요청 카드를 누르면 팝업으로 학습 내용 먼저 보기
 function openPayReq(uid, weekId){
@@ -6848,16 +6893,19 @@ async function goPayReq(uid, weekId){
 function payReqBannerHTML(req, isParent){
   if(!req) return "";
   const t=new Date(req.at), when=`${t.getMonth()+1}.${t.getDate()} ${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}`;
-  if(req.status==="paid") return `<div class="preq paid">💌 용돈 요청 → ✅ 지급 완료</div>`;
-  return `<div class="preq">💌 ${isParent? `<b>${esc(req.name||"자녀")}</b>이(가) 용돈 ${wonFmt(req.amount)}을 요청했어요` : `용돈 ${wonFmt(req.amount)} 요청함 · 부모님 확인 기다리는 중`} <small>${when}</small></div>`;
+  if(req.status==="paid") return `<div class="preq paid">🏁 종료 · 정산 요청 → ✅ 지급 완료</div>`;
+  return `<div class="preq">🏁 ${isParent? `<b>${esc(req.name||"자녀")}</b>이(가) 이 주를 종료하고 용돈 ${wonFmt(req.amount)}을 요청했어요` : `이 주를 종료했어요 · 용돈 ${wonFmt(req.amount)} 요청 · 부모님 확인 기다리는 중`} <small>${when}</small></div>`;
 }
 /* 📅 용돈 정산은 주 단위로 넘겨 볼 수 있어요 (state.allowOff: 0 = 이번 주, -1 = 지난주 …) */
 const allowWkName=()=>{ const o=state.allowOff||0; return o===0? "이번 주" : o===-1? "지난주" : o<0? `${-o}주 전` : `${o}주 뒤`; };
 function allowNav(d){ state.allowOff=Math.min(0,(state.allowOff||0)+d); drawAllowance(); }
 function allowGoto(weekId){
-  const cur=parseD(allowanceWeekDays(state.cursor)[6]), w=parseD(weekId);
-  state.allowOff=Math.min(0, Math.round((w-cur)/(7*86400000))); drawAllowance();
+  const cur=parseD(allowanceWeekDays(allowBase())[6]), w=parseD(weekId);
+  state.allowOff=Math.round((w-cur)/(7*86400000)); drawAllowanceDone=drawAllowance();
 }
+let drawAllowanceDone=Promise.resolve();
+// 정산 화면 기준 주: 보고 있는 날짜의 주 — 다음 주 계획 중(🏁 종료 후)이어도 정산은 이번 주부터
+function allowBase(){ const c=state.cursor||new Date(), t=new Date(); return fmt(c)>weekSatOf(t)? t : c; }
 function allowNavHTML(label){
   const o=state.allowOff||0;
   return `<div class="allow-nav"><button onclick="allowNav(-1)">‹ 지난주</button><div class="w"><b>${label}</b><small>${allowWkName()}</small></div>
@@ -6871,7 +6919,7 @@ function payHistHTML(list, curWeekId, title){
     ${rows.map(h=>`<button class="pay-hist ${h.id===curWeekId?"on":""}" onclick="allowGoto('${h.id}')"><span>${esc(h.weekLabel||h.id)}${h.rate!=null?` · ${hmFmt(h.payMin||0)} × ${wonFmt(h.rate)}`:(h.percent!=null?` · ${h.percent}%`:"")}${h.paidAt?` <small>· ${new Date(h.paidAt).getMonth()+1}/${new Date(h.paidAt).getDate()} 지급</small>`:""}</span><b style="color:#0E9F6E">${wonFmt(h.amount)}</b></button>`).join("")}`;
 }
 async function drawAllowance(){
-  const days=allowanceWeekDays(addDays(parseD(fmt(state.cursor||new Date())), 7*(state.allowOff||0))), weekId=days[6], label=weekLabelOf(days), wk=allowWkName();
+  const days=allowanceWeekDays(addDays(parseD(fmt(allowBase())), 7*(state.allowOff||0))), weekId=days[6], label=weekLabelOf(days), wk=allowWkName();
   document.getElementById("drawerRoot").innerHTML=`<div class="overlay"><div class="drawer wide">
     <div class="drawer-head"><h3>💰 용돈 정산</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
     <div class="drawer-body"><div class="empty">불러오는 중…</div></div></div></div>`;
@@ -6895,7 +6943,7 @@ async function drawAllowance(){
       sum += payout? payout.amount : payAmount(r, cap);
       cards+=`<div class="allow-card">
         <div class="name"><span class="av" style="background:${ch.color}">${esc((ch.name||"").slice(0,1))}</span>${esc(ch.name)}
-          <span style="margin-left:auto;font-size:11.5px;color:#94A3B8;font-weight:600">${r.boost?"🚀 시험기간 · ":""}예상 ${wonFmt(payAmount(r,cap))}</span></div>
+          <span style="margin-left:auto;font-size:11.5px;color:#94A3B8;font-weight:600">${r.boost?"🚀 부스터 · ":""}예상 ${wonFmt(payAmount(r,cap))}</span></div>
         ${payReqBannerHTML(req, true)}
         ${payTermsRowHTML(ch.uid, crit)}
         ${allowanceMetricsHTML(r,crit)}
@@ -6907,7 +6955,7 @@ async function drawAllowance(){
     }
     body=`${allowNavHTML(label)}<div class="allow-hero"><div class="wk">${label} · ${wk} 정산</div><div class="amt">${wonFmt(sum)}</div><div class="cap">자녀 ${state.children.length}명 합계</div></div>
       ${cards}
-      <div class="share-note">📌 주간 용돈 = <b>⏱ 공부 시간 × 1시간당 금액</b>(자녀마다 ⚙️ 기준에서 평소 · 시험기간 최대를 정해요) + <b>📚 학습앱 정답률 보너스</b> + <b>📝 모의고사 보너스</b>. 모의고사는 위 “${wk} 범위”로 시험을 본 뒤 점수를 입력하세요. 위 ‹ 지난주 버튼으로 지난 정산도 주 단위로 볼 수 있어요.</div>`;
+      <div class="share-note">📌 주간 용돈 = <b>⏱ 공부 시간 × 1시간당 금액</b>(자녀마다 ⚙️ 기준에서 평소 · 🚀 부스터 최대를 정해요) + <b>📚 학습앱 정답률 보너스</b> + <b>📝 모의고사 보너스</b>. 모의고사는 위 “${wk} 범위”로 시험을 본 뒤 점수를 입력하세요. 위 ‹ 지난주 버튼으로 지난 정산도 주 단위로 볼 수 있어요.</div>`;
   } else {
     // 단일 대상(내 플래너 또는 특정 자녀 열람 중)
     const uid=state.ownerUid;
@@ -6920,12 +6968,12 @@ async function drawAllowance(){
     const r=computeAllowance(tasks,days,crit);
     const cap = capOv!=null? capOv : null;
     const items=weekStudyItems(tasks, days);
-    allowCache[uid]={r,crit,cap,weekId,label,name:state.ownerName,items};
+    allowCache[uid]={r,crit,cap,weekId,label,name:state.ownerName,items,days};
     const canPay = isParent && state.viewingChild; // 부모가 자녀를 열람 중일 때만 지급
     const termsRow = canPay? payTermsRowHTML(uid, crit) : "";
     const shownAmt = payout? payout.amount : payAmount(r, cap);
     const hist=histSnap.docs.map(d=>({id:d.id,...d.data()}));
-    body=`${allowNavHTML(label)}<div class="allow-hero"><div class="wk">${label} · ${wk} · ${esc(state.ownerName)}</div><div class="amt">${wonFmt(shownAmt)}</div><div class="cap">⏱ ${wonFmt(payAmount(r,cap)-r.appBonus-r.mockBonus)} + 📚 ${wonFmt(r.appBonus)} + 📝 ${wonFmt(r.mockBonus)}${r.boost?" · 🚀 시험기간":""}</div></div>
+    body=`${allowNavHTML(label)}<div class="allow-hero"><div class="wk">${label} · ${wk} · ${esc(state.ownerName)}</div><div class="amt">${wonFmt(shownAmt)}</div><div class="cap">⏱ ${wonFmt(payAmount(r,cap)-r.appBonus-r.mockBonus)} + 📚 ${wonFmt(r.appBonus)} + 📝 ${wonFmt(r.mockBonus)}${r.boost?" · 🚀 부스터":""}</div></div>
       <div class="allow-card">
         ${payReqBannerHTML(req, isParent)}
         ${termsRow}
@@ -6933,8 +6981,8 @@ async function drawAllowance(){
         <details class="mock-det" ${(isParent && req && req.status!=="paid")?"open":""}><summary>📒 ${wk} 학습한 내용 (${items.length}개)</summary>${weekStudyHTML(items)}</details>
         <details class="mock-det"><summary>📝 ${wk} 모의고사 범위 (완료한 학습)</summary>${mockRangeHTML(tasks, days)}</details>
         ${payControlsHTML(uid, r, cap, payout, canPay)}
-        ${(!isParent && !payout && !req)? `<button class="pay-btn" style="width:100%;margin-top:10px" onclick="requestAllowance()">💌 ${wk} 용돈 요청하기</button>
-          <div class="cd-note" style="text-align:center;margin-top:6px">${wk} 학습한 내용이 부모님께 함께 보여요</div>` : ""}
+        ${(!isParent && !payout && !req && days[0]<=fmt(new Date()))? `<button class="pay-btn" style="width:100%;margin-top:10px" onclick="requestAllowance()">🏁 ${wk} 종료하고 정산하기</button>
+          <div class="cd-note" style="text-align:center;margin-top:6px">자동으로 마감되지 않아요 · 공부를 다 했으면 직접 눌러요 (학습한 내용이 부모님께 함께 보여요)</div>` : ""}
       </div>
       ${payHistHTML(hist, weekId)}`;
   }
@@ -6955,6 +7003,7 @@ async function payAllowanceUI(uid){
   });
   payReqRef(uid, c.weekId).get().then(d=>{ if(d.exists) return payReqRef(uid, c.weekId).update({status:"paid", paidAt:Date.now(), paidAmount:amount}); }).catch(()=>{});
   state.payReqs=(state.payReqs||[]).filter(x=>!(x.uid===uid && x.weekId===c.weekId));
+  state.weekClose[uid]={...(state.weekClose[uid]||{}), [c.weekId]:true};   // 지급한 주는 종료한 주
   drawAllowance();
 }
 
