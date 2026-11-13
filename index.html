@@ -399,6 +399,16 @@
   .td-min b span{font-size:14px;color:var(--muted);font-weight:var(--fw-semibold)}
   .td-goal{align-self:flex-start;border:none;background:var(--surface2);border-radius:999px;padding:4px 10px;font:inherit;font-size:11.5px;font-weight:var(--fw-semibold);color:var(--muted2);cursor:pointer;margin-top:4px;white-space:nowrap}
   .td-rings{display:flex;gap:4px;flex:0 0 auto}
+  .td-boost{display:flex;align-items:center;gap:8px;width:100%;margin:10px 0 2px;padding:9px 12px;border-radius:12px;border:1.5px dashed #F3B7BE;background:#FFF8F9;color:#A5323A;font:inherit;font-size:13px;font-weight:var(--fw-semibold);text-align:left;cursor:pointer}
+  .td-boost.on{border:1.5px solid #F08A96;background:linear-gradient(135deg,#FFF1F2,#FFE4E6)}
+  .td-boost .tb-e{font-size:18px}.td-boost .tb-t{flex:1;min-width:0;line-height:1.35}.td-boost .tb-t small{display:block;font-size:11.5px;color:#8A6516;font-weight:500}
+  .td-boost .tb-go{flex:0 0 auto;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:var(--fw-bold);background:#E5484D;color:#fff}
+  .td-boost.on .tb-go{background:#fff;color:#A5323A;border:1px solid #F3B7BE}
+  .sct-card{background:#F5F3FF;border:1px solid #DED8FB;border-radius:14px;padding:13px 14px;margin:0 0 14px;font-size:12.5px;line-height:1.6;color:#35296E}
+  .sct-card b.h{display:block;font-size:14px;margin-bottom:4px}
+  .sct-card details{margin-top:6px}.sct-card summary{cursor:pointer;font-weight:var(--fw-semibold)}
+  .sct-agree{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:12.5px;font-weight:var(--fw-semibold);color:#35296E}
+  .sct-agree input{margin-top:3px;width:17px;height:17px;flex:0 0 auto}
   .td-rings>div{display:flex;flex-direction:column;align-items:center;gap:0}
   .td-rings .rg-svg{width:44px;height:44px}
   .td-rings small{font-size:10.5px;color:var(--muted2);font-weight:var(--fw-semibold)}
@@ -2083,9 +2093,23 @@ function todayHeroHTML(ts, actMin, goal, done, ds, dType, isToday){
       <div class="td-rings">${R.map(r=>`<div>${ringSvg(r.v,r.c,r.emo)}<small>${r.name}</small></div>`).join("")}</div>
     </div>
     <div class="bar-track"><div class="bar-fill" style="width:${pct}%;${goal>0&&actMin>=goal?"background:#0E9F6E":""}"></div></div>
+    ${isToday? boostChipHTML() : ""}
     <div class="td-meta"><span>완료 ${done}/${ts.length}</span><span>${full? "⭕ 세 링 완성!" : "📋 계획 · ⏱ 집중 · 🧠 한 줄 복기로 링을 채워요"}</span></div>
     ${next}
   </div>`;
+}
+// 🚀 오늘 카드 안 부스터 켜기 / 끄기 (학생) · 상태 보기 (부모)
+function boostChipHTML(){
+  const e=activeExam(), student=state.profile.role!=="parent" && !state.viewingChild;
+  if(e){ const dd=examDday(e), i=examList().indexOf(e);
+    return `<button class="td-boost on" onclick="drawBooster()"><span class="tb-e">🚀</span>
+      <span class="tb-t">부스터 ON · ${esc(e.name||"시험")} ${dd>0?`D-${dd}`:"D-DAY"}<small>📵 스크린타임 제한 중 · 시험 대비 공부만 용돈에</small></span>
+      ${student? `<span class="tb-go" onclick="event.stopPropagation();boostOff(${i})">끄기</span>` : `<span class="tb-go">보기</span>`}</button>`; }
+  if(!student) return "";
+  const today=fmt(new Date()), wait=examList().find(x=>{ const g=boostRange(x); return g && g.from>today; });
+  if(wait){ const f=parseD(boostRange(wait).from);
+    return `<button class="td-boost" onclick="drawBooster()"><span class="tb-e">🚀</span><span class="tb-t">부스터 예약 · ${esc(wait.name||"시험")}<small>${f.getMonth()+1}/${f.getDate()}부터 켜져요</small></span><span class="tb-go">보기</span></button>`; }
+  return `<button class="td-boost" onclick="drawBooster()"><span class="tb-e">🚀</span><span class="tb-t">시험 공부 부스터<small>켜면 하루 인정 시간 ↑ · 📵 스크린타임 제한</small></span><span class="tb-go">켜기</span></button>`;
 }
 // 🎯 목표시간 (등교일 · 자율학습일 · 분) — 작은 창에서
 function drawGoalSheet(ds){
@@ -2758,7 +2782,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.13-1";
+const APP_VER="2026.11.13-2";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -3209,12 +3233,13 @@ async function boostOn(){
   const date=(document.getElementById("examDate")||{}).value;
   const today=fmt(new Date());
   if(!date || date<today) return alert("시험 날짜를 골라 주세요.");
+  if(!(document.getElementById("sctAgree")||{}).checked) return alert("📵 스크린타임 제한 안내를 읽고 체크해 주세요.");
   const left=examDday({date}, today);
   const from= left>BOOST_MAX_DAYS-1? fmt(addDays(parseD(date), -(BOOST_MAX_DAYS-1))) : today;
-  const E=[...examList(), {name, date, from, by:"child", at:Date.now()}];
+  const E=[...examList(), {name, date, from, by:"child", at:Date.now(), screenTime:true}];
   await saveSettings({...state.settings, exams:E});
   drawBooster(); render();
-  toast(from===today? `🚀 부스터 ON! ${name}까지 하루 최대 인정 시간이 늘어나요` : `🚀 ${name} 부스터 예약 · ${parseD(from).getMonth()+1}/${parseD(from).getDate()}부터 켜져요`,"cheer");
+  toast(from===today? `🚀 부스터 ON! 📵 스크린타임 제한을 걸고 시험 공부에 집중해요` : `🚀 ${name} 부스터 예약 · ${parseD(from).getMonth()+1}/${parseD(from).getDate()}부터 켜져요`,"cheer");
 }
 // 끄기: 오늘부터 꺼져요 (어제까지 부스터로 인정한 시간은 그대로) · 아직 시작 전이면 지워요
 async function boostOff(i){
@@ -3241,7 +3266,7 @@ function examListHTML(){
   }).join("");
 }
 function examBannerHTML(){
-  const e=activeExam(); if(!e) return "";
+  const e=activeExam(); if(!e || state.tab==="todo" || state.tab==="stats") return "";   // 할 일 · 기록 화면은 카드 안에 보여요
   const dd=examDday(e);
   return `<div class="week-banner" style="background:#FFF5F6;border-bottom:1px solid #FADADD;color:#A5323A">
     🚀 <b>부스터 ON · ${esc(e.name||"시험")} ${dd>0?`D-${dd}`:dd===0?"D-DAY!":""}</b>
@@ -3802,6 +3827,16 @@ async function drawExtApps(){
 }
 // 할 일 화면용 요약 배너
 /* ----- 🚀 부스터 모드 화면 (학생이 켜고, 부모님은 보고 끌 수 있어요) ----- */
+// 📵 부스터 = 스크린타임 제한 약속 (웹앱이 휴대폰 설정을 바꿀 수는 없어서, 켤 때 안내하고 부모님이 휴대폰에서 걸어요)
+function screenTimeCardHTML(on){
+  const parent=state.profile.role==="parent";
+  return `<div class="sct-card"><b class="h">📵 부스터를 켜면 스크린타임 제한을 걸어요</b>
+    ${parent? (on? "자녀가 부스터를 켰어요. 시험 날까지 <b>게임 · SNS · 영상 앱</b> 사용 시간을 제한해 주세요." : "자녀가 부스터를 켜면 시험 날까지 <b>게임 · SNS · 영상 앱</b> 사용 시간을 제한해 주세요.")
+      : "시험 날까지 <b>게임 · SNS · 영상 앱</b> 사용 시간을 줄여요. 부모님과 함께 휴대폰에서 설정해요. (이 앱이 휴대폰 설정을 직접 바꾸지는 않아요)"}
+    <details><summary>🍎 아이폰 · 아이패드</summary>설정 → <b>스크린 타임</b> → 앱 시간 제한 → 제한 추가 → 게임 · 소셜 · 엔터테인먼트 고르기 → 하루 시간 정하기<br>가족 공유를 쓰면 부모님 아이폰의 스크린 타임에서 자녀 이름을 골라 똑같이 걸 수 있어요.</details>
+    <details><summary>🤖 안드로이드 (갤럭시 등)</summary>설정 → <b>디지털 웰빙 및 자녀 보호 기능</b> → 앱 타이머 → 앱마다 하루 시간 정하기<br>부모님 휴대폰의 <b>Google Family Link</b> 앱으로 자녀 휴대폰 앱 사용 시간을 제한할 수도 있어요.</details>
+  </div>`;
+}
 function boostLimitsHTML(P){
   const h=m=>hmFmt(Number(m)||0);
   return `<div class="pay-terms" style="margin:0 0 12px">
@@ -3833,12 +3868,14 @@ async function drawBooster(){
         <div><label class="fld-lbl">시험 이름</label><input class="inp" id="examName" placeholder="예: 2학기 기말고사"></div>
         <div><label class="fld-lbl">시험 날짜</label><input class="inp" type="date" id="examDate" min="${today}"></div>
       </div>
+      <label class="sct-agree"><input type="checkbox" id="sctAgree"> 📵 부스터 기간에는 휴대폰 <b>스크린타임 제한</b>을 거는 것에 동의해요</label>
       <button class="add-btn" style="width:100%;margin-top:10px" onclick="boostOn()">🚀 부스터 켜기</button>
       <div class="cd-note" style="margin-top:8px;line-height:1.6">오늘부터 시험 날짜까지 켜져요 (최대 ${BOOST_MAX_DAYS}일 · 시험이 더 멀면 D-${BOOST_MAX_DAYS-1}부터). 언제든 끌 수 있어요.</div>` : "";
   document.getElementById("drawerRoot").innerHTML=`<div class="overlay" onclick="if(event.target===this)closeDrawer()"><div class="drawer wide">
     <div class="drawer-head"><h3>🚀 부스터 모드</h3><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
     <div class="drawer-body">
       ${banner}
+      ${screenTimeCardHTML(!!e)}
       <div class="dash-section">부스터를 켜면 이렇게 늘어나요</div>
       ${boostLimitsHTML(P)}
       ${state.profile.role==="parent"? `<div class="cd-note" style="margin:-4px 0 12px">늘어나는 시간과 금액은 ⚙️ 용돈 기준 → 자세한 기준에서 바꿔요.${state.viewingChild? "" : " 자녀가 켠 부스터는 자녀 플래너를 열면 보이고, 끌 수도 있어요."}</div>` : ""}
@@ -4676,6 +4713,7 @@ function renderRecord(){
           ${E? `<span class="cc-bar"><i style="width:${c.pct}%"></i></span><small>지킨 날 ${c.pts}/66 · ${c.next? `다음까지 ${c.toNext}일` : "전설 🏆"}</small>` : `<small>66일을 지키면 전설까지 자라요</small>`}</span></button>
       ${E? `<button class="rx-chip" onclick="drawHall('active')">🌱 66일 도전<b>${left? `D-${left}` : "완주"}</b></button>` : ""}
       <div class="rx-nums"><span>🏅 이번 달 지킨 날 <b>${ct? keptMonth() : "–"}</b></span><span>✅ 이번 주 완료 <b>${tot? tot.count : "–"}</b></span><span>⏱ 이번 주 <b>${tot? tot.min+extMin : "–"}</b>분</span></div>
+      ${boostChipHTML()}
     </div>` : `<div class="rx-hero"><div class="rx-mt" style="padding:4px 2px"><b>자녀를 골라 함께 봐요</b><small>⋯ 메뉴 → 자녀 플래너에서 열 수 있어요</small></div>
       <div class="rx-kids">${state.children.filter(k=>k.exists!==false).map((k,i)=>`<button onclick="viewChild(state.children[${state.children.indexOf(k)}].uid,state.children[${state.children.indexOf(k)}].name)"><span style="background:${k.color}">${esc((k.name||"?").slice(0,1))}</span>${esc(k.name)}</button>`).join("")}</div></div>`;
   // ② 자주 쓰는 큰 카드 4개
