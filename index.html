@@ -2758,7 +2758,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.06-1";
+const APP_VER="2026.11.13-1";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -3808,6 +3808,7 @@ function boostLimitsHTML(P){
       <div><span>🏫 등교일 하루 최대 인정</span><b>${h(P.dailyMaxMin)} → ${h(P.boostDayMaxMin)}</b></div>
       <div><span>🏖 자율학습일 하루 최대 인정</span><b>${h(P.dailyMaxFreeMin)} → ${h(P.boostDayMaxFreeMin)}</b></div>
       <div><span>💰 주간 시간 용돈 최대</span><b>${wonFmt(P.cap)} → ${wonFmt(P.boostCap)}</b></div>
+      <div><span>📚 학습앱 시간 · 정답률 보너스</span><b>부스터 날은 빼요</b></div>
     </div>`;
 }
 async function drawBooster(){
@@ -3819,7 +3820,7 @@ async function drawBooster(){
     ? `<div style="background:linear-gradient(135deg,#FFF1F2,#FFE4E6);border:2px solid #FADADD;border-radius:14px;padding:16px;text-align:center;margin-bottom:14px">
         <div style="font-size:30px">🚀</div>
         <div style="font-weight:var(--fw-bold);font-size:16px;color:#A5323A;margin-top:2px">부스터 ON · ${esc(e.name||"시험")} ${examDday(e)>0?`D-${examDday(e)}`:"D-DAY!"}</div>
-        <div style="font-size:12.5px;color:#8A6516;margin-top:6px;line-height:1.6">하루에 더 많이 공부해도 그만큼 인정돼요 (1시간당 금액은 그대로)</div>
+        <div style="font-size:12.5px;color:#8A6516;margin-top:6px;line-height:1.6">하루에 더 많이 공부해도 그만큼 인정돼요 (1시간당 금액은 그대로)<br>대신 <b>시험 대비 공부만</b> 용돈에 들어가요 — 학습앱 시간 · 정답률은 빼요</div>
       </div>`
     : `<div style="background:#F8FAFC;border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;margin-bottom:14px;color:#64748B">
         <div style="font-size:28px">🎯</div>
@@ -6553,6 +6554,7 @@ function weekLabelOf(days){ const s=parseD(days[0]),e=parseD(days[6]); return `$
  *  💰 주간 용돈 = ⏱ 시간 용돈 + 📚 학습앱 정답률 보너스 + 📝 모의고사 정답률 보너스
  *  - 시간 용돈: 공부한 시간 × 1시간당 금액 (평소 · 시험기간(부스터) 최대 — 부모가 자녀별로 정해요, 기본 1만 원 · 2만 원)
  *    🚀 부스터(학생이 켬) 날은 하루 최대 인정 시간이 늘어나요 (기본 등교일 4→6시간 · 자율학습일 8→10시간)
+ *       대신 시험 대비 공부만 인정 — 그날 학습앱 시간과 학습앱 정답률 보너스는 빼요
  *    + 타이머 보너스: 그중 타이머로 잰 부분의 10% (상한과 별도)
  *    → 1시간당 금액은 그대로라 시험기간 상한을 채우려면 공부 시간이 두 배 필요
  *  - 학습앱 보너스: 영단어 · 그래머 인사이드 · 천문장이 직접 채점한 그 주 정답률 (최대 5천 원)
@@ -6635,10 +6637,11 @@ function computeAllowance(tasks, days, crit, exd){
     const task=dt.reduce((a,t)=>a+verifiedMin(t),0);                            // 과제에 기록한 시간 (직접 적은 시간 포함)
     const taskTimed=dt.reduce((a,t)=>a+timedMin(t),0);                         // 그중 타이머로 잰 시간
     const focus=Math.round(Number(focusFree[ds])||0);                          // 과제 없이 쓴 포커스 타이머
-    const app=(T.includeApps!==false)? extCreditedOn(ds, X).total : 0;          // 학습앱이 잰 시간
+    const appAll=(T.includeApps!==false)? extCreditedOn(ds, X).total : 0;       // 학습앱이 잰 시간
+    const app=boosted? 0 : appAll;                                              // 🚀 부스터 날은 시험 대비 공부만 — 학습앱 시간 제외
     const raw=task+focus+app, paid=cap>0? Math.min(raw, cap) : raw;
     const timedPaid=Math.min(taskTimed+focus, paid);                           // 인정 시간 중 타이머 몫
-    return {ds, type, boosted, cap, task, timer:taskTimed, focus, app, raw, paid, timedPaid};
+    return {ds, type, boosted, cap, appSkipped:appAll-app, task, timer:taskTimed, focus, app, raw, paid, timedPaid};
   });
   const sum=k=>byDay.reduce((a,d)=>a+d[k],0);
   const taskMin=sum("task"), timerMin=sum("timer"), focusMin=sum("focus"), appMin=sum("app"), rawMin=sum("raw"), payMin=sum("paid"), timedPaidMin=sum("timedPaid");
@@ -6650,7 +6653,9 @@ function computeAllowance(tasks, days, crit, exd){
   const timerBonus=Math.round(basePay*timedShare*timerBonusRate/10)*10;         // ⏱ 타이머 보너스 (상한과 별도)
   const timePay=basePay+timerBonus;
   // 📚 학습앱 정답률 보너스
-  const acc=appAccuracy(days, X);
+  const accDays=byDay.filter(d=>!d.boosted).map(d=>d.ds);                       // 🚀 부스터 날 푼 학습앱 문제는 보너스에서도 제외
+  const acc=appAccuracy(accDays, X);
+  const appSkipMin=sum("appSkipped"), boostDays=byDay.filter(d=>d.boosted).length;
   const appOk=acc.total>=(Number(T.appMinAnswers)||0);
   const appBonus=appOk? accBonus(acc.acc, Number(T.appBonusMax)||0, Number(T.accFloor), Number(T.accFull)) : 0;
   // 📝 모의고사 정답률 보너스 (부모가 입력)
@@ -6660,7 +6665,7 @@ function computeAllowance(tasks, days, crit, exd){
   const amount=timePay+appBonus+mockBonus;
   return {planned, done, completion, scoreRate, scoredCount:scored.length, reviews, studyDays, daysTarget:Number(crit.daysTarget)||5,
     weekMin:rawMin, taskMin, timerMin, focusMin, appMin, timedPaidMin, timedShare, timerBonusRate, basePay, timerBonus, extMin:appMin, payMin, overDayMin:rawMin-payMin, byDay,
-    rate, dayMax, dayMaxSchool, dayMaxFree, includeApps:T.includeApps!==false, boost, timeCap, earned, timePay,
+    rate, dayMax, dayMaxSchool, dayMaxFree, includeApps:T.includeApps!==false, boost, boostDays, appSkipMin, timeCap, earned, timePay,
     appAcc:acc, appOk, appMinAnswers:Number(T.appMinAnswers)||0, appBonus, appBonusMax:Number(T.appBonusMax)||0,
     mock, mockAcc, mockBonus, mockBonusMax:Number(T.mockBonusMax)||0, accFloor:Number(T.accFloor), accFull:Number(T.accFull),
     amount, total:amount, bonus:appBonus+mockBonus, overMin:0, timeTarget:0, boostRate:1, effCap:timeCap,
@@ -6719,6 +6724,7 @@ function allowanceMetricsHTML(r,crit){
       ${row("📝","과제 공부 시간",hmFmt(r.taskMin)+(r.timerMin>0?` <em>(⏱ ${hmFmt(r.timerMin)})</em>`:""))}
       ${r.focusMin>0? row("🎯","포커스 타이머 (과제 없이)",hmFmt(r.focusMin)) : ""}
       ${r.includeApps? row("📚","학습앱 공부 시간",hmFmt(r.appMin)) : ""}
+      ${r.boostDays? `<div class="pb-sub">🚀 부스터 ${r.boostDays}일은 시험 대비 공부만 인정 — 학습앱 시간${r.appSkipMin>0?` ${hmFmt(r.appSkipMin)}`:""} · 정답률은 빼요</div>` : ""}
       ${r.overDayMin>0? row("✂️",`하루 최대(등교일 ${hmFmt(r.dayMaxSchool)} · 자율학습일 ${hmFmt(r.dayMaxFree)}) 넘은 시간 제외`,"−"+hmFmt(r.overDayMin),"minus") : ""}
       <div class="pb-total"><span>인정 <b>${hmFmt(r.payMin)}</b> × 1시간당 <b>${wonFmt(r.rate)}</b>${r.earned>r.basePay?` <em>(계산 ${wonFmt(r.earned)} → 상한)</em>`:""}</span><b>${wonFmt(r.basePay)}</b></div>
       <div class="pb-total"><span>⏱ 타이머 보너스 <em>(${hmFmt(r.timedPaidMin)} · +${Math.round(r.timerBonusRate*100)}%)</em></span><b>+${wonFmt(r.timerBonus)}</b></div>
