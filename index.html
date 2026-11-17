@@ -2927,7 +2927,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-11";
+const APP_VER="2026.11.17-12";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -8237,7 +8237,40 @@ async function aiUndo(id){
 }
 
 /* ----- 🤖 AI 연결 (부모 계정 전용) ----- */
-const AI_DEF={claude:"claude-opus-5-5", gemini:"gemini-2.5-flash"};
+const AI_DEF={claude:"claude-opus-5-5", gemini:"자동 (최신 Flash)"};
+/* Gemini 모델: 비워 두면 이 키로 쓸 수 있는 최신 Flash 모델을 자동으로 골라요 (구글이 옛 모델을 닫아도 계속 동작)
+ * 고른 모델이 '더 이상 쓸 수 없다'고 하면 목록을 다시 받아 한 번 더 시도해요 */
+const GM_KEY="gemModel";
+async function geminiPickModel(key, avoid){
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${encodeURIComponent(key)}`);
+  const j=await r.json(); if(!r.ok) throw new Error((j.error&&j.error.message)||("모델 목록 HTTP "+r.status));
+  const L=(j.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).map(m=>String(m.name||"").replace(/^models\//,"")).filter(n=>n && n!==avoid);
+  const ver=n=>{ const x=n.match(/gemini-(\d+(?:\.\d+)?)/); return x? parseFloat(x[1]) : 0; };
+  const bad=/lite|image|tts|live|audio|embed|exp|preview|thinking|vision|8b/i;
+  const pick=L.filter(n=>/^gemini-[\d.]+-flash$/.test(n)).sort((a,b)=>ver(b)-ver(a))[0]
+    || L.filter(n=>/gemini-[\d.]+-flash/.test(n) && !bad.test(n)).sort((a,b)=>ver(b)-ver(a))[0]
+    || L.filter(n=>/^gemini-/.test(n) && !bad.test(n)).sort((a,b)=>ver(b)-ver(a))[0];
+  if(!pick) throw new Error("이 키로 쓸 수 있는 Gemini 모델을 찾지 못했어요.");
+  try{ localStorage.setItem(GM_KEY, pick); }catch(_){}
+  return pick;
+}
+async function geminiGenerate(body){
+  const a=AS.ai, fixed=(a.model||"").trim();
+  let model=fixed; if(!model){ try{ model=localStorage.getItem(GM_KEY)||""; }catch(_){} }
+  if(!model) model=await geminiPickModel(a.key);
+  const call=m=>fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent?key=${encodeURIComponent(a.key)}`,{method:"POST", headers:{"content-type":"application/json"}, body:JSON.stringify(body)});
+  let r=await call(model), j=await r.json();
+  if(!r.ok && /no longer available|not found|is not supported|deprecated|not available/i.test((j.error&&j.error.message)||"") ){
+    // 고른(또는 적어 둔) 모델이 닫혔으면 최신 모델로 바꿔 한 번 더
+    const nm=await geminiPickModel(a.key, model);
+    if(fixed && state.profile.role==="parent"){ try{ await aiRef().set({...AS.ai, model:"", updatedAt:Date.now()}); AS.ai.model=""; }catch(_){} }
+    model=nm; r=await call(model); j=await r.json();
+  }
+  if(!r.ok) throw new Error((j.error&&j.error.message)||("HTTP "+r.status));
+  const txt=((((j.candidates||[])[0]||{}).content||{}).parts||[]).map(p=>p.text||"").join("");
+  if(!txt) throw new Error("AI가 답을 주지 않았어요.");
+  return JSON.parse(txt.replace(/^```(?:json)?\s*|\s*```$/g,""));
+}
 const aiRef=()=>db.collection("planner").doc(state.user.uid).collection("meta").doc("ai");
 // 👧 자녀 허용: 부모가 켜면 planner/{자녀}/meta/aiShare 에 키 사본 · 하루 횟수 한도를 둬요 (자녀 계정이 읽어 씀)
 const aiShareRef=u=>db.collection("planner").doc(u).collection("meta").doc("aiShare");
@@ -8357,14 +8390,8 @@ async function aiCall(ctx, text){
     const txt=(j.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("");
     return JSON.parse(txt);
   }
-  const model=a.model||AI_DEF.gemini;
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(a.key)}`,{method:"POST", headers:{"content-type":"application/json"},
-    body:JSON.stringify({systemInstruction:{parts:[{text:SYS}]}, contents:msgs.map(m=>({role:m.role==="assistant"?"model":"user", parts:[{text:m.text}]})),
-      generationConfig:{responseMimeType:"application/json"}})});
-  const j=await r.json(); if(!r.ok) throw new Error((j.error&&j.error.message)||("HTTP "+r.status));
-  const txt=((((j.candidates||[])[0]||{}).content||{}).parts||[]).map(p=>p.text||"").join("");
-  if(!txt) throw new Error("AI가 답을 주지 않았어요.");
-  return JSON.parse(txt.replace(/^```(?:json)?\s*|\s*```$/g,""));
+  return geminiGenerate({systemInstruction:{parts:[{text:SYS}]}, contents:msgs.map(m=>({role:m.role==="assistant"?"model":"user", parts:[{text:m.text}]})),
+      generationConfig:{responseMimeType:"application/json"}});
 }
 async function aiAsk(text){
   if(AS.kid){ const day=fmt(new Date()); let u={day, n:0}; try{ const d=await aiUseRef(state.user.uid).get(); if(d.exists && d.data().day===day) u=d.data(); }catch(_){}
@@ -8493,12 +8520,7 @@ async function aiJSON(sys, text, schema){
     if(j.stop_reason==="refusal") throw new Error("AI가 이 요청을 처리하지 않았어요.");
     return JSON.parse((j.content||[]).filter(c=>c.type==="text").map(c=>c.text).join(""));
   }
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(a.model||AI_DEF.gemini)}:generateContent?key=${encodeURIComponent(a.key)}`,{method:"POST", headers:{"content-type":"application/json"},
-    body:JSON.stringify({systemInstruction:{parts:[{text:SYS+"\n반드시 JSON 하나만 출력해."}]}, contents:[{role:"user", parts:[{text}]}], generationConfig:{responseMimeType:"application/json"}})});
-  const j=await r.json(); if(!r.ok) throw new Error((j.error&&j.error.message)||("HTTP "+r.status));
-  const txt=((((j.candidates||[])[0]||{}).content||{}).parts||[]).map(p=>p.text||"").join("");
-  if(!txt) throw new Error("AI가 답을 주지 않았어요.");
-  return JSON.parse(txt.replace(/^```(?:json)?\s*|\s*```$/g,""));
+  return geminiGenerate({systemInstruction:{parts:[{text:SYS+"\n반드시 JSON 하나만 출력해."}]}, contents:[{role:"user", parts:[{text}]}], generationConfig:{responseMimeType:"application/json"}});
 }
 const OBJ=(props,req)=>({type:"object", additionalProperties:false, required:req||Object.keys(props), properties:props});
 const SCH_EXPLAIN=OBJ({score:{type:"integer"}, feedback:{type:"string"}, missing:{type:"array", items:{type:"string"}}, followup:{type:"string"}});
