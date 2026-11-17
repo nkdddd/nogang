@@ -414,6 +414,9 @@
   .as-dots{display:flex;gap:4px}.as-dots i{width:7px;height:7px;border-radius:50%;background:#B9B1EE;animation:asd 1s infinite}.as-dots i:nth-child(2){animation-delay:.15s}.as-dots i:nth-child(3){animation-delay:.3s}
   @keyframes asd{50%{opacity:.3;transform:translateY(-3px)}}
   .as-prev{margin-top:8px;background:#F7F5FF;border-radius:10px;padding:8px 10px;font-size:12.5px;line-height:1.55}.ap-h{font-weight:var(--fw-bold);margin-top:4px;color:#35296E}
+  .ai-kid{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:6px;font-size:13px}
+  .ai-kid label{display:flex;align-items:center;gap:6px;cursor:pointer}.ai-kid input[type=checkbox]{width:18px;height:18px;accent-color:#0E9F6E}
+  .ai-kid span{display:flex;align-items:center;gap:4px;color:var(--muted)}.ai-kid .inp{width:56px;padding:5px 6px}
   .as-entry{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;width:100%;text-align:left;border:none;border-radius:14px;padding:12px 14px;margin:0 0 12px;background:linear-gradient(135deg,#6A58E6,#8F80FF);color:#fff;font:inherit;cursor:pointer}
   .as-entry span{font-size:22px}.as-entry b{font-size:14.5px}.as-entry small{flex-basis:100%;padding-left:32px;font-size:11.5px;opacity:.85}
   .pl-out{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.pl-out button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 11px;font:inherit;font-size:12px;font-weight:var(--fw-semibold);color:var(--ink);cursor:pointer}
@@ -2870,7 +2873,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-4";
+const APP_VER="2026.11.17-5";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -7958,17 +7961,17 @@ const AS_HELP=[["📝 시험 계획 짜기","시험 계획 짜줘"],["🔍 범�
 async function openAssist(){
   if(!AS.msgs.length) asBot(`안녕하세요! 🧭 계획 도우미예요.<br>아래에서 고르거나, 이렇게 적어 보세요:<br><span class="as-ex">수학 올림포스 p.10-60 5쪽씩 월~금 40분</span>`, AS_HELP);
   asDraw(true);
-  if(state.profile.role==="parent" && !AS.aiLoaded) aiLoad().then(()=>asDraw());
+  if(!AS.aiLoaded) aiLoad().then(()=>asDraw());
 }
 function asDraw(open){
   const root=document.getElementById("drawerRoot");
-  const isP=state.profile.role==="parent", aiReady=isP && AS.ai && AS.ai.key;
+  const isP=state.profile.role==="parent", aiReady=!!(AS.ai && AS.ai.key && (isP || AS.kid));
   const body=AS.msgs.map((m,i)=>`<div class="as-m ${m.who}"><div class="as-b">${m.html}</div>
       ${m.chips && i===AS.msgs.length-1? `<div class="as-chips">${m.chips.map(([l,v])=>`<button onclick="asSay(${JSON.stringify(v).replace(/"/g,"&quot;")},1)">${l}</button>`).join("")}</div>` : ""}</div>`).join("")
     + (AS.busy? `<div class="as-m bot"><div class="as-b as-dots"><i></i><i></i><i></i></div></div>` : "");
   const html=`<div class="overlay" onclick="if(event.target===this)closeDrawer()"><div class="drawer wide as-dr">
     <div class="drawer-head"><h3>🧭 계획 도우미 <small style="font-weight:500;color:var(--muted2);font-size:12px">${state.viewingChild? esc(state.ownerName)+" 플래너" : ""}</small></h3>
-      ${isP? `<button class="as-ai ${AS.aiOn&&aiReady?"on":""}" onclick="${aiReady? "AS.aiOn=!AS.aiOn;asDraw()" : "aiSetup()"}">🤖 AI ${aiReady? (AS.aiOn?"켜짐":"꺼짐") : "연결"}</button>` : ""}
+      ${isP || aiReady? `<button class="as-ai ${AS.aiOn&&aiReady?"on":""}" onclick="${aiReady? "AS.aiOn=!AS.aiOn;asDraw()" : "aiSetup()"}">🤖 AI ${aiReady? (AS.aiOn?"켜짐":"꺼짐") : "연결"}</button>` : ""}
       <button class="icon-btn sm" title="작업 기록" onclick="drawAiLog()">🧾</button><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
     <div class="drawer-body as-body" id="asBody">${body}</div>
     <div class="as-foot"><input class="inp" id="asIn" placeholder="${AS.wiz? "여기에 답해 주세요" : AS.aiOn&&aiReady? "AI에게 말해 보세요 (예: 수학이 약하니 이번 주에 늘려 줘)" : "무엇을 도와줄까요?"}" onkeydown="if(event.key==='Enter'&&!event.isComposing){asSend()}">${micBtn("asIn")}<button class="as-send" onclick="asSend()">➤</button></div>
@@ -7985,7 +7988,7 @@ async function asSay(text, chip){
     if(AS.wiz) return await asWizard(text);
     if(/^(취소|그만|처음)/.test(text)){ AS.wiz=null; AS.pend=null; return asBot("처음으로 돌아왔어요.", AS_HELP); }
     const cmd=/^(적용|되돌리기|계획표\s*보기|AI\s*설정|범위없는거 지워)/.test(text);
-    if(!chip && !cmd && AS.aiOn && AS.ai && AS.ai.key && state.profile.role==="parent") return await aiAsk(text);
+    if(!chip && !cmd && AS.aiOn && AS.ai && AS.ai.key && (state.profile.role==="parent" || AS.kid)) return await aiAsk(text);
     await asRule(text);
   }catch(e){ console.error(e); AS.busy=false; asBot("앗, 처리하지 못했어요. 다시 해 볼까요?", AS_HELP); }
 }
@@ -8000,7 +8003,7 @@ async function asRule(t){
   if(/이번\s*주|요약|점검표|정리해/.test(t)) return asWeek();
   const r=parsePlanLine(t);
   if(r && r.subjectId && r.chunks.length) return asLinePlan(t, r);
-  asBot(`음… 잘 모르겠어요 😅 이렇게 말해 보세요:<br>· <b>시험 계획 짜줘</b><br>· <b>계획 점검</b> · <b>분량 맞춰줘</b><br>· <span class="as-ex">영어 영단어 DAY 1-58 월수금 하루 2개</span>${state.profile.role==="parent"? "<br><br>🤖 자유롭게 말하려면 위의 <b>AI 연결</b>을 켜요 (부모 계정)." : ""}`, AS_HELP);
+  asBot(`음… 잘 모르겠어요 😅 이렇게 말해 보세요:<br>· <b>시험 계획 짜줘</b><br>· <b>계획 점검</b> · <b>분량 맞춰줘</b><br>· <span class="as-ex">영어 영단어 DAY 1-58 월수금 하루 2개</span>${state.profile.role==="parent"? "<br><br>🤖 자유롭게 말하려면 위의 <b>AI 연결</b>을 켜요 (부모 계정)." : AS.kid? "<br><br>🤖 자유롭게 말하려면 위의 <b>AI</b>를 켜요." : "<br><br>🤖 부모님이 AI를 허용하면 자유롭게 말로도 할 수 있어요."}`, AS_HELP);
 }
 function parseDateK(s){
   s=String(s||"").trim(); const now=new Date(); let y, m, d;
@@ -8157,13 +8160,34 @@ async function aiUndo(id){
 /* ----- 🤖 AI 연결 (부모 계정 전용) ----- */
 const AI_DEF={claude:"claude-opus-5-5", gemini:"gemini-2.5-flash"};
 const aiRef=()=>db.collection("planner").doc(state.user.uid).collection("meta").doc("ai");
-async function aiLoad(){ try{ const d=await aiRef().get(); AS.ai=d.exists? d.data() : null; }catch(_){ AS.ai=null; } AS.aiLoaded=true; if(AS.ai && AS.ai.key) AS.aiOn=true; }
+// 👧 자녀 허용: 부모가 켜면 planner/{자녀}/meta/aiShare 에 키 사본 · 하루 횟수 한도를 둬요 (자녀 계정이 읽어 씀)
+const aiShareRef=u=>db.collection("planner").doc(u).collection("meta").doc("aiShare");
+const aiUseRef=u=>db.collection("planner").doc(u).collection("meta").doc("aiUse");
+AS.shares={}; AS.kid=null;
+async function aiLoad(){
+  if(state.profile.role==="parent"){
+    try{ const d=await aiRef().get(); AS.ai=d.exists? d.data() : null; }catch(_){ AS.ai=null; }
+    AS.shares={};
+    for(const ch of (state.children||[])){ try{ const d=await aiShareRef(ch.uid).get(); if(d.exists && d.data().on) AS.shares[ch.uid]=d.data(); }catch(_){} }
+  } else {
+    try{ const d=await aiShareRef(state.user.uid).get(); const x=d.exists? d.data() : null;
+      if(x && x.on && x.key){ AS.ai={provider:x.provider, key:x.key, model:x.model}; AS.kid={daily:Number(x.daily)||20, by:x.byName||"부모님"}; } else { AS.ai=null; AS.kid=null; } }catch(_){ AS.ai=null; AS.kid=null; }
+  }
+  AS.aiLoaded=true; if(AS.ai && AS.ai.key) AS.aiOn=true;
+}
+async function aiShareSet(childUid, on, daily){
+  const a=AS.ai; if(on && !(a && a.key)) return alert("먼저 위에서 API 키를 저장해 주세요.");
+  if(on){ const doc={on:true, provider:a.provider, key:a.key, model:a.model||"", daily:Math.max(1,Number(daily)||20), by:state.user.uid, byName:state.profile.name||"부모님", at:Date.now()};
+    await aiShareRef(childUid).set(doc); AS.shares[childUid]=doc; }
+  else { try{ await aiShareRef(childUid).delete(); }catch(_){} delete AS.shares[childUid]; }
+  aiSetup();
+}
 function aiSetup(){
   if(state.profile.role!=="parent") return;
   const a=AS.ai||{provider:"gemini", key:"", model:""};
   hubShell("🤖 AI 연결 (부모님 전용)", `
     <div class="sct-card" style="margin:0 0 12px">AI 키를 넣으면 🧭 계획 도우미에서 <b>자유롭게 말로</b> 계획을 짜고 정리할 수 있어요.<br>
-      · 키는 <b>이 부모 계정에만</b> 저장되고, 자녀 계정에서는 보이지도 쓰이지도 않아요.<br>
+      · 키는 <b>이 부모 계정</b>에 저장돼요. 아래에서 허용한 자녀만 같은 키로 쓸 수 있어요.<br>
       · AI가 바꾸기 전에 항상 <b>미리 보기 → 적용</b>을 거치고, <b>↩ 되돌리기</b>로 원래대로 돌릴 수 있어요.<br>
       · 쓴 만큼 각 회사에 요금이 나가요. 키는 사용량 한도를 걸어 두세요.</div>
     <label class="fld-lbl">어떤 AI</label>
@@ -8172,7 +8196,12 @@ function aiSetup(){
     <label class="fld-lbl" style="margin-top:10px">모델 <small>(비워 두면 ${AI_DEF[a.provider||"gemini"]})</small></label><input class="inp" id="aiModel" value="${esc(a.model||"")}" placeholder="${AI_DEF[a.provider||"gemini"]}">
     <div class="cd-note" style="margin-top:8px;line-height:1.6">${a.provider==="claude"? "Claude 키: console.anthropic.com → API Keys. 이 화면은 키를 브라우저에서 바로 써요. 사용량 한도(Limits)를 꼭 걸어 두세요." : "Gemini 키: aistudio.google.com → Get API key. Google Cloud 콘솔에서 이 키를 <b>Generative Language API만</b>, 웹사이트 <b>nkdddd.github.io</b>에서만 쓰도록 제한해 두세요."}</div>
     <div style="display:flex;gap:8px;margin-top:14px">${a.key? `<button class="ghost-btn" style="flex:1" onclick="aiSave(true)">연결 끊기</button>` : ""}<button class="add-btn" style="flex:2" onclick="aiSave()">저장</button></div>
-    <button class="ghost-btn" style="width:100%;margin-top:8px" onclick="openAssist()">← 계획 도우미로</button>`);
+    ${(state.children||[]).length? `<div class="dash-section" style="margin-top:18px">👧 자녀도 쓰게 하기</div>
+      ${state.children.map(ch=>{ const sh=AS.shares[ch.uid]; return `<div class="ai-kid"><label><input type="checkbox" ${sh?"checked":""} ${a.key?"":"disabled"} onchange="aiShareSet('${ch.uid}',this.checked,document.getElementById('aiD-${ch.uid}').value)"> <b>${esc(ch.name)}</b></label>
+        <span>하루 <input class="inp" id="aiD-${ch.uid}" type="number" min="1" value="${sh? sh.daily : 20}" onchange="${sh? `aiShareSet('${ch.uid}',true,this.value)` : ""}"> 번까지</span></div>`; }).join("")}
+      <div class="cd-note" style="margin-top:6px;line-height:1.6">허용하면 자녀 계정의 🧭 도우미에서도 AI로 계획을 짜고 정리할 수 있어요. 자녀용 AI는 <b>공부 계획 이야기만</b> 하도록 정해 두었고, 한 일은 🧾 작업 기록에 자녀 이름으로 남아요.<br>
+        ⚠️ 자녀 기기에서도 이 키가 쓰여서, 기술적으로는 키를 꺼내 볼 수 있어요. <b>자녀용으로 따로 만든 키</b>에 사용 한도를 낮게 걸어 두는 걸 권해요.</div>` : ""}
+    <button class="ghost-btn" style="width:100%;margin-top:12px" onclick="openAssist()">← 계획 도우미로</button>`);
 }
 async function aiSave(off){
   const prov=(AS.ai&&AS.ai.provider)||"gemini";
@@ -8180,6 +8209,8 @@ async function aiSave(off){
   if(!off && !key) return alert("API 키를 넣어 주세요.");
   await aiRef().set({provider:prov, key, model, updatedAt:Date.now()});
   AS.ai={provider:prov, key, model}; AS.aiOn=!!key;
+  // 허용한 자녀에게도 새 키를 (끊으면 자녀 허용도 끝)
+  for(const cu of Object.keys(AS.shares||{})){ try{ if(key){ const d={...AS.shares[cu], provider:prov, key, model, at:Date.now()}; await aiShareRef(cu).set(d); AS.shares[cu]=d; } else { await aiShareRef(cu).delete(); delete AS.shares[cu]; } }catch(e){ console.warn(e); } }
   toast(key? "🤖 AI를 연결했어요" : "AI 연결을 끊었어요", "good"); openAssist();
 }
 const AI_SCHEMA={type:"object", additionalProperties:false, required:["reply","add","update","remove"], properties:{
@@ -8201,7 +8232,7 @@ async function aiContext(){
     exams:[...(state.plans||[]).filter(p=>p.kind==="exam").map(p=>`${p.name} ${p.end}`), ...examList().map(e=>`${e.name} ${e.date}`)],
     tasks:T.map(t=>`${t.id} | ${t.date} | ${sn(t.subjectId)} | ${t.unit||""} | ${t.plannedMin||0}분 | ${t.done?"완료":"예정"}${t.underStars!=null?` | 이해도 ${gradeTxt(t.underStars)}`:""}${t.help&&!t.helpOk?` | 질문: ${t.help}`:""}`)};
 }
-const AI_SYS=`너는 한국 중고등학생의 학습 매니저야. 부모님과 대화하며 학생 플래너의 할 일을 짜고 정리해.
+const AI_SYS=`너는 한국 중고등학생의 학습 매니저야. 부모님이나 학생과 대화하며 학생 플래너의 할 일을 짜고 정리해.
 규칙:
 - 계획에는 항상 구체적인 범위를 적어 (쪽수 p.10~15 · 단원 · 강 번호 · DAY 번호 · 문제 번호). "저번에 배운 단원 복습"처럼 막연하게 쓰지 마.
 - 하루 분량은 dailyGoalMin 목표 시간에 맞춰 (±30분). 시간표(timetable)의 학원 · 과외 시간과 겹쳐 무리하지 않게.
@@ -8210,12 +8241,20 @@ const AI_SYS=`너는 한국 중고등학생의 학습 매니저야. 부모님과
 - 바꿀 것이 없거나 질문만 받은 경우 add · update · remove 는 빈 배열.
 - reply 는 한국어로 짧게: 무엇을 바꾸는지 요약 (몇 개 추가 · 수정 · 삭제, 하루 분량).
 - 반드시 JSON 하나만 출력: {"reply": "...", "add": [{"date","subject","unit","minutes"}], "update": [{"id","date","unit","minutes"}], "remove": ["id"]}`;
+const AI_SYS_KID=`
+지금 대화 상대는 학생 본인이야 (부모님이 허용한 자녀 계정).
+- 학습 계획 · 공부 방법 · 시간 관리 이야기만 해. 다른 주제(게임 · 연애 · 외모 · 위험한 행동 · 개인정보 등)는 짧고 친절하게 거절하고 공부 계획으로 돌아와.
+- 숙제나 시험 답을 대신 써 주지 말고, 계획과 공부 순서만 도와줘.
+- 이름 · 학교 · 주소 · 연락처 같은 개인정보를 묻거나 적지 마.
+- 학생이 힘들다고 하면 분량을 줄이는 쪽을 먼저 제안하고, 걱정되는 내용이면 부모님이나 선생님께 이야기하라고 권해.
+- 말투는 친근한 존댓말로.`;
 async function aiCall(ctx, text){
+  const SYS=AI_SYS+(AS.kid? AI_SYS_KID : "");
   const a=AS.ai, msgs=[...AS.hist.slice(-8), {role:"user", text:`[플래너 정보]\n${JSON.stringify(ctx)}\n\n[요청]\n${text}`}];
   if(a.provider==="claude"){
     const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST", headers:{"content-type":"application/json","x-api-key":a.key,"anthropic-version":"2026-10-21",
         "anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:a.model||AI_DEF.claude, max_tokens:16000, system:AI_SYS, fallbacks:"default",
+      body:JSON.stringify({model:a.model||AI_DEF.claude, max_tokens:16000, system:SYS, fallbacks:"default",
         output_config:{effort:"medium", format:{type:"json_schema", schema:AI_SCHEMA}},
         messages:msgs.map(m=>({role:m.role, content:m.text}))})});
     const j=await r.json(); if(!r.ok) throw new Error((j.error&&j.error.message)||("HTTP "+r.status));
@@ -8226,7 +8265,7 @@ async function aiCall(ctx, text){
   }
   const model=a.model||AI_DEF.gemini;
   const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(a.key)}`,{method:"POST", headers:{"content-type":"application/json"},
-    body:JSON.stringify({systemInstruction:{parts:[{text:AI_SYS}]}, contents:msgs.map(m=>({role:m.role==="assistant"?"model":"user", parts:[{text:m.text}]})),
+    body:JSON.stringify({systemInstruction:{parts:[{text:SYS}]}, contents:msgs.map(m=>({role:m.role==="assistant"?"model":"user", parts:[{text:m.text}]})),
       generationConfig:{responseMimeType:"application/json"}})});
   const j=await r.json(); if(!r.ok) throw new Error((j.error&&j.error.message)||("HTTP "+r.status));
   const txt=((((j.candidates||[])[0]||{}).content||{}).parts||[]).map(p=>p.text||"").join("");
@@ -8234,6 +8273,9 @@ async function aiCall(ctx, text){
   return JSON.parse(txt.replace(/^```(?:json)?\s*|\s*```$/g,""));
 }
 async function aiAsk(text){
+  if(AS.kid){ const day=fmt(new Date()); let u={day, n:0}; try{ const d=await aiUseRef(state.user.uid).get(); if(d.exists && d.data().day===day) u=d.data(); }catch(_){}
+    if(u.n>=AS.kid.daily) return asBot(`🤖 오늘은 AI를 ${AS.kid.daily}번 다 썼어요. 내일 다시 쓸 수 있어요.<br>그동안은 아래 기능을 써 보세요.`, AS_HELP);
+    try{ await aiUseRef(state.user.uid).set({day, n:u.n+1, at:Date.now()}); }catch(_){} }
   AS.busy=true; asDraw();
   let out; const ctx=await aiContext();
   try{ out=await aiCall(ctx, text); }
