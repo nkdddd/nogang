@@ -411,7 +411,7 @@
   .as-send{width:40px;height:40px;border-radius:50%;border:none;background:#6A58E6;color:#fff;font-size:16px;cursor:pointer;flex:0 0 auto}
   .as-ai{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 10px;font:inherit;font-size:12px;font-weight:var(--fw-bold);color:var(--muted);margin-left:auto;margin-right:4px;cursor:pointer}
   .as-ai.on{background:#0E9F6E;border-color:#0E9F6E;color:#fff}
-  .as-dots{display:flex;gap:4px}.as-dots i{width:7px;height:7px;border-radius:50%;background:#B9B1EE;animation:asd 1s infinite}.as-dots i:nth-child(2){animation-delay:.15s}.as-dots i:nth-child(3){animation-delay:.3s}
+  .as-dots{display:inline-flex;gap:4px;vertical-align:middle;margin-right:4px}.as-dots i{width:7px;height:7px;border-radius:50%;background:#B9B1EE;animation:asd 1s infinite}.as-dots i:nth-child(2){animation-delay:.15s}.as-dots i:nth-child(3){animation-delay:.3s}
   @keyframes asd{50%{opacity:.3;transform:translateY(-3px)}}
   .as-prev{margin-top:8px;background:#F7F5FF;border-radius:10px;padding:8px 10px;font-size:12.5px;line-height:1.55}.ap-h{font-weight:var(--fw-bold);margin-top:4px;color:#35296E}
   .ck-box{background:#F7F5FF;border-radius:12px;padding:8px 10px;margin:6px 0 4px}.ck-q{font-size:12.5px;color:#35296E;margin:2px 0 6px;font-weight:var(--fw-semibold)}
@@ -1472,7 +1472,7 @@
       <button data-tab="ai" onclick="openAiTab()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="7.5" width="15" height="11" rx="3.5"/><path d="M12 7.5V4.5M9.5 12.5h.01M14.5 12.5h.01M9.5 15.5h5M2.5 12v2.5M21.5 12v2.5"/></svg>AI</button>
       <button data-tab="stats" onclick="setTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="13" width="4" height="7" rx="1.2"/><rect x="10" y="9" width="4" height="11" rx="1.2"/><rect x="16" y="4" width="4" height="16" rx="1.2"/></svg>기록</button>
     </div>
-    <button class="fab" title="빠르게 계획 세우기" aria-label="빠르게 계획 세우기" onclick="openQuick()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 16.5l-1.8-5.2L5 9.5l5.2-1.8zM18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg><span class="fab-t">빠른 계획</span></button>
+    <button class="fab" title="계획 도우미" aria-label="계획 도우미" onclick="openAssist()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 16.5l-1.8-5.2L5 9.5l5.2-1.8zM18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg><span class="fab-t">계획 도우미</span></button>
   </nav>
 </div>
 
@@ -2927,7 +2927,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-13";
+const APP_VER="2026.11.17-14";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -4894,7 +4894,7 @@ function renderRecord(){
     comm:[recRow("💬","가족 대화",isParent? "칭찬 · 응원 · 학습 피드백" : "부모님과 글 주고받기","drawChat()",state.chatUnread),
       isParent? recRow("🤝","자녀 친구 관리","친구 신청 승인 · 끊기","drawKidFriends()",state.friendPending) : recRow("🤝","친구 응원","친구 코드 · 👍","drawFriends()",state.friendPending),
       recRow("🔔","새 소식","대화 · 친구 · 응원 소식 모아 보기","drawNews()",newsTotal())],
-    anal:[recRow("🧭","계획 도우미 (채팅)",isParent? "말로 계획 짜기 · 점검 · 🤖 AI 연결" : "말로 계획 짜기 · 범위 점검 · 분량 맞추기","openAssist()"),
+    anal:[recRow("✨","계획 도우미 (채팅)",isParent? "말로 계획 짜기 · 점검 · 🤖 AI 연결" : "말로 계획 짜기 · 범위 점검 · 분량 맞추기","openAssist()"),
       recRow("🔎","학습 점검",isParent? "완료한 학습 확인 · ✓ △ ✗ · 한마디" : "점검 결과 · 부모님 확인 · 🧠 AI 점검","drawMgrCheck()"),
       recRow("📘","계획표","시험 대비 · 학습 포트폴리오 · 날짜별 자동 배치","state.planView='plans';setTab('plan',true);setView('plans')"),
       recRow("🗓","주간 시간표","요일마다 고정된 학원 · 과외 · 자습 시간","state.planView='tt';setTab('plan',true);setView('tt')"),
@@ -5537,7 +5537,9 @@ async function famLeave(id){
 
 /* ----- ✨ 빠른 계획: 적어 두면 학습 계획으로 정리 ----- */
 let quickItems=[];
-async function openQuick(mode){
+// ✨ 빠른 계획은 ✨ 계획 도우미(채팅) 하나로 합쳤어요 — 예전 호출도 도우미로
+function openQuick(){ return openAssist(); }
+async function openQuickLegacy(mode){
   quickItems=[];
   if(!AS.aiLoaded){ try{ await aiLoad(); }catch(_){} }
   const canAI=aiReadyNow();
@@ -5857,7 +5859,7 @@ function renderDay(){
         <h2>${isToday? (undoneCount>0? `오늘 남은 학습 ${undoneCount}개` : (ts.length? "오늘 학습 모두 완료" : "오늘의 학습"))
                      : `${ds.slice(5).replace("-",".")} 학습 ${ts.length}개`}</h2>
         <div class="dl-actions">
-          <button class="rollover-btn" onclick="openAssist()">🧭 도우미</button>
+          <button class="rollover-btn" onclick="openAssist()">✨ 도우미</button>
           ${state.profile.role==="parent" && state.viewingChild? `<button class="rollover-btn" onclick="drawMgrCheck('${ds}')">🔎 점검</button>` : ""}
           ${undoneCount>0?`<button class="rollover-btn" onclick="rolloverIncomplete()">↪ 미완료 ${undoneCount} 내일로</button>`:""}
         </div>
@@ -7646,7 +7648,7 @@ function renderPlans(){
   return `<div class="pl-wrap">
     <div class="pl-new"><button onclick="planNew('exam')"><b>📝 시험 대비 계획표</b><small>시험 날까지 과목별 범위를 날짜에 나눠요</small></button>
       <button onclick="planNew('long')"><b>📘 학습 포트폴리오</b><small>몇 달 동안 교재를 주 단위로 나눠요</small></button></div>
-    <button class="as-entry" onclick="openAssist()"><span>🧭</span><b>계획 도우미와 대화하기</b><small>시험 계획 짜기 · 범위 없는 계획 점검 · 분량 맞추기${state.profile.role==="parent"? " · 🤖 AI" : ""}</small></button>
+    <button class="as-entry" onclick="openAssist()"><span>✨</span><b>계획 도우미와 대화하기</b><small>시험 계획 짜기 · 범위 없는 계획 점검 · 분량 맞추기${state.profile.role==="parent"? " · 🤖 AI" : ""}</small></button>
     ${autoCardHTML()}
     ${cards || `<div class="cd-note" style="margin-top:10px">아직 계획표가 없어요. 시험이 다가오면 📝, 방학 · 학기 계획은 📘로 만들어요.</div>`}
   </div>`;
@@ -8021,7 +8023,7 @@ function icsHelp(){
 
 
 /* ============================================================
- *  🧭 계획 도우미 (채팅)
+ *  ✨ 계획 도우미 (채팅)
  *  - 기본: 규칙으로 알아듣는 질문형 채팅 (AI 없음 · 비용 0 · 아이도 사용)
  *      시험 계획 짜기 · 범위 없는 계획 점검 · 하루 분량 맞추기 · 밀린 계획 · 오늘 것 내일로 · 이번 주 점검 · 한 줄 계획
  *  - 🤖 AI 모드: 부모 계정에 API 키(Claude 또는 Gemini)를 넣으면 부모가 쓸 때만 켜져요
@@ -8032,20 +8034,24 @@ const AS={msgs:[], wiz:null, pend:null, ai:null, aiLoaded:false, aiOn:false, bus
 const asEsc=s=>esc(s).replace(/\n/g,"<br>");
 function asBot(html, chips){ AS.msgs.push({who:"bot", html, chips:chips||null}); asDraw(); }
 function asMe(text){ AS.msgs.push({who:"me", html:asEsc(text)}); }
-const AS_HELP=[["🧠 학습 점검 (AI)","점검 퀴즈"],["🔎 오늘 점검 목록","매니저 점검"],["📝 시험 계획 짜기","시험 계획 짜줘"],["🔍 범위 없는 계획 점검","계획 점검"],["⚖️ 하루 분량 맞추기","분량 맞춰줘"],["↪ 밀린 계획 다시 배치","밀린 계획"],["⏭ 오늘 남은 것 내일로","오늘 거 내일로"],["📋 이번 주 점검","이번 주 점검"]];
+const AS_HELP=[["✍️ 할 일 넣기","할 일 넣기"],["🧠 학습 점검 (AI)","점검 퀴즈"],["🔎 오늘 점검 목록","매니저 점검"],["📝 시험 계획 짜기","시험 계획 짜줘"],["🔍 범위 없는 계획 점검","계획 점검"],["⚖️ 하루 분량 맞추기","분량 맞춰줘"],["↪ 밀린 계획 다시 배치","밀린 계획"],["⏭ 오늘 남은 것 내일로","오늘 거 내일로"],["📋 이번 주 점검","이번 주 점검"]];
 async function openAssist(){
-  if(!AS.msgs.length) asBot(`안녕하세요! 🧭 계획 도우미예요.<br>아래에서 고르거나, 이렇게 적어 보세요:<br><span class="as-ex">수학 올림포스 p.10-60 5쪽씩 월~금 40분</span>`, AS_HELP);
+  if(!AS.msgs.length){ if(!AS.aiLoaded){ try{ await aiLoad(); }catch(_){} }
+    const ai=aiReadyNow();
+    asBot(`안녕하세요! ✨ 계획 도우미예요.<br>${ai? "🤖 <b>AI가 켜져 있어요.</b> 하고 싶은 걸 말로 적으면 계획으로 짜 드려요." : "공부할 것을 적으면 <b>할 일로 정리</b>해 드려요."}<br>
+      <span class="as-ex">${ai? "이번 주 수학 학원 숙제 p.30-60 평일에 나눠서 넣어줘" : "수학 3단원 40분, 영단어 20분"}</span><span class="as-ex">수학 올림포스 p.10-60 5쪽씩 월~금 40분</span>${ai? "" : `<small style="color:var(--muted2)">${state.profile.role==="parent"? "🤖 AI 탭에서 키를 넣으면 자유롭게 말로도 할 수 있어요." : "🤖 부모님이 AI를 허용하면 자유롭게 말로도 할 수 있어요."}</small>`}`, AS_HELP); }
   asDraw(true);
   if(!AS.aiLoaded) aiLoad().then(()=>asDraw());
 }
 function asDraw(open){
   const root=document.getElementById("drawerRoot");
+  if(AS.busy && !AS.busyAt) asBusyTick(true); else if(!AS.busy && AS.busyAt) asBusyTick(false);
   const isP=state.profile.role==="parent", aiReady=!!(AS.ai && AS.ai.key && (isP || AS.kid));
   const body=AS.msgs.map((m,i)=>`<div class="as-m ${m.who}"><div class="as-b">${m.html}</div>
       ${m.chips && i===AS.msgs.length-1? `<div class="as-chips">${m.chips.map(([l,v])=>`<button onclick="asSay(${JSON.stringify(v).replace(/"/g,"&quot;")},1)">${l}</button>`).join("")}</div>` : ""}</div>`).join("")
-    + (AS.busy? `<div class="as-m bot"><div class="as-b as-dots"><i></i><i></i><i></i></div></div>` : "");
+    + (AS.busy? `<div class="as-m bot"><div class="as-b"><span class="as-dots"><i></i><i></i><i></i></span> 🤖 생각 중 <b class="as-wait">${AS.busyAt? Math.round((Date.now()-AS.busyAt)/1000) : 0}초</b></div></div>` : "");
   const html=`<div class="overlay" onclick="if(event.target===this)closeDrawer()"><div class="drawer wide as-dr">
-    <div class="drawer-head"><h3>🧭 계획 도우미 <small style="font-weight:500;color:var(--muted2);font-size:12px">${state.viewingChild? esc(state.ownerName)+" 플래너" : ""}</small></h3>
+    <div class="drawer-head"><h3>✨ 계획 도우미 <small style="font-weight:500;color:var(--muted2);font-size:12px">${state.viewingChild? esc(state.ownerName)+" 플래너" : ""}</small></h3>
       ${isP || aiReady? `<button class="as-ai ${AS.aiOn&&aiReady?"on":""}" onclick="${aiReady? "AS.aiOn=!AS.aiOn;asDraw()" : "aiSetup()"}">🤖 AI ${aiReady? (AS.aiOn?"켜짐":"꺼짐") : "연결"}</button>` : ""}
       <button class="icon-btn sm" title="작업 기록" onclick="drawAiLog()">🧾</button><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
     <div class="drawer-body as-body" id="asBody">${body}</div>
@@ -8063,7 +8069,7 @@ async function asSay(text, chip){
     if(AS.quiz) return await aiCheckSay(text);
     if(AS.wiz) return await asWizard(text);
     if(/^(취소|그만|처음)/.test(text)){ AS.wiz=null; AS.pend=null; return asBot("처음으로 돌아왔어요.", AS_HELP); }
-    const cmd=/^(적용|되돌리기|계획표\s*보기|AI\s*설정|범위없는거 지워|점검:|점검\s*퀴즈|학습\s*점검|매니저\s*점검)/.test(text);
+    const cmd=/^(적용|되돌리기|계획표\s*보기|AI\s*설정|범위없는거 지워|점검:|점검\s*퀴즈|학습\s*점검|매니저\s*점검|닫기|할\s*일\s*넣기$)/.test(text);
     if(!chip && !cmd && AS.aiOn && AS.ai && AS.ai.key && (state.profile.role==="parent" || AS.kid)) return await aiAsk(text);
     await asRule(text);
   }catch(e){ console.error(e); AS.busy=false; asBot("앗, 처리하지 못했어요. 다시 해 볼까요?", AS_HELP); }
@@ -8077,7 +8083,13 @@ async function asRule(t){
   if(/밀린|재배치|다시\s*배치/.test(t)){ const n=await planReflow(true); return asBot(n? `↪ 밀린 계획 ${n}개를 버퍼 날로 옮겼어요.` : "밀린 계획표 할 일이 없어요 👍", AS_HELP); }
   if(/내일로|미뤄|미루/.test(t)) return asTomorrow();
   if(/이번\s*주|요약|점검표|정리해/.test(t)) return asWeek();
+  if(/^할\s*일\s*넣기$/.test(t)) return asBot("공부할 것을 쉼표로 나눠 적어 주세요. 날짜를 안 적으면 오늘(보고 있는 날)로 넣어요.<br><span class=\"as-ex\">수학 3단원 40분, 영단어 20분, 국어 문제풀이 1시간</span><span class=\"as-ex\">내일 과학 2단원 복습 30분</span>");
   const r=parsePlanLine(t);
+  if(r && r.subjectId && r.chunks.length>1) return asLinePlan(t, r);
+  // 항목마다 날짜(오늘 · 내일 · 모레 · 12/3)를 따로 봐요
+  const DW=/오늘|내일|모레|\d{1,2}\s*월\s*\d{1,2}\s*일|(^|\s)\d{1,2}\/\d{1,2}(?=\s|$)/g;
+  const q=parseQuick(t).filter(x=>x.subjectId).map(x=>({...x, date:asQuickDate(x.src), unit:String(x.unit||"").replace(DW," ").replace(/\s+/g," ").trim()}));
+  if(q.length) return asQuickPreview(q);
   if(r && r.subjectId && r.chunks.length) return asLinePlan(t, r);
   asBot(`음… 잘 모르겠어요 😅 이렇게 말해 보세요:<br>· <b>시험 계획 짜줘</b><br>· <b>계획 점검</b> · <b>분량 맞춰줘</b><br>· <span class="as-ex">영어 영단어 DAY 1-58 월수금 하루 2개</span>${state.profile.role==="parent"? "<br><br>🤖 자유롭게 말하려면 위의 <b>AI 연결</b>을 켜요 (부모 계정)." : AS.kid? "<br><br>🤖 자유롭게 말하려면 위의 <b>AI</b>를 켜요." : "<br><br>🤖 부모님이 AI를 허용하면 자유롭게 말로도 할 수 있어요."}`, AS_HELP);
 }
@@ -8169,12 +8181,14 @@ asRule=async function(t){
   }
   if(/^되돌리기\s+(\S+)/.test(t)){ const id=t.match(/^되돌리기\s+(\S+)/)[1]; const n=await aiUndo(id); return asBot(n>=0? `↩ 되돌렸어요 (${n}개).` : "이미 되돌렸거나 찾지 못했어요.", AS_HELP); }
   if(/^AI\s*설정/.test(t)) return aiSetup();
+  if(/^닫기$/.test(t)) return closeDrawer();
   if(/^점검:(.+)/.test(t)) return aiCheckStart(t.slice(3).trim());
   if(/점검\s*퀴즈|학습\s*점검|퀴즈|설명해\s*볼/.test(t)) return aiCheckPick();
   if(/매니저\s*점검|부모\s*점검/.test(t)){ closeDrawer(); return drawMgrCheck(); }
   if(/계획표\s*보기/.test(t)){ closeDrawer(); state.planView="plans"; setTab("plan",true); setView("plans"); return; }
   if(/^적용$/.test(t) && AS.pend && AS.pend.kind==="balance") return asBalanceApply();
   if(/^적용$/.test(t) && AS.pend && AS.pend.kind==="ai") return aiApply();
+  if(/^적용$/.test(t) && AS.pend && AS.pend.kind==="quick") return asQuickApply();
   return _asRule(t);
 };
 /* ⚖️ 하루 분량 맞추기 (계획표 할 일만 옮겨요) */
@@ -8242,7 +8256,7 @@ const AI_DEF={claude:"claude-opus-5-5", gemini:"자동 (최신 Flash)"};
  * 고른 모델이 '더 이상 쓸 수 없다'고 하면 목록을 다시 받아 한 번 더 시도해요 */
 const GM_KEY="gemModel";
 async function geminiPickModel(key, avoid){
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${encodeURIComponent(key)}`);
+  const r=await fetchT(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${encodeURIComponent(key)}`);
   const j=await r.json(); if(!r.ok) throw new Error((j.error&&j.error.message)||("모델 목록 HTTP "+r.status));
   const L=(j.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).map(m=>String(m.name||"").replace(/^models\//,"")).filter(n=>n && n!==avoid);
   const ver=n=>{ const x=n.match(/gemini-(\d+(?:\.\d+)?)/); return x? parseFloat(x[1]) : 0; };
@@ -8258,7 +8272,7 @@ async function geminiGenerate(body){
   const a=AS.ai, fixed=(a.model||"").trim();
   let model=fixed; if(!model){ try{ model=localStorage.getItem(GM_KEY)||""; }catch(_){} }
   if(!model) model=await geminiPickModel(a.key);
-  const call=m=>fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent?key=${encodeURIComponent(a.key)}`,{method:"POST", headers:{"content-type":"application/json"}, body:JSON.stringify(body)});
+  const call=m=>fetchT(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent?key=${encodeURIComponent(a.key)}`,{method:"POST", headers:{"content-type":"application/json"}, body:JSON.stringify(body)});
   let r=await call(model), j=await r.json();
   const msg0=(j.error&&j.error.message)||"";
   if(!r.ok && /no longer available|not found|is not supported|deprecated|not available/i.test(msg0)){
@@ -8311,7 +8325,7 @@ function aiSetup(){
 function aiSetupHTML(){
   const a=AS.ai||{provider:"gemini", key:"", model:""};
   return `
-    <div class="sct-card" style="margin:0 0 12px">AI 키를 넣으면 🧭 계획 도우미에서 <b>자유롭게 말로</b> 계획을 짜고 정리할 수 있어요.<br>
+    <div class="sct-card" style="margin:0 0 12px">AI 키를 넣으면 ✨ 계획 도우미에서 <b>자유롭게 말로</b> 계획을 짜고 정리할 수 있어요.<br>
       · 키는 <b>이 부모 계정</b>에 저장돼요. 아래에서 허용한 자녀만 같은 키로 쓸 수 있어요.<br>
       · AI가 바꾸기 전에 항상 <b>미리 보기 → 적용</b>을 거치고, <b>↩ 되돌리기</b>로 원래대로 돌릴 수 있어요.<br>
       · 쓴 만큼 각 회사에 요금이 나가요. 키는 사용량 한도를 걸어 두세요.</div>
@@ -8327,7 +8341,7 @@ function aiSetupHTML(){
     ${(state.children||[]).length? `
       ${state.children.map(ch=>{ const sh=AS.shares[ch.uid]; return `<div class="ai-kid"><label><input type="checkbox" ${sh?"checked":""} ${a.key?"":"disabled"} onchange="aiShareSet('${ch.uid}',this.checked,document.getElementById('aiD-${ch.uid}').value)"> <b>${esc(ch.name)}</b></label>
         ${sh? `<small class="ai-use">오늘 ${(AS.use||{})[ch.uid]||0}번 사용</small>` : ""}<span>하루 <input class="inp" id="aiD-${ch.uid}" type="number" min="1" value="${sh? sh.daily : 20}" onchange="${sh? `aiShareSet('${ch.uid}',true,this.value)` : ""}"> 번까지</span></div>`; }).join("")}
-      <div class="cd-note" style="margin-top:6px;line-height:1.6">허용하면 자녀 계정의 🧭 도우미에서도 AI로 계획을 짜고 정리할 수 있어요. 자녀용 AI는 <b>공부 계획 이야기만</b> 하도록 정해 두었고, 한 일은 🧾 작업 기록에 자녀 이름으로 남아요.<br>
+      <div class="cd-note" style="margin-top:6px;line-height:1.6">허용하면 자녀 계정의 ✨ 도우미에서도 AI로 계획을 짜고 정리할 수 있어요. 자녀용 AI는 <b>공부 계획 이야기만</b> 하도록 정해 두었고, 한 일은 🧾 작업 기록에 자녀 이름으로 남아요.<br>
         ⚠️ 자녀 기기에서도 이 키가 쓰여서, 기술적으로는 키를 꺼내 볼 수 있어요. <b>자녀용으로 따로 만든 키</b>에 사용 한도를 낮게 걸어 두는 걸 권해요.</div>` : ""}
     ${a.key? `<div class="dash-section" style="margin-top:18px">🧾 기록</div>
       <button class="ghost-btn" style="width:100%" onclick="drawAiLogAll()">자녀별 도우미 · AI 작업 기록 보기</button>` : ""}
@@ -8350,7 +8364,7 @@ const AI_SCHEMA={type:"object", additionalProperties:false, required:["reply","a
   update:{type:"array", items:{type:"object", additionalProperties:false, required:["id","date","unit","minutes"], properties:{id:{type:"string"}, date:{type:"string"}, unit:{type:"string"}, minutes:{type:"integer"}}}},
   remove:{type:"array", items:{type:"string"}}}};
 async function aiContext(){
-  const today=new Date(), from=fmt(addDays(today,-7)), to=fmt(addDays(today,42));
+  const today=new Date(), from=fmt(addDays(today,-3)), to=fmt(addDays(today,21));
   const T=(await asTasksRange(from, to)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.order||0)-(b.order||0));
   const sn=id=>{ const s=subjById(id); return s? s.name : ""; };
   const days=Array.from({length:14},(_,i)=>fmt(addDays(today,i)));
@@ -8363,7 +8377,7 @@ async function aiContext(){
     exams:[...(state.plans||[]).filter(p=>p.kind==="exam").map(p=>`${p.name} ${p.end}`), ...examList().map(e=>`${e.name} ${e.date}`)],
     tasks:T.map(t=>`${t.id} | ${t.date} | ${sn(t.subjectId)} | ${t.unit||""} | ${t.plannedMin||0}분 | ${t.done?"완료":"예정"}${t.underStars!=null?` | 이해도 ${gradeTxt(t.underStars)}`:""}${t.help&&!t.helpOk?` | 질문: ${t.help}`:""}`)};
 }
-const AI_SYS=`너는 한국 중고등학생의 학습 매니저야. 부모님이나 학생과 대화하며 학생 플래너의 할 일을 짜고 정리해.
+const AI_SYS=`너는 한국 중고등학생의 학습 매니저야. 답은 빠르고 간결하게. 부모님이나 학생과 대화하며 학생 플래너의 할 일을 짜고 정리해.
 규칙:
 - 계획에는 항상 구체적인 범위를 적어 (쪽수 p.10~15 · 단원 · 강 번호 · DAY 번호 · 문제 번호). "저번에 배운 단원 복습"처럼 막연하게 쓰지 마.
 - 하루 분량은 dailyGoalMin 목표 시간에 맞춰 (±30분). 시간표(timetable)의 학원 · 과외 시간과 겹쳐 무리하지 않게.
@@ -8383,7 +8397,7 @@ async function aiCall(ctx, text){
   const SYS=AI_SYS+(AS.kid? AI_SYS_KID : "");
   const a=AS.ai, msgs=[...AS.hist.slice(-8), {role:"user", text:`[플래너 정보]\n${JSON.stringify(ctx)}\n\n[요청]\n${text}`}];
   if(a.provider==="claude"){
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST", headers:{"content-type":"application/json","x-api-key":a.key,"anthropic-version":"2026-10-21",
+    const r=await fetchT("https://api.anthropic.com/v1/messages",{method:"POST", headers:{"content-type":"application/json","x-api-key":a.key,"anthropic-version":"2026-10-21",
         "anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({model:a.model||AI_DEF.claude, max_tokens:16000, system:SYS, fallbacks:"default",
         output_config:{effort:"medium", format:{type:"json_schema", schema:AI_SCHEMA}},
@@ -8401,11 +8415,11 @@ async function aiAsk(text){
   if(AS.kid){ const day=fmt(new Date()); let u={day, n:0}; try{ const d=await aiUseRef(state.user.uid).get(); if(d.exists && d.data().day===day) u=d.data(); }catch(_){}
     if(u.n>=AS.kid.daily) return asBot(`🤖 오늘은 AI를 ${AS.kid.daily}번 다 썼어요. 내일 다시 쓸 수 있어요.<br>그동안은 아래 기능을 써 보세요.`, AS_HELP);
     try{ await aiUseRef(state.user.uid).set({day, n:u.n+1, at:Date.now()}); }catch(_){} }
-  AS.busy=true; asDraw();
+  AS.busy=true; asBusyTick(true); asDraw();
   let out; const ctx=await aiContext();
   try{ out=await aiCall(ctx, text); }
-  catch(e){ AS.busy=false; console.warn("AI", e); return asBot(`🤖 AI 연결 오류: ${esc(e.message||e)}<br>키 · 모델 이름을 확인해 주세요.`, [["⚙️ AI 설정","AI 설정"],["처음으로","도움"]]); }
-  AS.busy=false;
+  catch(e){ AS.busy=false; asBusyTick(false); console.warn("AI", e); return asBot(`🤖 AI 연결 오류: ${esc(e.message||e)}${state.profile.role==="parent"? "<br>AI 탭에서 키 · 모델을 확인해 주세요." : "<br>계속 안 되면 부모님께 AI 설정을 확인해 달라고 해 주세요."}`, state.profile.role==="parent"? [["⚙️ AI 설정","AI 설정"],["처음으로","도움"]] : AS_HELP); }
+  AS.busy=false; asBusyTick(false);
   AS.hist.push({role:"user", text}, {role:"assistant", text:JSON.stringify({reply:out.reply})});
   const {add, update, remove, dropped}=aiValidate(out, ctx);
   if(!add.length && !update.length && !remove.length) return asBot(`🤖 ${asEsc(out.reply||"")}${dropped? `<br><small>(규칙에 맞지 않는 제안 ${dropped}개는 뺐어요)</small>` : ""}`);
@@ -8461,7 +8475,7 @@ async function drawAiLog(){
  *  🔎 학습 점검 — "정말 알았나?" 확인하기
  *  ① 스스로 점검: 완료 창에서 공부 방법에 맞는 점검 (단어 · 문제 → 맞은 수, 인강 · 개념 → 한 줄 요약)
  *      정답률로 이해도(S~F)를 자동으로 매기고, C · F면 복습 자동
- *  ② AI 점검 (🧭 도우미 · AI 연결 시): 🧑‍🏫 설명해 보기(빠진 부분 · 꼬리 질문) · 📝 미니 퀴즈 3문제 → 채점
+ *  ② AI 점검 (✨ 도우미 · AI 연결 시): 🧑‍🏫 설명해 보기(빠진 부분 · 꼬리 질문) · 📝 미니 퀴즈 3문제 → 채점
  *  ③ 부모 점검 (매니저 확인): 그날 완료한 학습을 모아 ✓ 잘했어 · △ 다시 보기 · ✗ 다시 하기 + 한마디
  *  task.check = {type, correct, total, wrong, summary, ai:{mode, score, max, weak, at}} · task.mgr = {mark, note, by, at}
  * ============================================================ */
@@ -8516,7 +8530,7 @@ async function aiQuota(){
 async function aiJSON(sys, text, schema){
   const a=AS.ai, SYS=sys+(AS.kid? AI_SYS_KID : "");
   if(a.provider==="claude"){
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST", headers:{"content-type":"application/json","x-api-key":a.key,"anthropic-version":"2026-10-21",
+    const r=await fetchT("https://api.anthropic.com/v1/messages",{method:"POST", headers:{"content-type":"application/json","x-api-key":a.key,"anthropic-version":"2026-10-21",
         "anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({model:a.model||AI_DEF.claude, max_tokens:8000, system:SYS, fallbacks:"default",
         output_config:{effort:"low", format:{type:"json_schema", schema}}, messages:[{role:"user", content:text}]})});
@@ -8727,7 +8741,7 @@ function renderParentHome(){
         <div><small>오늘</small><b>${r.today.done}/${r.today.n}</b><i style="--p:${pct(r.today.done,r.today.n)}%"></i><em>${hm(r.today.min)}</em></div>
         <div><small>이번 주</small><b>${pct(r.week.done,r.week.n)}%</b><i style="--p:${pct(r.week.done,r.week.n)}%"></i><em>${r.week.done}/${r.week.n} · ${hm(r.week.min)}</em></div></div>
       ${alerts.length? `<div class="pm-alerts">${alerts.map(([l,f,k])=>`<button class="${k}" onclick="${f}">${l}</button>`).join("")}</div>` : `<div class="pm-ok">👍 지금 챙길 일이 없어요</div>`}
-      <div class="pm-acts"><button onclick="pmGo('${u}','check')">🔎 점검</button><button onclick="pmGo('${u}','plan')">📅 계획 보기</button><button onclick="drawChat('${u}')">💬 대화</button><button onclick="pmGo('${u}','assist')">🧭 도우미</button></div>
+      <div class="pm-acts"><button onclick="pmGo('${u}','check')">🔎 점검</button><button onclick="pmGo('${u}','plan')">📅 계획 보기</button><button onclick="drawChat('${u}')">💬 대화</button><button onclick="pmGo('${u}','assist')">✨ 도우미</button></div>
     </div>`; }).join("");
   return `<div class="pm-wrap">${noticeCardsHTML()}${sum}${cards}
     <button class="pm-ai" onclick="openAiTab()"><span>🤖</span><b>AI 관리</b><small>${AS.ai && AS.ai.key? `연결됨 · 허용한 자녀 ${Object.keys(AS.shares||{}).length}명` : "키를 넣으면 말로 계획 짜기 · AI 점검"}</small><em>›</em></button>
@@ -8740,7 +8754,7 @@ function renderParentPlan(){
   return `<div class="pm-wrap"><div class="cd-note" style="margin:0 0 10px">계획은 자녀 플래너를 열어서 보고 고쳐요. 부모님이 넣은 계획엔 👑 표시가 붙어요.</div>
     ${state.pm.rows.map(r=>{ const u=r.ch.uid; return `<div class="pm-card"><div class="pm-top"><span class="pm-av" style="background:${r.ch.color}">${esc((r.ch.name||"?").slice(0,1))}</span><b>${esc(r.ch.name)}</b>
       <small class="pm-sm">이번 주 ${r.week.done}/${r.week.n}</small></div>
-      <div class="pm-acts three"><button onclick="pmGo('${u}','plan')">📅 주간 계획</button><button onclick="pmGo('${u}','plans')">📘 계획표</button><button onclick="pmGo('${u}','assist')">🧭 도우미로 짜기</button></div></div>`; }).join("")}</div>`;
+      <div class="pm-acts three"><button onclick="pmGo('${u}','plan')">📅 주간 계획</button><button onclick="pmGo('${u}','plans')">📘 계획표</button><button onclick="pmGo('${u}','assist')">✨ 도우미로 짜기</button></div></div>`; }).join("")}</div>`;
 }
 
 
@@ -8816,6 +8830,43 @@ async function quickAIApply(){
     <div style="display:flex;gap:8px;margin-top:10px"><button class="ghost-btn" style="flex:1" onclick="aiUndo('${r.logId}').then(()=>{toast('↩ 되돌렸어요','good');document.getElementById('qaOut').innerHTML='';})">↩ 되돌리기</button>
       <button class="add-btn" style="flex:1" onclick="closeDrawer()">닫기</button></div></div>`;
   toast(`✨ 계획 ${r.added}개를 넣었어요`,"good");
+}
+/* ----- ✍️ 할 일로 정리 (예전 ✨ 빠른 계획 — AI 없이) ----- */
+function asQuickDate(t){
+  if(/모레/.test(t)) return fmt(addDays(new Date(),2));
+  if(/내일/.test(t)) return fmt(addDays(new Date(),1));
+  if(/오늘/.test(t)) return fmt(new Date());
+  const m=t.match(/(\d{1,2})\s*월\s*(\d{1,2})\s*일/) || t.match(/(?:^|\s)(\d{1,2})\/(\d{1,2})(?=\s|$)/);
+  if(m){ const d=parseDateK(`${m[1]}/${m[2]}`); if(d) return d; }
+  return addDate();
+}
+function asQuickPreview(items){
+  AS.pend={kind:"quick", items};
+  const dl=ds=>{ const d=parseD(ds); return `${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]})`; };
+  asBot(`✍️ 할 일로 정리했어요.<div class="as-prev">${items.map(q=>{ const su=subjById(q.subjectId), tb=tbById(q.textbookId);
+      return `<div>${dl(q.date)} <b>${esc(su?su.name:"")}</b> ${esc([tb?tb.name:"", q.unit, q.method].filter(Boolean).join(" · ")||q.src)} · ${q.plannedMin}분</div>`; }).join("")}</div>`,
+    [["✅ 넣기","적용"],["취소","취소"]]);
+}
+async function asQuickApply(){
+  const P=AS.pend; AS.pend=null; const ids=[]; let n=0; const stamp=Date.now().toString(36);
+  for(const q of P.items){ const id=`qk-${stamp}-${n}`; ids.push(id);
+    await saveTask({id, date:q.date, subjectId:q.subjectId, textbookId:q.textbookId||"", unit:q.unit||"", method:q.method||"", episode:"", plannedMin:q.plannedMin||30,
+      plannedNote:"", done:false, actualMin:0, understood:"", rating:0, parentComment:"", score:"", scoreTotal:"", order:Date.now()+n}); n++; }
+  const log=await aiLogSave({src:"rule", summary:`할 일 ${n}개 추가`, added:ids, removed:[], updated:[]});
+  asBot(`✅ ${n}개를 넣었어요.`, [["↩ 되돌리기",`되돌리기 ${log}`],["✍️ 더 넣기","할 일 넣기"],["닫기","닫기"]]);
+  subscribeTasks();
+}
+/* ----- ⏱ AI 응답: 60초 제한 · 경과 시간 ----- */
+async function fetchT(url, opts, ms){
+  const ac=new AbortController(), t=setTimeout(()=>ac.abort(), ms||60000);
+  try{ return await fetch(url, {...(opts||{}), signal:ac.signal}); }
+  catch(e){ if(e && e.name==="AbortError") throw new Error("AI 응답이 60초 넘게 없어요. 잠시 뒤 다시 시도해 주세요."); throw e; }
+  finally{ clearTimeout(t); }
+}
+let asTick=null;
+function asBusyTick(on){
+  clearInterval(asTick); AS.busyAt=on? Date.now() : 0;
+  if(on) asTick=setInterval(()=>{ const el=document.querySelector(".as-wait"); if(el) el.textContent=`${Math.round((Date.now()-AS.busyAt)/1000)}초`; if(!AS.busy) clearInterval(asTick); }, 1000);
 }
 </script>
 </body>
