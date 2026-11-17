@@ -424,6 +424,10 @@
   .mg-act{display:flex;gap:6px;margin-top:8px}.mg-act button{flex:1;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 4px;font:inherit;font-size:12.5px;font-weight:var(--fw-semibold);cursor:pointer}
   .mg-act button.on.ok{background:#0E9F6E;border-color:#0E9F6E;color:#fff}.mg-act button.on.re{background:#F5A524;border-color:#F5A524;color:#fff}.mg-act button.on.redo{background:#E5484D;border-color:#E5484D;color:#fff}
   .mg-note{margin-top:6px;font-size:12.5px;padding:7px 10px}
+  .bnav-pill button[data-tab="ai"]{display:none}
+  html[data-pm="1"] .bnav-pill button[data-tab="ai"]{display:flex}
+  .ai-page .crit-grid,.ai-page .inp{max-width:100%}
+  .ai-use{color:#0E7A55;font-weight:var(--fw-semibold);margin-left:auto;margin-right:8px;font-size:11.5px}
   html[data-pm="1"] #chBtn, html[data-pm="1"] .tb-pill button[aria-label="학습 추가"]{display:none!important}
   .pm-acts.three{grid-template-columns:repeat(3,1fr)}
   html[data-pm="1"] .bnav-pill button[data-tab="learn"], html[data-pm="1"] .bnav-pill button[data-tab="timer"], html[data-pm="1"] .fab{display:none!important}
@@ -448,6 +452,8 @@
   .pm-ok{font-size:12.5px;color:#0E7A55;margin-bottom:8px}
   .pm-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
   .pm-acts button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 2px;font:inherit;font-size:12px;font-weight:var(--fw-semibold);cursor:pointer}
+  .pm-ai{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid #C9C1F5;background:#F7F5FF;border-radius:14px;padding:12px 14px;margin-bottom:12px;font:inherit;cursor:pointer}
+  .pm-ai span{font-size:22px}.pm-ai b{font-size:14.5px}.pm-ai small{flex:1;font-size:12px;color:var(--muted2)}.pm-ai em{font-style:normal;color:var(--muted2);font-size:18px}
   .pm-more{text-align:center}.pm-more button{border:none;background:none;color:var(--muted);font:inherit;font-size:12.5px;text-decoration:underline;cursor:pointer}
   .ai-kid{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:6px;font-size:13px}
   .ai-kid label{display:flex;align-items:center;gap:6px;cursor:pointer}.ai-kid input[type=checkbox]{width:18px;height:18px;accent-color:#0E9F6E}
@@ -1457,6 +1463,7 @@
       <button data-tab="plan" onclick="setTab('plan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="4.5" width="17" height="16" rx="3.5"/><path d="M3.5 9h17M8 3v3M16 3v3" stroke-linecap="round"/><text id="tabDate" x="12" y="18.2" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">1</text></svg>일정</button>
       <button data-tab="learn" onclick="setTab('learn')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 6.5C10 5 7.2 4.5 4 4.8v13.4c3.2-.3 6 .2 8 1.8 2-1.6 4.8-2.1 8-1.8V4.8c-3.2-.3-6 .2-8 1.7Z"/><path d="M12 6.5V20"/></svg>학습</button>
       <button data-tab="timer" onclick="setTab('timer')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3.5a8.5 8.5 0 1 1-8.5 8.5" opacity=".35"/><path d="M12 3.5a8.5 8.5 0 0 0-8.5 8.5"/></svg><span class="lbl">타이머</span></button>
+      <button data-tab="ai" onclick="openAiTab()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="7.5" width="15" height="11" rx="3.5"/><path d="M12 7.5V4.5M9.5 12.5h.01M14.5 12.5h.01M9.5 15.5h5M2.5 12v2.5M21.5 12v2.5"/></svg>AI</button>
       <button data-tab="stats" onclick="setTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="13" width="4" height="7" rx="1.2"/><rect x="10" y="9" width="4" height="11" rx="1.2"/><rect x="16" y="4" width="4" height="16" rx="1.2"/></svg>기록</button>
     </div>
     <button class="fab" title="빠르게 계획 세우기" aria-label="빠르게 계획 세우기" onclick="openQuick()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 16.5l-1.8-5.2L5 9.5l5.2-1.8zM18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg><span class="fab-t">빠른 계획</span></button>
@@ -2914,7 +2921,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-9";
+const APP_VER="2026.11.17-10";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -4579,6 +4586,8 @@ function render(){
   document.querySelectorAll(".bnav-pill button").forEach(b=>b.classList.toggle("on", b.dataset.tab===state.tab));
   document.documentElement.dataset.tab=state.tab;                       // 빠른 계획 버튼은 할 일 · 일정 탭에서만
   if(PM && state.tab==="todo"){ head.innerHTML=pmHead(); main.innerHTML=renderParentHome(); updateTopChips(); updateWeekBanner(); return; }
+  if(PM && state.tab==="ai"){ head.innerHTML=pageHead("AI 관리","키 · 자녀 허용 · 사용 횟수 · 기록"); main.innerHTML=`<div class="pm-wrap ai-page">${AS.aiLoaded? aiSetupHTML() : `<div class="empty">불러오는 중…</div>`}</div>`; if(!AS.aiLoaded) aiLoad().then(render); updateTopChips(); updateWeekBanner(); return; }
+  if(!PM && state.tab==="ai") state.tab="todo";
   if(PM && state.tab==="plan"){ head.innerHTML=pageHead("일정","자녀 계획 보기"); main.innerHTML=renderParentPlan(); updateTopChips(); updateWeekBanner(); return; }
   if(state.tab==="learn"){ head.innerHTML=pageHead("학습", state.viewingChild? `${esc(state.ownerName)} 님의 학습앱` : "천문장 · 영단어 · 문법"); main.innerHTML=renderLearn(); }
   else if(state.tab==="stats"){ head.innerHTML=pageHead("기록", "성장 · 소통 · 분석 · 용돈"); main.innerHTML=renderRecord(); }
@@ -4920,6 +4929,7 @@ function openMenu(){
     ${hubItem("💬","가족 대화"+commDot(state.chatUnread), isParent?"자녀와 글 · 응원 주고받기":"부모님과 글 주고받기","drawChat()")}
     ${isParent? hubItem("🤝","자녀 친구 관리"+commDot(state.friendPending),"친구 신청 승인 · 끊기","drawKidFriends()") : hubItem("🤝","친구 응원"+commDot(state.friendPending),"친구 코드 · 👍 응원","drawFriends()")}
     <div class="r-sec">관리</div>
+    ${isParent? hubItem("🤖","AI 관리","API 키 · 자녀 허용 · 하루 사용 횟수","closeDrawer();openAiTab()") : ""}
     ${hubItem("👨‍👩‍👧", "가족 연결"+(state.familyPending?` <span class="badge-dot">${state.familyPending}</span>`:""), isParent?"자녀에게 연결 신청 · 받은 신청 승인":"부모님께 연결 신청 · 받은 신청 승인","drawFamily()")}
     ${isParent? hubItem("📈","자녀 관리","리포트 · 다이어리 · 지킨 날 확인 · 자녀 계정","drawManage()") : hubItem("🐣","내 캐릭터 · 성장","66일 공부 도전 · 명예의 장 · 순위 · 뱃지","drawManage()")}
     ${isParent? hubItem("🔔","용돈 알림","자녀가 이번 주를 종료하면 · 푸시 · 이메일","drawNotify()") : ""}
@@ -8227,7 +8237,9 @@ async function aiLoad(){
   if(state.profile.role==="parent"){
     try{ const d=await aiRef().get(); AS.ai=d.exists? d.data() : null; }catch(_){ AS.ai=null; }
     AS.shares={};
-    for(const ch of (state.children||[])){ try{ const d=await aiShareRef(ch.uid).get(); if(d.exists && d.data().on) AS.shares[ch.uid]=d.data(); }catch(_){} }
+    AS.use={}; const day=fmt(new Date());
+    for(const ch of (state.children||[])){ try{ const d=await aiShareRef(ch.uid).get(); if(d.exists && d.data().on) AS.shares[ch.uid]=d.data();
+      const u=await aiUseRef(ch.uid).get(); AS.use[ch.uid]= u.exists && u.data().day===day? Number(u.data().n)||0 : 0; }catch(_){} }
   } else {
     try{ const d=await aiShareRef(state.user.uid).get(); const x=d.exists? d.data() : null;
       if(x && x.on && x.key){ AS.ai={provider:x.provider, key:x.key, model:x.model}; AS.kid={daily:Number(x.daily)||20, by:x.byName||"부모님"}; } else { AS.ai=null; AS.kid=null; } }catch(_){ AS.ai=null; AS.kid=null; }
@@ -8246,8 +8258,12 @@ function aiSetup(){
   if(state.profile.role!=="parent") return;
   // 자녀 목록이 아직 없으면 한 번 다시 불러와요
   if(!(state.children||[]).length && !aiKidsTried){ aiKidsTried=true; loadChildren().then(()=>aiLoad()).then(()=>{ if(document.getElementById("aiKey")) aiSetup(); }).catch(()=>{}); }
+  if(pmMode() && state.tab==="ai"){ render(); return; }
+  hubShell("🤖 AI 관리 (부모님 전용)", aiSetupHTML());
+}
+function aiSetupHTML(){
   const a=AS.ai||{provider:"gemini", key:"", model:""};
-  hubShell("🤖 AI 연결 (부모님 전용)", `
+  return `
     <div class="sct-card" style="margin:0 0 12px">AI 키를 넣으면 🧭 계획 도우미에서 <b>자유롭게 말로</b> 계획을 짜고 정리할 수 있어요.<br>
       · 키는 <b>이 부모 계정</b>에 저장돼요. 아래에서 허용한 자녀만 같은 키로 쓸 수 있어요.<br>
       · AI가 바꾸기 전에 항상 <b>미리 보기 → 적용</b>을 거치고, <b>↩ 되돌리기</b>로 원래대로 돌릴 수 있어요.<br>
@@ -8263,10 +8279,12 @@ function aiSetup(){
     ${!(state.children||[]).length? `<div class="cd-note">연결된 자녀가 없어요. ⋯ 메뉴 → <b>가족 연결</b>에서 자녀와 먼저 연결해 주세요.${aiKidsTried? "" : " (불러오는 중…)"}</div>` : ""}
     ${(state.children||[]).length? `
       ${state.children.map(ch=>{ const sh=AS.shares[ch.uid]; return `<div class="ai-kid"><label><input type="checkbox" ${sh?"checked":""} ${a.key?"":"disabled"} onchange="aiShareSet('${ch.uid}',this.checked,document.getElementById('aiD-${ch.uid}').value)"> <b>${esc(ch.name)}</b></label>
-        <span>하루 <input class="inp" id="aiD-${ch.uid}" type="number" min="1" value="${sh? sh.daily : 20}" onchange="${sh? `aiShareSet('${ch.uid}',true,this.value)` : ""}"> 번까지</span></div>`; }).join("")}
+        ${sh? `<small class="ai-use">오늘 ${(AS.use||{})[ch.uid]||0}번 사용</small>` : ""}<span>하루 <input class="inp" id="aiD-${ch.uid}" type="number" min="1" value="${sh? sh.daily : 20}" onchange="${sh? `aiShareSet('${ch.uid}',true,this.value)` : ""}"> 번까지</span></div>`; }).join("")}
       <div class="cd-note" style="margin-top:6px;line-height:1.6">허용하면 자녀 계정의 🧭 도우미에서도 AI로 계획을 짜고 정리할 수 있어요. 자녀용 AI는 <b>공부 계획 이야기만</b> 하도록 정해 두었고, 한 일은 🧾 작업 기록에 자녀 이름으로 남아요.<br>
         ⚠️ 자녀 기기에서도 이 키가 쓰여서, 기술적으로는 키를 꺼내 볼 수 있어요. <b>자녀용으로 따로 만든 키</b>에 사용 한도를 낮게 걸어 두는 걸 권해요.</div>` : ""}
-    <button class="ghost-btn" style="width:100%;margin-top:12px" onclick="openAssist()">← 계획 도우미로</button>`);
+    ${a.key? `<div class="dash-section" style="margin-top:18px">🧾 기록</div>
+      <button class="ghost-btn" style="width:100%" onclick="drawAiLogAll()">자녀별 도우미 · AI 작업 기록 보기</button>` : ""}
+    ${pmMode() && state.tab==="ai"? "" : `<button class="ghost-btn" style="width:100%;margin-top:12px" onclick="openAssist()">← 계획 도우미로</button>`}`;
 }
 async function aiSave(off){
   const prov=(AS.ai&&AS.ai.provider)||"gemini";
@@ -8276,7 +8294,8 @@ async function aiSave(off){
   AS.ai={provider:prov, key, model}; AS.aiOn=!!key;
   // 허용한 자녀에게도 새 키를 (끊으면 자녀 허용도 끝)
   for(const cu of Object.keys(AS.shares||{})){ try{ if(key){ const d={...AS.shares[cu], provider:prov, key, model, at:Date.now()}; await aiShareRef(cu).set(d); AS.shares[cu]=d; } else { await aiShareRef(cu).delete(); delete AS.shares[cu]; } }catch(e){ console.warn(e); } }
-  toast(key? "🤖 AI를 연결했어요" : "AI 연결을 끊었어요", "good"); openAssist();
+  toast(key? "🤖 AI를 연결했어요" : "AI 연결을 끊었어요", "good");
+  if(pmMode() && state.tab==="ai") render(); else openAssist();
 }
 const AI_SCHEMA={type:"object", additionalProperties:false, required:["reply","add","update","remove"], properties:{
   reply:{type:"string"},
@@ -8670,6 +8689,7 @@ function renderParentHome(){
       <div class="pm-acts"><button onclick="pmGo('${u}','check')">🔎 점검</button><button onclick="pmGo('${u}','plan')">📅 계획 보기</button><button onclick="drawChat('${u}')">💬 대화</button><button onclick="pmGo('${u}','assist')">🧭 도우미</button></div>
     </div>`; }).join("");
   return `<div class="pm-wrap">${noticeCardsHTML()}${sum}${cards}
+    <button class="pm-ai" onclick="openAiTab()"><span>🤖</span><b>AI 관리</b><small>${AS.ai && AS.ai.key? `연결됨 · 허용한 자녀 ${Object.keys(AS.shares||{}).length}명` : "키를 넣으면 말로 계획 짜기 · AI 점검"}</small><em>›</em></button>
     <div class="pm-more"><button onclick="setTab('stats')">📊 리포트 · 용돈 · 설정은 기록 탭에서</button></div></div>`;
 }
 // 일정 탭 (부모 자기 화면): 자녀 계획 고르기
@@ -8682,6 +8702,30 @@ function renderParentPlan(){
       <div class="pm-acts three"><button onclick="pmGo('${u}','plan')">📅 주간 계획</button><button onclick="pmGo('${u}','plans')">📘 계획표</button><button onclick="pmGo('${u}','assist')">🧭 도우미로 짜기</button></div></div>`; }).join("")}</div>`;
 }
 
+
+/* ----- 🤖 AI 관리 탭 (부모) ----- */
+function openAiTab(){
+  if(state.profile.role!=="parent") return;
+  if(state.viewingChild){ backToSelf(); }
+  state.tab="ai"; aiKidsTried=false;
+  const go=()=>{ render(); window.scrollTo(0,0); };
+  if(!(state.children||[]).length) loadChildren().then(()=>aiLoad()).then(go).catch(go);
+  else aiLoad().then(go).catch(go);
+  go();
+}
+// 자녀별 도우미 · AI 작업 기록 (부모)
+async function drawAiLogAll(){
+  hubShell("🧾 도우미 · AI 작업 기록", `<div class="empty">불러오는 중…</div>`);
+  const rows=[];
+  for(const ch of (state.children||[])){
+    try{ (await db.collection("planner").doc(ch.uid).collection("aiLog").orderBy("at","desc").limit(10).get()).docs.forEach(d=>rows.push({uid:ch.uid, name:ch.name, id:d.id, ...d.data()})); }catch(_){}
+  }
+  rows.sort((a,b)=>b.at-a.at);
+  const root=document.querySelector("#drawerRoot .drawer-body"); if(!root) return;
+  root.innerHTML=rows.length? rows.slice(0,30).map(x=>{ const t=new Date(x.at); return `<div class="hp-it ${x.undone?"ok":""}"><span>${x.src==="rule"?"🧭":"🤖"}</span>
+      <div style="flex:1;min-width:0"><b>${esc(x.name)} · ${esc(x.summary||"")}</b><small>${t.getMonth()+1}/${t.getDate()} ${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")} · ${esc(x.byName||"")}${x.undone?" · 되돌림":""}</small></div></div>`; }).join("")
+    : `<div class="cd-note">아직 기록이 없어요.</div>`;
+}
 </script>
 </body>
 </html>
