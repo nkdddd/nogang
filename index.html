@@ -400,6 +400,22 @@
   .td-goal{align-self:flex-start;border:none;background:var(--surface2);border-radius:999px;padding:4px 10px;font:inherit;font-size:11.5px;font-weight:var(--fw-semibold);color:var(--muted2);cursor:pointer;margin-top:4px;white-space:nowrap}
   .td-rings{display:flex;gap:4px;flex:0 0 auto}
   .td-dd{color:#E5484D;font-weight:var(--fw-bold);font-size:12px}
+  .au-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin:0 0 12px}
+  .au-h{display:block;font-size:13.5px;margin-bottom:6px}
+  .au-row{display:flex;gap:9px;align-items:flex-start;padding:6px 0;cursor:pointer}.au-row input{width:18px;height:18px;margin-top:2px;flex:0 0 auto;accent-color:#6A58E6}
+  .au-row b{display:block;font-size:13px}.au-row small{font-size:11.5px;color:var(--muted2)}
+  .pl-quick{background:#F7F5FF;border:1px dashed #C9C1F5;border-radius:12px;padding:10px 12px;margin-bottom:10px}
+  .pl-qh{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:var(--fw-bold);color:#35296E;margin-bottom:6px}
+  .pl-tbl .pl-c.mv{color:var(--muted2);text-decoration:line-through}.pl-tbl .pl-c.mv small{text-decoration:none;color:#6A58E6;font-weight:var(--fw-bold)}
+  .wr-box{background:#F7F5FF;border:1px solid #DED8FB;border-radius:12px;padding:10px 12px;margin:0 0 10px}
+  .wr-h{font-size:12.5px;font-weight:var(--fw-bold);color:#35296E;margin-bottom:6px}
+  .wr-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
+  .wr-g span{background:var(--surface);border-radius:10px;padding:6px 4px;font-size:11px;color:var(--muted2)}.wr-g b{display:block;font-size:17px;color:var(--ink)}.wr-g small{font-size:10.5px}
+  .wr-l{font-size:12px;color:#B4232A;margin-top:6px;font-weight:var(--fw-semibold)}.wr-l.ok{color:#0E7A55}
+  .mic-wrap{position:relative;display:flex;gap:6px;align-items:flex-start}.mic-wrap>.inp,.mic-wrap>textarea{flex:1}
+  .mic-btn{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);font-size:16px;cursor:pointer}
+  .mic-btn.on{background:#E5484D;border-color:#E5484D;animation:micP 1s ease-in-out infinite}
+  @keyframes micP{50%{transform:scale(1.08)}}
   /* 📘 학습 관리: 이해도 · 시간표 · 계획표 */
   .gr-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 10px}
   .gr-b{width:38px;height:34px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font:inherit;font-weight:var(--fw-bold);font-size:15px;color:var(--muted);cursor:pointer}
@@ -2837,7 +2853,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-1";
+const APP_VER="2026.11.17-2";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -3123,7 +3139,7 @@ async function createReviews(taskId){
   let n=0;
   for(const p of plans){
     await saveTask({
-      id:uid(), date:p.date, subjectId:t.subjectId, textbookId:t.textbookId,
+      id:`rv-${taskId}-${p.gap}`, date:p.date, subjectId:t.subjectId, textbookId:t.textbookId,
       unit:t.unit, method:"복습", episode:"",
       plannedMin:p.plannedMin,
       plannedNote:`[${p.gap}일 후 복습] ${t.unit||""}`.trim(),
@@ -4269,6 +4285,7 @@ function subscribeCategories(){
     else if(d.exists && mig.changed) plannerRef().collection("meta").doc("settings").set({allowance:state.settings.allowance},{merge:true}).catch(()=>{});
     fetchPayTerms(state.ownerUid).then(pt=>{ state.payTermsRaw=pt; render(); });
     loadWeekClose(state.ownerUid);
+    setTimeout(()=>planReflow().catch(e=>console.warn("재배치", e)), 2500);
     render();
   });
 }
@@ -5650,7 +5667,7 @@ function todayDiaryHTML(ds){
         title="${l}" onclick="setDayMood('${ds}','${e}')">${e}</button>`).join("")}
     </div>
     <div style="display:flex;gap:6px">
-      <input class="inp" id="dayDiary-${ds}" value="${esc(d.text||"")}" placeholder="오늘 공부는 어땠나요?" style="flex:1;padding:7px 10px;font-size:12.5px">
+      <input class="inp" id="dayDiary-${ds}" value="${esc(d.text||"")}" placeholder="오늘 공부는 어땠나요?" style="flex:1;padding:7px 10px;font-size:12.5px">${micBtn("dayDiary-"+ds)}
       <button class="ghost-btn" style="padding:7px 12px;font-size:12px" onclick="saveDayDiary('${ds}')">저장</button>
     </div>
   </div>`;
@@ -5979,11 +5996,11 @@ function drawDoneSheet(){
         <div class="ds-q">얼마나 이해했나요? <small>(이해도 · 선택)</small></div>${gradeHTML("underStars", d.underStars)}`
       : `
         <div class="ds-q">무엇을 공부했나요? <small>(미리 적지 않았어요)</small></div>
-        <div class="tm-area"><textarea id="dsContent" rows="2" maxlength="100" placeholder="예: 수학 3단원 일차함수 p.42-58 · 영단어 Day 12" oninput="doneDraft.content=this.value;document.getElementById('dsOk').disabled=!(doneDraft.content.trim()&&doneDraft.doneStars!=null&&doneDraft.underStars!=null)">${esc(d.content)}</textarea></div>
+        <div class="tm-area mic-wrap"><textarea id="dsContent" rows="2" maxlength="100" placeholder="예: 수학 3단원 일차함수 p.42-58 · 영단어 Day 12" oninput="doneDraft.content=this.value;document.getElementById('dsOk').disabled=!(doneDraft.content.trim()&&doneDraft.doneStars!=null&&doneDraft.underStars!=null)">${esc(d.content)}</textarea>${micBtn("dsContent")}</div>
         <div class="ds-q">계획한 만큼 했나요? (이행)</div>${starsHTML("doneStars", d.doneStars)}
         <div class="ds-q">얼마나 이해했나요? (이해도)</div>${gradeHTML("underStars", d.underStars)}`}
       <div class="ds-q">❓ 질문할 것 · 도움이 필요한 부분 <small>(선택)</small></div>
-      <div class="tm-area"><input class="inp" id="dsHelp" maxlength="80" value="${esc(d.help||"")}" placeholder="예: 직선의 방정식 3번 풀이를 모르겠어요" oninput="doneDraft.help=this.value"></div>
+      <div class="tm-area mic-wrap"><input class="inp" id="dsHelp" maxlength="80" value="${esc(d.help||"")}" placeholder="예: 직선의 방정식 3번 풀이를 모르겠어요" oninput="doneDraft.help=this.value">${micBtn("dsHelp")}</div>
       <div class="ds-hint">${d.planned? "계획한 내용은 할 일 수정에서 바꿀 수 있어요" : "💡 다음부터는 계획할 때 '공부할 내용'을 미리 적으면 완료할 때 별점만 주면 돼요"}</div>
     </div>
     <div class="modal-foot tm-foot">
@@ -6012,6 +6029,7 @@ async function finishTask(t, extra){
   const saved={...t, ...extra, done:true, actualMin, creditRate:cr.rate, checkedAt:Date.now(), appLinked:taskApp(t)};
   state.justDone=t.id; setTimeout(()=>{ state.justDone=null; },900);
   await saveTask(saved);
+  autoReviewAfter(saved).catch(e=>console.warn("자동 복습", e));
   const left=state.tasks.filter(x=>x.date===t.date && !x.done && x.id!==t.id).length;
   toast(`완료 · ${actualMin}분${extra.doneStars!=null?` · 이행 ${starsTxt(extra.doneStars)}`:""}${left? ` · 남은 학습 ${left}개` : " · 오늘 계획 끝! 수고했어요"}`,"good");
 }
@@ -6960,12 +6978,14 @@ function popupHTML(title, body, foot){
     <div class="modal-body">${body}</div><div class="modal-foot tm-foot">${foot}</div></div></div>`;
 }
 // 🏁 이번 주 종료 = 그 주 용돈 정산을 부모님께 요청 (토요일 18시 자동 마감 대신 학생이 직접 눌러요)
-function requestAllowance(){
+async function requestAllowance(){
   const c=allowCache[state.ownerUid]; if(!c) return;
+  c.review=await weekReviewFor(state.ownerUid, c.days||allowanceWeekDays(parseD(c.weekId)));
   const items=c.items||[], amt=c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap);
   const early=c.weekId>fmt(new Date()) && new Date().getDay()!==6;   // 토요일 전에 끝내려는 경우
   popupHTML(`🏁 ${allowWkName()} 종료하고 정산`, `
     <div class="pop-amt"><small>${esc(c.label)} · 이번 정산 금액</small><b>${wonFmt(amt)}</b></div>
+    ${weekReviewHTML(c.review)}
     <div class="cd-note" style="margin:0 0 10px;line-height:1.6">종료하면 부모님께 <b>용돈 정산 요청</b>이 가고, 다음 주 계획으로 넘어가요.${early?`<br>⚠️ 아직 ${WD_FULL[6]}이 아니에요. 남은 요일도 공부할 거면 나중에 종료해요.`:""}</div>
     ${items.length? `<div class="pop-sec">📒 부모님께 함께 보여 드릴 학습 내용</div>${weekStudyHTML(items)}` : `<div class="pop-empty">${allowWkName()}에 완료한 학습이 없어요.<br><small>그래도 종료할 수 있어요.</small></div>`}`,
     `<button class="tm-btn" onclick="closeModal()">취소</button><button class="tm-btn save" onclick="sendAllowanceRequest()">🏁 종료하기</button>`);
@@ -6975,7 +6995,7 @@ async function sendAllowanceRequest(){
   const uid=state.ownerUid, amt=c.payAmt!=null?c.payAmt:payAmount(c.r,c.cap);
   try{
     await payReqRef(uid, c.weekId).set({weekId:c.weekId, label:c.label, name:state.ownerName||state.profile.name||"", amount:amt,
-      payMin:c.r.payMin, items:c.items||[], status:"pending", at:Date.now(), closed:true});
+      payMin:c.r.payMin, items:c.items||[], status:"pending", at:Date.now(), closed:true, review:c.review||null});
     state.weekClose[uid]={...(state.weekClose[uid]||{}), [c.weekId]:true};
     saveAllowanceSnap(uid, state.ownerName, c.days, true).catch(e=>console.warn("정산 스냅샷", e));
     closeModal(); toast("🏁 이번 주를 종료했어요! 부모님이 학습 내용을 보고 용돈을 지급해요","good");
@@ -6992,6 +7012,7 @@ function openPayReq(uid, weekId){
   const q=(state.payReqs||[]).find(x=>x.uid===uid && x.weekId===weekId); if(!q) return goPayReq(uid, weekId);
   popupHTML(`💌 ${esc(q.name)}의 용돈 요청`, `
     <div class="pop-amt"><small>${esc(q.label||"")} · 요청 ${new Date(q.at).getMonth()+1}.${new Date(q.at).getDate()}</small><b>${wonFmt(q.amount)}</b></div>
+    ${weekReviewHTML(q.review)}
     <div class="pop-sec">📒 이번 주 학습한 내용</div>${weekStudyHTML(q.items||[])}`,
     `<button class="tm-btn" onclick="closeModal()">닫기</button><button class="tm-btn save" onclick="closeModal();goPayReq('${uid}','${weekId}')">💰 정산하러 가기</button>`);
 }
@@ -7401,7 +7422,7 @@ async function planApply(p){
   for(const d of cur.docs){ if(!ids.has(d.id) && !d.data().done) ops.push(b=>b.delete(d.ref)); }
   for(const t of want){ const h=have[t.id]; if(h && h.done) continue;
     const ref=plannerRef().collection("tasks").doc(t.id);
-    ops.push(b=>b.set(ref, {...(h||{}), ...t, ...(by && !h? {byParent:by} : {})})); }
+    ops.push(b=>b.set(ref, {...(h||{}), ...t, ...(h && h.moved? {date:h.date} : {}), ...(by && !h? {byParent:by} : {})})); }
   for(let i=0;i<ops.length;i+=400){ const b=db.batch(); ops.slice(i,i+400).forEach(f=>f(b)); await b.commit(); }
   return want.length;
 }
@@ -7473,10 +7494,11 @@ function planEdit(openRow){
       <div style="grid-column:1/-1"><label class="fld-lbl">🎯 목표</label><input class="inp" value="${esc(p.goal)}" placeholder="${exam?"예: 내 공부 인생의 마중물이 되는 시험으로!":"예: 고등 국어 기반 다지기"}" onchange="pdSet('goal',this.value)"></div>
       ${exam? `<div style="grid-column:1/-1"><label class="fld-lbl">✋ 행동 수칙</label><input class="inp" value="${esc(p.rule)}" placeholder="예: 휴대폰 통제 · 커피+낮잠 X" onchange="pdSet('rule',this.value)"></div>` : ""}
     </div>
-    ${exam? `<div class="dash-section" style="margin-top:14px">단계 <small style="color:#94A3B8">(그 날짜까지)</small></div>
+    ${exam? `<div class="dash-section" style="margin-top:14px">단계 <small style="color:#94A3B8">(그 날짜까지)</small> <button class="fam-btn" style="float:right" onclick="planAutoSplit()">⚡ 자동 배분</button></div>
       ${p.phases.map((ph,k)=>`<div class="pl-ph"><span class="pl-dot" style="background:${PHASE_C[k%PHASE_C.length]}"></span><input class="inp" value="${esc(ph.name)}" onchange="pdSet('phases.${k}.name',this.value)"><input class="inp" type="date" value="${ph.end}" onchange="pdSet('phases.${k}.end',this.value)"></div>`).join("")}` : ""}
     <div class="dash-section" style="margin-top:14px">과목별 계획 <small style="color:#94A3B8">${p.rows.length}줄</small></div>
-    ${p.rows.map(rowHTML).join("") || `<div class="cd-note">＋ 과목 줄을 넣어 교재 · 범위를 나눠 적어요.</div>`}
+    ${planQuickHTML()}
+    ${p.rows.map(rowHTML).join("") || `<div class="cd-note">＋ 과목 줄을 넣거나 위에 한 줄로 적어요.${exam? " 줄을 넣은 뒤 ⚡ 자동 배분을 누르면 1회독 · 2회독 · 버퍼로 나눠요." : ""}</div>`}
     <button class="ghost-btn" style="width:100%;margin-top:8px" onclick="planRowNew()">＋ 과목 줄 추가</button>
     <div style="display:flex;gap:8px;margin-top:16px">
       ${p.id? `<button class="ghost-btn" style="flex:1" onclick="planDelete('${p.id}')">🗑️ 계획 지우기</button>` : ""}
@@ -7526,14 +7548,15 @@ function renderPlans(){
   return `<div class="pl-wrap">
     <div class="pl-new"><button onclick="planNew('exam')"><b>📝 시험 대비 계획표</b><small>시험 날까지 과목별 범위를 날짜에 나눠요</small></button>
       <button onclick="planNew('long')"><b>📘 학습 포트폴리오</b><small>몇 달 동안 교재를 주 단위로 나눠요</small></button></div>
+    ${autoCardHTML()}
     ${cards || `<div class="cd-note" style="margin-top:10px">아직 계획표가 없어요. 시험이 다가오면 📝, 방학 · 학기 계획은 📘로 만들어요.</div>`}
   </div>`;
 }
 function planGridHTML(p, T){
   const exam=p.kind==="exam", today=fmt(new Date());
-  const doneMap={}; T.forEach(t=>{ doneMap[t.id]=t.done; });
+  const doneMap={}, dateMap={}; T.forEach(t=>{ doneMap[t.id]=t.done; dateMap[t.id]=t.date; });
   const head=`<div class="pl-meta">${p.goal?`<div>🎯 ${esc(p.goal)}</div>`:""}${p.rule?`<div>✋ ${esc(p.rule)}</div>`:""}
-      <div class="pl-acts"><button class="fam-btn" onclick="planOpen('${p.id}')">✏️ 고치기</button></div></div>`;
+      <div class="pl-acts"><button class="fam-btn" onclick="planOpen('${p.id}')">✏️ 고치기</button> <button class="fam-btn" onclick="planReflow(true)">↪ 밀린 것 다시 배치</button></div></div>`;
   if(exam){
     const days=planDates(p.start, p.end);
     const phaseOf=ds=>{ const k=p.phases.findIndex(ph=>ds<=ph.end); return k<0? p.phases.length-1 : k; };
@@ -7544,8 +7567,8 @@ function planGridHTML(p, T){
     const rows=p.rows.map(r=>{ const L=planLayout(r), su=subjById(r.subjectId); let idx=0; const pos={}; L.dates.forEach((ds,k)=>pos[ds]=k);
       return `<tr><th class="pl-sub" style="border-left:4px solid ${su?su.color:"#94A3B8"}">${esc(su?su.name:"")}<small>${esc(r.book||(tbById(r.textbookId)||{}).name||"")}</small></th><td class="pl-sub2">${esc(r.target||"")}</td>
         ${days.map(ds=>{ if(!(ds in L.map)) return `<td></td>`; const c=L.map[ds]; if(!c) return `<td class="pl-buf">버퍼</td>`;
-          const id=`pl-${p.id}-${r.id}-${pos[ds]}`, ok=doneMap[id];
-          return `<td class="pl-c ${ok?"ok":ds<today?"miss":""}" style="background:${PHASE_C[phaseOf(ds)%PHASE_C.length]}66">${ok?"✓ ":""}${esc(c.join(", "))}</td>`; }).join("")}</tr>`; }).join("");
+          const id=`pl-${p.id}-${r.id}-${pos[ds]}`, ok=doneMap[id], mv=dateMap[id] && dateMap[id]!==ds? parseD(dateMap[id]) : null;
+          return `<td class="pl-c ${ok?"ok":mv?"mv":ds<today?"miss":""}" style="background:${PHASE_C[phaseOf(ds)%PHASE_C.length]}66">${ok?"✓ ":""}${esc(c.join(", "))}${mv?`<small>↪ ${mv.getMonth()+1}/${mv.getDate()}</small>`:""}</td>`; }).join("")}</tr>`; }).join("");
     return head+`<div class="pl-scroll"><table class="pl-tbl">${ph}${dh}${rows}</table></div>`;
   }
   // 장기: 주 단위 (일요일 시작)
@@ -7580,6 +7603,177 @@ async function drawHelpList(){
 async function helpToggle(id, ok){
   try{ await plannerRef().collection("tasks").doc(id).update({helpOk:ok, helpOkAt:Date.now()}); }catch(e){ console.warn(e); }
   drawHelpList();
+}
+
+
+/* ============================================================
+ *  ⚙️ 자동 규칙 (AI 없이) — 매니저가 손으로 하던 일을 앱이 대신
+ *  ① 밀린 계획 자동 재배치: 계획표 할 일을 못 하고 날짜가 지나면 → 그 줄의 다음 버퍼 날(없으면 가장 한가한 공부 날)로
+ *  ② 이해도 C · F → 1 · 3 · 7일 뒤 복습 자동 추가
+ *  ③ 시험 계획 자동 배분: 개념 1회독 60% · 2회독 30% · 버퍼 10%, 2회독 줄 자동 생성
+ *  ④ 주간 자동 점검: 🏁 종료할 때 실행률 · 이해도 낮은 과목 · 남은 질문을 요약해 부모님께
+ *  설정: settings.auto = {reflow, review} (기본 켜짐)
+ * ============================================================ */
+const autoOn=k=>{ const a=(state.settings && state.settings.auto)||{}; return a[k]!==false; };
+async function autoSet(k, v){ await saveSettings({...state.settings, auto:{...((state.settings||{}).auto||{}), [k]:v}}); render(); }
+function autoCardHTML(){
+  const sw=(k,t,d)=>`<label class="au-row"><input type="checkbox" ${autoOn(k)?"checked":""} onchange="autoSet('${k}',this.checked)"><span><b>${t}</b><small>${d}</small></span></label>`;
+  return `<div class="au-card"><b class="au-h">⚙️ 자동 규칙</b>
+    ${sw("reflow","밀린 계획 자동 재배치","날짜가 지난 계획표 할 일을 다음 버퍼 날로 옮겨요")}
+    ${sw("review","이해도 C · F면 복습 자동 추가","1일 · 3일 · 7일 뒤에 짧은 복습을 넣어요")}</div>`;
+}
+
+/* ① 밀린 계획 재배치 */
+const reflowRan={};
+async function planReflow(manual){
+  const owner=state.ownerUid; if(!owner || (!manual && !autoOn("reflow"))) return 0;
+  const today=fmt(new Date()), key=owner+":"+today;
+  if(!manual && reflowRan[key]) return 0; reflowRan[key]=1;
+  if(state.plans===null) await loadPlans();
+  let moved=0;
+  for(const p of (state.plans||[])){
+    if(p.end<today) continue;
+    let T=[]; try{ T=(await plannerRef().collection("tasks").where("planId","==",p.id).get()).docs.map(d=>d.data()); }catch(_){ continue; }
+    const late=T.filter(t=>!t.done && t.date<today).sort((a,b)=>a.date<b.date?-1:1); if(!late.length) continue;
+    const batch=db.batch(); let n=0;
+    for(const row of (p.rows||[])){
+      const L=planLayout(row), mine=late.filter(t=>t.planRow===row.id); if(!mine.length) continue;
+      const load={}; T.filter(t=>t.planRow===row.id && !t.done && t.date>=today).forEach(t=>load[t.date]=(load[t.date]||0)+1);
+      const future=L.dates.filter(ds=>ds>=today);
+      for(const t of mine){
+        if(!future.length) break;
+        // 버퍼 날(배정 없음)부터, 없으면 할 일이 가장 적은 공부 날
+        const buf=future.find(ds=>!L.map[ds] && !load[ds]);
+        const ds=buf || future.slice().sort((a,b)=>(load[a]||0)-(load[b]||0) || (a<b?-1:1))[0];
+        load[ds]=(load[ds]||0)+1;
+        batch.update(plannerRef().collection("tasks").doc(t.id), {date:ds, moved:true, movedFrom:t.movedFrom||t.date, movedAt:Date.now()});
+        n++;
+      }
+    }
+    if(n){ await batch.commit(); moved+=n; delete state.planTasks[p.id]; }
+  }
+  if(moved){ toast(`↪ 밀린 계획 ${moved}개를 버퍼 날로 옮겼어요`,"info"); subscribeTasks(); }
+  else if(manual) toast("밀린 계획이 없어요 👍","good");
+  return moved;
+}
+
+/* ② 이해도 C · F → 복습 자동 */
+async function autoReviewAfter(t){
+  if(!autoOn("review") || state.viewingChild) return;
+  if(t.underStars==null || Number(t.underStars)>2 || t.method==="복습" || t.reviewOf) return;
+  state.tasksMap[t.id]=t;
+  const n=await createReviews(t.id);
+  if(n) toast(`🔁 이해도 ${gradeTxt(t.underStars)} · 복습을 1 · 3 · 7일 뒤에 넣었어요`,"cheer");
+}
+
+/* ③ 시험 계획 자동 배분 */
+function planAutoSplit(){
+  const p=planDraft; if(!p || p.kind!=="exam") return;
+  const days=planDates(p.start, p.end); if(days.length<4) return alert("시작부터 시험 날까지 4일 이상이어야 나눌 수 있어요.");
+  const e1=days[Math.max(0, Math.round(days.length*0.6)-1)], e2=days[Math.max(1, Math.round(days.length*0.9)-1)];
+  p.phases=[{name:"개념 1회독",end:e1},{name:"2회독 · 문제 풀기",end:e2},{name:"시험 기간 · 버퍼",end:p.end}];
+  const base=p.rows.filter(r=>!r.second);
+  const r2=e=>fmt(addDays(parseD(e),1));
+  const rows=[];
+  base.forEach(r=>{ rows.push({...r, from:p.start, to:e1});
+    if((r.chunks||[]).length) rows.push({...r, id:uid().slice(0,8), second:r.id, book:`2회독 · ${r.book||(tbById(r.textbookId)||{}).name||""}`.trim(), textbookId:r.textbookId,
+      chunks:r.chunks.slice(), from:r2(e1), to:e2, perDay:Math.max(1, Math.ceil(r.chunks.length/Math.max(1, planDates(r2(e1),e2).filter(ds=>(r.days||[]).includes(parseD(ds).getDay())).length)))}); });
+  p.rows=rows; planEdit();
+  toast("⚡ 1회독 60% · 2회독 30% · 버퍼 10%로 나눴어요","good");
+}
+
+/* ④ 주간 자동 점검 */
+async function weekReviewFor(uid, days){
+  let T=[]; try{ T=await fetchWeekTasks(uid, days); }catch(_){}
+  const pl=T.filter(t=>t.planId), low={};
+  T.filter(t=>t.done && t.underStars!=null && Number(t.underStars)<=2).forEach(t=>{ const s=subjById(t.subjectId); const n=s?s.name:"기타"; low[n]=(low[n]||0)+1; });
+  return {planned:T.length, done:T.filter(t=>t.done).length, plan:pl.length, planDone:pl.filter(t=>t.done).length,
+    low:Object.entries(low).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([n,c])=>`${n} ${c}`),
+    help:T.filter(t=>String(t.help||"").trim() && !t.helpOk).length, moved:T.filter(t=>t.moved).length};
+}
+function weekReviewHTML(v){
+  if(!v) return "";
+  const pct=(a,b)=>b? Math.round(a/b*100)+"%" : "–";
+  return `<div class="wr-box"><div class="wr-h">📋 이번 주 자동 점검</div>
+    <div class="wr-g"><span>실행률<b>${pct(v.done,v.planned)}</b><small>${v.done}/${v.planned}</small></span>
+      <span>계획표<b>${pct(v.planDone,v.plan)}</b><small>${v.planDone}/${v.plan}</small></span>
+      <span>❓ 질문<b>${v.help}</b><small>남음</small></span></div>
+    ${v.low.length? `<div class="wr-l">⚠️ 이해도 C · F: ${v.low.map(esc).join(" · ")}</div>` : `<div class="wr-l ok">👍 이해도 C · F 없음</div>`}
+    ${v.moved? `<div class="wr-l">↪ 밀려서 옮긴 계획 ${v.moved}개</div>` : ""}</div>`;
+}
+
+/* ----- 🎤 음성 입력 (지원하는 브라우저에서만 보여요) ----- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function micBtn(targetId, after){
+  if(!SR) return "";
+  return `<button type="button" class="mic-btn" title="말로 입력" onclick="micStart('${targetId}',${after?`'${after}'`:"null"},this)">🎤</button>`;
+}
+let micRec=null;
+function micStart(id, after, btn){
+  const el=document.getElementById(id); if(!el || !SR) return;
+  if(micRec){ try{ micRec.stop(); }catch(_){} micRec=null; return; }
+  const r=new SR(); r.lang="ko-KR"; r.interimResults=false; r.maxAlternatives=1;
+  micRec=r; if(btn) btn.classList.add("on");
+  r.onresult=e=>{ const txt=(e.results[0]&&e.results[0][0]&&e.results[0][0].transcript)||""; if(!txt) return;
+    el.value=(el.value? el.value.trim()+" " : "")+txt.trim(); el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true}));
+    if(after && window[after]) window[after](); };
+  r.onerror=e=>{ if(e.error==="not-allowed") alert("마이크 권한을 허용해 주세요."); };
+  r.onend=()=>{ micRec=null; if(btn) btn.classList.remove("on"); };
+  try{ r.start(); }catch(_){ micRec=null; if(btn) btn.classList.remove("on"); }
+}
+
+/* ----- ⚡ 한 줄로 계획 넣기 (규칙으로 해석) -----
+ *  예) 수학 올림포스 p.10-60 5쪽씩 월~금 40분
+ *      영어 강성태 영단어 DAY 1-58 월수금 하루 2개
+ *      국어 문학 작품 19개 매일                                      */
+const DAYMAP={"일":0,"월":1,"화":2,"수":3,"목":4,"금":5,"토":6};
+function parseDays(s){
+  if(/매일/.test(s)) return [0,1,2,3,4,5,6];
+  if(/평일/.test(s)) return [1,2,3,4,5];
+  if(/주말/.test(s)) return [0,6];
+  const rg=s.match(/([일월화수목금토])\s*[~\-]\s*([일월화수목금토])/);
+  if(rg){ const a=DAYMAP[rg[1]], b=DAYMAP[rg[2]], out=[]; for(let i=0;i<7;i++){ const d=(a+i)%7; out.push(d); if(d===b) break; } return out; }
+  const one=s.match(/(?:^|\s)([일월화수목금토]{2,7})(?:요일)?(?=\s|$)/);
+  if(one) return [...new Set(one[1].split("").map(c=>DAYMAP[c]))];
+  return null;
+}
+function parsePlanLine(line){
+  let s=" "+String(line||"").trim()+" "; if(!s.trim()) return null;
+  const subs=state.categories.subjects||[], tbs=state.categories.textbooks||[];
+  const su=subs.slice().sort((a,b)=>b.name.length-a.name.length).find(x=>s.includes(x.name));
+  if(su) s=s.replace(su.name," ");
+  const tb=tbs.filter(t=>!su || t.subjectId===su.id).sort((a,b)=>b.name.length-a.name.length).find(t=>s.includes(t.name));
+  if(tb) s=s.replace(tb.name," ");
+  let min=30; s=s.replace(/(\d+)\s*분/,(m,a)=>{ min=Number(a); return " "; });
+  let per=1; s=s.replace(/하루\s*(\d+)\s*개?/,(m,a)=>{ per=Number(a); return " "; });
+  const days=parseDays(s)||[1,2,3,4,5];
+  s=s.replace(/매일|평일|주말/g," ").replace(/[일월화수목금토]\s*[~\-]\s*[일월화수목금토]/g," ").replace(/(^|\s)[일월화수목금토]{2,7}(요일)?(?=\s|$)/g," ");
+  let step=1; s=s.replace(/(\d+)\s*(쪽|개|강|회|단원|일차)?\s*씩/,(m,a)=>{ step=Number(a); return " "; });
+  let chunks=[];
+  const rg=s.match(/([A-Za-z가-힣.]*)\s*\.?\s*(\d+)\s*[~\-]\s*(\d+)\s*(강|쪽|단원|회|일차)?/);
+  if(rg){ const pre=rg[1]||"", a=Number(rg[2]), b=Number(rg[3]), suf=rg[4]||"";
+    for(let x=a;x<=b;x+=step){ const y=Math.min(b,x+step-1); chunks.push(`${pre}${pre&&!/[.\s]$/.test(pre)?" ":""}${x===y?x:`${x}-${y}`}${suf}`.trim()); }
+    s=s.replace(rg[0]," "); }
+  else { const cnt=s.match(/(\d+)\s*개/); if(cnt){ const n=Number(cnt[1]); s=s.replace(cnt[0]," "); const name=s.replace(/\s+/g," ").trim()||"범위"; chunks=Array.from({length:n},(_,i)=>`${name} ${i+1}`); s=""; } }
+  const book=s.replace(/\s+/g," ").trim();
+  return {subjectId:su?su.id:"", textbookId:tb?tb.id:"", book:tb? "" : book, chunks, days, perDay:Math.max(1,per), min, _subj:su?su.name:"", _tb:tb?tb.name:""};
+}
+function planQuickAdd(){
+  const el=document.getElementById("plQuick"); if(!el) return;
+  const lines=el.value.split("\n").map(x=>x.trim()).filter(Boolean); if(!lines.length) return;
+  const p=planDraft, to=p.kind==="exam" && p.phases[0]? p.phases[0].end : p.end;
+  let n=0, miss=[];
+  lines.forEach(l=>{ const r=parsePlanLine(l); if(!r) return; if(!r.subjectId) miss.push(l);
+    p.rows.push({id:uid().slice(0,8), subjectId:r.subjectId||((state.categories.subjects||[])[0]||{}).id||"", target:"", book:r.book, textbookId:r.textbookId, range:"",
+      chunks:r.chunks, days:r.days, perDay:r.perDay, min:r.min, from:p.start, to}); n++; });
+  planEdit();
+  toast(`⚡ ${n}줄을 넣었어요${miss.length? ` · 과목을 못 찾은 ${miss.length}줄은 과목을 골라 주세요` : ""}`, miss.length? "info":"good");
+}
+function planQuickHTML(){
+  return `<div class="pl-quick"><div class="pl-qh">⚡ 한 줄로 넣기 ${micBtn("plQuick")}</div>
+    <textarea class="inp" id="plQuick" rows="2" placeholder="수학 올림포스 p.10-60 5쪽씩 월~금 40분&#10;영어 영단어 DAY 1-58 월수금 하루 2개"></textarea>
+    <button class="fam-btn" style="margin-top:6px" onclick="planQuickAdd()">줄 만들기</button>
+    <div class="cd-note" style="margin-top:4px">과목 · 교재 · 범위(p.10-60 · DAY 1-58 · 1~3단원) · ○씩 · 요일(월~금 · 월수금 · 매일 · 주말) · 하루 ○개 · ○분</div></div>`;
 }
 
 </script>
