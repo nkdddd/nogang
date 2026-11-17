@@ -949,7 +949,7 @@
   main{padding:0 16px 24px;}
 
   /* ----- 할 일(일간) — 한 줄 레이아웃 ----- */
-  .day{display:flex;flex-direction:column;gap:12px;}
+  .day{display:flex;flex-direction:column;align-items:stretch;gap:12px;}
   .day-side{position:static;order:2;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .day-side>*{min-width:0;}
   .day-side .mon-card,.day-side .goal-card:first-of-type{grid-column:1/-1;}
@@ -1228,6 +1228,12 @@
     html[data-device="pc"] #app{padding:0 22px 40px;}
     html[data-device="pc"] .day{grid-template-columns:minmax(0,1fr) 290px;gap:16px;}
     html[data-device="pc"] .l-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
+  /* 좁은 PC 창(가운데 칸이 좁을 때): 요약 칸을 아래로 내려 할 일 목록을 넓게 */
+  @media (max-width:1100px){
+    html[data-device="pc"] .day{display:flex;flex-direction:column;align-items:stretch;gap:14px;}
+    html[data-device="pc"] .day-side{position:static;display:grid;grid-template-columns:1fr 1fr;max-height:none;overflow:visible;order:2;}
+    html[data-device="pc"] .day-side>*{min-width:0}
   }
   /* 학습앱 전체 화면: 사이드바는 그대로 두고 오른쪽에 */
   html[data-device="pc"] .lapp{left:var(--side);border-left:1px solid var(--line);}
@@ -2908,7 +2914,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-8";
+const APP_VER="2026.11.17-9";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
