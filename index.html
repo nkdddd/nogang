@@ -2883,7 +2883,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-6";
+const APP_VER="2026.11.17-7";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -8201,8 +8201,11 @@ async function aiShareSet(childUid, on, daily){
   else { try{ await aiShareRef(childUid).delete(); }catch(_){} delete AS.shares[childUid]; }
   aiSetup();
 }
+let aiKidsTried=false;
 function aiSetup(){
   if(state.profile.role!=="parent") return;
+  // 자녀 목록이 아직 없으면 한 번 다시 불러와요
+  if(!(state.children||[]).length && !aiKidsTried){ aiKidsTried=true; loadChildren().then(()=>aiLoad()).then(()=>{ if(document.getElementById("aiKey")) aiSetup(); }).catch(()=>{}); }
   const a=AS.ai||{provider:"gemini", key:"", model:""};
   hubShell("🤖 AI 연결 (부모님 전용)", `
     <div class="sct-card" style="margin:0 0 12px">AI 키를 넣으면 🧭 계획 도우미에서 <b>자유롭게 말로</b> 계획을 짜고 정리할 수 있어요.<br>
@@ -8215,7 +8218,10 @@ function aiSetup(){
     <label class="fld-lbl" style="margin-top:10px">모델 <small>(비워 두면 ${AI_DEF[a.provider||"gemini"]})</small></label><input class="inp" id="aiModel" value="${esc(a.model||"")}" placeholder="${AI_DEF[a.provider||"gemini"]}">
     <div class="cd-note" style="margin-top:8px;line-height:1.6">${a.provider==="claude"? "Claude 키: console.anthropic.com → API Keys. 이 화면은 키를 브라우저에서 바로 써요. 사용량 한도(Limits)를 꼭 걸어 두세요." : "Gemini 키: aistudio.google.com → Get API key. Google Cloud 콘솔에서 이 키를 <b>Generative Language API만</b>, 웹사이트 <b>nkdddd.github.io</b>에서만 쓰도록 제한해 두세요."}</div>
     <div style="display:flex;gap:8px;margin-top:14px">${a.key? `<button class="ghost-btn" style="flex:1" onclick="aiSave(true)">연결 끊기</button>` : ""}<button class="add-btn" style="flex:2" onclick="aiSave()">저장</button></div>
-    ${(state.children||[]).length? `<div class="dash-section" style="margin-top:18px">👧 자녀도 쓰게 하기</div>
+    <div class="dash-section" style="margin-top:18px">👧 자녀도 쓰게 하기</div>
+    ${!a.key? `<div class="cd-note" style="margin-bottom:6px">먼저 위에서 API 키를 <b>저장</b>하면 자녀마다 켤 수 있어요.</div>` : ""}
+    ${!(state.children||[]).length? `<div class="cd-note">연결된 자녀가 없어요. ⋯ 메뉴 → <b>가족 연결</b>에서 자녀와 먼저 연결해 주세요.${aiKidsTried? "" : " (불러오는 중…)"}</div>` : ""}
+    ${(state.children||[]).length? `
       ${state.children.map(ch=>{ const sh=AS.shares[ch.uid]; return `<div class="ai-kid"><label><input type="checkbox" ${sh?"checked":""} ${a.key?"":"disabled"} onchange="aiShareSet('${ch.uid}',this.checked,document.getElementById('aiD-${ch.uid}').value)"> <b>${esc(ch.name)}</b></label>
         <span>하루 <input class="inp" id="aiD-${ch.uid}" type="number" min="1" value="${sh? sh.daily : 20}" onchange="${sh? `aiShareSet('${ch.uid}',true,this.value)` : ""}"> 번까지</span></div>`; }).join("")}
       <div class="cd-note" style="margin-top:6px;line-height:1.6">허용하면 자녀 계정의 🧭 도우미에서도 AI로 계획을 짜고 정리할 수 있어요. 자녀용 AI는 <b>공부 계획 이야기만</b> 하도록 정해 두었고, 한 일은 🧾 작업 기록에 자녀 이름으로 남아요.<br>
