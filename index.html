@@ -399,6 +399,61 @@
   .td-min b span{font-size:14px;color:var(--muted);font-weight:var(--fw-semibold)}
   .td-goal{align-self:flex-start;border:none;background:var(--surface2);border-radius:999px;padding:4px 10px;font:inherit;font-size:11.5px;font-weight:var(--fw-semibold);color:var(--muted2);cursor:pointer;margin-top:4px;white-space:nowrap}
   .td-rings{display:flex;gap:4px;flex:0 0 auto}
+  .td-dd{color:#E5484D;font-weight:var(--fw-bold);font-size:12px}
+  /* 📘 학습 관리: 이해도 · 시간표 · 계획표 */
+  .gr-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 10px}
+  .gr-b{width:38px;height:34px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font:inherit;font-weight:var(--fw-bold);font-size:15px;color:var(--muted);cursor:pointer}
+  .gr-b.on.gS{background:#6A58E6;border-color:#6A58E6;color:#fff}.gr-b.on.gA{background:#2A62C8;border-color:#2A62C8;color:#fff}.gr-b.on.gB{background:#0E9F6E;border-color:#0E9F6E;color:#fff}.gr-b.on.gC{background:#F5A524;border-color:#F5A524;color:#fff}.gr-b.on.gF{background:#E5484D;border-color:#E5484D;color:#fff}
+  .gr-row .ds-val{font-size:11.5px;color:var(--muted2)}
+  .ds-help{color:#B4232A;font-weight:var(--fw-semibold)}.ds-help.ok{color:#0E9F6E;text-decoration:line-through}
+  .tt-wrap{padding:0 0 90px}
+  .tt-top{display:flex;align-items:center;gap:10px;margin:0 0 10px}.tt-top>div{flex:1}.tt-top b{display:block;font-size:15px}.tt-top small{font-size:12px;color:var(--muted2)}
+  .tt-grid{display:grid;grid-template-columns:30px repeat(7,minmax(0,1fr));gap:0 3px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 6px}
+  .tt-h{text-align:center;font-size:12px;font-weight:var(--fw-bold);padding:2px 0 6px}.tt-h.sun{color:#E5484D}.tt-h.sat{color:#2A62C8}
+  .tt-axis{position:relative}.tt-axis span{position:absolute;right:4px;font-size:10px;color:var(--muted2);transform:translateY(-50%)}
+  .tt-col{position:relative;border-radius:8px;background:var(--surface2)}.tt-col.today{background:#EFECFD}
+  .tt-hl{position:absolute;left:0;right:0;border-top:1px dashed rgba(100,116,139,.18)}
+  .tt-now{position:absolute;left:0;right:0;border-top:2px solid #E5484D;z-index:2}
+  .tt-b{position:absolute;left:1px;right:1px;border:none;border-radius:6px;padding:2px 3px;text-align:left;font:inherit;font-size:10.5px;line-height:1.2;color:var(--ink);overflow:hidden;cursor:pointer}
+  .tt-b b{display:block;font-weight:var(--fw-semibold);word-break:keep-all}.tt-b small{display:block;font-size:9.5px;color:var(--muted2)}
+  .tt-today{display:flex;align-items:center;gap:6px;overflow-x:auto;margin:0 0 12px;padding:2px 0;scrollbar-width:none}
+  .tt-tl{flex:0 0 auto;font-size:12px;font-weight:var(--fw-bold);color:var(--muted)}
+  .tt-chip{flex:0 0 auto;font-size:12px;padding:5px 9px;border-radius:999px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--c);white-space:nowrap}
+  .tt-chip.live{background:var(--c);color:#fff;font-weight:var(--fw-bold)}
+  .tt-more{flex:0 0 auto;border:none;background:none;font:inherit;font-size:12px;color:var(--accent);font-weight:var(--fw-semibold)}
+  .pl-days{display:flex;gap:5px;flex-wrap:wrap}.pl-days button{min-width:38px;height:34px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font:inherit;font-weight:var(--fw-semibold);color:var(--muted)}
+  .pl-days button.on{background:#6A58E6;border-color:#6A58E6;color:#fff}
+  .pl-row{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+  .pl-row summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none}.pl-row summary::-webkit-details-marker{display:none}
+  .pl-row summary b{flex:1;min-width:0;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pl-row summary small{font-size:11.5px;color:var(--muted2)}
+  .pl-row[open] summary{margin-bottom:10px}
+  .pl-split{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}.pl-split .inp{width:58px;padding:6px 8px}
+  .pl-ph{display:flex;align-items:center;gap:6px;margin-bottom:6px}.pl-ph .inp:first-of-type{flex:1}.pl-ph .inp[type=date]{width:150px}
+  .pl-dot{width:12px;height:12px;border-radius:4px;flex:0 0 auto}
+  .pl-wrap{padding:0 0 90px}
+  .pl-new{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .pl-new button{border:1.5px dashed #C9C1F5;background:#F7F5FF;border-radius:14px;padding:12px;text-align:left;font:inherit;cursor:pointer}
+  .pl-new b{display:block;font-size:14px;color:#35296E}.pl-new small{font-size:11.5px;color:var(--muted2);line-height:1.4}
+  .pl-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+  .pl-head{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:none;background:none;font:inherit;text-align:left;cursor:pointer}
+  .pl-k{font-size:22px}.pl-t{flex:1;min-width:0}.pl-t b{display:block;font-size:14.5px}.pl-t small{font-size:12px;color:var(--muted2)}
+  .pl-dd{font-weight:var(--fw-bold);color:#E5484D;font-size:14px;white-space:nowrap}
+  .pl-meta{padding:0 14px 8px;font-size:12.5px;color:#35296E;line-height:1.6}.pl-acts{margin-top:6px}
+  .pl-scroll{overflow-x:auto;border-top:1px solid var(--line)}
+  .pl-tbl{border-collapse:collapse;font-size:11px;min-width:100%}
+  .pl-tbl th,.pl-tbl td{border:1px solid var(--line);padding:4px 5px;text-align:center;white-space:nowrap}
+  .pl-tbl .pl-sub{position:sticky;left:0;z-index:1;background:var(--surface);text-align:left;min-width:74px;font-size:12px}
+  .pl-tbl .pl-sub small{display:block;font-size:10px;color:var(--muted2);font-weight:500;max-width:90px;overflow:hidden;text-overflow:ellipsis}
+  .pl-tbl .pl-sub2{color:var(--muted);font-size:11px}
+  .pl-tbl .pl-phase{font-size:11px;font-weight:var(--fw-bold);color:#35296E}
+  .pl-tbl .pl-d{min-width:46px;font-weight:var(--fw-semibold)}.pl-tbl .pl-d small{display:block;font-size:9.5px;color:var(--muted2)}
+  .pl-tbl .pl-d.today{background:#6A58E6;color:#fff}.pl-tbl .pl-d.today small{color:#fff}.pl-tbl .pl-d.sun{color:#E5484D}.pl-tbl .pl-d.sat{color:#2A62C8}
+  .pl-tbl .pl-c{font-size:10.5px}.pl-tbl .pl-c.ok{color:#0E7A55;font-weight:var(--fw-bold)}.pl-tbl .pl-c.miss{color:#B4232A}
+  .pl-tbl .pl-c small{display:block;font-size:9.5px;color:var(--muted2)}
+  .pl-tbl .pl-buf{color:var(--muted2);background:repeating-linear-gradient(135deg,transparent 0 4px,rgba(100,116,139,.08) 4px 8px)}
+  .pl-tbl.wk .pl-d{min-width:78px}
+  .hp-it{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+  .hp-it b{display:block;font-size:13.5px}.hp-it small{font-size:11.5px;color:var(--muted2)}.hp-it.ok{opacity:.6}
   .td-boost{display:flex;align-items:center;gap:8px;width:100%;margin:10px 0 2px;padding:9px 12px;border-radius:12px;border:1.5px dashed #F3B7BE;background:#FFF8F9;color:#A5323A;font:inherit;font-size:13px;font-weight:var(--fw-semibold);text-align:left;cursor:pointer}
   .td-boost.on{border:1.5px solid #F08A96;background:linear-gradient(135deg,#FFF1F2,#FFE4E6)}
   .td-boost .tb-e{font-size:18px}.td-boost .tb-t{flex:1;min-width:0;line-height:1.35}.td-boost .tb-t small{display:block;font-size:11.5px;color:#8A6516;font-weight:500}
@@ -2088,7 +2143,7 @@ function todayHeroHTML(ts, actMin, goal, done, ds, dType, isToday){
       <div class="task-quick">${appBtnHTML(nx)||timerBtnHTML(nx)}<button class="done-btn" onclick="toggleDone('${nx.id}')">완료</button></div></div>`; }
   return `<div class="td-hero${full?" full":""}">
     <div class="td-row">
-      <div class="td-min"><small>${isToday? "오늘 공부" : `${ds.slice(5).replace("-","/")} 공부`}</small><b>${actMin}<span> / ${goal}분</span></b>
+      <div class="td-min"><small>${isToday? "오늘 공부" : `${ds.slice(5).replace("-","/")} 공부`}${(()=>{ if(state.plans===null) loadPlans().then(()=>{ if(state.view==="day") render(); }); const x=nextExam(ds); return x? ` · <span class="td-dd">${esc(x.name)} ${x.dd?`D-${x.dd}`:"D-DAY"}</span>` : ""; })()}</small><b>${actMin}<span> / ${goal}분</span></b>
         <button class="td-goal" onclick="drawGoalSheet('${ds}')">🎯 ${dType==="free"?"자율학습일":"등교일"} · 목표 ${goal}분 ›</button></div>
       <div class="td-rings">${R.map(r=>`<div>${ringSvg(r.v,r.c,r.emo)}<small>${r.name}</small></div>`).join("")}</div>
     </div>
@@ -2782,7 +2837,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.13-2";
+const APP_VER="2026.11.17-1";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -4113,7 +4168,7 @@ function rangeFor(){
   if(state.view==="month"){
     const first=new Date(state.cursor.getFullYear(),state.cursor.getMonth(),1);
     s=startOfWeek(first); e=addDays(s,41);
-  }else if(state.view==="week"){
+  }else if(state.view==="week"||state.view==="tt"||state.view==="plans"){
     s=startOfWeek(state.cursor); e=addDays(s,6);
   }else{ // 할 일 탭: 주간 날짜 줄 + 어제 비교까지 한 번에 받아 둠
     const ws=startOfWeek(state.cursor); s=addDays(ws,-1); e=addDays(ws,6);
@@ -4347,6 +4402,7 @@ function dayTypeBadge(ds,small){
 function resetOwnerCaches(){
   state.weakCache=null; state.dayDiary=undefined; state.extCache=null;
   state.dayGoals={}; state.dayTypes={};
+  state.plans=null; state.planTasks={}; state.planOpen=null;
 }
 async function viewChild(childUid,name){
   state.ownerUid=childUid; state.ownerName=name; state.ownerRole="child"; state.viewingChild=true;
@@ -4439,7 +4495,7 @@ function render(){
   if(state.tab==="learn"){ head.innerHTML=pageHead("학습", state.viewingChild? `${esc(state.ownerName)} 님의 학습앱` : "천문장 · 영단어 · 문법"); main.innerHTML=renderLearn(); }
   else if(state.tab==="stats"){ head.innerHTML=pageHead("기록", "성장 · 소통 · 분석 · 용돈"); main.innerHTML=renderRecord(); }
   else if(state.tab==="timer"){ head.innerHTML=pageHead("포커스", "집중 타이머"); main.innerHTML=renderFocus(); bindFocusDial(); }
-  else if(state.tab==="plan"){ head.innerHTML=planHead(); main.innerHTML= state.view==="month"? renderMonth() : renderWeek(); }
+  else if(state.tab==="plan"){ head.innerHTML=planHead(); main.innerHTML= state.view==="month"? renderMonth() : state.view==="tt"? renderTimetable() : state.view==="plans"? renderPlans() : renderWeek(); }
   else { head.innerHTML=todoHead(); main.innerHTML=renderDay(); }
   updateMonHead();
   updateTopChips();
@@ -4475,8 +4531,8 @@ function planHead(){
     ? (state.cursor.getFullYear()===new Date().getFullYear() && state.cursor.getMonth()===new Date().getMonth())
     : fmt(startOfWeek(state.cursor))===fmt(startOfWeek(new Date()));
   return `<div class="page-h">
-      <div><div class="h-sub">${state.view==="month"?"월간 계획":"주간 계획"}</div><h2>일정</h2></div>
-      <div class="h-nav">
+      <div><div class="h-sub">${state.view==="month"?"월간 계획":state.view==="tt"?"주간 시간표":state.view==="plans"?"시험 · 장기 계획표":"주간 계획"}</div><h2>일정</h2></div>
+      <div class="h-nav" ${state.view==="tt"||state.view==="plans"?'style="display:none"':""}>
         ${isCur?"":`<button class="today-chip" onclick="goToday()">오늘</button>`}
         <button onclick="nav(-1)" aria-label="이전">‹</button>
         <span>${periodLabel()}</span>
@@ -4487,6 +4543,8 @@ function planHead(){
     <div class="seg">
       <button class="${state.view==="week"?"on":""}" onclick="setView('week')">주간</button>
       <button class="${state.view==="month"?"on":""}" onclick="setView('month')">월간</button>
+      <button class="${state.view==="tt"?"on":""}" onclick="setView('tt')">🗓 시간표</button>
+      <button class="${state.view==="plans"?"on":""}" onclick="setView('plans')">📘 계획표</button>
     </div>`;
 }
 /* ----- 💰 상단 용돈 바 (모든 화면 고정) ----- */
@@ -4733,7 +4791,10 @@ function renderRecord(){
     comm:[recRow("💬","가족 대화",isParent? "칭찬 · 응원 · 학습 피드백" : "부모님과 글 주고받기","drawChat()",state.chatUnread),
       isParent? recRow("🤝","자녀 친구 관리","친구 신청 승인 · 끊기","drawKidFriends()",state.friendPending) : recRow("🤝","친구 응원","친구 코드 · 👍","drawFriends()",state.friendPending),
       recRow("🔔","새 소식","대화 · 친구 · 응원 소식 모아 보기","drawNews()",newsTotal())],
-    anal:[recRow("📊","학습 대시보드","전체 누적 · 이행률 · 과목별 시간","openDrawer('dash')"),
+    anal:[recRow("📘","계획표","시험 대비 · 학습 포트폴리오 · 날짜별 자동 배치","state.planView='plans';setTab('plan',true);setView('plans')"),
+      recRow("🗓","주간 시간표","요일마다 고정된 학원 · 과외 · 자습 시간","state.planView='tt';setTab('plan',true);setView('tt')"),
+      recRow("❓","질문 · 도움이 필요한 부분","공부 끝낼 때 적은 질문 모아 보기","drawHelpList()"),
+      recRow("📊","학습 대시보드","전체 누적 · 이행률 · 과목별 시간","openDrawer('dash')"),
       recRow("📋","주간 마감 리포트","이번 주 돌아보기 · 부족한 과목","drawWeekReport()"),
       recRow("📚","학습 다이어리","주간 · 월간 복기 기록","drawArchive()"),
       isParent? recRow("📈","자녀 학습 리포트","일 · 주 · 월 평균, 자녀별 비교","drawReport()") : "",
@@ -5681,6 +5742,7 @@ function renderDay(){
     <section class="day-list">
       ${keptDayBanner(ds)}
       ${todayHeroHTML(ts, actMin, dGoal, done, ds, dType, isToday)}
+      ${ttTodayHTML(ds)}
       <div class="dl-head">
         <h2>${isToday? (undoneCount>0? `오늘 남은 학습 ${undoneCount}개` : (ts.length? "오늘 학습 모두 완료" : "오늘의 학습"))
                      : `${ds.slice(5).replace("-",".")} 학습 ${ts.length}개`}</h2>
@@ -5781,7 +5843,7 @@ function renderTaskRow(t){
     </div>`:"";
   const open=state.openTasks && state.openTasks.has(t.id);
   const doneLine = t.done
-    ? `<div class="task-sub ok">완료 · ${Number(t.actualMin)||0}분${t.appLinked? ` · ${EXT_APPS[t.appLinked]?EXT_APPS[t.appLinked].short:"학습앱"} 기록으로 인정` : (_tim>0?` · 타이머 ${Math.min(_tim,_act)}분(+10%)`:"")}${t.understood?" · 메모 있음":""}${t.doneStars!=null?` · <span class="ds-mini">이행 ${starsTxt(t.doneStars)}</span>`:""}${t.underStars!=null?` · <span class="ds-mini">이해 ${starsTxt(t.underStars)}</span>`:""}</div>`
+    ? `<div class="task-sub ok">완료 · ${Number(t.actualMin)||0}분${t.appLinked? ` · ${EXT_APPS[t.appLinked]?EXT_APPS[t.appLinked].short:"학습앱"} 기록으로 인정` : (_tim>0?` · 타이머 ${Math.min(_tim,_act)}분(+10%)`:"")}${t.understood?" · 메모 있음":""}${t.doneStars!=null?` · <span class="ds-mini">이행 ${starsTxt(t.doneStars)}</span>`:""}${t.underStars!=null?` · <span class="ds-mini">이해도 ${gradeTxt(t.underStars)}</span>`:""}${t.help?` · <span class="ds-help ${t.helpOk?"ok":""}">❓ ${esc(t.help)}</span>`:""}</div>`
     : (t.plannedNote? `<div class="task-sub">${esc(t.plannedNote)}</div>` : "");
   const details = open? `
         <div class="exec-row">
@@ -5899,7 +5961,7 @@ function starsHTML(key, val){
 const starsTxt=n=>n==null||n===""? "" : "★".repeat(n)+"☆".repeat(5-n);
 function openDoneSheet(t){
   const planned=!!String(t.unit||"").trim();
-  doneDraft={id:t.id, planned, content:planned? "" : "", doneStars:null, underStars:null};
+  doneDraft={id:t.id, planned, content:planned? "" : "", doneStars:null, underStars:null, help:""};
   drawDoneSheet();
 }
 function drawDoneSheet(){
@@ -5913,12 +5975,15 @@ function drawDoneSheet(){
         ${tb?`<span class="tb-tag">${esc(tb.name)}</span>`:""}<span class="time-tag">${min}분 기록</span></div>
       ${d.planned? `
         <div class="ds-box"><div class="ds-lbl">📝 계획한 내용</div><div class="ds-plan">${esc(t.unit)}</div></div>
-        <div class="ds-q">계획한 만큼 얼마나 했나요?</div>${starsHTML("doneStars", d.doneStars)}`
+        <div class="ds-q">계획한 만큼 얼마나 했나요? (성취도)</div>${starsHTML("doneStars", d.doneStars)}
+        <div class="ds-q">얼마나 이해했나요? <small>(이해도 · 선택)</small></div>${gradeHTML("underStars", d.underStars)}`
       : `
         <div class="ds-q">무엇을 공부했나요? <small>(미리 적지 않았어요)</small></div>
         <div class="tm-area"><textarea id="dsContent" rows="2" maxlength="100" placeholder="예: 수학 3단원 일차함수 p.42-58 · 영단어 Day 12" oninput="doneDraft.content=this.value;document.getElementById('dsOk').disabled=!(doneDraft.content.trim()&&doneDraft.doneStars!=null&&doneDraft.underStars!=null)">${esc(d.content)}</textarea></div>
         <div class="ds-q">계획한 만큼 했나요? (이행)</div>${starsHTML("doneStars", d.doneStars)}
-        <div class="ds-q">얼마나 이해했나요? (이해도)</div>${starsHTML("underStars", d.underStars)}`}
+        <div class="ds-q">얼마나 이해했나요? (이해도)</div>${gradeHTML("underStars", d.underStars)}`}
+      <div class="ds-q">❓ 질문할 것 · 도움이 필요한 부분 <small>(선택)</small></div>
+      <div class="tm-area"><input class="inp" id="dsHelp" maxlength="80" value="${esc(d.help||"")}" placeholder="예: 직선의 방정식 3번 풀이를 모르겠어요" oninput="doneDraft.help=this.value"></div>
       <div class="ds-hint">${d.planned? "계획한 내용은 할 일 수정에서 바꿀 수 있어요" : "💡 다음부터는 계획할 때 '공부할 내용'을 미리 적으면 완료할 때 별점만 주면 돼요"}</div>
     </div>
     <div class="modal-foot tm-foot">
@@ -5934,7 +5999,9 @@ async function saveDoneSheet(){
   const d=doneDraft, t=d && state.tasksMap[d.id]; if(!t) return;
   if(d.doneStars==null || (!d.planned && (!d.content.trim() || d.underStars==null))) return;
   const extra={doneStars:d.doneStars};
-  if(!d.planned){ extra.unit=d.content.trim(); extra.underStars=d.underStars; extra.contentAfter=true; }
+  if(d.underStars!=null) extra.underStars=d.underStars;
+  if(String(d.help||"").trim()){ extra.help=d.help.trim(); extra.helpOk=false; }
+  if(!d.planned){ extra.unit=d.content.trim(); extra.contentAfter=true; }
   closeModal(); doneDraft=null;
   await finishTask(t, extra);
 }
@@ -6882,7 +6949,7 @@ function weekStudyHTML(items){
     <div class="ws-list">${Object.entries(by).map(([ds,L])=>{ const d=parseD(ds); return `<div class="ws-day"><div class="ws-date">${d.getMonth()+1}.${d.getDate()} (${W[d.getDay()]})</div>
       ${L.map(i=>`<div class="ws-it"><span class="ws-dot" style="background:${i.color}"></span><div style="flex:1;min-width:0">
           <div class="ws-t"><b>${esc(i.subj)}</b>${i.tb?` · ${esc(i.tb)}`:""} · ${esc(i.content||"내용 없음")}</div>
-          <div class="ws-m">${i.min}분${i.doneStars!=null?` · 이행 <span class="ds-mini">${starsTxt(i.doneStars)}</span>`:""}${i.underStars!=null?` · 이해 <span class="ds-mini">${starsTxt(i.underStars)}</span>`:""}${i.after?" · 공부 후 기록":""}</div></div></div>`).join("")}</div>`; }).join("")}</div>`;
+          <div class="ws-m">${i.min}분${i.doneStars!=null?` · 이행 <span class="ds-mini">${starsTxt(i.doneStars)}</span>`:""}${i.underStars!=null?` · 이해도 <span class="ds-mini">${gradeTxt(i.underStars)}</span>`:""}${i.after?" · 공부 후 기록":""}</div></div></div>`).join("")}</div>`; }).join("")}</div>`;
 }
 const payReqRef=(uid,weekId)=>db.collection("planner").doc(uid).collection("payRequests").doc(weekId);
 async function fetchPayReq(uid, weekId){ try{ const d=await payReqRef(uid,weekId).get(); return d.exists? d.data() : null; }catch(_){ return null; } }
@@ -7199,6 +7266,322 @@ function timerBtnHTML(t){
  *  11) 시작
  * ============================================================ */
 boot();
+
+/* ============================================================
+ *  📘 학습 관리 (셀프리더 · 주간 시간표 · 시험 계획표 · 학습 포트폴리오)
+ *  - 🗓 주간 시간표: 요일마다 고정된 시간 블록(학원 · 과외 · 자습) — settings.timetable
+ *  - 📘 계획표: 과목별 '범위 조각'을 요일 · 하루 개수에 맞춰 날짜에 자동 배치 → 할 일로 만들어요
+ *      · 시험 계획(일 단위 표 · 단계: 개념 1회독 → 2회독 · 문제 → 시험 기간)
+ *      · 장기 계획 = 학습 포트폴리오(주 단위 표 · 몇 달)
+ *    planner/{uid}/plans/{id} · 만든 할 일은 id가 pl-{계획}-{줄}-{n}이라 다시 만들어도 겹치지 않고, 끝낸 할 일은 그대로 둬요
+ *  - 셀프리더: 이해도 S·A·B·C·F, ❓ 질문할 것(도움이 필요한 부분), 시험 D-day
+ * ============================================================ */
+const GRADES=[["S",5],["A",4],["B",3],["C",2],["F",1]];
+const gradeTxt=n=>n==null||n===""? "" : (Number(n)>=5? "S" : Number(n)>=4? "A" : Number(n)>=3? "B" : Number(n)>=2? "C" : "F");
+function gradeHTML(key, val){
+  return `<div class="gr-row" role="radiogroup">${GRADES.map(([g,n])=>`<button class="gr-b g${g} ${val!=null&&gradeTxt(val)===g?"on":""}" onclick="doneDraft.${key}=${n};drawDoneSheet()">${g}</button>`).join("")}
+    <span class="ds-val">${val==null?"S 완벽 · A 대부분 · B 절반 · C 조금 · F 모름":`이해도 ${gradeTxt(val)}`}</span></div>`;
+}
+
+/* ----- 🗓 주간 시간표 ----- */
+const TT_COLORS=["#6A58E6","#E5484D","#0E9F6E","#F5A524","#2A62C8","#D6409F","#64748B"];
+const TT_DAYS=[1,2,3,4,5,6,0];   // 월~일
+const ttList=()=>Array.isArray(state.settings.timetable)? state.settings.timetable : [];
+const hm2m=s=>{ const [h,m]=String(s||"0:0").split(":").map(Number); return (h||0)*60+(m||0); };
+const m2hm=m=>`${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;
+function ttToday(ds){ const dow=parseD(ds).getDay(); return ttList().filter(b=>(b.days||[]).includes(dow)).sort((a,b)=>hm2m(a.s)-hm2m(b.s)); }
+function renderTimetable(){
+  const L=ttList();
+  const lo=L.length? Math.min(...L.map(b=>hm2m(b.s))) : 9*60, hi=L.length? Math.max(...L.map(b=>hm2m(b.e))) : 22*60;
+  const h0=Math.floor(Math.min(lo,9*60)/60), h1=Math.ceil(Math.max(hi,18*60)/60), PX=0.8;
+  const hours=Array.from({length:h1-h0},(_,i)=>h0+i), H=(h1-h0)*60*PX, now=new Date(), nowM=now.getHours()*60+now.getMinutes();
+  const col=dow=>`<div class="tt-col ${dow===now.getDay()?"today":""}" style="height:${H}px">
+      ${hours.map(h=>`<i class="tt-hl" style="top:${(h-h0)*60*PX}px"></i>`).join("")}
+      ${dow===now.getDay() && nowM>=h0*60 && nowM<=h1*60? `<i class="tt-now" style="top:${(nowM-h0*60)*PX}px"></i>` : ""}
+      ${L.filter(b=>(b.days||[]).includes(dow)).map(b=>{ const t=(hm2m(b.s)-h0*60)*PX, h=Math.max(16,(hm2m(b.e)-hm2m(b.s))*PX-2);
+        return `<button class="tt-b" style="top:${t}px;height:${h}px;background:${b.color||"#6A58E6"}1F;border-left:3px solid ${b.color||"#6A58E6"}" onclick="ttEdit('${b.id}')"><b>${esc(b.title)}</b>${h>30?`<small>${b.s}~${b.e}</small>`:""}</button>`; }).join("")}
+    </div>`;
+  return `<div class="tt-wrap">
+      <div class="tt-top"><div><b>🗓 주간 시간표</b><small>요일마다 고정된 학원 · 과외 · 자습 시간이에요</small></div><button class="pay-btn" onclick="ttEdit()">＋ 추가</button></div>
+      ${L.length? "" : `<div class="cd-note" style="margin:0 0 10px">예: 월~금 9:00~10:00 수학 개별지도 · 월수금 16:00~17:00 국어 · 토 11:00~18:00 자기주도학습</div>`}
+      <div class="tt-grid"><div class="tt-h"></div>${TT_DAYS.map(d=>`<div class="tt-h ${d===0?"sun":d===6?"sat":""}">${WD[d]}</div>`).join("")}
+        <div class="tt-axis" style="height:${H}px">${hours.map(h=>`<span style="top:${(h-h0)*60*PX}px">${h}</span>`).join("")}</div>
+        ${TT_DAYS.map(col).join("")}</div>
+    </div>`;
+}
+let ttDraft=null;
+function ttEdit(id){
+  const b=id? ttList().find(x=>x.id===id) : null;
+  ttDraft=b? {...b, days:[...(b.days||[])]} : {id:"", title:"", s:"16:00", e:"17:00", days:[1,2,3,4,5], color:TT_COLORS[0]};
+  ttDraw();
+}
+function ttDraw(){
+  const d=ttDraft;
+  hubShell(d.id? "🗓 시간표 고치기" : "🗓 시간표 추가", `
+    <label class="fld-lbl">이름</label><input class="inp" id="ttTitle" value="${esc(d.title)}" placeholder="예: 수학 개별지도 · 영어 학원 · 자기주도학습" oninput="ttDraft.title=this.value">
+    <div class="crit-grid" style="margin-top:10px">
+      <div><label class="fld-lbl">시작</label><input class="inp" type="time" value="${d.s}" onchange="ttDraft.s=this.value"></div>
+      <div><label class="fld-lbl">끝</label><input class="inp" type="time" value="${d.e}" onchange="ttDraft.e=this.value"></div>
+    </div>
+    <label class="fld-lbl" style="margin-top:10px">요일</label>
+    <div class="pl-days">${TT_DAYS.map(w=>`<button class="${d.days.includes(w)?"on":""}" onclick="ttDraft.days=ttDraft.days.includes(${w})?ttDraft.days.filter(x=>x!==${w}):[...ttDraft.days,${w}];ttDraw()">${WD[w]}</button>`).join("")}</div>
+    <label class="fld-lbl" style="margin-top:10px">색</label>
+    <div class="pl-days">${TT_COLORS.map(c=>`<button style="background:${c};border-color:${d.color===c?"#1C1B24":c};width:34px" onclick="ttDraft.color='${c}';ttDraw()">${d.color===c?"✓":""}</button>`).join("")}</div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      ${d.id? `<button class="ghost-btn" style="flex:1" onclick="ttDel('${d.id}')">🗑️ 지우기</button>` : ""}
+      <button class="add-btn" style="flex:2" onclick="ttSave()">저장</button></div>`);
+}
+async function ttSave(){
+  const d=ttDraft; d.title=(document.getElementById("ttTitle")||{value:d.title}).value.trim();
+  if(!d.title) return alert("이름을 적어 주세요.");
+  if(!d.days.length) return alert("요일을 하나 이상 골라 주세요.");
+  if(hm2m(d.e)<=hm2m(d.s)) return alert("끝나는 시간이 시작보다 늦어야 해요.");
+  const L=ttList().filter(x=>x.id!==d.id), it={...d, id:d.id||uid()};
+  await saveSettings({...state.settings, timetable:[...L, it]});
+  closeDrawer(); render(); toast("🗓 시간표에 넣었어요","good");
+}
+async function ttDel(id){
+  if(!confirm("이 시간표 칸을 지울까요?")) return;
+  await saveSettings({...state.settings, timetable:ttList().filter(x=>x.id!==id)});
+  closeDrawer(); render();
+}
+// 할 일 화면: 오늘 시간표 한 줄
+function ttTodayHTML(ds){
+  const L=ttToday(ds); if(!L.length) return "";
+  const today=ds===fmt(new Date()), n=new Date(), nowM=n.getHours()*60+n.getMinutes();
+  return `<div class="tt-today"><span class="tt-tl">🗓 ${today?"오늘":"이날"} 시간표</span>${L.map(b=>{ const live=today && nowM>=hm2m(b.s) && nowM<hm2m(b.e);
+    return `<span class="tt-chip ${live?"live":""}" style="--c:${b.color||"#6A58E6"}">${live?"● ":""}${b.s} ${esc(b.title)}</span>`; }).join("")}
+    <button class="tt-more" onclick="state.planView='tt';setTab('plan',true);setView('tt')">전체 ›</button></div>`;
+}
+
+/* ----- 📘 계획표 (시험 계획 · 장기 계획) ----- */
+const planCol=()=>plannerRef().collection("plans");
+state.plans=null;
+async function loadPlans(){
+  try{ const s=await planCol().get(); state.plans=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.end||"")<(b.end||"")?-1:1); }
+  catch(e){ console.warn("계획표", e); state.plans=[]; }
+  return state.plans;
+}
+// 가장 가까운 시험 D-day (계획표의 시험 · 🚀 부스터 시험)
+function nextExam(ds){
+  ds=ds||fmt(new Date());
+  const L=[...(state.plans||[]).filter(p=>p.kind==="exam" && p.end>=ds).map(p=>({name:p.name, date:p.end})),
+    ...examList().filter(e=>e.date>=ds).map(e=>({name:e.name, date:e.date}))].sort((a,b)=>a.date<b.date?-1:1);
+  return L[0]? {...L[0], dd:Math.round((parseD(L[0].date)-parseD(ds))/86400000)} : null;
+}
+function planDates(from, to){ const out=[]; if(!from||!to) return out; for(let d=parseD(from); fmt(d)<=to; d=addDays(d,1)) out.push(fmt(d)); return out; }
+// 한 줄의 배치: 고른 요일에 하루 n개씩 순서대로, 남는 날은 버퍼
+function planLayout(row){
+  const dates=planDates(row.from, row.to).filter(ds=>(row.days||[]).includes(parseD(ds).getDay()));
+  const chunks=(row.chunks||[]).filter(x=>String(x).trim());
+  let per=Math.max(1, Number(row.perDay)||1), short=false;
+  if(dates.length && chunks.length>dates.length*per){ per=Math.ceil(chunks.length/dates.length); short=true; }
+  const map={}; let i=0;
+  dates.forEach(ds=>{ if(i<chunks.length){ map[ds]=chunks.slice(i, i+per); i+=per; } else map[ds]=null; });
+  return {dates, map, per, short, chunks};
+}
+function planTasks(p){
+  const out=[];
+  (p.rows||[]).forEach((row,ri)=>{
+    const L=planLayout(row);
+    L.dates.forEach((ds,k)=>{ const c=L.map[ds]; if(!c) return;
+      out.push({id:`pl-${p.id}-${row.id}-${k}`, date:ds, subjectId:row.subjectId||"", textbookId:row.textbookId||"",
+        unit:[row.textbookId? "" : (row.book||""), c.join(", ")].filter(Boolean).join(" · "),
+        plannedMin:Number(row.min)||30, done:false, order:Date.now()+ri*100+k, planId:p.id, planRow:row.id, planName:p.name}); });
+  });
+  return out;
+}
+// 저장 + 할 일 만들기 (끝낸 할 일은 그대로, 안 한 옛 할 일은 지우고 새로)
+async function planApply(p){
+  const want=planTasks(p), ids=new Set(want.map(t=>t.id));
+  const cur=await plannerRef().collection("tasks").where("planId","==",p.id).get();
+  const have={}; cur.docs.forEach(d=>have[d.id]=d.data());
+  const by=(state.viewingChild && state.profile.role==="parent")? {uid:state.user.uid, name:state.profile.name||"부모님"} : null;
+  let ops=[];
+  for(const d of cur.docs){ if(!ids.has(d.id) && !d.data().done) ops.push(b=>b.delete(d.ref)); }
+  for(const t of want){ const h=have[t.id]; if(h && h.done) continue;
+    const ref=plannerRef().collection("tasks").doc(t.id);
+    ops.push(b=>b.set(ref, {...(h||{}), ...t, ...(by && !h? {byParent:by} : {})})); }
+  for(let i=0;i<ops.length;i+=400){ const b=db.batch(); ops.slice(i,i+400).forEach(f=>f(b)); await b.commit(); }
+  return want.length;
+}
+async function planDelete(id){
+  if(!confirm("이 계획표를 지울까요?\n아직 안 한 할 일도 함께 지워요 (끝낸 기록은 남아요).")) return;
+  const cur=await plannerRef().collection("tasks").where("planId","==",id).get();
+  const b=db.batch(); cur.docs.forEach(d=>{ if(!d.data().done) b.delete(d.ref); }); await b.commit();
+  await planCol().doc(id).delete();
+  await loadPlans(); closeDrawer(); render();
+}
+
+let planDraft=null;
+function planNew(kind){
+  const today=fmt(new Date());
+  if(kind==="exam"){
+    const end=fmt(addDays(new Date(),27));
+    planDraft={id:"", kind, name:"", start:today, end, goal:"", rule:"",
+      phases:[{name:"개념 1회독", end:fmt(addDays(new Date(),14))},{name:"2회독 · 문제 풀기",end:fmt(addDays(new Date(),23))},{name:"시험 기간",end}], rows:[]};
+  } else {
+    planDraft={id:"", kind, name:"", start:today, end:fmt(addDays(new Date(),7*12-1)), goal:"", rule:"", phases:[], rows:[]};
+  }
+  planEdit();
+}
+async function planOpen(id){
+  const p=(state.plans||[]).find(x=>x.id===id); if(!p) return;
+  planDraft=JSON.parse(JSON.stringify(p)); planEdit();
+}
+function planRowNew(){
+  const s=(state.categories.subjects||[])[0];
+  const ph=planDraft.kind==="exam" && planDraft.phases[0]? planDraft.phases[0].end : planDraft.end;
+  planDraft.rows.push({id:uid().slice(0,8), subjectId:s?s.id:"", target:"", book:"", textbookId:"", range:"", chunks:[], days:[1,2,3,4,5], perDay:1, min:30, from:planDraft.start, to:ph});
+  planEdit(planDraft.rows.length-1);
+}
+const pdSet=(path,v)=>{ const ks=path.split("."); let o=planDraft; ks.slice(0,-1).forEach(k=>o=o[k]); o[ks[ks.length-1]]=v; };
+function planEdit(openRow){
+  const p=planDraft, exam=p.kind==="exam", subs=state.categories.subjects||[];
+  const rowHTML=(r,i)=>{
+    const L=planLayout(r), su=subjById(r.subjectId), tbs=(state.categories.textbooks||[]).filter(t=>t.subjectId===r.subjectId);
+    return `<details class="pl-row" ${openRow===i?"open":""}><summary><span class="subj-tag" style="background:${su?su.color:"#94A3B8"}">${esc(su?su.name:"과목")}</span>
+        <b>${esc(r.book || (tbById(r.textbookId)||{}).name || "교재 / 학습 방법")}</b><small>${L.chunks.length}개 · ${L.dates.length}일${L.short?" ⚠️":""}</small></summary>
+      <div class="crit-grid">
+        <div><label class="fld-lbl">과목</label><select class="inp" onchange="pdSet('rows.${i}.subjectId',this.value);pdSet('rows.${i}.textbookId','');planEdit(${i})">${subs.map(s=>`<option value="${s.id}" ${s.id===r.subjectId?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
+        ${exam? `<div><label class="fld-lbl">목표 점수</label><input class="inp" type="number" value="${esc(r.target)}" placeholder="85" onchange="pdSet('rows.${i}.target',this.value)"></div>` : `<div><label class="fld-lbl">분류</label><input class="inp" value="${esc(r.range)}" placeholder="개념 · 어휘 · 독해 …" onchange="pdSet('rows.${i}.range',this.value)"></div>`}
+        <div><label class="fld-lbl">교재</label><select class="inp" onchange="pdSet('rows.${i}.textbookId',this.value);planEdit(${i})"><option value="">직접 적기</option>${tbs.map(t=>`<option value="${t.id}" ${t.id===r.textbookId?"selected":""}>${esc(t.name)}</option>`).join("")}</select></div>
+        <div><label class="fld-lbl">${r.textbookId? "학습 방법(선택)" : "교재 / 학습 방법"}</label><input class="inp" value="${esc(r.book)}" placeholder="교과서 · 자습서 · 인강" onchange="pdSet('rows.${i}.book',this.value)"></div>
+        ${exam? `<div style="grid-column:1/-1"><label class="fld-lbl">범위</label><input class="inp" value="${esc(r.range)}" placeholder="예: UNIT 1~3 · p.25~47" onchange="pdSet('rows.${i}.range',this.value)"></div>` : ""}
+      </div>
+      <label class="fld-lbl" style="margin-top:10px">나눈 범위 <small>(한 줄에 하나 · 이 순서대로 날짜에 들어가요)</small></label>
+      <textarea class="inp" rows="4" placeholder="unit1&#10;unit2&#10;p.25-30" onchange="pdSet('rows.${i}.chunks',this.value.split('\\n').map(x=>x.trim()).filter(Boolean));planEdit(${i})">${esc((r.chunks||[]).join("\n"))}</textarea>
+      <div class="pl-split">✂️ 번호로 나누기 <input class="inp" id="spP${i}" placeholder="DAY" value="${exam?"p.":"DAY"}"> <input class="inp" id="spA${i}" type="number" placeholder="1" value="1"> ~ <input class="inp" id="spB${i}" type="number" placeholder="60"> 씩 <input class="inp" id="spN${i}" type="number" value="${exam?5:1}">
+        <button class="fam-btn" onclick="planSplit(${i})">만들기</button></div>
+      <label class="fld-lbl" style="margin-top:10px">공부하는 요일</label>
+      <div class="pl-days">${TT_DAYS.map(w=>`<button class="${(r.days||[]).includes(w)?"on":""}" onclick="pdSet('rows.${i}.days',(planDraft.rows[${i}].days||[]).includes(${w})?planDraft.rows[${i}].days.filter(x=>x!==${w}):[...(planDraft.rows[${i}].days||[]),${w}]);planEdit(${i})">${WD[w]}</button>`).join("")}</div>
+      <div class="crit-grid" style="margin-top:10px">
+        <div><label class="fld-lbl">시작</label><input class="inp" type="date" value="${r.from}" onchange="pdSet('rows.${i}.from',this.value);planEdit(${i})"></div>
+        <div><label class="fld-lbl">끝</label><input class="inp" type="date" value="${r.to}" onchange="pdSet('rows.${i}.to',this.value);planEdit(${i})"></div>
+        <div><label class="fld-lbl">하루에 몇 개</label><input class="inp" type="number" min="1" value="${r.perDay||1}" onchange="pdSet('rows.${i}.perDay',Math.max(1,Number(this.value)||1));planEdit(${i})"></div>
+        <div><label class="fld-lbl">한 번에 몇 분</label><input class="inp" type="number" min="5" step="5" value="${r.min||30}" onchange="pdSet('rows.${i}.min',Number(this.value)||30)"></div>
+      </div>
+      <div class="cd-note" style="margin-top:6px">${L.chunks.length? `${L.dates.length}일 중 ${Math.ceil(L.chunks.length/L.per)}일에 공부 · 남는 ${Math.max(0,L.dates.length-Math.ceil(L.chunks.length/L.per))}일은 <b>버퍼</b>(밀린 것 하기)` : "범위를 나눠 적으면 날짜에 자동으로 들어가요"}${L.short? `<br>⚠️ 날짜가 모자라서 하루 ${L.per}개씩 넣어요` : ""}</div>
+      <button class="ghost-btn" style="width:100%;margin-top:8px" onclick="planDraft.rows.splice(${i},1);planEdit()">🗑️ 이 줄 빼기</button>
+    </details>`;
+  };
+  hubShell(exam? "📝 시험 대비 계획표" : "📘 학습 포트폴리오 (장기 계획)", `
+    <div class="crit-grid">
+      <div style="grid-column:1/-1"><label class="fld-lbl">이름</label><input class="inp" value="${esc(p.name)}" placeholder="${exam?"예: 2학기 기말고사":"예: 겨울방학 포트폴리오"}" onchange="pdSet('name',this.value)"></div>
+      <div><label class="fld-lbl">시작</label><input class="inp" type="date" value="${p.start}" onchange="pdSet('start',this.value)"></div>
+      <div><label class="fld-lbl">${exam?"시험 날":"끝"}</label><input class="inp" type="date" value="${p.end}" onchange="pdSet('end',this.value);${exam?"planDraft.phases[planDraft.phases.length-1].end=this.value;":""}planEdit()"></div>
+      <div style="grid-column:1/-1"><label class="fld-lbl">🎯 목표</label><input class="inp" value="${esc(p.goal)}" placeholder="${exam?"예: 내 공부 인생의 마중물이 되는 시험으로!":"예: 고등 국어 기반 다지기"}" onchange="pdSet('goal',this.value)"></div>
+      ${exam? `<div style="grid-column:1/-1"><label class="fld-lbl">✋ 행동 수칙</label><input class="inp" value="${esc(p.rule)}" placeholder="예: 휴대폰 통제 · 커피+낮잠 X" onchange="pdSet('rule',this.value)"></div>` : ""}
+    </div>
+    ${exam? `<div class="dash-section" style="margin-top:14px">단계 <small style="color:#94A3B8">(그 날짜까지)</small></div>
+      ${p.phases.map((ph,k)=>`<div class="pl-ph"><span class="pl-dot" style="background:${PHASE_C[k%PHASE_C.length]}"></span><input class="inp" value="${esc(ph.name)}" onchange="pdSet('phases.${k}.name',this.value)"><input class="inp" type="date" value="${ph.end}" onchange="pdSet('phases.${k}.end',this.value)"></div>`).join("")}` : ""}
+    <div class="dash-section" style="margin-top:14px">과목별 계획 <small style="color:#94A3B8">${p.rows.length}줄</small></div>
+    ${p.rows.map(rowHTML).join("") || `<div class="cd-note">＋ 과목 줄을 넣어 교재 · 범위를 나눠 적어요.</div>`}
+    <button class="ghost-btn" style="width:100%;margin-top:8px" onclick="planRowNew()">＋ 과목 줄 추가</button>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      ${p.id? `<button class="ghost-btn" style="flex:1" onclick="planDelete('${p.id}')">🗑️ 계획 지우기</button>` : ""}
+      <button class="add-btn" style="flex:2" onclick="planSave()">💾 저장하고 할 일 만들기</button></div>
+    <div class="cd-note" style="margin-top:8px">저장하면 날짜마다 할 일이 생겨요. 고쳐서 다시 저장해도 끝낸 할 일은 그대로예요.</div>`);
+}
+const PHASE_C=["#F5C9A8","#B9CDF0","#BFE3C9","#F3B7BE","#D9CCF5"];
+function planSplit(i){
+  const v=k=>(document.getElementById(k+i)||{}).value;
+  const pre=(v("spP")||"").trim(), a=Number(v("spA")), b=Number(v("spB")), n=Math.max(1,Number(v("spN"))||1);
+  if(!(b>=a)) return alert("시작과 끝 번호를 적어 주세요.");
+  const out=[]; for(let x=a; x<=b; x+=n){ const y=Math.min(b, x+n-1); out.push(`${pre}${pre&&!/[.\s]$/.test(pre)?" ":""}${x===y? x : `${x}-${y}`}`); }
+  planDraft.rows[i].chunks=out; planEdit(i);
+}
+async function planSave(){
+  const p=planDraft;
+  if(!String(p.name||"").trim()) return alert("계획 이름을 적어 주세요.");
+  if(!p.rows.length) return alert("과목 줄을 하나 이상 넣어 주세요.");
+  if(p.end<p.start) return alert("끝나는 날이 시작보다 뒤여야 해요.");
+  if(!p.id) p.id=uid().replace(/-/g,"").slice(0,12);
+  p.updatedAt=Date.now(); p.by=state.profile.role;
+  try{
+    await planCol().doc(p.id).set(JSON.parse(JSON.stringify(p)));
+    const n=await planApply(p);
+    await loadPlans(); closeDrawer(); state.planOpen=p.id; render();
+    toast(`📘 ${p.name} · 할 일 ${n}개를 날짜에 넣었어요`,"good");
+  }catch(e){ console.error(e); alert("저장하지 못했어요.\n"+firestoreDiag(e)); }
+}
+// 계획표 탭: 목록 + 표(시험: 날짜별 / 장기: 주별)
+state.planTasks={};
+async function planLoadTasks(id){
+  try{ const s=await plannerRef().collection("tasks").where("planId","==",id).get(); state.planTasks[id]=s.docs.map(d=>d.data()); }
+  catch(_){ state.planTasks[id]=[]; }
+  if(state.view==="plans") render();
+}
+function renderPlans(){
+  if(state.plans===null){ loadPlans().then(()=>{ if(state.view==="plans") render(); }); return `<div class="empty">불러오는 중…</div>`; }
+  const P=state.plans, today=fmt(new Date());
+  const cards=P.map(p=>{ const T=state.planTasks[p.id]; if(!T) planLoadTasks(p.id);
+    const done=T? T.filter(t=>t.done).length : 0, tot=T? T.length : 0, dd=Math.round((parseD(p.end)-parseD(today))/86400000), open=state.planOpen===p.id;
+    return `<div class="pl-card ${open?"open":""}">
+      <button class="pl-head" onclick="state.planOpen=${open?"null":`'${p.id}'`};render()">
+        <span class="pl-k">${p.kind==="exam"?"📝":"📘"}</span><span class="pl-t"><b>${esc(p.name)}</b><small>${p.start.slice(5).replace("-","/")}~${p.end.slice(5).replace("-","/")} · ${p.rows.length}과목 · ${tot? `${done}/${tot} 완료` : "…"}</small></span>
+        <span class="pl-dd">${p.kind==="exam"? (dd>0?`D-${dd}`:dd===0?"D-DAY":"끝") : (dd>=0? `${Math.ceil((dd+1)/7)}주 남음` : "끝")}</span></button>
+      ${open? planGridHTML(p, T||[]) : ""}
+    </div>`; }).join("");
+  return `<div class="pl-wrap">
+    <div class="pl-new"><button onclick="planNew('exam')"><b>📝 시험 대비 계획표</b><small>시험 날까지 과목별 범위를 날짜에 나눠요</small></button>
+      <button onclick="planNew('long')"><b>📘 학습 포트폴리오</b><small>몇 달 동안 교재를 주 단위로 나눠요</small></button></div>
+    ${cards || `<div class="cd-note" style="margin-top:10px">아직 계획표가 없어요. 시험이 다가오면 📝, 방학 · 학기 계획은 📘로 만들어요.</div>`}
+  </div>`;
+}
+function planGridHTML(p, T){
+  const exam=p.kind==="exam", today=fmt(new Date());
+  const doneMap={}; T.forEach(t=>{ doneMap[t.id]=t.done; });
+  const head=`<div class="pl-meta">${p.goal?`<div>🎯 ${esc(p.goal)}</div>`:""}${p.rule?`<div>✋ ${esc(p.rule)}</div>`:""}
+      <div class="pl-acts"><button class="fam-btn" onclick="planOpen('${p.id}')">✏️ 고치기</button></div></div>`;
+  if(exam){
+    const days=planDates(p.start, p.end);
+    const phaseOf=ds=>{ const k=p.phases.findIndex(ph=>ds<=ph.end); return k<0? p.phases.length-1 : k; };
+    let ph=`<tr><th class="pl-sub" colspan="2"></th>`; let k0=-1, span=0, cells=[];
+    days.forEach(ds=>{ const k=phaseOf(ds); if(k!==k0){ if(span) cells.push([k0,span]); k0=k; span=0; } span++; }); if(span) cells.push([k0,span]);
+    ph+=cells.map(([k,n])=>`<th colspan="${n}" class="pl-phase" style="background:${PHASE_C[k%PHASE_C.length]}">${esc((p.phases[k]||{}).name||"")}</th>`).join("")+`</tr>`;
+    const dh=`<tr><th class="pl-sub">과목</th><th class="pl-sub2">목표</th>${days.map(ds=>{ const d=parseD(ds), w=d.getDay(); return `<th class="pl-d ${ds===today?"today":""} ${w===0?"sun":w===6?"sat":""}">${d.getDate()}<small>${WD[w]}</small></th>`; }).join("")}</tr>`;
+    const rows=p.rows.map(r=>{ const L=planLayout(r), su=subjById(r.subjectId); let idx=0; const pos={}; L.dates.forEach((ds,k)=>pos[ds]=k);
+      return `<tr><th class="pl-sub" style="border-left:4px solid ${su?su.color:"#94A3B8"}">${esc(su?su.name:"")}<small>${esc(r.book||(tbById(r.textbookId)||{}).name||"")}</small></th><td class="pl-sub2">${esc(r.target||"")}</td>
+        ${days.map(ds=>{ if(!(ds in L.map)) return `<td></td>`; const c=L.map[ds]; if(!c) return `<td class="pl-buf">버퍼</td>`;
+          const id=`pl-${p.id}-${r.id}-${pos[ds]}`, ok=doneMap[id];
+          return `<td class="pl-c ${ok?"ok":ds<today?"miss":""}" style="background:${PHASE_C[phaseOf(ds)%PHASE_C.length]}66">${ok?"✓ ":""}${esc(c.join(", "))}</td>`; }).join("")}</tr>`; }).join("");
+    return head+`<div class="pl-scroll"><table class="pl-tbl">${ph}${dh}${rows}</table></div>`;
+  }
+  // 장기: 주 단위 (일요일 시작)
+  const weeks=[]; for(let s=startOfWeek(parseD(p.start)); fmt(s)<=p.end; s=addDays(s,7)) weeks.push(s);
+  const mh=[]; weeks.forEach(w=>{ const m=w.getMonth()+1; if(mh.length && mh[mh.length-1][0]===m) mh[mh.length-1][1]++; else mh.push([m,1]); });
+  const wn={}; const hd=`<tr><th class="pl-sub" rowspan="2">과목</th><th class="pl-sub2" rowspan="2">분류</th>${mh.map(([m,n])=>`<th colspan="${n}" class="pl-phase" style="background:#E9E6FB">${m}월</th>`).join("")}</tr>
+    <tr>${weeks.map(w=>{ const m=w.getMonth(); wn[m]=(wn[m]||0)+1; const cur=fmt(w)<=today && today<=fmt(addDays(w,6)); return `<th class="pl-d ${cur?"today":""}">${wn[m]}주</th>`; }).join("")}</tr>`;
+  const rows=p.rows.map(r=>{ const L=planLayout(r), su=subjById(r.subjectId); const pos={}; L.dates.forEach((ds,k)=>pos[ds]=k);
+    return `<tr><th class="pl-sub" style="border-left:4px solid ${su?su.color:"#94A3B8"}">${esc(su?su.name:"")}<small>${esc(r.book||(tbById(r.textbookId)||{}).name||"")}</small></th><td class="pl-sub2">${esc(r.range||"")}</td>
+      ${weeks.map(w=>{ const ds7=Array.from({length:7},(_,i)=>fmt(addDays(w,i))).filter(ds=>L.map[ds]); if(!ds7.length) return `<td></td>`;
+        const all=ds7.flatMap(ds=>L.map[ds]), n=ds7.filter(ds=>doneMap[`pl-${p.id}-${r.id}-${pos[ds]}`]).length;
+        const txt=all.length>1? `${all[0]} ~ ${all[all.length-1]}` : all[0];
+        return `<td class="pl-c ${n===ds7.length?"ok":""}" style="background:${su?su.color:"#94A3B8"}22">${esc(txt)}<small>${n}/${ds7.length}</small></td>`; }).join("")}</tr>`; }).join("");
+  return head+`<div class="pl-scroll"><table class="pl-tbl wk">${hd}${rows}</table></div>`;
+}
+
+/* ----- ❓ 질문할 것 (도움이 필요한 부분) ----- */
+async function drawHelpList(){
+  hubShell("❓ 질문 · 도움이 필요한 부분", `<div class="empty">불러오는 중…</div>`);
+  const from=fmt(addDays(new Date(),-45));
+  let L=[];
+  try{ const s=await plannerRef().collection("tasks").where("date",">=",from).get(); L=s.docs.map(d=>d.data()).filter(t=>String(t.help||"").trim()).sort((a,b)=>a.date<b.date?1:-1); }catch(e){ console.warn(e); }
+  const open=L.filter(t=>!t.helpOk), closed=L.filter(t=>t.helpOk);
+  const item=t=>{ const su=subjById(t.subjectId); return `<div class="hp-it ${t.helpOk?"ok":""}"><span class="subj-tag" style="background:${su?su.color:"#94A3B8"}">${esc(su?su.name:"과목")}</span>
+      <div style="flex:1;min-width:0"><b>${esc(t.help)}</b><small>${t.date.slice(5).replace("-","/")} · ${esc(t.unit||"")}${t.underStars!=null?` · 이해도 ${gradeTxt(t.underStars)}`:""}</small></div>
+      <button class="fam-btn" onclick="helpToggle('${t.id}',${t.helpOk?"false":"true"})">${t.helpOk?"다시 열기":"해결 ✓"}</button></div>`; };
+  const root=document.querySelector("#drawerRoot .drawer-body"); if(!root) return;
+  root.innerHTML=`<div class="cd-note" style="margin:0 0 10px">공부를 끝낼 때 적은 “질문할 것”이 모여요. 선생님 · 부모님께 물어보고 해결하면 ✓ 표시해요.</div>
+    ${open.map(item).join("") || `<div class="cd-note">지금 질문할 것이 없어요 👍</div>`}
+    ${closed.length? `<div class="dash-section" style="margin-top:14px">해결한 것 ${closed.length}개</div>${closed.map(item).join("")}` : ""}`;
+}
+async function helpToggle(id, ok){
+  try{ await plannerRef().collection("tasks").doc(id).update({helpOk:ok, helpOkAt:Date.now()}); }catch(e){ console.warn(e); }
+  drawHelpList();
+}
+
 </script>
 </body>
 </html>
