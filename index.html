@@ -452,6 +452,12 @@
   .pm-ok{font-size:12.5px;color:#0E7A55;margin-bottom:8px}
   .pm-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
   .pm-acts button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 2px;font:inherit;font-size:12px;font-weight:var(--fw-semibold);cursor:pointer}
+  .qa-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 12px}.qa-tabs button{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:9px;font:inherit;font-size:13px;font-weight:var(--fw-semibold);cursor:pointer;color:var(--muted)}
+  .qa-tabs button.on{background:#6A58E6;border-color:#6A58E6;color:#fff}
+  .qa-note{font-size:12.5px;color:var(--muted2);background:var(--surface2);border-radius:10px;padding:8px 10px;margin:0 0 10px}
+  .qa-ex{display:flex;flex-direction:column;gap:5px;margin:8px 0}.qa-ex button{text-align:left;border:1px dashed #C9C1F5;background:#F7F5FF;color:#35296E;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+  .qa-res{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.55}.qa-res.warn{color:#B4232A}.qa-res.ok{color:#0E7A55;font-weight:var(--fw-semibold)}
+  .qa-it{display:flex;gap:6px;align-items:baseline;padding:3px 0;border-bottom:1px dashed var(--line)}.qa-it span{color:var(--muted2);font-size:12px;width:38px;flex:0 0 auto}.qa-it em{margin-left:auto;font-style:normal;color:var(--muted2);font-size:12px}
   .pm-ai{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid #C9C1F5;background:#F7F5FF;border-radius:14px;padding:12px 14px;margin-bottom:12px;font:inherit;cursor:pointer}
   .pm-ai span{font-size:22px}.pm-ai b{font-size:14.5px}.pm-ai small{flex:1;font-size:12px;color:var(--muted2)}.pm-ai em{font-style:normal;color:var(--muted2);font-size:18px}
   .pm-more{text-align:center}.pm-more button{border:none;background:none;color:var(--muted);font:inherit;font-size:12.5px;text-decoration:underline;cursor:pointer}
@@ -2921,7 +2927,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-10";
+const APP_VER="2026.11.17-11";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -5531,10 +5537,14 @@ async function famLeave(id){
 
 /* ----- ✨ 빠른 계획: 적어 두면 학습 계획으로 정리 ----- */
 let quickItems=[];
-function openQuick(){
+async function openQuick(mode){
   quickItems=[];
+  if(!AS.aiLoaded){ try{ await aiLoad(); }catch(_){} }
+  const canAI=aiReadyNow();
+  if(canAI && mode!=="manual") return openQuickAI();
   const ex=(state.categories.textbooks||[])[0];
   hubShell("✨ 빠른 계획", `
+    ${canAI? `<div class="qa-tabs"><button onclick="openQuickAI()">🤖 AI로 세우기</button><button class="on">✍️ 직접 정리</button></div>` : (state.profile.role!=="parent"? `<div class="qa-note">🤖 부모님이 AI를 허용하면 여기서 AI로 계획을 세울 수 있어요.</div>` : "")}
     <div class="q-orb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 16.5l-1.8-5.2L5 9.5l5.2-1.8z"/></svg></div>
     <div class="q-lead">여기에 공부할 것을 적어 두세요.<br>제가 학습 계획으로 정리해 드릴게요.</div>
     <div class="q-ex">예: ${esc(ex?ex.name:"개념원리")} 3단원 40분, 영어 단어 20분, 국어 문제풀이 1시간</div>
@@ -8366,14 +8376,7 @@ async function aiAsk(text){
   catch(e){ AS.busy=false; console.warn("AI", e); return asBot(`🤖 AI 연결 오류: ${esc(e.message||e)}<br>키 · 모델 이름을 확인해 주세요.`, [["⚙️ AI 설정","AI 설정"],["처음으로","도움"]]); }
   AS.busy=false;
   AS.hist.push({role:"user", text}, {role:"assistant", text:JSON.stringify({reply:out.reply})});
-  // 검사
-  const subs=state.categories.subjects||[], known=new Set(ctx.tasks.map(l=>l.split(" | ")[0]));
-  const doneIds=new Set(ctx.tasks.filter(l=>l.includes("| 완료")).map(l=>l.split(" | ")[0]));
-  const today=fmt(new Date()), last=fmt(addDays(new Date(),60)), okDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(d) && d>=today && d<=last;
-  const add=(out.add||[]).filter(x=>okDate(x.date) && subs.some(s=>s.name===x.subject) && String(x.unit||"").trim()).map(x=>({...x, minutes:Math.max(10,Math.min(240,Number(x.minutes)||30))}));
-  const update=(out.update||[]).filter(x=>known.has(x.id) && !doneIds.has(x.id) && okDate(x.date));
-  const remove=(out.remove||[]).filter(id=>known.has(id) && !doneIds.has(id));
-  const dropped=(out.add||[]).length-add.length+(out.update||[]).length-update.length+(out.remove||[]).length-remove.length;
+  const {add, update, remove, dropped}=aiValidate(out, ctx);
   if(!add.length && !update.length && !remove.length) return asBot(`🤖 ${asEsc(out.reply||"")}${dropped? `<br><small>(규칙에 맞지 않는 제안 ${dropped}개는 뺐어요)</small>` : ""}`);
   AS.pend={kind:"ai", add, update, remove};
   const line=(d,s,u,m)=>`${d.slice(5).replace("-","/")} <b>${esc(s)}</b> ${esc(u)} · ${m}분`;
@@ -8384,9 +8387,20 @@ async function aiAsk(text){
       ${dropped? `<div><small>규칙에 맞지 않는 제안 ${dropped}개는 뺐어요 (완료한 것 · 날짜 · 과목 오류)</small></div>` : ""}</div>`,
     [["✅ 적용","적용"],["취소","취소"]]);
 }
-async function aiApply(){
+// AI 제안 검사: 완료한 것 · 모르는 id · 과목 · 날짜(오늘~60일) · 분(10~240)
+function aiValidate(out, ctx){
+  const subs=state.categories.subjects||[], known=new Set(ctx.tasks.map(l=>l.split(" | ")[0]));
+  const doneIds=new Set(ctx.tasks.filter(l=>l.includes("| 완료")).map(l=>l.split(" | ")[0]));
+  const today=fmt(new Date()), last=fmt(addDays(new Date(),60)), okDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(d) && d>=today && d<=last;
+  const add=(out.add||[]).filter(x=>okDate(x.date) && subs.some(s=>s.name===x.subject) && String(x.unit||"").trim()).map(x=>({...x, minutes:Math.max(10,Math.min(240,Number(x.minutes)||30))}));
+  const update=(out.update||[]).filter(x=>known.has(x.id) && !doneIds.has(x.id) && okDate(x.date));
+  const remove=(out.remove||[]).filter(id=>known.has(id) && !doneIds.has(id));
+  const dropped=(out.add||[]).length-add.length+(out.update||[]).length-update.length+(out.remove||[]).length-remove.length;
+  return {add, update, remove, dropped};
+}
+async function aiApply(silent){
   const P=AS.pend; AS.pend=null;
-  if(P.remove.length>=20 && !confirm(`할 일 ${P.remove.length}개를 지워요. 적용할까요?`)) return asBot("적용하지 않았어요.");
+  if(P.remove.length>=20 && !confirm(`할 일 ${P.remove.length}개를 지워요. 적용할까요?`)) return silent? null : asBot("적용하지 않았어요.");
   const col=plannerRef().collection("tasks"), subs=state.categories.subjects||[], logId=Date.now().toString(36)+"a";
   const by=(state.viewingChild && state.profile.role==="parent")? {uid:state.user.uid, name:state.profile.name||"부모님"} : null;
   const added=[], removed=[], updated=[]; let ops=[];
@@ -8398,6 +8412,7 @@ async function aiApply(){
   for(let i=0;i<ops.length;i+=400){ const b=db.batch(); ops.slice(i,i+400).forEach(f=>f(b)); await b.commit(); }
   try{ await plannerRef().collection("aiLog").doc(logId).set(JSON.parse(JSON.stringify({src:AS.ai.provider, summary:`AI: 추가 ${added.length} · 수정 ${updated.length} · 삭제 ${removed.length}`, added, removed, updated, at:Date.now(), by:state.user.uid, byName:state.profile.name||""}))); }catch(e){ console.warn(e); }
   subscribeTasks();
+  if(silent) return {logId, added:added.length, updated:updated.length, removed:removed.length};
   asBot(`✅ 적용했어요: 추가 ${added.length} · 수정 ${updated.length} · 삭제 ${removed.length}`, [["↩ 되돌리기",`되돌리기 ${logId}`],["📋 이번 주 점검","이번 주 점검"]]);
 }
 // 🤖 작업 기록 목록 (되돌리기)
@@ -8725,6 +8740,56 @@ async function drawAiLogAll(){
   root.innerHTML=rows.length? rows.slice(0,30).map(x=>{ const t=new Date(x.at); return `<div class="hp-it ${x.undone?"ok":""}"><span>${x.src==="rule"?"🧭":"🤖"}</span>
       <div style="flex:1;min-width:0"><b>${esc(x.name)} · ${esc(x.summary||"")}</b><small>${t.getMonth()+1}/${t.getDate()} ${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")} · ${esc(x.byName||"")}${x.undone?" · 되돌림":""}</small></div></div>`; }).join("")
     : `<div class="cd-note">아직 기록이 없어요.</div>`;
+}
+
+/* ----- ✨ 빠른 계획 · 🤖 AI로 세우기 (자녀는 부모가 허용한 키로) ----- */
+let qaPend=null;
+function openQuickAI(){
+  qaPend=null;
+  const kidN=AS.kid? AS.kid.daily : null;
+  hubShell("✨ 빠른 계획", `
+    <div class="qa-tabs"><button class="on">🤖 AI로 세우기</button><button onclick="openQuick('manual')">✍️ 직접 정리</button></div>
+    <div class="q-orb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 16.5l-1.8-5.2L5 9.5l5.2-1.8z"/></svg></div>
+    <div class="q-lead">무엇을 언제까지 공부할지 말로 적어 주세요.<br>AI가 날짜별 계획으로 짜 드려요.</div>
+    <div class="qa-ex">${["오늘 수학 학원 숙제 p.30-45랑 영단어 DAY 12 넣어줘","이번 주 기말 대비로 국어 문학 작품 6개 나눠서 넣어줘","내일 과학 2단원 복습 40분, 영어 독해 3지문"].map(t=>`<button onclick="document.getElementById('qaText').value=this.textContent">${t}</button>`).join("")}</div>
+    <div class="q-box mic-wrap"><textarea id="qaText" rows="3" placeholder="예: 이번 주 수학 올림포스 p.10-40을 평일에 나눠서 넣어줘"></textarea>${micBtn("qaText")}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin:10px 2px 0;font-size:12.5px;color:#6D6B7A">
+      기준 날짜 <input class="inp" type="date" id="qaDate" value="${addDate()}" style="width:auto;padding:6px 10px;font-size:13px">
+      ${kidN? `<span style="margin-left:auto">하루 ${kidN}번까지</span>` : ""}</div>
+    <button class="add-btn" id="qaGo" style="width:100%;margin-top:12px" onclick="quickAIGo()">🤖 AI로 계획 만들기</button>
+    <div id="qaOut"></div>`);
+  setTimeout(()=>{ const t=document.getElementById("qaText"); if(t) t.focus(); }, 50);
+}
+async function quickAIGo(){
+  const text=((document.getElementById("qaText")||{}).value||"").trim(), base=(document.getElementById("qaDate")||{}).value||fmt(new Date());
+  const out=document.getElementById("qaOut"), btn=document.getElementById("qaGo");
+  if(!text) return alert("무엇을 공부할지 적어 주세요.");
+  if(!(await aiQuota())) { out.innerHTML=`<div class="qa-res warn">🤖 오늘은 AI를 ${AS.kid.daily}번 다 썼어요. 「✍️ 직접 정리」로 넣어 주세요.</div>`; return; }
+  btn.disabled=true; btn.textContent="🤖 계획 짜는 중…"; out.innerHTML=`<div class="as-b as-dots" style="margin-top:10px"><i></i><i></i><i></i></div>`;
+  let res, ctx;
+  try{ ctx=await aiContext(); res=await aiCall(ctx, `${text}\n(따로 날짜를 말하지 않은 계획은 ${base}에 넣어 줘. 이 요청은 새 계획 추가가 중심이야.)`); }
+  catch(e){ btn.disabled=false; btn.textContent="🤖 AI로 계획 만들기"; out.innerHTML=`<div class="qa-res warn">🤖 AI 연결 오류: ${esc(e.message||e)}<br>${AS.kid? "부모님께 AI 설정을 확인해 달라고 해 주세요." : "AI 탭에서 키 · 모델을 확인해 주세요."}</div>`; return; }
+  btn.disabled=false; btn.textContent="🤖 다시 만들기";
+  const v=aiValidate(res, ctx);
+  if(!v.add.length && !v.update.length && !v.remove.length){ out.innerHTML=`<div class="qa-res">🤖 ${asEsc(res.reply||"넣을 계획을 찾지 못했어요. 과목과 범위를 조금 더 자세히 적어 주세요.")}</div>`; return; }
+  qaPend=v;
+  const line=(d,su,u,m)=>`<div class="qa-it"><span>${d.slice(5).replace("-","/")}</span><b>${esc(su)}</b> ${esc(u)}<em>${m}분</em></div>`;
+  out.innerHTML=`<div class="qa-res"><div>🤖 ${asEsc(res.reply||"")}</div>
+    ${v.add.length? `<div class="ap-h">➕ 추가 ${v.add.length}개</div>${v.add.map(x=>line(x.date,x.subject,x.unit,x.minutes)).join("")}` : ""}
+    ${v.update.length? `<div class="ap-h">✏️ 수정 ${v.update.length}개</div>${v.update.map(x=>line(x.date,"",x.unit,x.minutes)).join("")}` : ""}
+    ${v.remove.length? `<div class="ap-h">🗑 삭제 ${v.remove.length}개</div>` : ""}
+    ${v.dropped? `<div><small>규칙에 맞지 않는 제안 ${v.dropped}개는 뺐어요</small></div>` : ""}
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="ghost-btn" style="flex:1" onclick="qaPend=null;document.getElementById('qaOut').innerHTML=''">취소</button>
+      <button class="add-btn" style="flex:2" onclick="quickAIApply()">✅ 계획에 넣기</button></div></div>`;
+}
+async function quickAIApply(){
+  if(!qaPend) return; AS.pend={kind:"ai", ...qaPend}; qaPend=null;
+  const r=await aiApply(true); if(!r) return;
+  const out=document.getElementById("qaOut");
+  if(out) out.innerHTML=`<div class="qa-res ok">✅ 넣었어요: 추가 ${r.added} · 수정 ${r.updated} · 삭제 ${r.removed}
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="ghost-btn" style="flex:1" onclick="aiUndo('${r.logId}').then(()=>{toast('↩ 되돌렸어요','good');document.getElementById('qaOut').innerHTML='';})">↩ 되돌리기</button>
+      <button class="add-btn" style="flex:1" onclick="closeDrawer()">닫기</button></div></div>`;
+  toast(`✨ 계획 ${r.added}개를 넣었어요`,"good");
 }
 </script>
 </body>
