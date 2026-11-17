@@ -424,6 +424,31 @@
   .mg-act{display:flex;gap:6px;margin-top:8px}.mg-act button{flex:1;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 4px;font:inherit;font-size:12.5px;font-weight:var(--fw-semibold);cursor:pointer}
   .mg-act button.on.ok{background:#0E9F6E;border-color:#0E9F6E;color:#fff}.mg-act button.on.re{background:#F5A524;border-color:#F5A524;color:#fff}.mg-act button.on.redo{background:#E5484D;border-color:#E5484D;color:#fff}
   .mg-note{margin-top:6px;font-size:12.5px;padding:7px 10px}
+  html[data-pm="1"] #chBtn, html[data-pm="1"] .tb-pill button[aria-label="학습 추가"]{display:none!important}
+  .pm-acts.three{grid-template-columns:repeat(3,1fr)}
+  html[data-pm="1"] .bnav-pill button[data-tab="learn"], html[data-pm="1"] .bnav-pill button[data-tab="timer"], html[data-pm="1"] .fab{display:none!important}
+  .pm-wrap{padding:0 0 90px}
+  .pm-empty{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:40px 16px}.pm-empty small{color:var(--muted2)}
+  .pm-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 12px}
+  .pm-sum button{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 4px;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .pm-sum b{font-size:20px;font-weight:var(--fw-bold)}.pm-sum small{font-size:11px;color:var(--muted2);white-space:nowrap}
+  .pm-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:12px}
+  .pm-top{display:flex;align-items:center;gap:8px}.pm-top b{font-size:16px}
+  .pm-av{width:32px;height:32px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--fw-bold)}
+  .pm-tag{font-size:11px;font-weight:var(--fw-bold);padding:2px 8px;border-radius:999px}.pm-tag.b{background:#FFE4E6;color:#A5323A}.pm-tag.p{background:#DCF5EA;color:#0E7A55}
+  .pm-open{margin-left:auto;border:none;background:#EFECFD;color:#4B3FA6;border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:var(--fw-bold);cursor:pointer}
+  .pm-sm{margin-left:auto;color:var(--muted2);font-size:12px}
+  .pm-stat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+  .pm-stat>div{background:var(--surface2);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:3px}
+  .pm-stat small{font-size:11.5px;color:var(--muted2)}.pm-stat b{font-size:18px}.pm-stat em{font-style:normal;font-size:11.5px;color:var(--muted)}
+  .pm-stat i{display:block;height:5px;border-radius:3px;background:linear-gradient(90deg,#6A58E6 var(--p),#E4E1F5 var(--p))}
+  .pm-alerts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .pm-alerts button{border:none;border-radius:999px;padding:6px 10px;font:inherit;font-size:12.5px;font-weight:var(--fw-semibold);cursor:pointer}
+  .pm-alerts button.a{background:#6A58E6;color:#fff}.pm-alerts button.w{background:#FFF4E5;color:#8A6516}
+  .pm-ok{font-size:12.5px;color:#0E7A55;margin-bottom:8px}
+  .pm-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .pm-acts button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 2px;font:inherit;font-size:12px;font-weight:var(--fw-semibold);cursor:pointer}
+  .pm-more{text-align:center}.pm-more button{border:none;background:none;color:var(--muted);font:inherit;font-size:12.5px;text-decoration:underline;cursor:pointer}
   .ai-kid{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:6px;font-size:13px}
   .ai-kid label{display:flex;align-items:center;gap:6px;cursor:pointer}.ai-kid input[type=checkbox]{width:18px;height:18px;accent-color:#0E9F6E}
   .ai-kid span{display:flex;align-items:center;gap:4px;color:var(--muted)}.ai-kid .inp{width:56px;padding:5px 6px}
@@ -1422,7 +1447,7 @@
   <nav class="bnav" aria-label="주 메뉴">
     <div class="side-brand"><span class="side-logo">🎓</span><div><b>우리집 학습플래너</b><span>계획 · 실천 · 점검</span></div></div>
     <div class="bnav-pill">
-      <button data-tab="todo" onclick="setTab('todo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12 3 3 5-6"/></svg>할 일</button>
+      <button data-tab="todo" onclick="setTab('todo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12 3 3 5-6"/></svg><span class="lbl-todo">할 일</span></button>
       <button data-tab="plan" onclick="setTab('plan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="4.5" width="17" height="16" rx="3.5"/><path d="M3.5 9h17M8 3v3M16 3v3" stroke-linecap="round"/><text id="tabDate" x="12" y="18.2" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">1</text></svg>일정</button>
       <button data-tab="learn" onclick="setTab('learn')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 6.5C10 5 7.2 4.5 4 4.8v13.4c3.2-.3 6 .2 8 1.8 2-1.6 4.8-2.1 8-1.8V4.8c-3.2-.3-6 .2-8 1.7Z"/><path d="M12 6.5V20"/></svg>학습</button>
       <button data-tab="timer" onclick="setTab('timer')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3.5a8.5 8.5 0 1 1-8.5 8.5" opacity=".35"/><path d="M12 3.5a8.5 8.5 0 0 0-8.5 8.5"/></svg><span class="lbl">타이머</span></button>
@@ -2883,7 +2908,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-7";
+const APP_VER="2026.11.17-8";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -4460,6 +4485,7 @@ async function viewChild(childUid,name){
 function backToSelf(){
   state.ownerUid=state.user.uid; state.ownerName=state.profile.name; state.ownerRole=state.profile.role; state.viewingChild=false;
   resetOwnerCaches(); closeDrawer();
+  if(state.profile.role==="parent"){ state.tab="todo"; state.view="day"; state.cursor=new Date(); pmLoad(true); }
   renderHeader(); subscribeCategories(); subscribeTasks();
 }
 
@@ -4483,7 +4509,7 @@ function renderHeader(){
   if(state.viewingChild){
     banner.classList.remove("hidden");
     banner.innerHTML=`<span>👀 <b>${esc(state.ownerName)}</b> 님의 플래너를 보고 있어요 (계획 세우기·코멘트·확인 가능 · 세운 계획엔 👑 ${esc(state.profile.name||"부모님")} 표시)</span>
-      <button onclick="backToSelf()" style="white-space:nowrap">내 플래너로</button>`;
+      <button onclick="backToSelf()" style="white-space:nowrap">🏠 관리 홈</button>`;
   }else{
     banner.classList.add("hidden");
   }
@@ -4539,7 +4565,15 @@ function render(){
   if(!state.profile) return;
   const main=document.getElementById("main"), head=document.getElementById("pageHead");
   document.querySelectorAll(".bnav-pill button").forEach(b=>b.classList.toggle("on", b.dataset.tab===state.tab));
+  // 👩 부모 관리 모드: 학습 · 타이머 탭 대신 관리 홈
+  const PM=pmMode();
+  if(PM && (state.tab==="learn"||state.tab==="timer")) state.tab="todo";
+  document.documentElement.dataset.pm=PM? "1" : "";
+  const lt=document.querySelector(".lbl-todo"); if(lt) lt.textContent=PM? "관리" : "할 일";
+  document.querySelectorAll(".bnav-pill button").forEach(b=>b.classList.toggle("on", b.dataset.tab===state.tab));
   document.documentElement.dataset.tab=state.tab;                       // 빠른 계획 버튼은 할 일 · 일정 탭에서만
+  if(PM && state.tab==="todo"){ head.innerHTML=pmHead(); main.innerHTML=renderParentHome(); updateTopChips(); updateWeekBanner(); return; }
+  if(PM && state.tab==="plan"){ head.innerHTML=pageHead("일정","자녀 계획 보기"); main.innerHTML=renderParentPlan(); updateTopChips(); updateWeekBanner(); return; }
   if(state.tab==="learn"){ head.innerHTML=pageHead("학습", state.viewingChild? `${esc(state.ownerName)} 님의 학습앱` : "천문장 · 영단어 · 문법"); main.innerHTML=renderLearn(); }
   else if(state.tab==="stats"){ head.innerHTML=pageHead("기록", "성장 · 소통 · 분석 · 용돈"); main.innerHTML=renderRecord(); }
   else if(state.tab==="timer"){ head.innerHTML=pageHead("포커스", "집중 타이머"); main.innerHTML=renderFocus(); bindFocusDial(); }
@@ -8541,6 +8575,105 @@ async function mgrNote(id, note){
   const ref=plannerRef().collection("tasks").doc(id), d=await ref.get(); if(!d.exists) return;
   await ref.update({mgr:{...(d.data().mgr||{}), note:String(note||"").slice(0,80), by:state.profile.name||"부모님", at:Date.now()}});
   toast("💬 한마디를 남겼어요","good");
+}
+
+
+/* ============================================================
+ *  👩 부모 관리 모드 — 부모 계정은 '계획 세우기'보다 '관리'
+ *  - 부모가 자기 화면(자녀 플래너를 보지 않을 때)이면: 할 일 탭 → 🏠 관리 홈, 일정 탭 → 자녀 계획 고르기
+ *    학습 · 타이머 탭과 ✨ 빠른 계획 버튼은 숨겨요 (자녀 플래너를 열면 원래대로)
+ *  - 관리 홈: 자녀마다 오늘 진행 · 이번 주 실행률 · 점검 대기 · 이해도 C·F · 질문 · 범위 없는 계획 · 정산 요청
+ *    → 버튼 하나로 그 자녀 화면/점검/대화/정산으로
+ * ============================================================ */
+const pmMode=()=>!!(state.profile && state.profile.role==="parent" && !state.viewingChild);
+state.pm={at:0, rows:null, loading:false};
+async function pmLoad(force){
+  if(state.pm.loading || (!force && state.pm.rows && Date.now()-state.pm.at<60000)) return;
+  state.pm.loading=true;
+  const today=fmt(new Date()), from=fmt(addDays(new Date(),-6)), to=fmt(addDays(new Date(),7)), wk=charWeekDays(), wkId=wk[6];
+  const rows=[];
+  for(const ch of (state.children||[]).filter(k=>k.exists!==false)){
+    let T=[], req=null, paid=null, boost=null;
+    try{ T=(await db.collection("planner").doc(ch.uid).collection("tasks").where("date",">=",from).where("date","<=",to).get()).docs.map(d=>d.data()); }catch(_){}
+    try{ const q=await db.collection("planner").doc(ch.uid).collection("payRequests").doc(wkId).get(); req=q.exists? q.data() : null;
+         const pq=await db.collection("planner").doc(ch.uid).collection("payRequests").doc(fmt(addDays(parseD(wkId),-7))).get(); if(pq.exists && pq.data().status==="pending") req=req||pq.data(); }catch(_){}
+    try{ const po=await db.collection("planner").doc(ch.uid).collection("payouts").doc(wkId).get(); paid=po.exists? po.data() : null; }catch(_){}
+    try{ const st=await db.collection("planner").doc(ch.uid).collection("meta").doc("settings").get(); const ex=(st.exists && st.data().exams)||[]; boost=examFor(today, ex); }catch(_){}
+    const td=T.filter(t=>t.date===today), wkT=T.filter(t=>wk.includes(t.date) && t.date<=today);
+    const sumMin=L=>L.filter(t=>t.done).reduce((a,t)=>a+(Number(t.actualMin)||0),0);
+    rows.push({ch, req, paid, boost,
+      today:{n:td.length, done:td.filter(t=>t.done).length, min:sumMin(td)},
+      week:{n:wkT.length, done:wkT.filter(t=>t.done).length, min:sumMin(wkT)},
+      check:T.filter(t=>t.done && t.date>=fmt(addDays(new Date(),-2)) && !t.mgr).length,
+      low:T.filter(t=>t.done && t.underStars!=null && Number(t.underStars)<=2).length,
+      help:T.filter(t=>String(t.help||"").trim() && !t.helpOk).length,
+      vague:T.filter(t=>t.date>=today && isVague(t)).length,
+      late:T.filter(t=>!t.done && t.date<today && wk.includes(t.date)).length});
+  }
+  state.pm={at:Date.now(), rows, loading:false};
+  if(pmMode() && (state.tab==="todo"||state.tab==="plan")) render();
+}
+// 자녀 화면으로 들어가서 할 일 하기
+async function pmGo(uid, what){
+  const ch=(state.children||[]).find(c=>c.uid===uid); if(!ch) return;
+  await viewChild(ch.uid, ch.name);
+  setTimeout(()=>{
+    if(what==="check") drawMgrCheck();
+    else if(what==="plan"){ state.planView="week"; setTab("plan", true); }
+    else if(what==="plans"){ state.planView="plans"; setTab("plan", true); setView("plans"); }
+    else if(what==="help") drawHelpList();
+    else if(what==="assist") openAssist();
+    else if(what==="today") setTab("todo", true);
+  }, 350);
+}
+function pmHead(){
+  const d=new Date();
+  return `<div class="page-h"><div><div class="h-sub">${d.getMonth()+1}월 ${d.getDate()}일 ${WD_FULL[d.getDay()]}</div><h2>관리</h2></div>
+    <div class="h-nav"><button class="today-chip" onclick="pmLoad(true)">↻ 새로고침</button></div></div>`;
+}
+function renderParentHome(){
+  if(!(state.children||[]).length) return `<div class="pm-empty"><div style="font-size:40px">👨‍👩‍👧</div><b>아직 연결된 자녀가 없어요</b><small>자녀 이메일로 연결하면 이곳에서 관리할 수 있어요.</small>
+    <button class="add-btn" onclick="drawFamily()">가족 연결하기</button></div>`;
+  if(!state.pm.rows){ pmLoad(); return `<div class="empty">자녀 현황을 불러오는 중…</div>`; }
+  if(Date.now()-state.pm.at>60000) pmLoad();
+  const R=state.pm.rows, tot=k=>R.reduce((a,r)=>a+(typeof k==="function"? k(r) : r[k]),0);
+  const reqN=tot(r=>r.req && r.req.status==="pending"? 1 : 0);
+  const sum=`<div class="pm-sum">
+      <button onclick="${R.length===1? `pmGo('${R[0].ch.uid}','check')` : "void 0"}"><b>${tot("check")}</b><small>🔎 점검 대기</small></button>
+      <button onclick="${R.length===1? `pmGo('${R[0].ch.uid}','help')` : "void 0"}"><b>${tot("help")}</b><small>❓ 질문</small></button>
+      <button onclick="openDrawer('allowance')"><b>${reqN}</b><small>💰 정산 요청</small></button>
+      <button onclick="drawChat()"><b>${state.chatUnread||0}</b><small>💬 새 대화</small></button></div>`;
+  const pct=(a,b)=>b? Math.round(a/b*100) : 0, hm=m=>m>=60? `${Math.floor(m/60)}시간 ${m%60? m%60+"분":""}` : `${m}분`;
+  const cards=R.map(r=>{ const c=r.ch, u=c.uid;
+    const alerts=[
+      r.check? [`🔎 점검 대기 ${r.check}`, `pmGo('${u}','check')`, "a"] : null,
+      r.req && r.req.status==="pending"? [`💰 정산 요청 ${wonFmt(r.req.amount)}`, `goPayReq('${u}','${r.req.weekId}')`, "a"] : null,
+      r.help? [`❓ 질문 ${r.help}`, `pmGo('${u}','help')`, "w"] : null,
+      r.low? [`⚠️ 이해도 C·F ${r.low}`, `pmGo('${u}','check')`, "w"] : null,
+      r.vague? [`📝 범위 없는 계획 ${r.vague}`, `pmGo('${u}','assist')`, "w"] : null,
+      r.late? [`↪ 밀린 계획 ${r.late}`, `pmGo('${u}','plan')`, "w"] : null,
+    ].filter(Boolean);
+    return `<div class="pm-card">
+      <div class="pm-top"><span class="pm-av" style="background:${c.color}">${esc((c.name||"?").slice(0,1))}</span><b>${esc(c.name)}</b>
+        ${r.boost? `<span class="pm-tag b">🚀 부스터</span>` : ""}${r.paid? `<span class="pm-tag p">✓ 지급</span>` : ""}
+        <button class="pm-open" onclick="pmGo('${u}','today')">열기 ›</button></div>
+      <div class="pm-stat">
+        <div><small>오늘</small><b>${r.today.done}/${r.today.n}</b><i style="--p:${pct(r.today.done,r.today.n)}%"></i><em>${hm(r.today.min)}</em></div>
+        <div><small>이번 주</small><b>${pct(r.week.done,r.week.n)}%</b><i style="--p:${pct(r.week.done,r.week.n)}%"></i><em>${r.week.done}/${r.week.n} · ${hm(r.week.min)}</em></div></div>
+      ${alerts.length? `<div class="pm-alerts">${alerts.map(([l,f,k])=>`<button class="${k}" onclick="${f}">${l}</button>`).join("")}</div>` : `<div class="pm-ok">👍 지금 챙길 일이 없어요</div>`}
+      <div class="pm-acts"><button onclick="pmGo('${u}','check')">🔎 점검</button><button onclick="pmGo('${u}','plan')">📅 계획 보기</button><button onclick="drawChat('${u}')">💬 대화</button><button onclick="pmGo('${u}','assist')">🧭 도우미</button></div>
+    </div>`; }).join("");
+  return `<div class="pm-wrap">${noticeCardsHTML()}${sum}${cards}
+    <div class="pm-more"><button onclick="setTab('stats')">📊 리포트 · 용돈 · 설정은 기록 탭에서</button></div></div>`;
+}
+// 일정 탭 (부모 자기 화면): 자녀 계획 고르기
+function renderParentPlan(){
+  if(!(state.children||[]).length) return renderParentHome();
+  if(!state.pm.rows){ pmLoad(); return `<div class="empty">불러오는 중…</div>`; }
+  return `<div class="pm-wrap"><div class="cd-note" style="margin:0 0 10px">계획은 자녀 플래너를 열어서 보고 고쳐요. 부모님이 넣은 계획엔 👑 표시가 붙어요.</div>
+    ${state.pm.rows.map(r=>{ const u=r.ch.uid; return `<div class="pm-card"><div class="pm-top"><span class="pm-av" style="background:${r.ch.color}">${esc((r.ch.name||"?").slice(0,1))}</span><b>${esc(r.ch.name)}</b>
+      <small class="pm-sm">이번 주 ${r.week.done}/${r.week.n}</small></div>
+      <div class="pm-acts three"><button onclick="pmGo('${u}','plan')">📅 주간 계획</button><button onclick="pmGo('${u}','plans')">📘 계획표</button><button onclick="pmGo('${u}','assist')">🧭 도우미로 짜기</button></div></div>`; }).join("")}</div>`;
 }
 
 </script>
