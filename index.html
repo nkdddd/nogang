@@ -400,6 +400,22 @@
   .td-goal{align-self:flex-start;border:none;background:var(--surface2);border-radius:999px;padding:4px 10px;font:inherit;font-size:11.5px;font-weight:var(--fw-semibold);color:var(--muted2);cursor:pointer;margin-top:4px;white-space:nowrap}
   .td-rings{display:flex;gap:4px;flex:0 0 auto}
   .td-dd{color:#E5484D;font-weight:var(--fw-bold);font-size:12px}
+  .as-dr .drawer-body.as-body{background:#F6F5FB;display:flex;flex-direction:column;gap:8px;padding-bottom:12px;min-height:50vh}
+  .as-m{display:flex;flex-direction:column;align-items:flex-start;max-width:88%}.as-m.me{align-self:flex-end;align-items:flex-end}
+  .as-b{background:var(--surface);border:1px solid var(--line);border-radius:16px 16px 16px 4px;padding:9px 12px;font-size:13.5px;line-height:1.6;word-break:keep-all}
+  .as-m.me .as-b{background:#6A58E6;color:#fff;border-color:#6A58E6;border-radius:16px 16px 4px 16px}
+  .as-b a{color:#6A58E6;font-weight:var(--fw-semibold)}
+  .as-ex{display:block;margin:3px 0;padding:4px 8px;border-radius:8px;background:#F1EEFF;color:#35296E;font-size:12.5px;font-weight:var(--fw-semibold)}
+  .as-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.as-chips button{border:1.5px solid #C9C1F5;background:#fff;color:#35296E;border-radius:999px;padding:6px 11px;font:inherit;font-size:12.5px;font-weight:var(--fw-semibold);cursor:pointer}
+  .as-foot{display:flex;gap:6px;align-items:center;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface)}.as-foot .inp{flex:1}
+  .as-send{width:40px;height:40px;border-radius:50%;border:none;background:#6A58E6;color:#fff;font-size:16px;cursor:pointer;flex:0 0 auto}
+  .as-ai{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 10px;font:inherit;font-size:12px;font-weight:var(--fw-bold);color:var(--muted);margin-left:auto;margin-right:4px;cursor:pointer}
+  .as-ai.on{background:#0E9F6E;border-color:#0E9F6E;color:#fff}
+  .as-dots{display:flex;gap:4px}.as-dots i{width:7px;height:7px;border-radius:50%;background:#B9B1EE;animation:asd 1s infinite}.as-dots i:nth-child(2){animation-delay:.15s}.as-dots i:nth-child(3){animation-delay:.3s}
+  @keyframes asd{50%{opacity:.3;transform:translateY(-3px)}}
+  .as-prev{margin-top:8px;background:#F7F5FF;border-radius:10px;padding:8px 10px;font-size:12.5px;line-height:1.55}.ap-h{font-weight:var(--fw-bold);margin-top:4px;color:#35296E}
+  .as-entry{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;width:100%;text-align:left;border:none;border-radius:14px;padding:12px 14px;margin:0 0 12px;background:linear-gradient(135deg,#6A58E6,#8F80FF);color:#fff;font:inherit;cursor:pointer}
+  .as-entry span{font-size:22px}.as-entry b{font-size:14.5px}.as-entry small{flex-basis:100%;padding-left:32px;font-size:11.5px;opacity:.85}
   .pl-out{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.pl-out button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 11px;font:inherit;font-size:12px;font-weight:var(--fw-semibold);color:var(--ink);cursor:pointer}
   .au-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin:0 0 12px}
   .au-h{display:block;font-size:13.5px;margin-bottom:6px}
@@ -2854,7 +2870,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-3";
+const APP_VER="2026.11.17-4";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -4809,7 +4825,8 @@ function renderRecord(){
     comm:[recRow("💬","가족 대화",isParent? "칭찬 · 응원 · 학습 피드백" : "부모님과 글 주고받기","drawChat()",state.chatUnread),
       isParent? recRow("🤝","자녀 친구 관리","친구 신청 승인 · 끊기","drawKidFriends()",state.friendPending) : recRow("🤝","친구 응원","친구 코드 · 👍","drawFriends()",state.friendPending),
       recRow("🔔","새 소식","대화 · 친구 · 응원 소식 모아 보기","drawNews()",newsTotal())],
-    anal:[recRow("📘","계획표","시험 대비 · 학습 포트폴리오 · 날짜별 자동 배치","state.planView='plans';setTab('plan',true);setView('plans')"),
+    anal:[recRow("🧭","계획 도우미 (채팅)",isParent? "말로 계획 짜기 · 점검 · 🤖 AI 연결" : "말로 계획 짜기 · 범위 점검 · 분량 맞추기","openAssist()"),
+      recRow("📘","계획표","시험 대비 · 학습 포트폴리오 · 날짜별 자동 배치","state.planView='plans';setTab('plan',true);setView('plans')"),
       recRow("🗓","주간 시간표","요일마다 고정된 학원 · 과외 · 자습 시간","state.planView='tt';setTab('plan',true);setView('tt')"),
       recRow("❓","질문 · 도움이 필요한 부분","공부 끝낼 때 적은 질문 모아 보기","drawHelpList()"),
       recRow("📊","학습 대시보드","전체 누적 · 이행률 · 과목별 시간","openDrawer('dash')"),
@@ -5765,6 +5782,7 @@ function renderDay(){
         <h2>${isToday? (undoneCount>0? `오늘 남은 학습 ${undoneCount}개` : (ts.length? "오늘 학습 모두 완료" : "오늘의 학습"))
                      : `${ds.slice(5).replace("-",".")} 학습 ${ts.length}개`}</h2>
         <div class="dl-actions">
+          <button class="rollover-btn" onclick="openAssist()">🧭 도우미</button>
           ${undoneCount>0?`<button class="rollover-btn" onclick="rolloverIncomplete()">↪ 미완료 ${undoneCount} 내일로</button>`:""}
         </div>
       </div>
@@ -7550,6 +7568,7 @@ function renderPlans(){
   return `<div class="pl-wrap">
     <div class="pl-new"><button onclick="planNew('exam')"><b>📝 시험 대비 계획표</b><small>시험 날까지 과목별 범위를 날짜에 나눠요</small></button>
       <button onclick="planNew('long')"><b>📘 학습 포트폴리오</b><small>몇 달 동안 교재를 주 단위로 나눠요</small></button></div>
+    <button class="as-entry" onclick="openAssist()"><span>🧭</span><b>계획 도우미와 대화하기</b><small>시험 계획 짜기 · 범위 없는 계획 점검 · 분량 맞추기${state.profile.role==="parent"? " · 🤖 AI" : ""}</small></button>
     ${autoCardHTML()}
     ${cards || `<div class="cd-note" style="margin-top:10px">아직 계획표가 없어요. 시험이 다가오면 📝, 방학 · 학기 계획은 📘로 만들어요.</div>`}
   </div>`;
@@ -7670,9 +7689,9 @@ async function autoReviewAfter(t){
 }
 
 /* ③ 시험 계획 자동 배분 */
-function planAutoSplit(){
-  const p=planDraft; if(!p || p.kind!=="exam") return;
-  const days=planDates(p.start, p.end); if(days.length<4) return alert("시작부터 시험 날까지 4일 이상이어야 나눌 수 있어요.");
+function planAutoSplit(silent){
+  const p=planDraft; if(!p || p.kind!=="exam") return false;
+  const days=planDates(p.start, p.end); if(days.length<4){ if(silent) return false; return alert("시작부터 시험 날까지 4일 이상이어야 나눌 수 있어요."); }
   const e1=days[Math.max(0, Math.round(days.length*0.6)-1)], e2=days[Math.max(1, Math.round(days.length*0.9)-1)];
   p.phases=[{name:"개념 1회독",end:e1},{name:"2회독 · 문제 풀기",end:e2},{name:"시험 기간 · 버퍼",end:p.end}];
   const base=p.rows.filter(r=>!r.second);
@@ -7681,7 +7700,7 @@ function planAutoSplit(){
   base.forEach(r=>{ rows.push({...r, from:p.start, to:e1});
     if((r.chunks||[]).length) rows.push({...r, id:uid().slice(0,8), second:r.id, book:`2회독 · ${r.book||(tbById(r.textbookId)||{}).name||""}`.trim(), textbookId:r.textbookId,
       chunks:r.chunks.slice(), from:r2(e1), to:e2, perDay:Math.max(1, Math.ceil(r.chunks.length/Math.max(1, planDates(r2(e1),e2).filter(ds=>(r.days||[]).includes(parseD(ds).getDay())).length)))}); });
-  p.rows=rows; planEdit();
+  p.rows=rows; if(silent) return true; planEdit();
   toast("⚡ 1회독 60% · 2회독 30% · 버퍼 10%로 나눴어요","good");
 }
 
@@ -7920,6 +7939,349 @@ function icsHelp(){
     <details open><summary>🍎 아이폰</summary>받은 파일(파일 앱 또는 Safari 다운로드)을 누르면 「모두 추가」가 나와요 → 넣을 캘린더를 골라요.</details>
     <details open><summary>🤖 구글 캘린더 (PC에서)</summary>calendar.google.com → 오른쪽 위 ⚙️ 설정 → 가져오기/내보내기 → 파일 선택 → 가져오기<br>새 캘린더를 하나 만들어 그곳에 가져오면 나중에 한 번에 지우기 쉬워요.</details>
     <div style="margin-top:6px">계획을 고친 뒤에는 다시 받아서 가져와요 (같은 일정은 같은 이름으로 다시 들어가요).</div></div>`);
+}
+
+
+/* ============================================================
+ *  🧭 계획 도우미 (채팅)
+ *  - 기본: 규칙으로 알아듣는 질문형 채팅 (AI 없음 · 비용 0 · 아이도 사용)
+ *      시험 계획 짜기 · 범위 없는 계획 점검 · 하루 분량 맞추기 · 밀린 계획 · 오늘 것 내일로 · 이번 주 점검 · 한 줄 계획
+ *  - 🤖 AI 모드: 부모 계정에 API 키(Claude 또는 Gemini)를 넣으면 부모가 쓸 때만 켜져요
+ *      키는 planner/{부모uid}/meta/ai 에만 저장 (보안 규칙상 그 부모 계정만 읽음)
+ *      AI는 바꿀 내용(추가 · 수정 · 삭제)을 제안 → 미리 보기 → [적용] → aiLog 에 기록 · ↩ 되돌리기
+ * ============================================================ */
+const AS={msgs:[], wiz:null, pend:null, ai:null, aiLoaded:false, aiOn:false, busy:false, hist:[]};
+const asEsc=s=>esc(s).replace(/\n/g,"<br>");
+function asBot(html, chips){ AS.msgs.push({who:"bot", html, chips:chips||null}); asDraw(); }
+function asMe(text){ AS.msgs.push({who:"me", html:asEsc(text)}); }
+const AS_HELP=[["📝 시험 계획 짜기","시험 계획 짜줘"],["🔍 범위 없는 계획 점검","계획 점검"],["⚖️ 하루 분량 맞추기","분량 맞춰줘"],["↪ 밀린 계획 다시 배치","밀린 계획"],["⏭ 오늘 남은 것 내일로","오늘 거 내일로"],["📋 이번 주 점검","이번 주 점검"]];
+async function openAssist(){
+  if(!AS.msgs.length) asBot(`안녕하세요! 🧭 계획 도우미예요.<br>아래에서 고르거나, 이렇게 적어 보세요:<br><span class="as-ex">수학 올림포스 p.10-60 5쪽씩 월~금 40분</span>`, AS_HELP);
+  asDraw(true);
+  if(state.profile.role==="parent" && !AS.aiLoaded) aiLoad().then(()=>asDraw());
+}
+function asDraw(open){
+  const root=document.getElementById("drawerRoot");
+  const isP=state.profile.role==="parent", aiReady=isP && AS.ai && AS.ai.key;
+  const body=AS.msgs.map((m,i)=>`<div class="as-m ${m.who}"><div class="as-b">${m.html}</div>
+      ${m.chips && i===AS.msgs.length-1? `<div class="as-chips">${m.chips.map(([l,v])=>`<button onclick="asSay(${JSON.stringify(v).replace(/"/g,"&quot;")},1)">${l}</button>`).join("")}</div>` : ""}</div>`).join("")
+    + (AS.busy? `<div class="as-m bot"><div class="as-b as-dots"><i></i><i></i><i></i></div></div>` : "");
+  const html=`<div class="overlay" onclick="if(event.target===this)closeDrawer()"><div class="drawer wide as-dr">
+    <div class="drawer-head"><h3>🧭 계획 도우미 <small style="font-weight:500;color:var(--muted2);font-size:12px">${state.viewingChild? esc(state.ownerName)+" 플래너" : ""}</small></h3>
+      ${isP? `<button class="as-ai ${AS.aiOn&&aiReady?"on":""}" onclick="${aiReady? "AS.aiOn=!AS.aiOn;asDraw()" : "aiSetup()"}">🤖 AI ${aiReady? (AS.aiOn?"켜짐":"꺼짐") : "연결"}</button>` : ""}
+      <button class="icon-btn sm" title="작업 기록" onclick="drawAiLog()">🧾</button><button class="icon-btn sm" onclick="closeDrawer()">✕</button></div>
+    <div class="drawer-body as-body" id="asBody">${body}</div>
+    <div class="as-foot"><input class="inp" id="asIn" placeholder="${AS.wiz? "여기에 답해 주세요" : AS.aiOn&&aiReady? "AI에게 말해 보세요 (예: 수학이 약하니 이번 주에 늘려 줘)" : "무엇을 도와줄까요?"}" onkeydown="if(event.key==='Enter'&&!event.isComposing){asSend()}">${micBtn("asIn")}<button class="as-send" onclick="asSend()">➤</button></div>
+  </div></div>`;
+  const prev=document.getElementById("asIn"), val=prev? prev.value : "", had=prev && prev===document.activeElement;
+  root.innerHTML=html;
+  const inp=document.getElementById("asIn"); if(inp){ inp.value=val; if(had||open) setTimeout(()=>inp.focus(),30); }
+  const b=document.getElementById("asBody"); if(b) b.scrollTop=b.scrollHeight;
+}
+function asSend(){ const el=document.getElementById("asIn"); const v=(el&&el.value||"").trim(); if(!v) return; el.value=""; asSay(v); }
+async function asSay(text, chip){
+  asMe(text); asDraw();
+  try{
+    if(AS.wiz) return await asWizard(text);
+    if(/^(취소|그만|처음)/.test(text)){ AS.wiz=null; AS.pend=null; return asBot("처음으로 돌아왔어요.", AS_HELP); }
+    const cmd=/^(적용|되돌리기|계획표\s*보기|AI\s*설정|범위없는거 지워)/.test(text);
+    if(!chip && !cmd && AS.aiOn && AS.ai && AS.ai.key && state.profile.role==="parent") return await aiAsk(text);
+    await asRule(text);
+  }catch(e){ console.error(e); AS.busy=false; asBot("앗, 처리하지 못했어요. 다시 해 볼까요?", AS_HELP); }
+}
+/* ----- 규칙으로 알아듣기 ----- */
+async function asRule(t){
+  if(/도움|뭐\s*할\s*수|help|메뉴/.test(t)) return asBot("이런 걸 할 수 있어요.", AS_HELP);
+  if(/(시험|기말|중간|모의).*(계획|짜)|(계획|짜).*(시험|기말|중간)/.test(t)) return asWizStart();
+  if(/점검|범위\s*없|애매|구체/.test(t) && !/이번\s*주/.test(t)) return asVague();
+  if(/분량|맞춰|균형|고르게/.test(t)) return asBalance();
+  if(/밀린|재배치|다시\s*배치/.test(t)){ const n=await planReflow(true); return asBot(n? `↪ 밀린 계획 ${n}개를 버퍼 날로 옮겼어요.` : "밀린 계획표 할 일이 없어요 👍", AS_HELP); }
+  if(/내일로|미뤄|미루/.test(t)) return asTomorrow();
+  if(/이번\s*주|요약|점검표|정리해/.test(t)) return asWeek();
+  const r=parsePlanLine(t);
+  if(r && r.subjectId && r.chunks.length) return asLinePlan(t, r);
+  asBot(`음… 잘 모르겠어요 😅 이렇게 말해 보세요:<br>· <b>시험 계획 짜줘</b><br>· <b>계획 점검</b> · <b>분량 맞춰줘</b><br>· <span class="as-ex">영어 영단어 DAY 1-58 월수금 하루 2개</span>${state.profile.role==="parent"? "<br><br>🤖 자유롭게 말하려면 위의 <b>AI 연결</b>을 켜요 (부모 계정)." : ""}`, AS_HELP);
+}
+function parseDateK(s){
+  s=String(s||"").trim(); const now=new Date(); let y, m, d;
+  let x=s.match(/(\d{4})[-.\/]\s*(\d{1,2})[-.\/]\s*(\d{1,2})/); if(x){ y=+x[1]; m=+x[2]; d=+x[3]; }
+  else if((x=s.match(/(\d{1,2})\s*(?:월|\/|\.|-)\s*(\d{1,2})/))){ m=+x[1]; d=+x[2]; y=now.getFullYear(); if(fmt(new Date(y,m-1,d))<fmt(now)) y++; }
+  else if((x=s.match(/(\d+)\s*(일|주)\s*(뒤|후)/))){ return fmt(addDays(now, +x[1]*(x[2]==="주"?7:1))); }
+  else return null;
+  const dt=new Date(y,m-1,d); return isNaN(dt)? null : fmt(dt);
+}
+/* 📝 시험 계획 마법사 */
+function asWizStart(){
+  AS.wiz={step:"name"};
+  asBot("좋아요! 시험 이름이 뭐예요?", [["2학기 기말고사","2학기 기말고사"],["2학기 중간고사","2학기 중간고사"],["모의고사","모의고사"]]);
+}
+async function asWizard(t){
+  const w=AS.wiz;
+  if(/^(취소|그만)/.test(t)){ AS.wiz=null; return asBot("시험 계획 짜기를 멈췄어요.", AS_HELP); }
+  if(w.step==="name"){ w.name=t.trim(); w.step="date"; return asBot(`<b>${esc(w.name)}</b> 날짜는 언제예요? (예: 12/14)`); }
+  if(w.step==="date"){ const d=parseDateK(t); if(!d || d<=fmt(new Date())) return asBot("날짜를 알아듣지 못했어요. <b>12/14</b>처럼 적어 주세요."); w.date=d; w.rows=[]; w.step="rows";
+    const dd=Math.round((parseD(d)-parseD(fmt(new Date())))/86400000);
+    return asBot(`D-${dd}이네요! 이제 과목별 범위를 <b>한 줄씩</b> 알려 주세요.<br><span class="as-ex">영어 교과서 unit1-3 월~금</span><span class="as-ex">수학 올림포스 p.10-60 5쪽씩 월~토 50분</span><span class="as-ex">국어 문학 작품 19개 매일</span>다 적었으면 <b>끝</b>이라고 해요.`); }
+  if(w.step==="rows"){
+    if(/^(끝|다\s*했|완료|됐어|없어)/.test(t)){
+      if(!w.rows.length) return asBot("아직 과목이 없어요. 한 줄 이상 적어 주세요.");
+      w.step="confirm";
+      return asBot(`이렇게 짤게요:<br>${w.rows.map(r=>`· <b>${esc(r._subj)}</b> ${esc(r._tb||r.book)} · ${r.chunks.length}개 (${esc(r.chunks[0])} ~ ${esc(r.chunks[r.chunks.length-1])})`).join("<br>")}<br><br>개념 1회독 60% · 2회독 30% · 버퍼 10%로 나눠서 날짜에 넣을까요?`, [["✅ 만들어 줘","만들어"],["✏️ 더 넣을래","더"],["취소","취소"]]); }
+    let added=0, bad=[];
+    t.split(/\n/).map(x=>x.trim()).filter(Boolean).forEach(l=>{ const r=parsePlanLine(l); if(r && r.subjectId && r.chunks.length){ w.rows.push(r); added++; } else bad.push(l); });
+    return asBot(`${added? `✓ ${added}줄 넣었어요 (지금 ${w.rows.length}과목).` : ""}${bad.length? `<br>⚠️ 이 줄은 과목이나 범위를 못 찾았어요: ${bad.map(esc).join(", ")}<br>과목 이름(${(state.categories.subjects||[]).map(s=>esc(s.name)).join(" · ")})과 범위(p.10-60 · unit1-3 · DAY 1-58 · 19개)를 넣어 주세요.` : ""}<br>더 있으면 계속 적고, 다 했으면 <b>끝</b>.`, [["끝","끝"]]);
+  }
+  if(w.step==="confirm"){
+    if(/더/.test(t)){ w.step="rows"; return asBot("좋아요, 더 적어 주세요. 다 했으면 <b>끝</b>."); }
+    if(!/만들|응|좋아|네|ㅇㅇ|오케이|ok/i.test(t)) return asBot("만들까요?", [["✅ 만들어 줘","만들어"],["취소","취소"]]);
+    const today=fmt(new Date());
+    planDraft={id:"", kind:"exam", name:w.name, start:today, end:w.date, goal:"", rule:"", phases:[{name:"개념 1회독",end:w.date},{name:"2회독 · 문제 풀기",end:w.date},{name:"시험 기간",end:w.date}],
+      rows:w.rows.map(r=>({id:uid().slice(0,8), subjectId:r.subjectId, target:"", book:r.book, textbookId:r.textbookId, range:"", chunks:r.chunks, days:r.days, perDay:r.perDay, min:r.min, from:today, to:w.date}))};
+    if(planAutoSplit(true)===false){ AS.wiz=null; return asBot("시험까지 4일보다 적어서 단계로 나눌 수 없어요. 📘 계획표에서 직접 만들어 주세요.", AS_HELP); }
+    const n=await asSavePlan(planDraft); AS.wiz=null;
+    return asBot(`🎉 <b>${esc(w.name)}</b> 계획표를 만들고 할 일 <b>${n}개</b>를 날짜에 넣었어요.`, [["📘 계획표 보기","계획표 보기"],["⚖️ 분량 맞추기","분량 맞춰줘"],["처음으로","도움"]]);
+  }
+}
+async function asSavePlan(p){
+  p.id=p.id||uid().replace(/-/g,"").slice(0,12); p.updatedAt=Date.now(); p.by=state.profile.role;
+  await planCol().doc(p.id).set(JSON.parse(JSON.stringify(p)));
+  const n=await planApply(p); await loadPlans(); state.planOpen=p.id; subscribeTasks(); return n;
+}
+/* 한 줄 계획 → 계획표 */
+async function asLinePlan(text, r){
+  AS.wiz={step:"line", r, text};
+  asBot(`<b>${esc(r._subj)}</b> ${esc(r._tb||r.book)} · ${r.chunks.length}개 (${esc(r.chunks[0])} ~ ${esc(r.chunks[r.chunks.length-1])}) · ${r.days.map(d=>WD[d]).join("")} · ${r.min}분<br>언제까지 끝낼까요?`,
+    [["2주","2주 뒤"],["4주","4주 뒤"],["8주","8주 뒤"],["날짜 적기","날짜"]]);
+}
+const _asWiz=asWizard;
+asWizard=async function(t){
+  const w=AS.wiz;
+  if(w && w.step==="line"){
+    if(/^(취소|그만)/.test(t)){ AS.wiz=null; return asBot("취소했어요.", AS_HELP); }
+    if(/^날짜$/.test(t)) return asBot("끝낼 날짜를 적어 주세요 (예: 1/31)");
+    const end=parseDateK(t); if(!end || end<=fmt(new Date())) return asBot("날짜를 알아듣지 못했어요. <b>1/31</b>이나 <b>4주 뒤</b>처럼 적어 주세요.");
+    const r=w.r, today=fmt(new Date()), name=`${r._subj} ${r._tb||r.book}`.trim();
+    const p={id:"", kind:"long", name, start:today, end, goal:"", rule:"", phases:[], rows:[{id:uid().slice(0,8), subjectId:r.subjectId, range:"", book:r.book, textbookId:r.textbookId, chunks:r.chunks, days:r.days, perDay:r.perDay, min:r.min, from:today, to:end}]};
+    const L=planLayout(p.rows[0]); const n=await asSavePlan(p); AS.wiz=null;
+    return asBot(`📘 <b>${esc(name)}</b> 계획표를 만들었어요. 할 일 ${n}개${L.short? ` (날짜가 모자라 하루 ${L.per}개씩)` : ""} · 남는 날은 버퍼예요.`, [["📘 계획표 보기","계획표 보기"],["처음으로","도움"]]);
+  }
+  return _asWiz(t);
+};
+/* 🔍 범위 없는 계획 점검 */
+async function asTasksRange(from, to){ return (await plannerRef().collection("tasks").where("date",">=",from).where("date","<=",to).get()).docs.map(d=>d.data()); }
+const isVague=t=>!t.done && !t.appLinked && !t.reviewOf && !/\d/.test(String(t.unit||"")+String(t.episode||""));
+async function asVague(){
+  const today=fmt(new Date()), L=(await asTasksRange(today, fmt(addDays(new Date(),30)))).filter(isVague).sort((a,b)=>a.date<b.date?-1:1);
+  if(!L.length) return asBot("👍 앞으로 30일 계획은 모두 범위(쪽수 · 단원 · 번호)가 적혀 있어요.", AS_HELP);
+  AS.pend={kind:"vague", ids:L.map(t=>t.id)};
+  asBot(`⚠️ 범위가 없는 계획 <b>${L.length}개</b>를 찾았어요. 무엇을 할지 구체적으로 적어야 실천하기 쉬워요.<br>${L.slice(0,12).map(t=>{ const s=subjById(t.subjectId); return `· ${t.date.slice(5).replace("-","/")} <b>${esc(s?s.name:"")}</b> ${esc(t.unit||"(내용 없음)")} <a href="#" onclick="openEventSheet('${t.id}');return false">고치기</a>`; }).join("<br>")}${L.length>12? `<br>… 외 ${L.length-12}개` : ""}`,
+    [["🗑 모두 지우기","범위없는거 지워"],["그대로 둘래","도움"]]);
+}
+const _asRule=asRule;
+asRule=async function(t){
+  if(/범위\s*없는\s*거\s*지워|모두\s*지우기/.test(t) && AS.pend && AS.pend.kind==="vague"){
+    const ids=AS.pend.ids; AS.pend=null;
+    if(!confirm(`범위 없는 계획 ${ids.length}개를 지울까요?`)) return asBot("지우지 않았어요.", AS_HELP);
+    const backup=[]; const b=db.batch();
+    for(const id of ids){ const d=await plannerRef().collection("tasks").doc(id).get(); if(d.exists && !d.data().done){ backup.push(d.data()); b.delete(d.ref); } }
+    await b.commit(); const log=await aiLogSave({src:"rule", summary:`범위 없는 계획 ${backup.length}개 삭제`, added:[], removed:backup, updated:[]});
+    subscribeTasks();
+    return asBot(`🗑 ${backup.length}개를 지웠어요.`, [["↩ 되돌리기",`되돌리기 ${log}`],["📝 시험 계획 짜기","시험 계획 짜줘"],["처음으로","도움"]]);
+  }
+  if(/^되돌리기\s+(\S+)/.test(t)){ const id=t.match(/^되돌리기\s+(\S+)/)[1]; const n=await aiUndo(id); return asBot(n>=0? `↩ 되돌렸어요 (${n}개).` : "이미 되돌렸거나 찾지 못했어요.", AS_HELP); }
+  if(/^AI\s*설정/.test(t)) return aiSetup();
+  if(/계획표\s*보기/.test(t)){ closeDrawer(); state.planView="plans"; setTab("plan",true); setView("plans"); return; }
+  if(/^적용$/.test(t) && AS.pend && AS.pend.kind==="balance") return asBalanceApply();
+  if(/^적용$/.test(t) && AS.pend && AS.pend.kind==="ai") return aiApply();
+  return _asRule(t);
+};
+/* ⚖️ 하루 분량 맞추기 (계획표 할 일만 옮겨요) */
+async function asBalance(){
+  const days=Array.from({length:14},(_,i)=>fmt(addDays(new Date(),i)));
+  const T=(await asTasksRange(days[0], days[13])).filter(t=>!t.done);
+  const load={}; days.forEach(d=>load[d]=0); T.forEach(t=>load[t.date]=(load[t.date]||0)+(Number(t.plannedMin)||0));
+  const goal={}; days.forEach(d=>goal[d]=dayTypeGoal(d)||120);
+  const rowOf={}; (state.plans||[]).forEach(p=>(p.rows||[]).forEach(r=>rowOf[p.id+"/"+r.id]=r));
+  const moves=[];
+  days.forEach((d,i)=>{
+    let over=load[d]-goal[d]; if(over<=30) return;
+    const mv=T.filter(t=>t.date===d && t.planId).sort((a,b)=>(b.plannedMin||0)-(a.plannedMin||0));
+    for(const t of mv){ if(over<=30) break;
+      const r=rowOf[t.planId+"/"+t.planRow], m=Number(t.plannedMin)||30;
+      const to=days.slice(i+1).find(x=>load[x]+m<=goal[x] && (!r || (r.days||[]).includes(parseD(x).getDay())));
+      if(!to) continue; moves.push({t, to}); load[d]-=m; load[to]+=m; over-=m; t.date=to; }
+  });
+  const heavy=days.filter(d=>load[d]-goal[d]>30), light=days.filter(d=>load[d]>0 && goal[d]-load[d]>60);
+  if(!moves.length) return asBot(`⚖️ 2주 동안 옮길 만한 계획이 없어요.${heavy.length? `<br>여전히 많은 날: ${heavy.map(d=>`${d.slice(5).replace("-","/")}(${load[d]}분/${goal[d]}분)`).join(", ")} — 목표 시간을 늘리거나 계획을 줄여 보세요.` : " 하루 분량이 고르게 잘 맞아요 👍"}`, AS_HELP);
+  AS.pend={kind:"balance", moves};
+  asBot(`⚖️ 목표 시간보다 많은 날의 계획표 할 일 <b>${moves.length}개</b>를 여유 있는 날로 옮길게요.<br>${moves.slice(0,12).map(x=>{ const s=subjById(x.t.subjectId); return `· ${esc(s?s.name:"")} ${esc(x.t.unit||"")} → <b>${x.to.slice(5).replace("-","/")}</b>`; }).join("<br>")}${moves.length>12? `<br>… 외 ${moves.length-12}개` : ""}`,
+    [["✅ 적용","적용"],["취소","취소"]]);
+}
+async function asBalanceApply(){
+  const mv=AS.pend.moves; AS.pend=null; const b=db.batch(), upd=[];
+  for(const x of mv){ const ref=plannerRef().collection("tasks").doc(x.t.id), d=await ref.get(); if(!d.exists) continue; upd.push({id:x.t.id, before:{date:d.data().date}}); b.update(ref,{date:x.to, moved:true, movedFrom:d.data().movedFrom||d.data().date}); }
+  await b.commit(); const log=await aiLogSave({src:"rule", summary:`분량 맞추기 ${upd.length}개 이동`, added:[], removed:[], updated:upd});
+  subscribeTasks();
+  return asBot(`⚖️ ${upd.length}개를 옮겼어요.`, [["↩ 되돌리기",`되돌리기 ${log}`],["처음으로","도움"]]);
+}
+/* ⏭ 오늘 남은 것 내일로 */
+async function asTomorrow(){
+  const today=fmt(new Date()), tm=fmt(addDays(new Date(),1));
+  const L=(await asTasksRange(today, today)).filter(t=>!t.done);
+  if(!L.length) return asBot("오늘 남은 계획이 없어요 👏", AS_HELP);
+  const b=db.batch(), upd=[]; L.forEach(t=>{ upd.push({id:t.id, before:{date:t.date}}); b.update(plannerRef().collection("tasks").doc(t.id),{date:tm}); });
+  await b.commit(); const log=await aiLogSave({src:"rule", summary:`오늘 남은 ${L.length}개 내일로`, added:[], removed:[], updated:upd}); subscribeTasks();
+  asBot(`⏭ 오늘 남은 ${L.length}개를 내일로 옮겼어요.`, [["↩ 되돌리기",`되돌리기 ${log}`],["⚖️ 분량 맞추기","분량 맞춰줘"]]);
+}
+/* 📋 이번 주 점검 */
+async function asWeek(){
+  const v=await weekReviewFor(state.ownerUid, charWeekDays());
+  asBot(weekReviewHTML(v)+(v.low.length? "이해도가 낮은 과목은 복습을 늘려 보세요." : ""), AS_HELP);
+}
+
+/* ----- 🤖 작업 기록 · 되돌리기 (규칙 · AI 공통) ----- */
+async function aiLogSave(o){
+  const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  try{ await plannerRef().collection("aiLog").doc(id).set(JSON.parse(JSON.stringify({...o, at:Date.now(), by:state.user.uid, byName:state.profile.name||""}))); }catch(e){ console.warn("작업 기록", e); }
+  return id;
+}
+async function aiUndo(id){
+  const ref=plannerRef().collection("aiLog").doc(id), d=await ref.get(); if(!d.exists || d.data().undone) return -1;
+  const L=d.data(), b=db.batch(), col=plannerRef().collection("tasks"); let n=0;
+  (L.added||[]).forEach(tid=>{ b.delete(col.doc(tid)); n++; });
+  (L.removed||[]).forEach(t=>{ if(t && t.id){ b.set(col.doc(t.id), t); n++; } });
+  (L.updated||[]).forEach(u=>{ if(u && u.id){ b.update(col.doc(u.id), u.before||{}); n++; } });
+  b.update(ref,{undone:true, undoneAt:Date.now()}); await b.commit(); subscribeTasks(); return n;
+}
+
+/* ----- 🤖 AI 연결 (부모 계정 전용) ----- */
+const AI_DEF={claude:"claude-opus-5-5", gemini:"gemini-2.5-flash"};
+const aiRef=()=>db.collection("planner").doc(state.user.uid).collection("meta").doc("ai");
+async function aiLoad(){ try{ const d=await aiRef().get(); AS.ai=d.exists? d.data() : null; }catch(_){ AS.ai=null; } AS.aiLoaded=true; if(AS.ai && AS.ai.key) AS.aiOn=true; }
+function aiSetup(){
+  if(state.profile.role!=="parent") return;
+  const a=AS.ai||{provider:"gemini", key:"", model:""};
+  hubShell("🤖 AI 연결 (부모님 전용)", `
+    <div class="sct-card" style="margin:0 0 12px">AI 키를 넣으면 🧭 계획 도우미에서 <b>자유롭게 말로</b> 계획을 짜고 정리할 수 있어요.<br>
+      · 키는 <b>이 부모 계정에만</b> 저장되고, 자녀 계정에서는 보이지도 쓰이지도 않아요.<br>
+      · AI가 바꾸기 전에 항상 <b>미리 보기 → 적용</b>을 거치고, <b>↩ 되돌리기</b>로 원래대로 돌릴 수 있어요.<br>
+      · 쓴 만큼 각 회사에 요금이 나가요. 키는 사용량 한도를 걸어 두세요.</div>
+    <label class="fld-lbl">어떤 AI</label>
+    <div class="pl-days" style="margin-bottom:10px"><button class="${a.provider==="gemini"?"on":""}" style="width:auto;padding:0 12px" onclick="AS.ai={...(AS.ai||{}),provider:'gemini'};aiSetup()">Google Gemini</button><button class="${a.provider==="claude"?"on":""}" style="width:auto;padding:0 12px" onclick="AS.ai={...(AS.ai||{}),provider:'claude'};aiSetup()">Anthropic Claude</button></div>
+    <label class="fld-lbl">API 키</label><input class="inp" id="aiKey" type="password" autocomplete="off" value="${esc(a.key||"")}" placeholder="${a.provider==="claude"?"sk-ant-…":"AIza…"}">
+    <label class="fld-lbl" style="margin-top:10px">모델 <small>(비워 두면 ${AI_DEF[a.provider||"gemini"]})</small></label><input class="inp" id="aiModel" value="${esc(a.model||"")}" placeholder="${AI_DEF[a.provider||"gemini"]}">
+    <div class="cd-note" style="margin-top:8px;line-height:1.6">${a.provider==="claude"? "Claude 키: console.anthropic.com → API Keys. 이 화면은 키를 브라우저에서 바로 써요. 사용량 한도(Limits)를 꼭 걸어 두세요." : "Gemini 키: aistudio.google.com → Get API key. Google Cloud 콘솔에서 이 키를 <b>Generative Language API만</b>, 웹사이트 <b>nkdddd.github.io</b>에서만 쓰도록 제한해 두세요."}</div>
+    <div style="display:flex;gap:8px;margin-top:14px">${a.key? `<button class="ghost-btn" style="flex:1" onclick="aiSave(true)">연결 끊기</button>` : ""}<button class="add-btn" style="flex:2" onclick="aiSave()">저장</button></div>
+    <button class="ghost-btn" style="width:100%;margin-top:8px" onclick="openAssist()">← 계획 도우미로</button>`);
+}
+async function aiSave(off){
+  const prov=(AS.ai&&AS.ai.provider)||"gemini";
+  const key=off? "" : (document.getElementById("aiKey").value||"").trim(), model=off? "" : (document.getElementById("aiModel").value||"").trim();
+  if(!off && !key) return alert("API 키를 넣어 주세요.");
+  await aiRef().set({provider:prov, key, model, updatedAt:Date.now()});
+  AS.ai={provider:prov, key, model}; AS.aiOn=!!key;
+  toast(key? "🤖 AI를 연결했어요" : "AI 연결을 끊었어요", "good"); openAssist();
+}
+const AI_SCHEMA={type:"object", additionalProperties:false, required:["reply","add","update","remove"], properties:{
+  reply:{type:"string"},
+  add:{type:"array", items:{type:"object", additionalProperties:false, required:["date","subject","unit","minutes"], properties:{date:{type:"string"}, subject:{type:"string"}, unit:{type:"string"}, minutes:{type:"integer"}}}},
+  update:{type:"array", items:{type:"object", additionalProperties:false, required:["id","date","unit","minutes"], properties:{id:{type:"string"}, date:{type:"string"}, unit:{type:"string"}, minutes:{type:"integer"}}}},
+  remove:{type:"array", items:{type:"string"}}}};
+async function aiContext(){
+  const today=new Date(), from=fmt(addDays(today,-7)), to=fmt(addDays(today,42));
+  const T=(await asTasksRange(from, to)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.order||0)-(b.order||0));
+  const sn=id=>{ const s=subjById(id); return s? s.name : ""; };
+  const days=Array.from({length:14},(_,i)=>fmt(addDays(today,i)));
+  return {
+    today:fmt(today), weekday:WD_FULL[today.getDay()], student:state.ownerName||"",
+    subjects:(state.categories.subjects||[]).map(s=>s.name),
+    textbooks:(state.categories.textbooks||[]).map(t=>`${sn(t.subjectId)}: ${t.name}`),
+    dailyGoalMin:days.map(d=>`${d} ${WD[parseD(d).getDay()]} ${dayTypeGoal(d)}분`),
+    timetable:ttList().map(b=>`${(b.days||[]).map(d=>WD[d]).join("")} ${b.s}-${b.e} ${b.title}`),
+    exams:[...(state.plans||[]).filter(p=>p.kind==="exam").map(p=>`${p.name} ${p.end}`), ...examList().map(e=>`${e.name} ${e.date}`)],
+    tasks:T.map(t=>`${t.id} | ${t.date} | ${sn(t.subjectId)} | ${t.unit||""} | ${t.plannedMin||0}분 | ${t.done?"완료":"예정"}${t.underStars!=null?` | 이해도 ${gradeTxt(t.underStars)}`:""}${t.help&&!t.helpOk?` | 질문: ${t.help}`:""}`)};
+}
+const AI_SYS=`너는 한국 중고등학생의 학습 매니저야. 부모님과 대화하며 학생 플래너의 할 일을 짜고 정리해.
+규칙:
+- 계획에는 항상 구체적인 범위를 적어 (쪽수 p.10~15 · 단원 · 강 번호 · DAY 번호 · 문제 번호). "저번에 배운 단원 복습"처럼 막연하게 쓰지 마.
+- 하루 분량은 dailyGoalMin 목표 시간에 맞춰 (±30분). 시간표(timetable)의 학원 · 과외 시간과 겹쳐 무리하지 않게.
+- 완료된 할 일은 절대 수정 · 삭제하지 마. 수정 · 삭제는 context.tasks 에 있는 id만 써.
+- subject 는 반드시 context.subjects 중 하나. date 는 YYYY-MM-DD, 오늘부터 60일 안. minutes 는 10~240.
+- 바꿀 것이 없거나 질문만 받은 경우 add · update · remove 는 빈 배열.
+- reply 는 한국어로 짧게: 무엇을 바꾸는지 요약 (몇 개 추가 · 수정 · 삭제, 하루 분량).
+- 반드시 JSON 하나만 출력: {"reply": "...", "add": [{"date","subject","unit","minutes"}], "update": [{"id","date","unit","minutes"}], "remove": ["id"]}`;
+async function aiCall(ctx, text){
+  const a=AS.ai, msgs=[...AS.hist.slice(-8), {role:"user", text:`[플래너 정보]\n${JSON.stringify(ctx)}\n\n[요청]\n${text}`}];
+  if(a.provider==="claude"){
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST", headers:{"content-type":"application/json","x-api-key":a.key,"anthropic-version":"2026-10-21",
+        "anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:a.model||AI_DEF.claude, max_tokens:16000, system:AI_SYS, fallbacks:"default",
+        output_config:{effort:"medium", format:{type:"json_schema", schema:AI_SCHEMA}},
+        messages:msgs.map(m=>({role:m.role, content:m.text}))})});
+    const j=await r.json(); if(!r.ok) throw new Error((j.error&&j.error.message)||("HTTP "+r.status));
+    if(j.stop_reason==="refusal") throw new Error("AI가 이 요청을 처리하지 않았어요.");
+    if(j.stop_reason==="max_tokens") throw new Error("답이 너무 길어 잘렸어요. 기간을 나눠서 요청해 주세요.");
+    const txt=(j.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("");
+    return JSON.parse(txt);
+  }
+  const model=a.model||AI_DEF.gemini;
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(a.key)}`,{method:"POST", headers:{"content-type":"application/json"},
+    body:JSON.stringify({systemInstruction:{parts:[{text:AI_SYS}]}, contents:msgs.map(m=>({role:m.role==="assistant"?"model":"user", parts:[{text:m.text}]})),
+      generationConfig:{responseMimeType:"application/json"}})});
+  const j=await r.json(); if(!r.ok) throw new Error((j.error&&j.error.message)||("HTTP "+r.status));
+  const txt=((((j.candidates||[])[0]||{}).content||{}).parts||[]).map(p=>p.text||"").join("");
+  if(!txt) throw new Error("AI가 답을 주지 않았어요.");
+  return JSON.parse(txt.replace(/^```(?:json)?\s*|\s*```$/g,""));
+}
+async function aiAsk(text){
+  AS.busy=true; asDraw();
+  let out; const ctx=await aiContext();
+  try{ out=await aiCall(ctx, text); }
+  catch(e){ AS.busy=false; console.warn("AI", e); return asBot(`🤖 AI 연결 오류: ${esc(e.message||e)}<br>키 · 모델 이름을 확인해 주세요.`, [["⚙️ AI 설정","AI 설정"],["처음으로","도움"]]); }
+  AS.busy=false;
+  AS.hist.push({role:"user", text}, {role:"assistant", text:JSON.stringify({reply:out.reply})});
+  // 검사
+  const subs=state.categories.subjects||[], known=new Set(ctx.tasks.map(l=>l.split(" | ")[0]));
+  const doneIds=new Set(ctx.tasks.filter(l=>l.includes("| 완료")).map(l=>l.split(" | ")[0]));
+  const today=fmt(new Date()), last=fmt(addDays(new Date(),60)), okDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(d) && d>=today && d<=last;
+  const add=(out.add||[]).filter(x=>okDate(x.date) && subs.some(s=>s.name===x.subject) && String(x.unit||"").trim()).map(x=>({...x, minutes:Math.max(10,Math.min(240,Number(x.minutes)||30))}));
+  const update=(out.update||[]).filter(x=>known.has(x.id) && !doneIds.has(x.id) && okDate(x.date));
+  const remove=(out.remove||[]).filter(id=>known.has(id) && !doneIds.has(id));
+  const dropped=(out.add||[]).length-add.length+(out.update||[]).length-update.length+(out.remove||[]).length-remove.length;
+  if(!add.length && !update.length && !remove.length) return asBot(`🤖 ${asEsc(out.reply||"")}${dropped? `<br><small>(규칙에 맞지 않는 제안 ${dropped}개는 뺐어요)</small>` : ""}`);
+  AS.pend={kind:"ai", add, update, remove};
+  const line=(d,s,u,m)=>`${d.slice(5).replace("-","/")} <b>${esc(s)}</b> ${esc(u)} · ${m}분`;
+  asBot(`🤖 ${asEsc(out.reply||"")}<div class="as-prev">
+      ${add.length? `<div class="ap-h">➕ 추가 ${add.length}개</div>${add.slice(0,15).map(x=>`<div>${line(x.date,x.subject,x.unit,x.minutes)}</div>`).join("")}${add.length>15?`<div>… 외 ${add.length-15}개</div>`:""}` : ""}
+      ${update.length? `<div class="ap-h">✏️ 수정 ${update.length}개</div>${update.slice(0,10).map(x=>`<div>${line(x.date,"",x.unit,x.minutes)}</div>`).join("")}` : ""}
+      ${remove.length? `<div class="ap-h">🗑 삭제 ${remove.length}개</div>` : ""}
+      ${dropped? `<div><small>규칙에 맞지 않는 제안 ${dropped}개는 뺐어요 (완료한 것 · 날짜 · 과목 오류)</small></div>` : ""}</div>`,
+    [["✅ 적용","적용"],["취소","취소"]]);
+}
+async function aiApply(){
+  const P=AS.pend; AS.pend=null;
+  if(P.remove.length>=20 && !confirm(`할 일 ${P.remove.length}개를 지워요. 적용할까요?`)) return asBot("적용하지 않았어요.");
+  const col=plannerRef().collection("tasks"), subs=state.categories.subjects||[], logId=Date.now().toString(36)+"a";
+  const by=(state.viewingChild && state.profile.role==="parent")? {uid:state.user.uid, name:state.profile.name||"부모님"} : null;
+  const added=[], removed=[], updated=[]; let ops=[];
+  P.add.forEach((x,i)=>{ const id=`ai-${logId}-${i}`, s=subs.find(z=>z.name===x.subject); added.push(id);
+    ops.push(b=>b.set(col.doc(id), {id, date:x.date, subjectId:s?s.id:"", unit:x.unit, plannedMin:x.minutes, done:false, order:Date.now()+i, byAI:logId, ...(by?{byParent:by}:{})})); });
+  for(const x of P.update){ const d=await col.doc(x.id).get(); if(!d.exists) continue; const o=d.data(); updated.push({id:x.id, before:{date:o.date, unit:o.unit||"", plannedMin:o.plannedMin||0}});
+    ops.push(b=>b.update(col.doc(x.id), {date:x.date, unit:x.unit, plannedMin:Math.max(10,Math.min(240,Number(x.minutes)||o.plannedMin||30)), byAI:logId})); }
+  for(const id of P.remove){ const d=await col.doc(id).get(); if(!d.exists || d.data().done) continue; removed.push(d.data()); ops.push(b=>b.delete(col.doc(id))); }
+  for(let i=0;i<ops.length;i+=400){ const b=db.batch(); ops.slice(i,i+400).forEach(f=>f(b)); await b.commit(); }
+  try{ await plannerRef().collection("aiLog").doc(logId).set(JSON.parse(JSON.stringify({src:AS.ai.provider, summary:`AI: 추가 ${added.length} · 수정 ${updated.length} · 삭제 ${removed.length}`, added, removed, updated, at:Date.now(), by:state.user.uid, byName:state.profile.name||""}))); }catch(e){ console.warn(e); }
+  subscribeTasks();
+  asBot(`✅ 적용했어요: 추가 ${added.length} · 수정 ${updated.length} · 삭제 ${removed.length}`, [["↩ 되돌리기",`되돌리기 ${logId}`],["📋 이번 주 점검","이번 주 점검"]]);
+}
+// 🤖 작업 기록 목록 (되돌리기)
+async function drawAiLog(){
+  hubShell("🧾 도우미 작업 기록", `<div class="empty">불러오는 중…</div>`);
+  let L=[]; try{ L=(await plannerRef().collection("aiLog").orderBy("at","desc").limit(20).get()).docs.map(d=>({id:d.id,...d.data()})); }catch(e){ console.warn(e); }
+  const root=document.querySelector("#drawerRoot .drawer-body"); if(!root) return;
+  root.innerHTML=L.length? L.map(x=>{ const t=new Date(x.at); return `<div class="hp-it ${x.undone?"ok":""}"><span>${x.src==="rule"?"🧭":"🤖"}</span>
+      <div style="flex:1;min-width:0"><b>${esc(x.summary||"")}</b><small>${t.getMonth()+1}/${t.getDate()} ${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")} · ${esc(x.byName||"")}${x.undone?" · 되돌림":""}</small></div>
+      ${x.undone? "" : `<button class="fam-btn" onclick="aiUndo('${x.id}').then(n=>{toast('↩ 되돌렸어요','good');drawAiLog();})">↩ 되돌리기</button>`}</div>`; }).join("") : `<div class="cd-note">아직 기록이 없어요.</div>`;
 }
 
 </script>
