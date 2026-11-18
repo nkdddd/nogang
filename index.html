@@ -1346,6 +1346,11 @@
 .pt-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:#475569;background:#F8FAFC;border-radius:10px;padding:7px 10px;margin:8px 0}
 .pt-row small{color:#94A3B8}.pt-row .ghost-btn{padding:6px 10px;white-space:nowrap}
 .ds-box{background:#F6F6FC;border-radius:12px;padding:10px 12px;margin-bottom:12px}.ds-lbl{font-size:12px;color:#64748B;font-weight:var(--fw-bold);margin-bottom:3px}.ds-plan{font-weight:var(--fw-bold);font-size:15px;line-height:1.45}
+.pure-box{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:14px;padding:12px;margin:4px 0 6px}
+.pure-row{display:flex;align-items:center;gap:8px}.pure-in{width:96px;text-align:center;font-size:20px;font-weight:800;padding:8px}
+.pure-u{font-weight:700}.pure-st{min-width:44px;height:40px;border-radius:10px;border:1px solid #BAE6FD;background:#fff;font-weight:700;cursor:pointer}
+.pure-sub{font-size:12px;color:#64748B;margin-top:6px}.pure-warn{font-size:12px;color:#B45309;min-height:0;margin-top:2px}
+.pure-ok{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;margin-top:8px;cursor:pointer}.pure-ok input{width:18px;height:18px}
 .ds-q{font-weight:var(--fw-bold);font-size:14px;margin:12px 0 6px}.ds-q small{font-weight:600;color:#94A3B8;font-size:12px}
 .ds-stars{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .ds-st{border:0;background:none;font-size:32px;line-height:1;color:#E2E8F0;cursor:pointer;padding:0 2px}.ds-st.on{color:#F5B400}
@@ -2927,7 +2932,7 @@ function drawNews(){
   hubShell("🔔 새 소식", L.length? L.map(([e,t,fn])=>hubItem(e,t,"눌러서 확인",fn)).join("") : `<div class="empty" style="padding:18px">새 소식이 없어요 🙂</div>`);
 }
 /* ----- 🔄 새 버전 알림: 휴대폰(홈 화면 앱)이 예전 화면을 붙들고 있을 때 ----- */
-const APP_VER="2026.11.17-14";
+const APP_VER="2026.11.18-1";
 async function checkAppVersion(){
   try{
     const r=await fetch("index.html?v="+Date.now(),{cache:"no-store"}); if(!r.ok) return;
@@ -6075,25 +6080,27 @@ function starsHTML(key, val){
 const starsTxt=n=>n==null||n===""? "" : "★".repeat(n)+"☆".repeat(5-n);
 function openDoneSheet(t){
   const planned=!!String(t.unit||"").trim();
-  doneDraft={id:t.id, planned, content:planned? "" : "", doneStars:null, underStars:null, help:"", check:null};
+  // ⏱ 순공 시간: 계획 시간을 그대로 넣지 않고 직접 입력 (타이머·미리 적은 시간이 있으면 그 값으로 시작)
+  const pre=Number(t.actualMin)||Number(t.timerMin)||0;
+  doneDraft={id:t.id, planned, content:planned? "" : "", doneStars:null, underStars:null, help:"", check:null, pure:pre? String(pre) : "", honest:false};
   drawDoneSheet();
 }
 function drawDoneSheet(){
   const d=doneDraft, t=d && state.tasksMap[d.id]; if(!t) return;
   const su=subjById(t.subjectId), tb=tbById(t.textbookId);
-  const min=Number(t.actualMin)||Math.max(Number(t.timerMin)||0, Number(t.plannedMin)||0);
-  const ready=d.planned? d.doneStars!=null : (d.content.trim() && d.doneStars!=null && d.underStars!=null);
+  const ready=pureOk(d) && (d.planned? d.doneStars!=null : (d.content.trim() && d.doneStars!=null && d.underStars!=null));
   const inner=`<div class="modal-head"><h3>✅ 학습 완료</h3><button class="icon-btn sm" onclick="closeModal()">✕</button></div>
     <div class="modal-body">
       <div class="tags" style="margin-bottom:10px"><span class="subj-tag" style="background:${su?su.color:"#94A3B8"}">${esc(su?su.name:"과목")}</span>
-        ${tb?`<span class="tb-tag">${esc(tb.name)}</span>`:""}<span class="time-tag">${min}분 기록</span></div>
+        ${tb?`<span class="tb-tag">${esc(tb.name)}</span>`:""}<span class="time-tag">계획 ${Number(t.plannedMin)||0}분</span></div>
+      ${pureHTML(d, t)}
       ${d.planned? `
         <div class="ds-box"><div class="ds-lbl">📝 계획한 내용</div><div class="ds-plan">${esc(t.unit)}</div></div>
         <div class="ds-q">계획한 만큼 얼마나 했나요? (성취도)</div>${starsHTML("doneStars", d.doneStars)}
         <div class="ds-q">얼마나 이해했나요? <small>(이해도 · 선택)</small></div>${gradeHTML("underStars", d.underStars)}`
       : `
         <div class="ds-q">무엇을 공부했나요? <small>(미리 적지 않았어요)</small></div>
-        <div class="tm-area mic-wrap"><textarea id="dsContent" rows="2" maxlength="100" placeholder="예: 수학 3단원 일차함수 p.42-58 · 영단어 Day 12" oninput="doneDraft.content=this.value;document.getElementById('dsOk').disabled=!(doneDraft.content.trim()&&doneDraft.doneStars!=null&&doneDraft.underStars!=null)">${esc(d.content)}</textarea>${micBtn("dsContent")}</div>
+        <div class="tm-area mic-wrap"><textarea id="dsContent" rows="2" maxlength="100" placeholder="예: 수학 3단원 일차함수 p.42-58 · 영단어 Day 12" oninput="doneDraft.content=this.value;dsOkSync()">${esc(d.content)}</textarea>${micBtn("dsContent")}</div>
         <div class="ds-q">계획한 만큼 했나요? (이행)</div>${starsHTML("doneStars", d.doneStars)}
         <div class="ds-q">얼마나 이해했나요? (이해도)</div>${gradeHTML("underStars", d.underStars)}`}
       ${checkHTML(d, t)}
@@ -6110,10 +6117,29 @@ function drawDoneSheet(){
   document.getElementById("modalRoot").innerHTML=`<div class="overlay pop-ov" onclick="if(event.target===this)closeModal()"><div class="modal tm ds pop">${inner}</div></div>`;
   if(!d.planned) setTimeout(()=>{ const n=document.getElementById("dsContent"); if(n) n.focus(); }, 50);
 }
+// ⏱ 순공 시간 입력 칸
+function pureOk(d){ const v=Number(d.pure); return d.pure!=="" && isFinite(v) && v>=0 && v<=600 && d.honest; }
+function dsOkSync(){ const d=doneDraft, b=document.getElementById("dsOk"), t=d && state.tasksMap[d.id]; if(!b||!t) return;
+  b.disabled=!(pureOk(d) && (d.planned? d.doneStars!=null : (d.content.trim() && d.doneStars!=null && d.underStars!=null)));
+  const w=document.getElementById("pmWarn"), v=Number(d.pure), pl=Number(t.plannedMin)||0;
+  if(w) w.textContent = d.pure===""? "" : v>pl*1.5 && pl? `계획(${pl}분)보다 많이 했네요! 맞다면 그대로 두세요` : v===0? "0분이면 용돈 인정 시간은 없어요" : ""; }
+function pureSet(v){ doneDraft.pure=String(Math.max(0, Math.min(600, v))); const i=document.getElementById("dsPure"); if(i) i.value=doneDraft.pure; dsOkSync(); }
+function pureHTML(d, t){
+  const tm=Number(t.timerMin)||0, pl=Number(t.plannedMin)||0;
+  return `<div class="pure-box">
+    <div class="ds-q" style="margin-top:0">⏱ 순공 시간 <small>(실제로 집중해서 공부한 시간)</small></div>
+    <div class="pure-row"><button class="pure-st" onclick="pureSet((Number(doneDraft.pure)||0)-5)" aria-label="5분 빼기">−5</button>
+      <input id="dsPure" class="inp pure-in" type="number" inputmode="numeric" min="0" max="600" value="${esc(d.pure)}" placeholder="몇 분?" oninput="doneDraft.pure=this.value;dsOkSync()">
+      <span class="pure-u">분</span><button class="pure-st" onclick="pureSet((Number(doneDraft.pure)||0)+5)" aria-label="5분 더하기">+5</button></div>
+    <div class="pure-sub">계획 ${pl}분${tm? ` · 타이머로 잰 시간 ${tm}분` : ""} · 쉬는 시간·휴대폰·딴짓은 빼고 적어요</div>
+    <div class="pure-warn" id="pmWarn"></div>
+    <label class="pure-ok"><input type="checkbox" ${d.honest?"checked":""} onchange="doneDraft.honest=this.checked;dsOkSync()"> 🙋 양심적으로 적었어요</label>
+  </div>`;
+}
 async function saveDoneSheet(){
   const d=doneDraft, t=d && state.tasksMap[d.id]; if(!t) return;
-  if(d.doneStars==null || (!d.planned && (!d.content.trim() || d.underStars==null))) return;
-  const extra={doneStars:d.doneStars};
+  if(!pureOk(d) || d.doneStars==null || (!d.planned && (!d.content.trim() || d.underStars==null))) return;
+  const extra={doneStars:d.doneStars, actualMin:Math.round(Number(d.pure)), pureIn:true};
   if(d.underStars!=null) extra.underStars=d.underStars;
   if(String(d.help||"").trim()){ extra.help=d.help.trim(); extra.helpOk=false; }
   if(!d.planned){ extra.unit=d.content.trim(); extra.contentAfter=true; }
@@ -6124,7 +6150,7 @@ async function saveDoneSheet(){
 async function finishTask(t, extra){
   const cr=creditFor(t.date);
   // 원탭 완료: 타이머로 잰 시간 → 적어 둔 시간 → 계획 시간 순으로 기록
-  const actualMin=Number(t.actualMin)||Math.max(Number(t.timerMin)||0, Number(t.plannedMin)||0);
+  const actualMin=extra.actualMin!=null? extra.actualMin : (Number(t.actualMin)||Math.max(Number(t.timerMin)||0, Number(t.plannedMin)||0));
   const saved={...t, ...extra, done:true, actualMin, creditRate:cr.rate, checkedAt:Date.now(), appLinked:taskApp(t)};
   state.justDone=t.id; setTimeout(()=>{ state.justDone=null; },900);
   await saveTask(saved);
